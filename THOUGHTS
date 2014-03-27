@@ -1,0 +1,12 @@
+by adding new abstraction layers
+* automatical think about interfaces
+* testability
+* more optional features, e.g. by using a representer you get HAL etc for free once included. how would that work with rabl? or easy nested forms with reform
+
+the less associations in models the better
+
+hi-level APIs: Invoice::Flow instead of creating I:Item out-of-sync
+  if your factories have 5 lines or more, your API is wrong, (Invoice::Flow)
+
+
+i don't wanna show anti-patterns, i wanna show how you can make things work.
