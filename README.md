@@ -3,7 +3,13 @@
 _Trailblazer is a thin layer on top of Rails. It gently enforces object-oriented encapsulation and code structure._
 
 
-It is non-intrusive, allowing you to fallback to the "Rails Way" whenever you want but offers you abstraction layers for all aspects of Ruby On Rails.
+## Mission
+
+While _Trailblazer_ offers you abstraction layers for all aspects of Ruby On Rails, it does _not_ missionize you. Whereever you want, you may fall back to the "Rails Way" with fat models, monolithic controllers, helpers, etc. This is not a bad thing, but allows you to step-wise introduce Trailblazer's encapsulation in your app without having to rewrite it.
+
+Trailblazer is all about structure. It helps re-organizing existing code into smaller components where different concerns are handled in separated classes. Forms go into form objects, views are object-oriented MVC controllers, the business logic happens in dedicated domain objects that are backed by completely decoupled persistance objects.
+
+Again, you can pick which layers you want. Trailblazer doesn't impose technical implementations, it offers mature solutions for re-occuring problems in all types of Rails application.
 
 
 
@@ -34,7 +40,7 @@ app
 
 ## Gems
 
-Trailblazer is basically a mash-up of mature gems that have been developed over the past 8 years and are heavily used in the community.
+Trailblazer is basically a mash-up of mature gems that have been developed over the past 8 years and are used in hundreds and thousands of production apps.
 
 * Cells for view components
 * Reform * Virtus for coercion and Reform::Contract
@@ -42,7 +48,23 @@ Trailblazer is basically a mash-up of mature gems that have been developed over 
 * Roar
 * Disposable::Twin
 * ActiveRecord, or whatever you fancy as an ORM. (EMPTY data models)
+* controller Operation
 
+
+## Routing
+
+Routing in Trailblazer is completely handled by Rails. As forwarding requests to controller actions works just fine, we didn't see a reason yet to add behaviour here.
+
+## Controllers
+
+A typical controller should contain authentication, authorization and delegations to domain operations. You can leave your controller _configuration_ as it is - with devise, cancan and all the nifty tools. Behaviour should be delegated to `Operation`s.
+
+## Domain
+## Persistance
+## Views
+## Forms
+## Contracts
+## APIs
 
 
 ## Why?
