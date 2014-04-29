@@ -11,6 +11,7 @@ Trailblazer is all about structure. It helps re-organizing existing code into sm
 
 Again, you can pick which layers you want. Trailblazer doesn't impose technical implementations, it offers mature solutions for re-occuring problems in all types of Rails application.
 
+Trailblazer is no "complex web of objects and indirection". It solves many problems that have been around for years with a cleanly layered architecture. Only use what you like. And that's the bottom line.
 
 
 ## A Concept-Driven OOP Framework
