@@ -2,20 +2,24 @@ require 'test_helper'
 
 require 'trailblazer/operation'
 class OperationTest < MiniTest::Spec
-  class Operation < Trailblazer::Operation
-    def flow(params, &block)
-      # block is "controller" block
+  class Contract #< Reform::Form
+    def initialize(*)
+    end
+    def validate(params)
+      params
+    end
+  end
 
-      if params[:valid] # contract.validate()
-        yield 1
-      end
+  class Operation < Trailblazer::Operation
+    def flow(params)
+      validate(Contract, OpenStruct.new, params)
     end
   end
 
   it do
-    @result = nil
+   #@result = "nil"
 
-    Operation.flow({:id => 1, :valid => true}) do |model| # usually, model _is_ the Contract/Form.
+    Operation.flow(true) do |model| # usually, model _is_ the Contract/Form.
       @result = true # executed in real context.
     end
     # usually, you'd use return in the block?
@@ -23,48 +27,61 @@ class OperationTest < MiniTest::Spec
 
     @result.must_equal true
   end
-end
 
+  it do
+    #@result = "nil"
 
-
-def update
-  Operation::Update.flow(params) do |contract|
-    @profile = contract.model
-    return redirect_to ...
+    Operation.flow(false) do |model| # usually, model _is_ the Contract/Form.
+      @result = true # executed in real context.
+    end
+    # usually, you'd use return in the block?
+    @result ||= false
+    @result.must_equal false
   end
-
-  render :new # invalid
 end
 
 
-class Operation::Update
-  def flow(params)
-    girl = CoverGirl.new
 
-    params = params[:cover_girl]
-    params.merge!(
-      image_fingerprint: Time.now.to_i,
-    )
+# def update
+#   Operation::Update.flow(params) do |contract|
+#     @profile = contract.model
+#     return redirect_to ...
+#   end
 
-    super(girl, params, Contract) do |contract|
-      res = contract.save
+#   render :new # invalid
+# end
 
-      # TODO: assert that save was successful. this could be another flowing contract?
-      CoverGirl::Upload.new(girl).call(contract.image)
-    end
-end
 
-class Operation::Update
-  def flow(params)
-    girl = CoverGirl.new
+# class Operation::Create
+#   def flow(params)
+#     girl = CoverGirl.new
 
-    girl.update_attributes(params)
+#     params = params[:cover_girl]
+#     params.merge!(
+#       image_fingerprint: Time.now.to_i,
+#     )
 
-    super(girl, params, Contract) do |contract|
-    # validate(girl, params, Contract)
-      res = contract.save
+#     super(girl, params, Contract) do |contract|
+#       res = contract.save
 
-      # TODO: assert that save was successful. this could be another flowing contract?
-      CoverGirl::Upload.new(girl).call(contract.image)
-    end
-end
+#       # TODO: assert that save was successful. this could be another flowing contract?
+#       CoverGirl::Upload.new(girl).call(contract.image)
+#     end
+#   end
+# end
+
+# class Operation::Update
+#   def flow(params)
+#     girl = CoverGirl.new
+
+#     girl.update_attributes(params)
+
+#     super(girl, params, Contract) do |contract|
+#     # validate(girl, params, Contract)
+#       res = contract.save
+
+#       # TODO: assert that save was successful. this could be another flowing contract?
+#       CoverGirl::Upload.new(girl).call(contract.image)
+#     end
+#   end
+# end
