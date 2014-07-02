@@ -33,5 +33,4 @@ class UploadedFileTest < MiniTest::Spec
     it { subject.content_type.must_equal "image/png" }
     it { subject.tempfile.must_be_kind_of File }
   end
-
 end
