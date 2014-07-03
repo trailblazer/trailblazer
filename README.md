@@ -62,6 +62,16 @@ A typical controller should contain authentication, authorization and delegation
 
 ## Operational Domain Layer: Flow + Operation
 
+### Flow
+
+A Flow invocation implements the pattern of _"Run a piece of code. If true, do this! Else, do that!"_.
+
+### Operation
+
+Operations in Trailblazer aim to implement atomic steps in your application domain like _“Validate and update a comment!”_, _"Run and render a search!"_ or _“Process uploaded images!”_.
+
+Operations typically have different granularity levels and will be nested.
+
 
 
 ### Stateless Operations
@@ -70,7 +80,7 @@ Both `Flow` and `Operation` have a single entry point: a class method. While the
 
 Encapsulating an atomic operation into a stateless asset makes it easily detachable, e.g. for background-processing with Sidekiq, Resque or whatever.
 
-Note that "stateless" doesn't mean you're not allowed to mess around with the application state: Internally, you can do whatever you need to meet your domain requirements! The statelessness is refering to the entire Operation and its flow.
+Note that "stateless" doesn't mean you're not allowed to mess around with the application state: Internally, you can do whatever you need to meet your domain requirements! The statelessness is refering to the entire Operation and its flow seen from the caller's perspective.
 
 ## Domain
 ## Persistance
