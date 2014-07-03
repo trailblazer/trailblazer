@@ -12,12 +12,12 @@ class FlowTest < MiniTest::Spec
 
   it "no block" do
     res = Trailblazer::Flow.flow(true, Operation.new)
-    res.must_equal [true]
+    res.must_equal [true, nil]
   end
 
   it "no block, invalid" do
     res = Trailblazer::Flow.flow(false, Operation.new)
-    res.must_equal [false]
+    res.must_equal [false, nil]
   end
 
   it "block" do
@@ -28,7 +28,7 @@ class FlowTest < MiniTest::Spec
     @outcome ||= false # not executed.
 
     @outcome.must_equal "true" # block was executed.
-    res.must_equal [true]
+    res.must_equal nil # !!! assert something better.
   end
 
   it "block, invalid" do
@@ -38,7 +38,7 @@ class FlowTest < MiniTest::Spec
     @outcome ||= false # not executed.
 
     @outcome.must_equal false # block was _not_ executed.
-    res.must_equal [false]
+    res.must_equal nil # !!! assert something better.
   end
 end
 
@@ -110,19 +110,20 @@ class SelfmadeOperationIncludingFlow < MiniTest::Spec
     end
 
     def run(params)
-      [params] # done by validate
+      [params, Object] # done by validate
     end
   end
 
   it do
-    Operation.flow(true).must_equal [true]
+    Operation.flow(true).must_equal [true, Object]
   end
 
   it "no block, invalid" do
     res = Operation.flow(false)
-    res.must_equal [false]
+    res.must_equal [false, Object]
   end
 
+  # with block => we don't need result boolean!
   it "block" do
     @outcome = "nil"
     res = Operation.flow(true) do
@@ -131,7 +132,7 @@ class SelfmadeOperationIncludingFlow < MiniTest::Spec
     @outcome ||= false # not executed.
 
     @outcome.must_equal "true" # block was executed.
-    res.must_equal [true]
+    res.must_equal Object
   end
 
   it "block, invalid" do
@@ -141,7 +142,7 @@ class SelfmadeOperationIncludingFlow < MiniTest::Spec
     @outcome ||= false # not executed.
 
     @outcome.must_equal false # block was _not_ executed.
-    res.must_equal [false]
+    res.must_equal Object
   end
 end
 

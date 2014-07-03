@@ -70,7 +70,7 @@ A Flow invocation implements the pattern of _"Run a piece of code. If true, do t
 
 Operations in Trailblazer aim to implement atomic steps in your application domain like _“Validate and update a comment!”_, _"Run and render a search!"_ or _“Process uploaded images!”_.
 
-Operations typically have different granularity levels and will be nested.
+Operations typically have different granularity levels and will be nested. This could mean that all of the above steps could be run inside a wrapping operation.
 
 
 
