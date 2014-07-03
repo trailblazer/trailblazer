@@ -60,6 +60,18 @@ Routing in Trailblazer is completely handled by Rails. As forwarding requests to
 
 A typical controller should contain authentication, authorization and delegations to domain operations. You can leave your controller _configuration_ as it is - with devise, cancan and all the nifty tools. Behaviour should be delegated to `Operation`s.
 
+## Operational Domain Layer: Flow + Operation
+
+
+
+### Stateless Operations
+
+Both `Flow` and `Operation` have a single entry point: a class method. While the class method instantly creates an instance and delegates further processing to the latter, this class method stresses the fact that an Operation (with or without a flow) is _stateless_.
+
+Encapsulating an atomic operation into a stateless asset makes it easily detachable, e.g. for background-processing with Sidekiq, Resque or whatever.
+
+Note that "stateless" doesn't mean you're not allowed to mess around with the application state: Internally, you can do whatever you need to meet your domain requirements! The statelessness is refering to the entire Operation and its flow.
+
 ## Domain
 ## Persistance
 ## Views
