@@ -3,14 +3,14 @@ module Trailblazer
   module Flow
     module Flow
       def flow(params, operation=self)
-        res, args = operation.run(params) # Operation::run, not Operation#run.
+        res, model = operation.run(params) # Operation::run, not Operation#run.
 
         if res
-          yield args if block_given?
+          yield model if block_given?
         end
 
-        return args if block_given?
-        [res, args]
+        return model if block_given?
+        [res, model]
       end
     end
     include Flow
