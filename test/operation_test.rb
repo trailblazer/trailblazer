@@ -60,7 +60,7 @@ class OperationTest < MiniTest::Spec
 
     def run(params)
       model = OpenStruct.new
-      validate(Contract, model, params)
+      validate(model, params, Contract)
     end
   end
 
@@ -98,6 +98,30 @@ class OperationTest < MiniTest::Spec
     @result ||= false
     @result.must_equal false
   end
+end
+
+
+
+class OperationRunTest < MiniTest::Spec
+  class Operation < Trailblazer::Operation
+    class Contract #< Reform::Form
+      def initialize(*)
+      end
+      def validate(params)
+        "local #{params}"
+      end
+    end
+
+    extend Flow
+
+    def run(params)
+      model = Object
+      validate(model, params)
+    end
+  end
+
+  # contract is inferred from self::Contract.
+  it { Operation.run(true).must_equal ["local true", Object] }
 end
 
 
@@ -145,49 +169,3 @@ class SelfmadeOperationIncludingFlow < MiniTest::Spec
     res.must_equal Object
   end
 end
-
-
-
-# def update
-#   Operation::Update.flow(params) do |contract|
-#     @profile = contract.model
-#     return redirect_to ...
-#   end
-
-#   render :new # invalid
-# end
-
-
-# class Operation::Create
-#   def flow(params)
-#     girl = CoverGirl.new
-
-#     params = params[:cover_girl]
-#     params.merge!(
-#       image_fingerprint: Time.now.to_i,
-#     )
-
-#     super(girl, params, Contract) do |contract|
-#       res = contract.save
-
-#       # TODO: assert that save was successful. this could be another flowing contract?
-#       CoverGirl::Upload.new(girl).call(contract.image)
-#     end
-#   end
-# end
-
-# class Operation::Update
-#   def flow(params)
-#     girl = CoverGirl.new
-
-#     girl.update_attributes(params)
-
-#     super(girl, params, Contract) do |contract|
-#     # validate(girl, params, Contract)
-#       res = contract.save
-
-#       # TODO: assert that save was successful. this could be another flowing contract?
-#       CoverGirl::Upload.new(girl).call(contract.image)
-#     end
-#   end
-# end

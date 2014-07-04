@@ -14,12 +14,13 @@ module Trailblazer
       new.run(params)
     end
 
+
     def run(params) # to be overridden!!!
       validate(Contract, nil, params)
     end
 
-    def validate(contract, model, params) # NOT to be overridden?!! it creates Result for us.
-      contract = contract.new(model)
+    def validate(model, params, contract_class=self.contract_class) # NOT to be overridden?!! it creates Result for us.
+      contract = contract_class.new(model)
 
       if result = contract.validate(params)
         yield contract if block_given?
@@ -28,6 +29,10 @@ module Trailblazer
 
       # we had raise here
       [result, model] # we wanna return model or contract here?
+    end
+
+    def contract_class
+      self.class.const_get :Contract
     end
 
     Flow = Trailblazer::Flow # Operation::Flow
