@@ -1,3 +1,8 @@
+# make sure #run always returns model
+
+# in test with sidekiq/testing
+# Operation.run #=> call perform_one and return [result, model] (model?)
+
 require 'test_helper'
 require 'trailblazer/operation'
 require 'trailblazer/operation/worker'
