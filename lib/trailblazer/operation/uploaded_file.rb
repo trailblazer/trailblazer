@@ -49,7 +49,7 @@ module Trailblazer
 
       path = path + "_trailblazer_upload"
 
-      File.rename(@uploaded.path, path)
+      FileUtils.mv(@uploaded.path, path)
       path
     end
 
