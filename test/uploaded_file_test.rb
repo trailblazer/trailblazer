@@ -21,7 +21,7 @@ class UploadedFileTest < MiniTest::Spec
     it { subject[:type].must_equal "image/png" }
     it { subject[:tempfile_path].must_match /\w+_trailblazer_upload$/ }
 
-    it { File.exists?(subject[:tempfile_path]) }
+    it { File.exists?(subject[:tempfile_path]).must_equal true }
     it { File.size(subject[:tempfile_path]).must_equal image.size }
   end
 
@@ -45,7 +45,7 @@ class UploadedFileTest < MiniTest::Spec
       it { subject.must_match /\w+_trailblazer_upload$/ }
       it { subject.must_match /^\/tmp\/uploads\// }
 
-      it { File.exists?(subject) }
+      it { File.exists?(subject).must_equal true }
       it { File.size(subject).must_equal image.size }
     end
   end
