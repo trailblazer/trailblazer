@@ -15,14 +15,22 @@ class UploadedFileTest < MiniTest::Spec
   }
 
   describe "#to_hash" do
-    subject { Trailblazer::Operation::UploadedFile.new(upload).to_hash }
+    before {
+      @uploaded_path = upload.tempfile.path
+      @subject = Trailblazer::Operation::UploadedFile.new(upload).to_hash
+     }
 
-    it { subject[:filename].must_equal "apotomo.png" }
-    it { subject[:type].must_equal "image/png" }
-    it { subject[:tempfile_path].must_match /\w+_trailblazer_upload$/ }
+    it { @subject[:filename].must_equal "apotomo.png" }
+    it { @subject[:type].must_equal "image/png" }
+    it { @subject[:tempfile_path].must_match /\w+_trailblazer_upload$/ }
 
-    it { File.exists?(subject[:tempfile_path]).must_equal true }
-    it { File.size(subject[:tempfile_path]).must_equal image.size }
+
+    # Rails upload file must be removed.
+    it {
+      File.exists?(@uploaded_path).must_equal false }
+
+    it { File.exists?(@subject[:tempfile_path]).must_equal true }
+    it { File.size(@subject[:tempfile_path]).must_equal image.size }
   end
 
   describe "::from_hash" do
@@ -39,14 +47,18 @@ class UploadedFileTest < MiniTest::Spec
 
   describe "with custom tmp directory" do
     describe "#to_hash" do
-      let (:uploaded) { Trailblazer::Operation::UploadedFile.new(upload, :tmp_dir => "/tmp/uploads").to_hash }
-      subject { uploaded[:tempfile_path] }
+      before {
+        @uploaded = Trailblazer::Operation::UploadedFile.new(upload, :tmp_dir => "/tmp/uploads")
+        @subject  = @uploaded.to_hash[:tempfile_path]
+      }
 
-      it { subject.must_match /\w+_trailblazer_upload$/ }
-      it { subject.must_match /^\/tmp\/uploads\// }
+      it { @subject.must_match /\w+_trailblazer_upload$/ }
+      it { @subject.must_match /^\/tmp\/uploads\// }
 
-      it { File.exists?(subject).must_equal true }
-      it { File.size(subject).must_equal image.size }
+      it { File.exists?(@subject).must_equal true }
+      it { File.size(@subject).must_equal image.size }
+
+      it { @uploaded.instance_variable_get(:@with_tmp_dir).path.must_equal nil }
     end
   end
 end

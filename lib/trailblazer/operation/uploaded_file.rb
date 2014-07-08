@@ -17,11 +17,15 @@ module Trailblazer
     def to_hash
       path = persist!
 
-      {
+      hash = {
         :filename       => @uploaded.original_filename,
         :type           => @uploaded.content_type,
         :tempfile_path  => path
       }
+
+      cleanup!
+
+      hash
     end
 
     # Returns a ActionDispatch::Http::UploadedFile as if the upload was in the same request.
@@ -56,8 +60,18 @@ module Trailblazer
     def path_with_tmp_dir(path)
       return path unless tmp_dir # if tmp_dir set, create path in it.
 
-      path = File.basename(path)
-      Tempfile.new(path, tmp_dir).path # use Tempfile to create nested dirs (os-dependent.)
+      @with_tmp_dir = Tempfile.new(File.basename(path), tmp_dir)
+      @with_tmp_dir.path # use Tempfile to create nested dirs (os-dependent.)
+    end
+
+    def delete!(file)
+      file.close
+      file.unlink # the Rails uploaded file is already unlinked since moved.
+    end
+
+    def cleanup!
+      delete!(@uploaded.tempfile) # this is Rails' uploaded file, not sure if we need to do that.
+      delete!(@with_tmp_dir) if @with_tmp_dir # we used that file to create a tmp file path below tmp_dir.
     end
   end
 end
