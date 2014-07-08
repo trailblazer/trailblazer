@@ -56,6 +56,8 @@ Trailblazer is basically a mash-up of mature gems that have been developed over 
 
 Routing in Trailblazer is completely handled by Rails. As forwarding requests to controller actions works just fine, we didn't see a reason to add behaviour here, yet.
 
+There are some enhancements planned, though. See TODO.
+
 ## Controllers
 
 A typical controller should contain authentication, authorization and delegations to domain operations. You can leave your controller _configuration_ as it is - with devise, cancan and all the nifty tools. Behaviour should be delegated to `Operation`s.
@@ -87,6 +89,7 @@ Note that "stateless" doesn't mean you're not allowed to mess around with the ap
 
 One design goal in Trailblazer's operation layer is to make asnynchronous processing a no-brainer. As operations are stateless that is easily achieved: Basically, any operation can be sent to a background process. Trailblazer makes you think in domain operations that come with free background processing. This is completely different to a monolithic model with hundreds of methods and the omnipresent thought of "How to make this part async?".
 
+{Notes: do validation in realtime, send work of Operation to bg}
 
 ### Testing Operations
 

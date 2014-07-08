@@ -3,9 +3,15 @@ require 'action_dispatch/http/upload'
 require 'tempfile'
 
 module Trailblazer
+  # TODO: document:
+  # to_hash
+  # from_hash
+  # initialize/tmp_dir
   class Operation::UploadedFile
-    def initialize(uploaded)
+    def initialize(uploaded, options={})
       @uploaded = uploaded
+      @options  = options
+      @tmp_dir  = options[:tmp_dir]
     end
 
     def to_hash
@@ -34,10 +40,24 @@ module Trailblazer
     end
 
   private
+    attr_reader :tmp_dir
+
      # convert Tempfile from Rails upload into persistent "temp" file so it is available in workers.
     def persist!
-      File.rename(@uploaded.path, path = @uploaded.path + "_tmp")
+      path = @uploaded.path # original Tempfile path (from Rails).
+      path = path_with_tmp_dir(path)
+
+      path = path + "_trailblazer_upload"
+
+      File.rename(@uploaded.path, path)
       path
+    end
+
+    def path_with_tmp_dir(path)
+      return path unless tmp_dir # if tmp_dir set, create path in it.
+
+      path = File.basename(path)
+      Tempfile.new(path, tmp_dir).path # use Tempfile to create nested dirs (os-dependent.)
     end
   end
 end
