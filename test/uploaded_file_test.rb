@@ -33,6 +33,7 @@ class UploadedFileTest < MiniTest::Spec
     it { subject.original_filename.must_equal "apotomo.png" }
     it { subject.content_type.must_equal "image/png" }
     it { subject.tempfile.must_be_kind_of File }
+    it { subject.size.must_equal image.size }
   end
 
 
