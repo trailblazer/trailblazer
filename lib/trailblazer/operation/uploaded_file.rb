@@ -70,7 +70,7 @@ module Trailblazer
     end
 
     def cleanup!
-      @uploaded.close # this is Rails' uploaded file, not sure if we need to do that.
+      @uploaded.tempfile if @uploaded.respond_to?(:tempfile) # this is Rails' uploaded file, not sure if we need to do that. in 3.2, we don't have UploadedFile#close, yet.
       delete!(@with_tmp_dir) if @with_tmp_dir # we used that file to create a tmp file path below tmp_dir.
     end
   end
