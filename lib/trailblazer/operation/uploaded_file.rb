@@ -70,7 +70,7 @@ module Trailblazer
     end
 
     def cleanup!
-      delete!(@uploaded.tempfile) # this is Rails' uploaded file, not sure if we need to do that.
+      @uploaded.close # this is Rails' uploaded file, not sure if we need to do that.
       delete!(@with_tmp_dir) if @with_tmp_dir # we used that file to create a tmp file path below tmp_dir.
     end
   end
