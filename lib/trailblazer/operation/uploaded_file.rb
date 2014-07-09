@@ -36,7 +36,7 @@ module Trailblazer
       # we need to create a Tempfile to make Http::UploadedFile work.
       tmp = Tempfile.new(["bla", suffix]) # always force file suffix to avoid problems with imagemagick etc.
       tmp.write(file.read) # DISCUSS: can we avoid that? slow!
-      # unlink file
+      file.close # unlink file. # TODO: can we test that?
 
       hash[:tempfile] = tmp
 
