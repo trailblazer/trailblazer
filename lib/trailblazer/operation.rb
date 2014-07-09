@@ -2,21 +2,13 @@ require 'trailblazer/flow'
 
 module Trailblazer
   class Operation
-    class Contract #< Reform::Form
-      def initialize(*)
-      end
-      def validate(params)
-        params
-      end
-    end
-
     def self.run(params, &block) # Endpoint behaviour
       new.run(params)
     end
 
 
     def run(params) # to be overridden!!!
-      validate(Contract, nil, params)
+      # validate(nil, params, Contract)
     end
 
     def validate(model, params, contract_class=self.contract_class) # NOT to be overridden?!! it creates Result for us.

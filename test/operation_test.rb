@@ -125,6 +125,18 @@ class OperationRunTest < MiniTest::Spec
 end
 
 
+class OperationRunWithoutContractTest < MiniTest::Spec
+  class Operation < Trailblazer::Operation
+    def run(params)
+      validate(Object, params)
+    end
+  end
+
+  # contract is inferred from self::Contract.
+  it { assert_raises(NameError) { Operation.run(true) } }
+end
+
+
 class SelfmadeOperationIncludingFlow < MiniTest::Spec
   class Operation
     extend Trailblazer::Flow # gives us Operation.flow.
