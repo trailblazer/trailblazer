@@ -30,17 +30,17 @@ module Trailblazer
 
     # Returns a ActionDispatch::Http::UploadedFile as if the upload was in the same request.
     def self.from_hash(hash)
-      file   = File.open(hash[:tempfile_path]) # doesn't close automatically :( # fixme: introduce strategy (Tempfile:=>slow, File:=> hopefully less memory footprint)
-      # suffix = File.extname(hash[:tempfile_path])
+      suffix = File.extname(hash[:filename])
 
       # we need to create a Tempfile to make Http::UploadedFile work.
-      # tmp = Tempfile.new(["bla", suffix]) # always force file suffix to avoid problems with imagemagick etc.
-      # tmp.write(file.read) # DISCUSS: can we avoid that? slow!
-      # file.close # unlink file. # TODO: can we test that?
-      # hash[:tempfile] = tmp
-      hash[:tempfile] = file
+      tmp  = Tempfile.new(["bla", suffix]) # always force file suffix to avoid problems with imagemagick etc.
+      file = File.open(hash[:tempfile_path])# doesn't close automatically :( # fixme: introduce strategy (Tempfile:=>slow, File:=> hopefully less memory footprint)
+      tmp.write(file.read) # DISCUSS: We need Tempfile.new(<File>) to avoid this slow and memory-consuming mechanics.
 
-      ActionDispatch::Http::UploadedFile.new(hash)
+      file.close # TODO: can we test that?
+      File.unlink(file)
+
+      ActionDispatch::Http::UploadedFile.new(hash.merge(:tempfile => tmp))
     end
 
   private
@@ -53,7 +53,7 @@ module Trailblazer
 
       path = path + "_trailblazer_upload"
 
-      FileUtils.mv(@uploaded.path, path)
+      FileUtils.mv(@uploaded.path, path) # move Rails upload file into persistent `path`.
       path
     end
 

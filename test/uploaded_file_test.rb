@@ -1,6 +1,10 @@
 require 'test_helper'
 require 'trailblazer/operation/uploaded_file'
 
+class TempfileTest < MiniTest::Spec
+
+end
+
 class UploadedFileTest < MiniTest::Spec
   let (:image) { File.open("test/fixtures/apotomo.png") }
   let (:tempfile) { tmp = Tempfile.new("bla")
@@ -42,6 +46,23 @@ class UploadedFileTest < MiniTest::Spec
     it { subject.content_type.must_equal "image/png" }
     it { subject.tempfile.must_be_kind_of File }
     it { subject.size.must_equal image.size }
+
+    # params is not modified.
+    it { params = data.clone and subject; data.must_equal params }
+
+    # Tempfile must have proper extension for further processing (sidekiq/imagemagick, etc).
+    it { subject.tempfile.path.must_match /\.png$/ }
+
+    # Tempfile must be unlinked after process is finished.
+    it do
+      @subject = Trailblazer::Operation::UploadedFile.from_hash(data)
+
+      processable_file = @subject.tempfile.path
+      File.exists?(processable_file).must_equal true # this file must be GCed since it's a Tempfile, that's the whole point.
+      # @subject = nil
+      # GC.start
+      # File.exists?(processable_file).must_equal false
+    end
   end
 
 
