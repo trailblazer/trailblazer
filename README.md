@@ -45,19 +45,28 @@ Files, classes and views that logically belong to one _concept_ are kept in one 
 ## Architecture
 
 1. **Routing** Traiblazer uses Rails routing to map URLs to controllers (we will add simplifications to routing soon).
+
 2. **Controllers** A controller usually contains authentication logic, only (e.g. using devise) and then delegates to an _Enpoint_ or, more often, an _Operation_.  (we will add simplifications to authentication soon)
+
 3. **Endpoint** Endpoints are the only classes with knowledge about HTTP. They delegate to an _Operation_.
+
 4. **Operation** Business logic happens in operations. They replace ActiveRecord callbacks, cleanly group behaviour and encapsulate knowledge about operations like _Create_, _Update_, or _Crop_. Operations can be nested and use other operations.
 
     An operation uses a _Contract_ to validate the incoming parameters.
+
 5. **Contract** Deserialization of the incoming data, populating an object graph and validating it is done in a _Contract_. This is usually a [reform](https://github.com/apotonick/reform) form which can also be rendered. _Contract_ and _Operation_ both work on the model.
+
 6. **Model** The model can be implemented using any ORM you fancy, for instance [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord#active-record--object-relational-mapping-in-rails) or [Datamapper](http://datamapper.org/).
 
     In Trailblazer, models are completely empty and solely configure database-relevant directives and associations.
+
 7. **Views** Rendering UI happens in _View Models_ as found in [cells](https://github.com/apotonick/cells). View models also replace helpers.
-8. **HTTP API** Consuming and rendering API documents (e.g. JSON or XML) is done via [roar](https://github.com/apotonick/roar) and [representable](https://github.com/apotonick/representable). They usually inherit the schema from _Contract_s.
+
+8. **HTTP API** Consuming and rendering API documents (e.g. JSON or XML) is done via [roar](https://github.com/apotonick/roar) and [representable](https://github.com/apotonick/representable). They usually inherit the schema from _Contract_s .
+
 9. **Model API** Working with your internal API explicitely is done by using _Operation_s . _Model_s should not be accessed directly anymore.
-10. **Tests** Subject to tests are mainly _Operation_s and _View Model_s, as they encapsulate endpoint behaviour of your app. As a nice side effect, factories are replaced by simple _Operation_ calls.
+
+10. **Tests** Subject to tests are mainly _Operation_s and _View Model_s , as they encapsulate endpoint behaviour of your app. As a nice side effect, factories are replaced by simple _Operation_ calls.
 
 Trailblazer is basically a mash-up of mature gems that have been developed over the past 10 years and are used in hundreds and thousands of production apps.
 
