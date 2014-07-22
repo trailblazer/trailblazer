@@ -29,6 +29,7 @@ app
 │   │   ├── assets
 │   │   │   ├── comment.css.sass
 │   │   ├── form.rb
+│   │   ├── operation.rb
 │   │   ├── twin.rb
 │   │   ├── persistance.rb
 │   │   ├── representer
@@ -38,6 +39,17 @@ app
 │   │   ├── form
 │   │   │   ├── admin.rb
 ```
+
+Files, classes and views that logically belong to one _concept_ are kept in one place. You are free to use additional namespaces within a concept. Trailblazer tries to keep it as simple as possible, though.
+
+## Architecture
+
+1. *Routing* Traiblazer uses Rails routing to map URLs to controllers (we will add simplifications to routing soon).
+2. *Controllers* A controller usually contains authentication logic, only (e.g. using devise) and then delegates to an `Enpoint` or, more often, an `Operation`.  (we will add simplifications to authentication soon)
+3. *Endpoint* Endpoints are the only class with knowledge about HTTP. They delegate to an @Operation@.
+4. *Operation* Business logic happens in operations. They replace ActiveRecord callbacks, cleanly group behaviour and encapsulate knowledge about operations like `Create`, `Update`, or `Crop`. Operations can be nested and use other operations. Every operation uses a @Contract@ to validate the incoming parameters.
+5. *Contract* Deserialization of the incoming data, populating an object graph and validating it is done in a @Contract@. This is usually a @Reform::Form@ which can also be rendered. @Contract@ and @Operation@ both work on the model.
+6. *Model* The model can be any ORM you like, for instance ActiveRecord or Datamapper. In Trailblazer, models are completely empty and solely configure database-relevant directives and associations.
 
 ## Gems
 
@@ -50,6 +62,11 @@ Trailblazer is basically a mash-up of mature gems that have been developed over 
 * Disposable::Twin
 * ActiveRecord, or whatever you fancy as an ORM. (EMPTY data models)
 * controller Operation
+
+
+## Naming
+
+Concept namespaces with layer names, no AdminController::UserController anymore.
 
 
 ## Routing
