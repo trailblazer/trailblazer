@@ -64,9 +64,9 @@ Files, classes and views that logically belong to one _concept_ are kept in one 
 
 8. **HTTP API** Consuming and rendering API documents (e.g. JSON or XML) is done via [roar](https://github.com/apotonick/roar) and [representable](https://github.com/apotonick/representable). They usually inherit the schema from _Contract_s .
 
-9. **Model API** Working with your internal API explicitely is done by using _Operation_s . _Model_s should not be accessed directly anymore.
+9. **Model API** Working with your internal API explicitely is done by using <em>Operation</em>s . <em>Model</em>s should not be accessed directly anymore.
 
-10. **Tests** Subject to tests are mainly _Operation_s and _View Model_s , as they encapsulate endpoint behaviour of your app. As a nice side effect, factories are replaced by simple _Operation_ calls.
+10. **Tests** Subject to tests are mainly <em>Operation</em>s and <em>View Model</em>s , as they encapsulate endpoint behaviour of your app. As a nice side effect, factories are replaced by simple _Operation_ calls.
 
 Trailblazer is basically a mash-up of mature gems that have been developed over the past 10 years and are used in hundreds and thousands of production apps.
 
