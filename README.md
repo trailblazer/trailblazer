@@ -44,12 +44,18 @@ Files, classes and views that logically belong to one _concept_ are kept in one 
 
 ## Architecture
 
-1. *Routing* Traiblazer uses Rails routing to map URLs to controllers (we will add simplifications to routing soon).
-2. *Controllers* A controller usually contains authentication logic, only (e.g. using devise) and then delegates to an `Enpoint` or, more often, an `Operation`.  (we will add simplifications to authentication soon)
-3. *Endpoint* Endpoints are the only class with knowledge about HTTP. They delegate to an @Operation@.
-4. *Operation* Business logic happens in operations. They replace ActiveRecord callbacks, cleanly group behaviour and encapsulate knowledge about operations like `Create`, `Update`, or `Crop`. Operations can be nested and use other operations. Every operation uses a @Contract@ to validate the incoming parameters.
-5. *Contract* Deserialization of the incoming data, populating an object graph and validating it is done in a @Contract@. This is usually a @Reform::Form@ which can also be rendered. @Contract@ and @Operation@ both work on the model.
-6. *Model* The model can be any ORM you like, for instance ActiveRecord or Datamapper. In Trailblazer, models are completely empty and solely configure database-relevant directives and associations.
+1. **Routing** Traiblazer uses Rails routing to map URLs to controllers (we will add simplifications to routing soon).
+2. **Controllers** A controller usually contains authentication logic, only (e.g. using devise) and then delegates to an `Enpoint` or, more often, an `Operation`.  (we will add simplifications to authentication soon)
+3. **Endpoint** Endpoints are the only classes with knowledge about HTTP. They delegate to an `Operation`.
+4. **Operation** Business logic happens in operations. They replace ActiveRecord callbacks, cleanly group behaviour and encapsulate knowledge about operations like `Create`, `Update`, or `Crop`.
+
+    Operations can be nested and use other operations.
+
+    Every operation uses a @Contract@ to validate the incoming parameters.
+5. **Contract** Deserialization of the incoming data, populating an object graph and validating it is done in a `Contract`. This is usually a `Reform::Form` which can also be rendered. `Contract` and `Operation` both work on the model.
+6. **Model** The model can be any ORM you like, for instance [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord#active-record--object-relational-mapping-in-rails) or [Datamapper](http://datamapper.org/.
+
+    In Trailblazer, models are completely empty and solely configure database-relevant directives and associations.
 
 ## Gems
 
