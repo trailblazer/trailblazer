@@ -45,29 +45,22 @@ Files, classes and views that logically belong to one _concept_ are kept in one 
 ## Architecture
 
 1. **Routing** Traiblazer uses Rails routing to map URLs to controllers (we will add simplifications to routing soon).
-2. **Controllers** A controller usually contains authentication logic, only (e.g. using devise) and then delegates to an `Enpoint` or, more often, an `Operation`.  (we will add simplifications to authentication soon)
-3. **Endpoint** Endpoints are the only classes with knowledge about HTTP. They delegate to an `Operation`.
-4. **Operation** Business logic happens in operations. They replace ActiveRecord callbacks, cleanly group behaviour and encapsulate knowledge about operations like `Create`, `Update`, or `Crop`.
+2. **Controllers** A controller usually contains authentication logic, only (e.g. using devise) and then delegates to an _Enpoint_ or, more often, an _Operation_.  (we will add simplifications to authentication soon)
+3. **Endpoint** Endpoints are the only classes with knowledge about HTTP. They delegate to an _Operation_.
+4. **Operation** Business logic happens in operations. They replace ActiveRecord callbacks, cleanly group behaviour and encapsulate knowledge about operations like _Create_, _Update_, or _Crop_.
 
     Operations can be nested and use other operations.
 
-    Every operation uses a @Contract@ to validate the incoming parameters.
-5. **Contract** Deserialization of the incoming data, populating an object graph and validating it is done in a `Contract`. This is usually a `Reform::Form` which can also be rendered. `Contract` and `Operation` both work on the model.
+    An operation uses a _Contract_ to validate the incoming parameters.
+5. **Contract** Deserialization of the incoming data, populating an object graph and validating it is done in a _Contract_. This is usually a [reform](https://github.com/apotonick/reform) form which can also be rendered. _Contract_ and _Operation_ both work on the model.
 6. **Model** The model can be any ORM you like, for instance [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord#active-record--object-relational-mapping-in-rails) or [Datamapper](http://datamapper.org/.
 
     In Trailblazer, models are completely empty and solely configure database-relevant directives and associations.
+7. **Views** Rendering UI happens in _View Models_ as found in [cells](https://github.com/apotonick/cells). View models also replace helpers.
+8. **HTTP API** Consuming and rendering API documents (e.g. JSON or XML) is done via [roar](https://github.com/apotonick/roar) and [representable](https://github.com/apotonick/representable). They usually inherit the schema from _5. Contract_s.
+9. **Model API** Working with your internal API explicitely is done by using _Operation_s. _Models_ should not be accessed directly anymore.
 
-## Gems
-
-Trailblazer is basically a mash-up of mature gems that have been developed over the past 8 years and are used in hundreds and thousands of production apps.
-
-* Cells for view components
-* Reform * Virtus for coercion and Reform::Contract
-* Representable
-* Roar
-* Disposable::Twin
-* ActiveRecord, or whatever you fancy as an ORM. (EMPTY data models)
-* controller Operation
+Trailblazer is basically a mash-up of mature gems that have been developed over the past 10 years and are used in hundreds and thousands of production apps.
 
 
 ## Naming
