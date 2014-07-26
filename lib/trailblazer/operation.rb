@@ -16,11 +16,11 @@ module Trailblazer
 
       if result = contract.validate(params)
         yield contract if block_given?
-        return [result, model] # this is not Boolean
+        return [result, contract] # this is not Boolean
       end
 
       # we had raise here
-      [result, model] # we wanna return model or contract here?
+      [result, contract]
     end
 
     def contract_class

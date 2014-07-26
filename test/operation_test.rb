@@ -2,6 +2,13 @@ require 'test_helper'
 
 require 'trailblazer/operation'
 
+module Comparable
+  # only used for test.
+  def ==(b)
+    self.class == b.class
+  end
+end
+
 
 class FlowTest < MiniTest::Spec
   class Operation
@@ -52,6 +59,8 @@ class OperationTest < MiniTest::Spec
     def validate(params)
       params
     end
+
+    include Comparable
   end
 
   require 'ostruct'
@@ -67,12 +76,12 @@ class OperationTest < MiniTest::Spec
 
   it "no block" do
     res = Operation.flow(true)
-    res.must_equal [true, OpenStruct.new]
+    res.must_equal [true, Contract.new]
   end
 
   it "no block, invalid" do
     res = Operation.flow(false)
-    res.must_equal [false, OpenStruct.new]
+    res.must_equal [false, Contract.new]
   end
 
 
@@ -110,6 +119,8 @@ class OperationRunTest < MiniTest::Spec
       def validate(params)
         "local #{params}"
       end
+
+      include Comparable
     end
 
     extend Flow
@@ -121,7 +132,7 @@ class OperationRunTest < MiniTest::Spec
   end
 
   # contract is inferred from self::Contract.
-  it { Operation.run(true).must_equal ["local true", Object] }
+  it { Operation.run(true).must_equal ["local true", Operation::Contract.new] }
 end
 
 
