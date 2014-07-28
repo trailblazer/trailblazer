@@ -85,6 +85,7 @@ class OperationTest < MiniTest::Spec
   end
 
 
+  # use Flow directly.
   it do
    #@result = "nil"
 
@@ -133,6 +134,10 @@ class OperationRunTest < MiniTest::Spec
 
   # contract is inferred from self::Contract.
   it { Operation.run(true).must_equal ["local true", Operation::Contract.new] }
+
+  # only return contract when ::call
+  it { Operation.call(true).must_equal Operation::Contract.new }
+  it { Operation[true].must_equal Operation::Contract.new }
 end
 
 

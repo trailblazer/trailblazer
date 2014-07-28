@@ -2,9 +2,19 @@ require 'trailblazer/flow'
 
 module Trailblazer
   class Operation
-    def self.run(params, &block) # Endpoint behaviour
-      new.run(params)
+    class << self
+      def run(params, &block) # Endpoint behaviour
+        new.run(params)
+      end
+
+      # ::call only returns the Contract instance (or whatever was returned from #validate).
+      # This is useful in tests when using Op as a factory and you already know its valid.
+      def call(params)
+        run(params).last
+      end
+      alias_method :[], :call
     end
+
 
 
     def run(params) # to be overridden!!!
