@@ -2,6 +2,7 @@
 
 _Trailblazer is a thin layer on top of Rails. It gently enforces encapsulation, an intuitive code structure and gives you an object-oriented architecture._
 
+In a nutshell: Trailblazer makes you write **logic-less models** that purely act as data objects, don't contain callbacks, nested attributes, validations or domain logic. It **removes bulky controllers** and strong_parameters by supplying additional layers to put that code and **completely replaces helpers**.
 
 ## Mission
 
