@@ -68,8 +68,11 @@ class UploadedFileTest < MiniTest::Spec
 
   describe "with custom tmp directory" do
     describe "#to_hash" do
+      let (:tmp_dir) { "/tmp/uploads" }
       before {
-        @uploaded = Trailblazer::Operation::UploadedFile.new(upload, :tmp_dir => "/tmp/uploads")
+        Dir.mkdir(tmp_dir) unless File.exists?(tmp_dir)
+
+        @uploaded = Trailblazer::Operation::UploadedFile.new(upload, :tmp_dir => tmp_dir)
         @subject  = @uploaded.to_hash[:tempfile_path]
       }
 
