@@ -62,7 +62,7 @@ Files, classes and views that logically belong to one _concept_ are kept in one 
 
 7. **Views** Rendering UI happens in _View Models_ as found in [cells](https://github.com/apotonick/cells). View models also replace helpers.
 
-8. **HTTP API** Consuming and rendering API documents (e.g. JSON or XML) is done via [roar](https://github.com/apotonick/roar) and [representable](https://github.com/apotonick/representable). They usually inherit the schema from _Contract_s .
+8. **HTTP API** Consuming and rendering API documents (e.g. JSON or XML) is done via [roar](https://github.com/apotonick/roar) and [representable](https://github.com/apotonick/representable). They usually inherit the schema from <em>Contract</em>s .
 
 9. **Model API** Working with your internal API explicitely is done by using <em>Operation</em>s . <em>Model</em>s should not be accessed directly anymore.
 
