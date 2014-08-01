@@ -93,9 +93,9 @@ A typical controller should contain authentication, authorization and delegation
 
 A Flow invocation implements the pattern of _"Run a piece of code. If true, do this! Else, do that!"_.
 
-### Operation
+## Operation
 
-Operations in Trailblazer aim to implement atomic steps in your application domain like _“Validate and update a comment!”_, _"Run and render a search!"_ or _“Process uploaded images!”_.
+Operations in Trailblazer aim to implement atomic steps in your application domain like _“Validate and update a comment!”_, _"Run and render a search!"_ or _“Process uploaded images!”_. Operations embrace high-level API calls in your domain: logic that gets invoked from a controller or console.
 
 Operations typically have different granularity levels and will be nested. This could mean that all of the above steps could be run inside a wrapping operation.
 
@@ -107,7 +107,12 @@ Both `Flow` and `Operation` have a single entry point: a class method. While the
 
 Encapsulating an atomic operation into a stateless asset makes it easily detachable, e.g. for background-processing with Sidekiq, Resque or whatever.
 
+
+### Functional Semantic
+
 Note that "stateless" doesn't mean you're not allowed to mess around with the application state: Internally, you can do whatever you need to meet your domain requirements! The statelessness is refering to the entire Operation and its flow seen from the caller's perspective.
+
+Again, Operations are high-level entry points for your application. With one public method, they expose a rather functional behaviour. This is intended and doesn't break object-orientation at all. Within the operation, you can use as many models, state machines, workflows, etc you need - only the embracing operation is functional.
 
 
 ### Background Processing
