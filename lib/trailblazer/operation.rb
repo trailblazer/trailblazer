@@ -16,9 +16,20 @@ module Trailblazer
     end
 
 
-
+    # Calling this method from the overriding method (aka "super model")
+    # will return a result array that works with the existing invocation protocol.
+    # As no validation happens, the result will always be true. Whatever is passed to super
+    # is returned in the result array.
+    #
+    #   def run(params)
+    #     model = Comment.create(params) # NO validation happens.
+    #     super model
+    #   end
+    #
+    #   Operation.run(body: "Fabulous!") #=> [true, <Comment body: "Fabulous!">]
     def run(params) # to be overridden!!!
       # validate(nil, params, Contract)
+      [true, params] # standard behaviour: no validation means "always true" and return whatever came in.
     end
 
     def validate(model, params, contract_class=self.contract_class) # NOT to be overridden?!! it creates Result for us.

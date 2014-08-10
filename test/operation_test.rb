@@ -150,6 +150,18 @@ class OperationRunWithoutContractTest < MiniTest::Spec
 
   # contract is inferred from self::Contract.
   it { assert_raises(NameError) { Operation.run(true) } }
+
+
+  class OperationWithoutValidateCall < Trailblazer::Operation
+    def run(params)
+      super(params)
+    end
+  end
+
+  # ::run
+  it { OperationWithoutValidateCall.run({}).must_equal [true, {}] }
+  # ::[]
+  it { OperationWithoutValidateCall[{}].must_equal({}) }
 end
 
 
