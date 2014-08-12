@@ -133,7 +133,7 @@ class OperationRunTest < MiniTest::Spec
   end
 
   # contract is inferred from self::Contract.
-  it("blaa") { Operation.run(true).must_equal ["local true", Operation::Contract.new] }
+  it { Operation.run(true).must_equal ["local true", Operation::Contract.new] }
 
   # only return contract when ::call
   it { Operation.call(true).must_equal Operation::Contract.new }
@@ -152,7 +152,7 @@ class OperationRunWithoutContractTest < MiniTest::Spec
   it { assert_raises(NameError) { Operation.run(true) } }
 
 
-  # self-made #process!.
+  # #process! and no validate.
   class OperationWithoutValidateCall < Trailblazer::Operation
     def process!
       params
@@ -160,9 +160,23 @@ class OperationRunWithoutContractTest < MiniTest::Spec
   end
 
   # ::run
-  it { OperationWithoutValidateCall.run({}).must_equal [true, {}] }
+  it { OperationWithoutValidateCall.run(Object).must_equal [true, Object] }
   # ::[]
-  it { OperationWithoutValidateCall[{}].must_equal({}) }
+  it { OperationWithoutValidateCall[Object].must_equal(Object) }
+
+
+  # manually setting @valid
+  class OperationWithManualValid < Trailblazer::Operation
+    def process!
+      @valid = false
+      params
+    end
+  end
+
+  # ::run
+  it { OperationWithManualValid.run(Object).must_equal [false, Object] }
+  # ::[]
+  it { OperationWithManualValid[Object].must_equal(Object) }
 end
 
 
