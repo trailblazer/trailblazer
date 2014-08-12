@@ -51,9 +51,9 @@ end
 
 
 
-
+# Operation with Contract and #process
 class OperationTest < MiniTest::Spec
-  class Contract #< Reform::Form
+  class Contract
     def initialize(*)
     end
     def validate(params)
@@ -67,7 +67,7 @@ class OperationTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
     extend Flow
 
-    def run(params)
+    def process!
       model = OpenStruct.new
       validate(model, params, Contract)
     end
@@ -126,14 +126,14 @@ class OperationRunTest < MiniTest::Spec
 
     extend Flow
 
-    def run(params)
+    def process!
       model = Object
       validate(model, params)
     end
   end
 
   # contract is inferred from self::Contract.
-  it { Operation.run(true).must_equal ["local true", Operation::Contract.new] }
+  it("blaa") { Operation.run(true).must_equal ["local true", Operation::Contract.new] }
 
   # only return contract when ::call
   it { Operation.call(true).must_equal Operation::Contract.new }
@@ -143,7 +143,7 @@ end
 
 class OperationRunWithoutContractTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
-    def run(params)
+    def process!
       validate(Object, params)
     end
   end
@@ -152,9 +152,10 @@ class OperationRunWithoutContractTest < MiniTest::Spec
   it { assert_raises(NameError) { Operation.run(true) } }
 
 
+  # self-made #process!.
   class OperationWithoutValidateCall < Trailblazer::Operation
-    def run(params)
-      super(params)
+    def process!
+      params
     end
   end
 

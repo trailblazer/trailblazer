@@ -16,6 +16,10 @@ module Trailblazer
     end
 
 
+    def initialize
+      @valid = true
+    end
+
     # Calling this method from the overriding method (aka "super model")
     # will return a result array that works with the existing invocation protocol.
     # As no validation happens, the result will always be true. Whatever is passed to super
@@ -27,21 +31,25 @@ module Trailblazer
     #   end
     #
     #   Operation.run(body: "Fabulous!") #=> [true, <Comment body: "Fabulous!">]
-    def run(params) # to be overridden!!!
+    def run(params)
+      @params = params # TODO: make this in constructor when sorted with sidekiq.
+      # where do we assign/find the model?
+
+      [process!, @valid].reverse
       # validate(nil, params, Contract)
-      [true, params] # standard behaviour: no validation means "always true" and return whatever came in.
     end
 
-    def validate(model, params, contract_class=self.contract_class) # NOT to be overridden?!! it creates Result for us.
+  private
+    attr_reader :params
+
+    def validate(model, params, contract_class=send(:contract_class)) # NOT to be overridden?!! it creates Result for us.
       contract = contract_class.new(model)
 
-      if result = contract.validate(params)
+      if @valid = contract.validate(params)
         yield contract if block_given?
-        return [result, contract] # this is not Boolean
       end
 
-      # we had raise here
-      [result, contract]
+      contract
     end
 
     def contract_class
