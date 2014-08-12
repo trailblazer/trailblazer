@@ -67,7 +67,7 @@ class OperationTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
     extend Flow
 
-    def process!
+    def process
       model = OpenStruct.new
       validate(model, params, Contract)
     end
@@ -126,7 +126,7 @@ class OperationRunTest < MiniTest::Spec
 
     extend Flow
 
-    def process!
+    def process
       model = Object
       validate(model, params)
     end
@@ -143,7 +143,7 @@ end
 
 class OperationRunWithoutContractTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
-    def process!
+    def process
       validate(Object, params)
     end
   end
@@ -152,9 +152,9 @@ class OperationRunWithoutContractTest < MiniTest::Spec
   it { assert_raises(NameError) { Operation.run(true) } }
 
 
-  # #process! and no validate.
+  # #process and no validate.
   class OperationWithoutValidateCall < Trailblazer::Operation
-    def process!
+    def process
       params
     end
   end
@@ -167,7 +167,7 @@ class OperationRunWithoutContractTest < MiniTest::Spec
 
   # manually setting @valid
   class OperationWithManualValid < Trailblazer::Operation
-    def process!
+    def process
       @valid = false
       params
     end

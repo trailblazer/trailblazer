@@ -35,7 +35,7 @@ module Trailblazer
       @params = params # TODO: make this in constructor when sorted with sidekiq.
       # where do we assign/find the model?
 
-      [process!, @valid].reverse
+      [process, @valid].reverse
       # validate(nil, params, Contract)
     end
 
