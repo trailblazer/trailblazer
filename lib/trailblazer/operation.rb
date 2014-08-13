@@ -32,15 +32,16 @@ module Trailblazer
     #
     #   Operation.run(body: "Fabulous!") #=> [true, <Comment body: "Fabulous!">]
     def run(params)
-      @params = params # TODO: make this in constructor when sorted with sidekiq.
+      setup!(params)
       # where do we assign/find the model?
 
-      [process, @valid].reverse
+      [process(params), @valid].reverse
       # validate(nil, params, Contract)
     end
 
   private
-    attr_reader :params
+    def setup!(params)
+    end
 
     def validate(model, params, contract_class=send(:contract_class)) # NOT to be overridden?!! it creates Result for us.
       contract = contract_class.new(model)

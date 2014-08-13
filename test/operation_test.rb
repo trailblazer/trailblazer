@@ -67,7 +67,7 @@ class OperationTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
     extend Flow
 
-    def process
+    def process(params)
       model = OpenStruct.new
       validate(model, params, Contract)
     end
@@ -126,7 +126,7 @@ class OperationRunTest < MiniTest::Spec
 
     extend Flow
 
-    def process
+    def process(params)
       model = Object
       validate(model, params)
     end
@@ -143,7 +143,7 @@ end
 
 class OperationRunWithoutContractTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
-    def process
+    def process(params)
       validate(Object, params)
     end
   end
@@ -154,7 +154,7 @@ class OperationRunWithoutContractTest < MiniTest::Spec
 
   # #process and no validate.
   class OperationWithoutValidateCall < Trailblazer::Operation
-    def process
+    def process(params)
       params
     end
   end
@@ -167,7 +167,7 @@ class OperationRunWithoutContractTest < MiniTest::Spec
 
   # manually setting @valid
   class OperationWithManualValid < Trailblazer::Operation
-    def process
+    def process(params)
       @valid = false
       params
     end
@@ -177,6 +177,18 @@ class OperationRunWithoutContractTest < MiniTest::Spec
   it { OperationWithManualValid.run(Object).must_equal [false, Object] }
   # ::[]
   it { OperationWithManualValid[Object].must_equal(Object) }
+
+
+  # re-assign params
+  class OperationReassigningParams < Trailblazer::Operation
+    def process(params)
+      params = params[:title]
+      params
+    end
+  end
+
+  # ::run
+  it { OperationReassigningParams.run({:title => "Day Like This"}).must_equal [true, "Day Like This"] }
 end
 
 
