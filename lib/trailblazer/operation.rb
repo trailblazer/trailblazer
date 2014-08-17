@@ -53,6 +53,11 @@ module Trailblazer
       contract
     end
 
+    def invalid!(result)
+      @valid = false
+      result
+    end
+
     def contract_class
       self.class.const_get :Contract
     end

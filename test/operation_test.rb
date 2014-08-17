@@ -189,6 +189,18 @@ class OperationRunWithoutContractTest < MiniTest::Spec
 
   # ::run
   it { OperationReassigningParams.run({:title => "Day Like This"}).must_equal [true, "Day Like This"] }
+
+
+  # #invalid!
+  class OperationCallingInvalid < Trailblazer::Operation
+    def process(params)
+      return 1 if params
+      invalid!(2)
+    end
+  end
+
+  it { OperationCallingInvalid.run(true).must_equal [true, 1] }
+  it { OperationCallingInvalid.run(nil).must_equal [false, 2] }
 end
 
 
