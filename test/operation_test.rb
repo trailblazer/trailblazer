@@ -201,6 +201,16 @@ class OperationRunWithoutContractTest < MiniTest::Spec
 
   it { OperationCallingInvalid.run(true).must_equal [true, 1] }
   it { OperationCallingInvalid.run(nil).must_equal [false, 2] }
+
+
+  # unlimited arguments for ::run and friends.
+  class OperationReceivingLottaArguments < Trailblazer::Operation
+    def process(model, params)
+      [model, params]
+    end
+  end
+
+  it { OperationReceivingLottaArguments.run(Object, {}).must_equal([true, [Object, {}]]) }
 end
 
 
