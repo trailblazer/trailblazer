@@ -8,16 +8,21 @@ module Trailblazer
       end
 
       # ::call only returns the Contract instance (or whatever was returned from #validate).
-      # This is useful in tests when using Op as a factory and you already know its valid.
+      # This is useful in tests or in irb, e.g. when using Op as a factory and you already know it's valid.
       def call(*params)
         run(*params).last
       end
       alias_method :[], :call
+
+      def contract(*params)
+        new(false).run(*params).last
+      end
     end
 
 
-    def initialize
-      @valid = true
+    def initialize(validate=true)
+      @valid    = true
+      @validate = validate
     end
 
     # Calling this method from the overriding method (aka "super model")
@@ -43,8 +48,10 @@ module Trailblazer
     def setup!(*params)
     end
 
-    def validate(model, params, contract_class=send(:contract_class)) # NOT to be overridden?!! it creates Result for us.
-      contract = contract_class.new(model)
+    def validate(model, params, contract_class=nil) # NOT to be overridden?!! it creates Result for us.
+      contract = contract_for(contract_class, model)
+
+      return contract unless @validate
 
       if @valid = contract.validate(params)
         yield contract if block_given?
@@ -62,6 +69,18 @@ module Trailblazer
       self.class.const_get :Contract
     end
 
+    # Instantiate the contract, either by using the user's contract passed into #validate
+    # or infer the Operation contract.
+    def contract_for(contract_class, model)
+      (contract_class || send(:contract_class)).new(model)
+    end
+
     Flow = Trailblazer::Flow # Operation::Flow
   end
 end
+
+# run
+#   setup
+#   process
+#     contract
+#     validate

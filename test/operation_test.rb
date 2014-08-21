@@ -211,6 +211,28 @@ class OperationRunWithoutContractTest < MiniTest::Spec
   end
 
   it { OperationReceivingLottaArguments.run(Object, {}).must_equal([true, [Object, {}]]) }
+
+
+  # TODO: experimental.
+  # ::contract to avoid running #validate.
+  class ContractOnlyOperation < Trailblazer::Operation
+    class Contract
+      def initialize(model)
+        @_model = model
+      end
+      attr_reader :_model
+    end
+
+    def process(params)
+      @object = Object # arbitraty init code.
+
+      validate(Object, params) do
+        raise # this should not be run.
+      end
+    end
+  end
+
+  it { ContractOnlyOperation.contract({})._model.must_equal Object }
 end
 
 
