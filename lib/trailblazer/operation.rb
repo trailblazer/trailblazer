@@ -37,18 +37,16 @@ module Trailblazer
     #
     #   Operation.run(body: "Fabulous!") #=> [true, <Comment body: "Fabulous!">]
     def run(*params)
-      setup!(*params)
-      # where do we assign/find the model?
+      setup!(*params) # where do we assign/find the model?
 
       [process(*params), @valid].reverse
-      # validate(nil, *params, Contract)
     end
 
   private
     def setup!(*params)
     end
 
-    def validate(model, params, contract_class=nil) # NOT to be overridden?!! it creates Result for us.
+    def validate(params, model, contract_class=nil) # NOT to be overridden?!! it creates Result for us.
       contract = contract_for(contract_class, model)
 
       return contract unless @validate

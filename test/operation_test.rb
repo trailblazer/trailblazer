@@ -69,7 +69,7 @@ class OperationTest < MiniTest::Spec
 
     def process(params)
       model = OpenStruct.new
-      validate(model, params, Contract)
+      validate(params, model, Contract)
     end
   end
 
@@ -128,7 +128,7 @@ class OperationRunTest < MiniTest::Spec
 
     def process(params)
       model = Object
-      validate(model, params)
+      validate(params, model)
     end
   end
 
@@ -226,7 +226,7 @@ class OperationRunWithoutContractTest < MiniTest::Spec
     def process(params)
       @object = Object # arbitraty init code.
 
-      validate(Object, params) do
+      validate(params, Object) do
         raise # this should not be run.
       end
     end
