@@ -71,8 +71,8 @@ module Trailblazer
 
     # Instantiate the contract, either by using the user's contract passed into #validate
     # or infer the Operation contract.
-    def contract_for(contract_class, model)
-      (contract_class || send(:contract_class)).new(model)
+    def contract_for(contract_class, *model)
+      (contract_class || send(:contract_class)).new(*model)
     end
 
     Flow = Trailblazer::Flow # Operation::Flow
