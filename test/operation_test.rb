@@ -118,7 +118,12 @@ class OperationRunTest < MiniTest::Spec
       def initialize(*)
       end
       def validate(params)
+        return false if params == false # used in ::[] with exception test.
         "local #{params}"
+      end
+
+      def errors
+        Struct.new(:to_s).new("Op just calls #to_s on Errors!")
       end
 
       include Comparable
@@ -138,6 +143,12 @@ class OperationRunTest < MiniTest::Spec
   # only return contract when ::call
   it { Operation.call(true).must_equal Operation::Contract.new }
   it { Operation[true].must_equal Operation::Contract.new }
+
+  # ::[] raises exception when invalid.
+  it do
+    exception = assert_raises(Trailblazer::Operation::InvalidContract) { Operation[false] }
+    exception.message.must_equal "Op just calls #to_s on Errors!"
+  end
 end
 
 
@@ -227,12 +238,30 @@ class OperationRunWithoutContractTest < MiniTest::Spec
       @object = Object # arbitraty init code.
 
       validate(params, Object) do
-        raise # this should not be run.
+        raise "this should not be run."
       end
     end
   end
 
   it { ContractOnlyOperation.contract({})._model.must_equal Object }
+
+
+  # ::[] raising exception when invalid.
+  class ReturnContract
+    def initialize(*)
+    end
+    def validate(params)
+      params
+    end
+
+    include Comparable
+  end
+
+  class OperationUsingValidate < Trailblazer::Operation
+    def process(params)
+
+    end
+  end
 end
 
 
