@@ -10,20 +10,21 @@ module Trailblazer
       # ::call only returns the Contract instance (or whatever was returned from #validate).
       # This is useful in tests or in irb, e.g. when using Op as a factory and you already know it's valid.
       def call(*params)
-        new(true, true).run(*params).last
+        new(:raise_on_invalid => true).run(*params).last
       end
       alias_method :[], :call
 
       def contract(*params)
-        new(false).run(*params).last
+        new(:validate => false).run(*params).last
       end
     end
 
 
-    def initialize(validate=true, raise_on_invalid=false)
-      @valid    = true
-      @validate = validate
-      @raise_on_invalid = raise_on_invalid
+    def initialize(options={})
+      @valid            = true
+      # DISCUSS: use reverse_merge here?
+      @validate         = options[:validate] == false ? false : true
+      @raise_on_invalid = options[:raise_on_invalid] || false
     end
 
     # Calling this method from the overriding method (aka "super model")
