@@ -87,23 +87,117 @@ There are some enhancements planned, though. See TODO.
 
 A typical controller should contain authentication, authorization and delegations to domain operations. You can leave your controller _configuration_ as it is - with devise, cancan and all the nifty tools. Behaviour should be delegated to `Operation`s.
 
-## Operational Domain Layer: Flow + Operation
 
-### Flow
+## Operational Domain Layer: Operation
 
-A Flow invocation implements the pattern of _"Run a piece of code. If true, do this! Else, do that!"_.
 
-## Operation
+### Operation
 
-Operations in Trailblazer aim to implement atomic steps in your application domain like _“Validate and update a comment!”_, _"Run and render a search!"_ or _“Process uploaded images!”_. Operations embrace high-level API calls in your domain: logic that gets invoked from a controller or console.
+Operations in Trailblazer implement high-level actions in your application domain: logic that gets invoked from a controller, the console, in tests, or from other components.
 
-Operations typically have different granularity levels and will be nested. This could mean that all of the above steps could be run inside a wrapping operation.
+This could be _“Validate and update a comment!”_ or _"Run and render a search!"_. Operations can also be nested, and implement something as in _“Process uploaded images!”_.
+
+In Trailblazer, controllers always simply delegate to an Operation. This is where the domain logic sits, this simplifies testing without the HTTP overhead and makes the action reusable as test factories.
+
+### API
+
+A very simple operation to create a comment could look as follows.
+
+```ruby
+class Comment::Operation::Create < Trailblazer::Operation
+  class Contract < Reform::Form
+    property :body
+    validates :body, presence: true
+  end
+
+
+  def process(params)
+    comment = Comment.new
+
+    validate(params, comment) do |contract|
+      contract.save
+      # further after_save logic happens here
+    end
+  end
+end
+```
+
+A typical operations has three essential parts:
+
+1. Usually, an Operation has a form (or, contract) to validate incoming data. This form can also be used for rendering the operation's form in a UI, as known from Reform.
+2. The `#process` method implements the actual operation and is the only public instance method. You can do whatever you want in here.
+3. Within `#process` you may call `#validate` which will instantiate the operation's form, validate the data and, in case of a valid form state, call the block.
+
+**Note:** You don't _have_ to make use of form/contract here. This is a convention Trailblazer establishes, however, you're free to run your own logic. Instantiating and invoking the form happens in `Operation#validate`.
+
+
+### Flow Usage
+
+In a controller, you typically use the `::run` interface, which gives you a great flow API for dealing with valid and invalid invocations.
+
+```ruby
+def create
+  @contract = Comment::Operation::Create.run(params[:comment]) do |contract|
+    return redirect_to(contract.model) # success.
+  end
+
+  render :new # failure. re-render form.
+end
+```
+
+Controller-specific logic is kept in the controller, everything else is encapsulated in the operation. Per default, the operation yields the internal contract to the successful block, or returns it so the failure code can make use of it.
+
+### Call Usage
+
+Sometimes you don't need to implement a flow. For instance, using an Operation as a test factory is straight-forward.
+
+```ruby
+comment = Comment::Operation::Create[params].model
+```
+
+Using the call invocation doesn't allow a block and strictly returns the contract (or, whatever you return from `#process`). As an additional service, an exception is raised when the incoming `params` doesn't validate with the form.
+
+### Operations With JSON (Or XML)
+
+The internal Reform form object is extremely powerful, as it does not only work with hashes (e.g. `params`) but also with other formats such as JSON, YAML or XML!
+
+This basically means you could reuse an operation for your JSON API.
+
+```ruby
+class Comment::Operation::Create
+  class JSON < self
+    class Contract < Contract
+      include Json # Contract::JSON
+    end
+  end
+```
+
+Note that presently you have to derive the JSON operation from the original one. This will be available implicitely soon.
+
+```ruby
+Comment::Operation::Create::JSON.run(request.body.string) do
+  render :success
+end
+```
+
+You don't have to rewrite this over and over again as a lot of behaviour is implemented in Endpoint.
+
+### Additional Semantics
+
+invalid!
+return from validate
+return value of ::run
+
+testing invoked nested methods
+
+create/find models automatically
+json
 
 
 
 ### Stateless Operations
 
-Both `Flow` and `Operation` have a single entry point: a class method. While the class method instantly creates an instance and delegates further processing to the latter, this class method stresses the fact that an Operation (with or without a flow) is _stateless_.
+`Operation` has a single entry point: a class method. While the class method instantly creates an instance and delegates further processing to the latter, this class method stresses the fact that an Operation is _stateless_.
 
 Encapsulating an atomic operation into a stateless asset makes it easily detachable, e.g. for background-processing with Sidekiq, Resque or whatever.
 
@@ -122,9 +216,6 @@ One design goal in Trailblazer's operation layer is to make asnynchronous proces
 {Notes: do validation in realtime, send work of Operation to bg}
 
 ### Testing Operations
-
-### Operations In Controllers
-
 
 ## Domain
 ## Persistance

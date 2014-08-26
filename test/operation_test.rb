@@ -112,6 +112,7 @@ class OperationTest < MiniTest::Spec
     OperationWithoutValidateCall.run(true) { @outcome = "true" }.must_equal true
     @outcome.must_equal "true"
   end
+  # TODO: test contract yielding
 
 
   # manually setting @valid
