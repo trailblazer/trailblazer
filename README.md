@@ -88,8 +88,9 @@ There are some enhancements planned, though. See TODO.
 A typical controller should contain authentication, authorization and delegations to domain operations. You can leave your controller _configuration_ as it is - with devise, cancan and all the nifty tools. Behaviour should be delegated to `Operation`s.
 
 
-## Operational Domain Layer: Operation
+## Domain Layer: Operation
 
+Domain logic happens in `Operation`s: stateless but yet object-oriented instances that encapsulate your business. They are extremly reusable, testable and bring background-processing for free.
 
 ### Operation
 
@@ -152,12 +153,12 @@ Controller-specific logic is kept in the controller, everything else is encapsul
 Sometimes you don't need to implement a flow. For instance, using an Operation as a test factory is straight-forward.
 
 ```ruby
-comment = Comment::Operation::Create[params].model
+let(:comment) { Comment::Operation::Create[params].model }
 ```
 
 Using the call invocation doesn't allow a block and strictly returns the contract (or, whatever you return from `#process`). As an additional service, an exception is raised when the incoming `params` doesn't validate with the form.
 
-### Operations With JSON (Or XML)
+### Operations With JSON
 
 The internal Reform form object is extremely powerful, as it does not only work with hashes (e.g. `params`) but also with other formats such as JSON, YAML or XML!
 
@@ -182,18 +183,6 @@ end
 
 You don't have to rewrite this over and over again as a lot of behaviour is implemented in Endpoint.
 
-### Additional Semantics
-
-invalid!
-return from validate
-return value of ::run
-
-testing invoked nested methods
-
-create/find models automatically
-json
-
-
 
 ### Stateless Operations
 
@@ -214,6 +203,20 @@ Again, Operations are high-level entry points for your application. With one pub
 One design goal in Trailblazer's operation layer is to make asnynchronous processing a no-brainer. As operations are stateless that is easily achieved: Basically, any operation can be sent to a background process. Trailblazer makes you think in domain operations that come with free background processing. This is completely different to a monolithic model with hundreds of methods and the omnipresent thought of "How to make this part async?".
 
 {Notes: do validation in realtime, send work of Operation to bg}
+
+### Additional Semantics
+
+::contract
+invalid!
+return from validate
+return value of ::run
+
+testing invoked nested methods
+
+create/find models automatically
+json
+
+
 
 ### Testing Operations
 
