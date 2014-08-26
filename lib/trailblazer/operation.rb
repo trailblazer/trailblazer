@@ -1,10 +1,15 @@
-require 'trailblazer/flow'
-
 module Trailblazer
   class Operation
     class << self
       def run(*params, &block) # Endpoint behaviour
-        new.run(*params)
+        res, contract = new.run(*params)
+
+        if block_given?
+          yield contract if res
+          return contract
+        end
+
+        [res, contract]
       end
 
       # ::call only returns the Contract instance (or whatever was returned from #validate).
@@ -27,16 +32,6 @@ module Trailblazer
       @raise_on_invalid = options[:raise_on_invalid] || false
     end
 
-    # Calling this method from the overriding method (aka "super model")
-    # will return a result array that works with the existing invocation protocol.
-    # As no validation happens, the result will always be true. Whatever is passed to super
-    # is returned in the result array.
-    #
-    #   def run(params)
-    #     model = Comment.create(params) # NO validation happens.
-    #     super model
-    #   end
-    #
     #   Operation.run(body: "Fabulous!") #=> [true, <Comment body: "Fabulous!">]
     def run(*params)
       setup!(*params) # where do we assign/find the model?
@@ -81,8 +76,6 @@ module Trailblazer
     def contract_for(contract_class, *model)
       (contract_class || send(:contract_class)).new(*model)
     end
-
-    Flow = Trailblazer::Flow # Operation::Flow
 
     class InvalidContract < RuntimeError
     end
