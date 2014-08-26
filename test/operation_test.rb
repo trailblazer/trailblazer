@@ -153,6 +153,28 @@ class OperationTest < MiniTest::Spec
   it { OperationCallingInvalid.run(nil).must_equal [false, 2] }
 
 
+  # calling return from #validate block leaves result true.
+  class OperationUsingReturnInValidate < Trailblazer::Operation
+    class Contract
+      def initialize(*)
+      end
+      def validate(params)
+        params
+      end
+    end
+
+    def process(params)
+      validate(params, Object) do
+        return 1
+      end
+      2
+    end
+  end
+
+  it { OperationUsingReturnInValidate.run(true).must_equal [true, 1] }
+  it { OperationUsingReturnInValidate.run(false).must_equal [false, 2] }
+
+
   # unlimited arguments for ::run and friends.
   class OperationReceivingLottaArguments < Trailblazer::Operation
     def process(model, params)
@@ -184,21 +206,4 @@ class OperationTest < MiniTest::Spec
 
   it { ContractOnlyOperation.contract({})._model.must_equal Object }
 
-
-  # ::[] raising exception when invalid.
-  class ReturnContract
-    def initialize(*)
-    end
-    def validate(params)
-      params
-    end
-
-    include Comparable
-  end
-
-  class OperationUsingValidate < Trailblazer::Operation
-    def process(params)
-
-    end
-  end
 end
