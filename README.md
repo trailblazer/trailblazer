@@ -90,7 +90,7 @@ A typical controller should contain authentication, authorization and delegation
 
 ## Domain Layer: Operation
 
-Domain logic happens in `Operation`s: stateless but yet object-oriented instances that encapsulate your business. They are extremly reusable, testable and bring background-processing for free.
+Domain logic happens in `Operation`s: stateless but yet object-oriented instances that encapsulate your business. They are extremely reusable, easily testable and bring background-processing for free.
 
 ### Operation
 
