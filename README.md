@@ -34,9 +34,6 @@ app
 │   │   ├── twin.rb
 │   │   ├── persistance.rb
 │   │   ├── representer
-```
-
-```
 │   │   ├── form
 │   │   │   ├── admin.rb
 ```
