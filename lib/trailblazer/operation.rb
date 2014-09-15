@@ -39,12 +39,15 @@ module Trailblazer
       [process(*params), @valid].reverse
     end
 
+    attr_reader :contract
+
   private
+
     def setup!(*params)
     end
 
     def validate(params, model, contract_class=nil) # NOT to be overridden?!! it creates Result for us.
-      contract = contract_for(contract_class, model)
+      @contract = contract_for(contract_class, model)
 
       return contract unless @validate # Op.contract will return here.
 
@@ -54,7 +57,7 @@ module Trailblazer
         raise!(contract)
       end
 
-      contract
+      self
     end
 
     def invalid!(result)

@@ -33,14 +33,14 @@ class OperationRunTest < MiniTest::Spec
     end
   end
 
-  let (:contract) { Operation::Contract.new }
+  let (:operation) { Operation.new.extend(Comparable) }
 
   # contract is inferred from self::Contract.
-  it { Operation.run(true).must_equal ["local true", contract] }
+  it { Operation.run(true).must_equal ["local true", operation] }
 
   # only return contract when ::call
-  it { Operation.call(true).must_equal contract }
-  it { Operation[true].must_equal contract }
+  it { Operation.call(true).must_equal operation }
+  it { Operation[true].must_equal operation }
 
   # ::[] raises exception when invalid.
   it do
@@ -49,8 +49,8 @@ class OperationRunTest < MiniTest::Spec
   end
 
   # ::run without block returns result set
-  it { Operation.run(true).must_equal  ["local true", contract] }
-  it { Operation.run(false).must_equal [false, contract] }
+  it { Operation.run(true).must_equal  ["local true", operation] }
+  it { Operation.run(false).must_equal [false, operation] }
 
   # ::run with block returns contract.
   # valid executes block.
@@ -62,7 +62,7 @@ class OperationRunTest < MiniTest::Spec
     # @outcome ||= false # not executed.
 
     outcome.must_equal "true" # block was executed.
-    res.must_equal contract
+    res.must_equal operation
   end
 
   # invalid doesn't execute block.
@@ -73,8 +73,16 @@ class OperationRunTest < MiniTest::Spec
     end
 
     outcome.must_equal nil # block was _not_ executed.
-    res.must_equal contract
+    res.must_equal operation
   end
+
+  # TODO: this goes into Operation::Model
+  # Operation#model returns @model.
+  # it { Operation[true].model.must_equal }
+
+  # Operation#contract returns @contract
+  let (:contract)  { Operation::Contract.new }
+  it { Operation[true].contract.must_equal contract }
 end
 
 
@@ -112,8 +120,29 @@ class OperationTest < MiniTest::Spec
     OperationWithoutValidateCall.run(true) { @outcome = "true" }.must_equal true
     @outcome.must_equal "true"
   end
-  # TODO: test contract yielding
 
+  # #validate yields contract when valid
+  class OperationWithValidateBlock < Trailblazer::Operation
+    class Contract
+      def initialize(*)
+      end
+
+      def validate(params)
+        params
+      end
+    end
+
+    def process(params)
+      validate(params, Object.new) do |c|
+        @secret_contract = c
+      end
+    end
+
+    attr_reader :secret_contract
+  end
+
+  it { OperationWithValidateBlock.run(false).last.secret_contract.must_equal nil }
+  it { OperationWithValidateBlock[true].secret_contract.must_equal OperationWithValidateBlock::Contract.new.extend(Comparable) }
 
   # manually setting @valid
   class OperationWithManualValid < Trailblazer::Operation
