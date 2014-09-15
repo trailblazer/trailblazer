@@ -38,7 +38,7 @@ class OperationRunTest < MiniTest::Spec
   # contract is inferred from self::Contract.
   it { Operation.run(true).must_equal ["local true", operation] }
 
-  # only return contract when ::call
+  # return operation, only, when ::call
   it { Operation.call(true).must_equal operation }
   it { Operation[true].must_equal operation }
 
@@ -48,11 +48,11 @@ class OperationRunTest < MiniTest::Spec
     exception.message.must_equal "Op just calls #to_s on Errors!"
   end
 
-  # ::run without block returns result set
+  # ::run without block returns result set.
   it { Operation.run(true).must_equal  ["local true", operation] }
   it { Operation.run(false).must_equal [false, operation] }
 
-  # ::run with block returns contract.
+  # ::run with block returns operation.
   # valid executes block.
   it "block" do
     outcome = nil
