@@ -96,6 +96,12 @@ class OperationTest < MiniTest::Spec
   # contract is inferred from self::Contract.
   it { assert_raises(NameError) { Operation.run(true) } }
 
+  # no #process method defined.
+  # DISCUSS: not sure if we need that.
+  # class OperationWithoutProcessMethod < Trailblazer::Operation
+  # end
+
+  # it { OperationWithoutProcessMethod[{}].must_be_kind_of OperationWithoutProcessMethod }
 
   # #process and no validate.
   class OperationWithoutValidateCall < Trailblazer::Operation
