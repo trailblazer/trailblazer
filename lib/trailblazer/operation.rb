@@ -85,6 +85,8 @@ module Trailblazer
   end
 end
 
+require 'trailblazer/operation/crud'
+
 # run
 #   setup
 #   process
