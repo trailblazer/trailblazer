@@ -54,4 +54,16 @@ class CrudTest < MiniTest::Spec
 
   # uses :create as default if not set via ::action.
   it { DefaultCreateOperation[{}].model.must_equal Song.new }
+
+  # no call to ::model raises error.
+  class NoModelOperation < Trailblazer::Operation
+    include CRUD
+
+    def process(params)
+      self
+    end
+  end
+
+  # uses :create as default if not set via ::action.
+  it { assert_raises(RuntimeError){ NoModelOperation[{}] } }
 end

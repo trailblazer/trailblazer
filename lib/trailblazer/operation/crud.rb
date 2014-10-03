@@ -25,6 +25,10 @@ module Trailblazer
         def action_name # considered private.
           self.config[:action] or :create
         end
+
+        def model_name # considered private.
+          self.config[:model] or raise "[Trailblazer] You didn't call Operation::model." # TODO: infer model name.
+        end
       end
 
 
@@ -43,7 +47,7 @@ module Trailblazer
       end
 
       def create_model(params)
-        self.class.config[:model].new
+        self.class.model_name.new
       end
     end
   end
