@@ -21,6 +21,10 @@ module Trailblazer
         def action(name)
           self.config[:action] = name
         end
+
+        def action_name # considered private.
+          self.config[:action] or :create
+        end
       end
 
 
@@ -35,7 +39,7 @@ module Trailblazer
       end
 
       def instantiate_model(params)
-        send("#{self.class.config[:action]}_model", params)
+        send("#{self.class.action_name}_model", params)
       end
 
       def create_model(params)

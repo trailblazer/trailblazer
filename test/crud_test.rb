@@ -22,6 +22,7 @@ class CrudTest < MiniTest::Spec
     end
   end
 
+
   # creates model for you.
   it { CreateOperation[song: {title: "Blue Rondo a la Turk"}].model.title.must_equal "Blue Rondo a la Turk" }
   # exposes #model.
@@ -37,7 +38,20 @@ class CrudTest < MiniTest::Spec
     end
   end
 
-  # lets you create model.
+  # lets you modify model.
   it { ModifyingCreateOperation[song: {title: "Blue Rondo a la Turk"}].model.title.must_equal "Blue Rondo a la Turk" }
   it { ModifyingCreateOperation[song: {title: "Blue Rondo a la Turk"}].model.genre.must_equal "Punkrock" }
+
+
+  class DefaultCreateOperation < Trailblazer::Operation
+    include CRUD
+    model Song
+
+    def process(params)
+      self
+    end
+  end
+
+  # uses :create as default if not set via ::action.
+  it { DefaultCreateOperation[{}].model.must_equal Song.new }
 end
