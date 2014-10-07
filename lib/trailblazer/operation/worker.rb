@@ -48,5 +48,35 @@ class Trailblazer::Operation
     def deserializable(params)
       params # this is where we convert file uloads into Trailblazer::UploadedFile, etc. soon.
     end
+
+
+    # Overrides ::serializable and #deserializable and handles file properties from the Contract schema.
+    module FileMarshaller
+      # nested_forms do |attr|
+      #   attr.merge!(
+
+      module ToHash
+        def to_hash
+          representable_attrs.each do |dfn| # TODO: copy so we don't pollute. also, this can be done once.
+            dfn.merge! :getter => lambda { |*| self[dfn.name.to_sym] } # FIXME: allow both sym and str.
+
+            next unless dfn[:file]
+            # TODO: where do we set /tmp/uploads?
+            dfn.merge!(:representable => true, :serialize => lambda { |file, *| Trailblazer::Operation::UploadedFile.new(file, :tmp_dir => "/tmp/uploads").to_hash })
+          end
+
+          # TODO: nested, copied!
+
+          super
+        end
+
+      end
+
+    private
+      def serializable(params)
+        # TODO: API to retrieve representable_attrs
+        new({}).send(:contract_class).representer_class.new(params).extend(ToHash).to_hash
+      end
+    end
   end
 end

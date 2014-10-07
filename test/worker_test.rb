@@ -57,3 +57,33 @@ class WorkerTest < MiniTest::Spec
     it { SerializingOperation.perform_one.must_equal "I was working hard on {\"title\"=>\"Dragonfly\"}" }
   end
 end
+
+
+class WorkerFileMarshallerTest < UploadedFileTest
+  class Operation < Trailblazer::Operation
+    class Contract < Reform::Form
+      property :title
+      property :image, file: true
+      # TODO: add nested file
+    end
+
+    include Worker
+    extend Worker::FileMarshaller
+
+    def process(params)
+      params
+    end
+  end
+
+  # no image
+
+  # with image serializes the file for later retrieval.
+  it do
+    Operation.run(title: "Dragonfly", image: upload)
+
+    args = Operation.jobs[0]["args"].first
+    args["title"].must_equal("Dragonfly")
+    args["image"]["filename"].must_equal "apotomo.png"
+    args["image"]["tempfile_path"].must_match /trailblazer_upload/
+  end
+end
