@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Trailblazer::VERSION
   spec.authors       = ["Nick Sutterer"]
   spec.email         = ["apotonick@gmail.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = %q{Trailblazer is a thin layer on top of Rails. It gently enforces encapsulation, an intuitive code structure and gives you an object-oriented architecture.}
+  spec.summary       = %q{A New Architecture For Rails.}
   spec.homepage      = ""
   spec.license       = "MIT"
 
