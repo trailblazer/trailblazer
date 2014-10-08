@@ -59,31 +59,48 @@ class WorkerTest < MiniTest::Spec
 end
 
 
-class WorkerFileMarshallerTest < UploadedFileTest
+class WorkerFileMarshallerTest < MiniTest::Spec
+  def uploaded_file(name)
+    tmp = Tempfile.new("bla")
+    tmp.write File.open("test/fixtures/#{name}").read
+
+    ActionDispatch::Http::UploadedFile.new(
+    :tempfile => tmp,
+    :filename => name,
+    :type     => "image/png")
+  end
+
   class Operation < Trailblazer::Operation
     class Contract < Reform::Form
       property :title
       property :image, file: true
-      # TODO: add nested file
+
+      property :album do
+        property :image, file: true
+      end
     end
 
     include Worker
-    extend Worker::FileMarshaller
+    extend Worker::FileMarshaller # should be ContractFileMarshaller
 
     def process(params)
       params
     end
   end
 
-  # no image
+  # TODO: no image
 
   # with image serializes the file for later retrieval.
   it do
-    Operation.run(title: "Dragonfly", image: upload)
+    Operation.run(title: "Dragonfly", image: uploaded_file("apotomo.png"), album: {image: uploaded_file("cells.png")})
 
     args = Operation.jobs[0]["args"].first
     args["title"].must_equal("Dragonfly")
     args["image"]["filename"].must_equal "apotomo.png"
     args["image"]["tempfile_path"].must_match /trailblazer_upload/
+
+    args["album"]["image"]["filename"].must_equal "cells.png"
+
+    # Operation.perform_one.must_equal([true, {"title" => "Dragonfly", "image" => upload}])
   end
 end
