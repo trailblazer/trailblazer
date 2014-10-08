@@ -2,7 +2,7 @@ module Trailblazer
   class Operation
     class << self
       def run(*params, &block) # Endpoint behaviour
-        res, contract = new.run(*params)
+        res, contract = build_operation(*params).new.run(*params)
 
         if block_given?
           yield contract if res
@@ -21,6 +21,11 @@ module Trailblazer
 
       def contract(*params)
         new(:validate => false).run(*params).last
+      end
+
+    private
+      def build_operation(params)
+        self
       end
     end
 
