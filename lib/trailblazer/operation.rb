@@ -24,7 +24,7 @@ module Trailblazer
       end
 
     private
-      def build_operation(params)
+      def build_operation(*params)
         self
       end
     end
