@@ -1,8 +1,10 @@
+require 'uber/builder'
+
 module Trailblazer
   class Operation
     class << self
       def run(*params, &block) # Endpoint behaviour
-        res, contract = build_operation(*params).new.run(*params)
+        res, contract = build_operation_class(*params).new.run(*params)
 
         if block_given?
           yield contract if res
@@ -15,7 +17,7 @@ module Trailblazer
       # ::call only returns the Contract instance (or whatever was returned from #validate).
       # This is useful in tests or in irb, e.g. when using Op as a factory and you already know it's valid.
       def call(*params)
-        new(:raise_on_invalid => true).run(*params).last
+        build_operation_class(*params).new(:raise_on_invalid => true).run(*params).last
       end
       alias_method :[], :call
 
@@ -24,10 +26,12 @@ module Trailblazer
       end
 
     private
-      def build_operation(*params)
-        self
+      def build_operation_class(*params)
+        class_builder.call(*params) # Uber::Builder::class_builder
       end
     end
+
+    include Uber::Builder
 
 
     def initialize(options={})

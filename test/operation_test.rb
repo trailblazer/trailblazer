@@ -242,3 +242,27 @@ class OperationTest < MiniTest::Spec
   it { ContractOnlyOperation.contract({})._model.must_equal Object }
 
 end
+
+class OperationBuilderTest < MiniTest::Spec
+  class Operation < Trailblazer::Operation
+    def process(params)
+      "operation"
+    end
+
+    class Sub < self
+      def process(params)
+        "sub:operation"
+      end
+    end
+
+    builds do |params|
+      Sub if params[:sub]
+    end
+  end
+
+  it { Operation.run({}).last.must_equal "operation" }
+  it { Operation.run({sub: true}).last.must_equal "sub:operation" }
+
+  it { Operation[{}].must_equal "operation" }
+  it { Operation[{sub: true}].must_equal "sub:operation" }
+end
