@@ -81,7 +81,7 @@ class WorkerFileMarshallerTest < MiniTest::Spec
     end
 
     include Worker
-    extend Worker::FileMarshaller # should be ContractFileMarshaller
+    include Worker::FileMarshaller # should be ContractFileMarshaller
 
     def process(params)
       params
@@ -101,6 +101,12 @@ class WorkerFileMarshallerTest < MiniTest::Spec
 
     args["album"]["image"]["filename"].must_equal "cells.png"
 
-    # Operation.perform_one.must_equal([true, {"title" => "Dragonfly", "image" => upload}])
+    _, params = Operation.perform_one # deserialize.
+
+    params["title"].must_equal("Dragonfly")
+    params["image"].must_be_kind_of ActionDispatch::Http::UploadedFile
+    params["image"].original_filename.must_equal "apotomo.png"
+    params["album"]["image"].must_be_kind_of ActionDispatch::Http::UploadedFile
+    params["album"]["image"].original_filename.must_equal "cells.png"
   end
 end

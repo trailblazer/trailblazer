@@ -53,6 +53,9 @@ class Trailblazer::Operation
     # Overrides ::serializable and #deserializable and handles file properties from the Contract schema.
     module FileMarshaller
       # NOTE: this is WIP and the implementation will be more understandable and performant soon.
+      def self.included(base)
+        base.extend ClassMethods
+      end
 
       # nested_forms do |attr|
       #   attr.merge!(
@@ -75,8 +78,26 @@ class Trailblazer::Operation
           super
         end
 
+        def from_hash(hash, *args)
+          representable_attrs.each do |dfn| # TODO: copy so we don't pollute. also, this can be done once.
+            dfn.merge! :setter => lambda { |fragment, *| self[dfn.name.to_s] = fragment } # FIXME: allow both sym and str.
+
+            nested!(dfn) and next if dfn[:form]
+
+            next unless dfn[:file]
+            # TODO: where do we set /tmp/uploads?
+            dfn.merge!(:representable => true, class: Hash, :deserialize => lambda { |object, hash, *|
+              # puts "@@@@@@@@@@@@@@@@@@@@ FILE: #{file}"
+              Trailblazer::Operation::UploadedFile.from_hash(hash) })
+
+          end
+
+          # TODO: nested, copied!
+          super
+        end
+
         def nested!(definition)
-          definition.merge!(prepare: lambda { |args, *| Class.new(definition[:form].representer_class).new(args).extend(ToHash) })
+          definition.merge!(class: Hash, prepare: lambda { |args, *| Class.new(definition[:form].representer_class).new(args).extend(ToHash) })
         end
 
         # OK, we have that problem a million times in Reform, in disposable and now here:
@@ -87,9 +108,18 @@ class Trailblazer::Operation
       end
 
     private
-      def serializable(params)
-        # TODO: API to retrieve representable_attrs
-        new({}).send(:contract_class).representer_class.new(params).extend(ToHash).to_hash
+      module ClassMethods
+        def serializable(params)
+          # TODO: API to retrieve representable_attrs
+          new({}).send(:contract_class).representer_class.new(params).extend(ToHash).to_hash
+        end
+      end
+
+      require 'representable/debug'
+      def deserializable(hash)
+        representer = contract_class.representer_class.new({}).extend(Trailblazer::Operation::Worker::FileMarshaller::ToHash)
+        representer.extend(Representable::Debug)
+        representer.from_hash(hash)
       end
     end
   end
