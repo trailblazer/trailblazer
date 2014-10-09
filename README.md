@@ -116,6 +116,8 @@ class Comment::Operation::Create < Trailblazer::Operation
       contract.save
       # further after_save logic happens here
     end
+
+    contract
   end
 end
 ```
