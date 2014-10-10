@@ -77,6 +77,17 @@ class CrudTest < MiniTest::Spec
   # uses :create as default if not set via ::action.
   it { DefaultCreateOperation[{}].model.must_equal Song.new }
 
+  # model Song, :action
+  class ModelCreateOperation < CreateOperation
+    model Song, :update
+  end
+
+  # allows ::model, :action.
+  it do
+    Song.find_result = song = Song.new
+    ModelCreateOperation[{id: 1, song: {title: "Mercy Day For Mr. Vengeance"}}].model.must_equal song
+  end
+
   # no call to ::model raises error.
   class NoModelOperation < Trailblazer::Operation
     include CRUD

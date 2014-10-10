@@ -16,6 +16,7 @@ module Trailblazer
       module ClassMethods
         def model(name, action=nil)
           self.config[:model] = name
+          action(action) if action # coolest line ever.
         end
 
         def action(name)
