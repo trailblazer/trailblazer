@@ -71,7 +71,7 @@ class Trailblazer::Operation
               :setter => lambda { |fragment, *| self[dfn.name.to_s] = fragment }
             ) # FIXME: allow both sym and str.
 
-            dfn.merge!(:class => Hash) and next if dfn[:form]
+            dfn.merge!(:class => Hash) and next if dfn[:form] # nested properties need a class for deserialization.
             next unless dfn[:file]
 
             # TODO: where do we set /tmp/uploads?
