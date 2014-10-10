@@ -3,7 +3,15 @@ require 'trailblazer/operation'
 require 'reform'
 
 class CrudTest < MiniTest::Spec
-  Song = Struct.new(:title)
+  Song = Struct.new(:title, :id) do
+    class << self
+      attr_accessor :find_result # TODO: eventually, replace with AR test.
+
+      def find(id)
+        find_result
+      end
+    end
+  end
 
   class CreateOperation < Trailblazer::Operation
     include CRUD
@@ -41,6 +49,20 @@ class CrudTest < MiniTest::Spec
   # lets you modify model.
   it { ModifyingCreateOperation[song: {title: "Blue Rondo a la Turk"}].model.title.must_equal "Blue Rondo a la Turk" }
   it { ModifyingCreateOperation[song: {title: "Blue Rondo a la Turk"}].model.genre.must_equal "Punkrock" }
+
+  # Update
+  class UpdateOperation < CreateOperation
+    action :update
+  end
+
+  # finds model and updates.
+  it do
+    song = CreateOperation[song: {title: "Anchor End"}].model
+    Song.find_result = song
+
+    UpdateOperation[id: song.id, song: {title: "The Rip"}].model.title.must_equal "The Rip"
+    song.title.must_equal "The Rip"
+  end
 
 
   class DefaultCreateOperation < Trailblazer::Operation

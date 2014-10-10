@@ -49,6 +49,10 @@ module Trailblazer
       def create_model(params)
         self.class.model_name.new
       end
+
+      def update_model(params)
+        self.class.model_name.find(params[:id])
+      end
     end
   end
 end
