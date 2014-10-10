@@ -57,69 +57,40 @@ class Trailblazer::Operation
         base.extend ClassMethods
       end
 
-      # nested_forms do |attr|
-      #   attr.merge!(
-
-      module ToHash
-        def to_hash(*)
-          representable_attrs.each do |dfn| # TODO: copy so we don't pollute. also, this can be done once.
-            dfn.merge! :getter => lambda { |*| self[dfn.name.to_sym] } # FIXME: allow both sym and str.
-
-            nested!(dfn) and next if dfn[:form]
-
-            next unless dfn[:file]
-            # TODO: where do we set /tmp/uploads?
-            dfn.merge!(:representable => true, :serialize => lambda { |file, *|
-              # puts "@@@@@@@@@@@@@@@@@@@@ FILE: #{file}"
-              Trailblazer::Operation::UploadedFile.new(file, :tmp_dir => "/tmp/uploads").to_hash })
-          end
-
-          # TODO: nested, copied!
-          super
-        end
-
-        def from_hash(hash, *args)
-          representable_attrs.each do |dfn| # TODO: copy so we don't pollute. also, this can be done once.
-            dfn.merge! :setter => lambda { |fragment, *| self[dfn.name.to_s] = fragment } # FIXME: allow both sym and str.
-
-            nested!(dfn) and next if dfn[:form]
-
-            next unless dfn[:file]
-            # TODO: where do we set /tmp/uploads?
-            dfn.merge!(:representable => true, class: Hash, :deserialize => lambda { |object, hash, *|
-              # puts "@@@@@@@@@@@@@@@@@@@@ FILE: #{file}"
-              Trailblazer::Operation::UploadedFile.from_hash(hash) })
-
-          end
-
-          # TODO: nested, copied!
-          super
-        end
-
-        def nested!(definition)
-          definition.merge!(class: Hash, prepare: lambda { |args, *| Class.new(definition[:form].representer_class).new(args).extend(ToHash) })
-        end
-
-        # OK, we have that problem a million times in Reform, in disposable and now here:
-        # we got Form->Representer->Form->Representer
-        # now i want to do something along
-        # take form's representer, clone, change dfn, for nested dfn do blabla, store new representer so we don't have to do that again.
-        # Form.cloned_representer(if dfn[:file] => dfn.merge!..., if dfn[:form] => ...) this should go through the schema tree ONCE and update it ONCE.
-      end
 
     private
       module ClassMethods
+        def file_marshaller_representer
+          contract_class = new({}).send(:contract_class) # FIXME.
+
+          @file_marshaller_representer ||= contract_class.schema.apply do |dfn|
+            dfn.delete!(:prepare)
+
+            dfn.merge!(
+              :getter => lambda { |*| self[dfn.name.to_sym] },
+              :setter => lambda { |fragment, *| self[dfn.name.to_s] = fragment }
+            ) # FIXME: allow both sym and str.
+
+            dfn.merge!(:class => Hash) and next if dfn[:form]
+            next unless dfn[:file]
+
+            # TODO: where do we set /tmp/uploads?
+            dfn.merge!(
+              :serialize   => lambda { |file, *| Trailblazer::Operation::UploadedFile.new(file, :tmp_dir => "/tmp/uploads").to_hash },
+              :deserialize => lambda { |object, hash, *| Trailblazer::Operation::UploadedFile.from_hash(hash) },
+              :class       => Hash
+            )
+          end
+        end
+
         def serializable(params)
-          # TODO: API to retrieve representable_attrs
-          new({}).send(:contract_class).representer_class.new(params).extend(ToHash).to_hash
+          file_marshaller_representer.new(params).to_hash
         end
       end
 
-      require 'representable/debug'
       def deserializable(hash)
-        representer = contract_class.representer_class.new({}).extend(Trailblazer::Operation::Worker::FileMarshaller::ToHash)
-        representer.extend(Representable::Debug)
-        representer.from_hash(hash)
+          # self.class.file_marshaller_representer.new({}).extend(Representable::Debug).from_hash(hash)
+          self.class.file_marshaller_representer.new({}).from_hash(hash)
       end
     end
   end
