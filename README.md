@@ -135,8 +135,8 @@ In a controller, you typically use the `::run` interface, which gives you a grea
 
 ```ruby
 def create
-  @contract = Comment::Operation::Create.run(params[:comment]) do |contract|
-    return redirect_to(contract.model) # success.
+  @operation = Comment::Operation::Create.run(params[:comment]) do |op|
+    return redirect_to(op.model) # success.
   end
 
   render :new # failure. re-render form.
@@ -213,6 +213,7 @@ testing invoked nested methods
 create/find models automatically
 json
 
+### Worker::FileMarshaller: needs representable 2.1.1 (.schema)
 
 
 ### Testing Operations
