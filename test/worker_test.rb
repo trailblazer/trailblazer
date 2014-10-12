@@ -71,7 +71,7 @@ class WorkerFileMarshallerTest < MiniTest::Spec
   end
 
   class Operation < Trailblazer::Operation
-    class Contract < Reform::Form
+    contract do
       property :title
       property :image, file: true
 

@@ -1,7 +1,19 @@
 require 'uber/builder'
+# TODO: extract all reform-contract stuff into optional module.
+require 'reform'
 
 module Trailblazer
   class Operation
+    extend Uber::InheritableAttr
+    inheritable_attr :contract_class
+    self.contract_class = Reform::Form.clone
+    self.contract_class.class_eval do
+      def self.name # FIXME: rewrite validators and don't fucking use this piece of shit named ActiveModel. I hate Rails.
+        # for whatever reason, validations climb up the inheritance tree and require _every_ class to have a name (4.1).
+        "Form"
+      end
+    end
+
     class << self
       def run(*params, &block) # Endpoint behaviour
         res, op = build_operation_class(*params).new.run(*params)
@@ -21,9 +33,15 @@ module Trailblazer
       end
       alias_method :[], :call
 
-      def contract(*params)
+      # Runs #process without validate and returns the form object.
+      def present(*params)
         new(:validate => false).run(*params).last.contract # not sure if i like this.
       end
+
+      def contract(&block)
+        contract_class.class_eval(&block)
+      end
+
 
     private
       def build_operation_class(*params)
@@ -56,6 +74,7 @@ module Trailblazer
     end
 
     def validate(params, model, contract_class=nil) # NOT to be overridden?!! it creates Result for us.
+
       @contract = contract_for(contract_class, model)
 
       return self unless @validate # Op.contract will return here.
@@ -79,14 +98,10 @@ module Trailblazer
       raise InvalidContract.new(contract.errors.to_s) if @raise_on_invalid
     end
 
-    def contract_class
-      self.class.const_get :Contract
-    end
-
     # Instantiate the contract, either by using the user's contract passed into #validate
     # or infer the Operation contract.
     def contract_for(contract_class, *model)
-      (contract_class || send(:contract_class)).new(*model)
+      (contract_class || self.class.contract_class).new(*model)
     end
 
     class InvalidContract < RuntimeError

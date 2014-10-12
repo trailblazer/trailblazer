@@ -1,6 +1,5 @@
 require 'test_helper'
 require 'trailblazer/operation'
-require 'reform'
 
 class CrudTest < MiniTest::Spec
   Song = Struct.new(:title, :id) do
@@ -18,7 +17,7 @@ class CrudTest < MiniTest::Spec
     model Song
     action :create
 
-    class Contract < Reform::Form
+    contract do
       property :title
       validates :title, presence: true
     end

@@ -61,8 +61,6 @@ class Trailblazer::Operation
     private
       module ClassMethods
         def file_marshaller_representer
-          contract_class = new({}).send(:contract_class) # FIXME.
-
           @file_marshaller_representer ||= contract_class.schema.apply do |dfn|
             dfn.delete!(:prepare)
 
@@ -89,8 +87,7 @@ class Trailblazer::Operation
       end
 
       def deserializable(hash)
-          # self.class.file_marshaller_representer.new({}).extend(Representable::Debug).from_hash(hash)
-          self.class.file_marshaller_representer.new({}).from_hash(hash)
+        self.class.file_marshaller_representer.new({}).from_hash(hash)
       end
     end
   end

@@ -12,7 +12,8 @@ end
 
 class OperationRunTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
-    class Contract #< Reform::Form
+    # allow providing your own contract.
+    self.contract_class = class Contract
       def initialize(*)
       end
       def validate(params)
@@ -25,6 +26,7 @@ class OperationRunTest < MiniTest::Spec
       end
 
       include Comparable
+      self
     end
 
     def process(params)
@@ -35,7 +37,7 @@ class OperationRunTest < MiniTest::Spec
 
   let (:operation) { Operation.new.extend(Comparable) }
 
-  # contract is inferred from self::Contract.
+  # contract is inferred from self::contract_class.
   it { Operation.run(true).must_equal ["local true", operation] }
 
   # return operation when ::call
@@ -135,13 +137,14 @@ class OperationTest < MiniTest::Spec
 
   # #validate yields contract when valid
   class OperationWithValidateBlock < Trailblazer::Operation
-    class Contract
+    self.contract_class = class Contract
       def initialize(*)
       end
 
       def validate(params)
         params
       end
+      self
     end
 
     def process(params)
@@ -154,7 +157,7 @@ class OperationTest < MiniTest::Spec
   end
 
   it { OperationWithValidateBlock.run(false).last.secret_contract.must_equal nil }
-  it { OperationWithValidateBlock[true].secret_contract.must_equal OperationWithValidateBlock::Contract.new.extend(Comparable) }
+  it('zzz') { OperationWithValidateBlock[true].secret_contract.must_equal OperationWithValidateBlock.contract_class.new.extend(Comparable) }
 
   # manually setting @valid
   class OperationWithManualValid < Trailblazer::Operation
@@ -196,12 +199,13 @@ class OperationTest < MiniTest::Spec
 
   # calling return from #validate block leaves result true.
   class OperationUsingReturnInValidate < Trailblazer::Operation
-    class Contract
+    self.contract_class = class Contract
       def initialize(*)
       end
       def validate(params)
         params
       end
+      self
     end
 
     def process(params)
@@ -227,13 +231,14 @@ class OperationTest < MiniTest::Spec
 
 
   # TODO: experimental.
-  # ::contract to avoid running #validate.
+  # ::present to avoid running #validate.
   class ContractOnlyOperation < Trailblazer::Operation
-    class Contract
+    self.contract_class = class Contract
       def initialize(model)
         @_model = model
       end
       attr_reader :_model
+      self
     end
 
     def process(params)
@@ -245,7 +250,7 @@ class OperationTest < MiniTest::Spec
     end
   end
 
-  it { ContractOnlyOperation.contract({})._model.must_equal Object }
+  it { ContractOnlyOperation.present({})._model.must_equal Object }
 
 end
 
@@ -271,4 +276,37 @@ class OperationBuilderTest < MiniTest::Spec
 
   it { Operation[{}].must_equal "operation" }
   it { Operation[{sub: true}].must_equal "sub:operation" }
+end
+
+# ::contract builds Reform::Form class
+class OperationInheritanceTest < MiniTest::Spec
+  class Operation < Trailblazer::Operation
+    contract do
+      property :title
+
+      # TODO/DISCUSS: this is needed in order to "handle" the anon forms. but in Trb, that
+      # doesn't really matter as AM is automatically included?
+      def self.name
+        "Song"
+      end
+    end
+
+    class JSON < self
+      # inherit Contract
+      contract_class.send :property, :genre, validates: {presence: true}
+    end
+  end
+
+  # inherits subclassed Contract.
+  it { Operation.contract_class.wont_equal Operation::JSON.contract_class }
+
+  it do
+    form = Operation.contract_class.new(OpenStruct.new)
+    form.validate({})#.must_equal true
+    form.errors.to_s.must_equal "{}"
+
+    form = Operation::JSON.contract_class.new(OpenStruct.new)
+    form.validate({})#.must_equal true
+    form.errors.to_s.must_equal "{:genre=>[\"can't be blank\"]}"
+  end
 end
