@@ -38,7 +38,7 @@ class Trailblazer::Operation
 
       # the following code is basically what happens in a controller.
       # this is a bug in Rails, it doesn't work without requiring as/hash/ina
-      # params = ActiveSupport::HashWithIndifferentAccess.new_from_hash_copying_default(params) # TODO: this might make it ultra-slow as Reform converts it back to strings. fuck that.
+      # params = ActiveSupport::HashWithIndifferentAccess.new_from_hash_copying_default(params) # TODO: this might make it ultra-slow as Reform converts it back to strings.
       params = params.with_indifferent_access
 
       run(deserializable(params))
@@ -88,9 +88,10 @@ class Trailblazer::Operation
         end
       end
 
+      # todo: do with_indifferent_access in #deserialize and call super here.
       def deserializable(hash)
           # self.class.file_marshaller_representer.new({}).extend(Representable::Debug).from_hash(hash)
-          self.class.file_marshaller_representer.new({}).from_hash(hash)
+          self.class.file_marshaller_representer.new({}.with_indifferent_access).from_hash(hash)
       end
     end
   end

@@ -14,7 +14,9 @@ class WorkerTest < MiniTest::Spec
     include Worker
 
     def run(params)
-      "I was working hard on #{params.inspect}"
+      with_symbol = params[:title]
+      with_string = params["title"]
+      "I was working hard on #{params.inspect}. title:#{with_symbol} \"title\"=>#{with_string}"
     end
   end
 
@@ -30,10 +32,11 @@ class WorkerTest < MiniTest::Spec
 
     it { @res.kind_of?(String).must_equal true } # for now, we return the job from sidekiq.
     it { Operation.jobs[0]["args"].must_equal([{"title"=>"Dragonfly"}]) }
-    it { Operation.perform_one.must_equal "I was working hard on {\"title\"=>\"Dragonfly\"}" }
+    it { Operation.perform_one.must_equal "I was working hard on {\"title\"=>\"Dragonfly\"}. title:Dragonfly \"title\"=>Dragonfly" }
   end
 
-  it { NoBackgroundOperation.run(:title => "Dragonfly").must_equal "I was working hard on {:title=>\"Dragonfly\"}" }
+  # without sidekiq, we don't have indifferent_access automatically.
+  it { NoBackgroundOperation.run(:title => "Dragonfly").must_equal "I was working hard on {:title=>\"Dragonfly\"}. title:Dragonfly \"title\"=>" }
 
 
   # test manual serialisation (to be done with UploadedFile etc automatically).
@@ -54,7 +57,7 @@ class WorkerTest < MiniTest::Spec
 
     it { @res.kind_of?(String).must_equal true } # for now, we return the job from sidekiq.
     it { SerializingOperation.jobs[0]["args"].must_equal([{"wrap"=>{"title"=>"Dragonfly"}}]) }
-    it { SerializingOperation.perform_one.must_equal "I was working hard on {\"title\"=>\"Dragonfly\"}" }
+    it { SerializingOperation.perform_one.must_equal "I was working hard on {\"title\"=>\"Dragonfly\"}. title:Dragonfly \"title\"=>Dragonfly" }
   end
 end
 
@@ -104,6 +107,7 @@ class WorkerFileMarshallerTest < MiniTest::Spec
     _, params = Operation.perform_one # deserialize.
 
     params["title"].must_equal("Dragonfly")
+    params[:title].must_equal("Dragonfly") # must allow indifferent_access.
     params["image"].must_be_kind_of ActionDispatch::Http::UploadedFile
     params["image"].original_filename.must_equal "apotomo.png"
     params["album"]["image"].must_be_kind_of ActionDispatch::Http::UploadedFile
