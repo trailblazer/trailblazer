@@ -10,7 +10,7 @@ module Trailblazer
     self.contract_class.class_eval do
       def self.name # FIXME: rewrite validators and don't fucking use this piece of shit named ActiveModel. I hate Rails.
         # for whatever reason, validations climb up the inheritance tree and require _every_ class to have a name (4.1).
-        "Form"
+        "Reform::Form"
       end
     end
 
