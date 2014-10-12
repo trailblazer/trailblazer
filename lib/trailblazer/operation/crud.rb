@@ -16,6 +16,7 @@ module Trailblazer
       module ClassMethods
         def model(name, action=nil)
           self.config[:model] = name
+          action(action) if action # coolest line ever.
         end
 
         def action(name)
@@ -48,6 +49,10 @@ module Trailblazer
 
       def create_model(params)
         self.class.model_name.new
+      end
+
+      def update_model(params)
+        self.class.model_name.find(params[:id])
       end
     end
   end
