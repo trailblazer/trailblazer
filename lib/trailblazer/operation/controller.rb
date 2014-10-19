@@ -38,7 +38,9 @@ module Trailblazer::Operation::Controller
     unless request.format == :html
       # FIXME: how do we know the "name" of the Operation body?
       # return respond_with User::Update::JSON.run(params.merge(user: request.body.string))
-      res, op = User::Update::JSON.run(params.merge(user: request.body.string))
+      concept_name = operation_class.to_s.split("::").first.downcase # TODO: holy shit test this properly
+
+      res, op = operation_class.const_get(:JSON).run(params.merge(concept_name => request.body.string))
 
 
 

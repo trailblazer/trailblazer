@@ -2,6 +2,8 @@ require 'uber/builder'
 # TODO: extract all reform-contract stuff into optional module.
 require 'reform'
 
+# TODO: OP[] without wrapper, OP.run with (eg for params)
+
 module Trailblazer
   class Operation
     extend Uber::InheritableAttr
