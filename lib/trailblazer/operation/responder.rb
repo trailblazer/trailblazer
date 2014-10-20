@@ -6,7 +6,7 @@ module Trailblazer::Operation::Responder
 
   module ClassMethods
     def model_name
-      ::ActiveModel::Name.new(self, nil, "thing") # FIXME:
+      ::ActiveModel::Name.new(self, nil, model_class.to_s) # FIXME: dependency to CRUD.
     end
   end
 
