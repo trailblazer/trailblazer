@@ -61,4 +61,16 @@ module Trailblazer::Operation::Controller
     Else.new(op, !res)
   end
   private :present, :run
+
+  # TODO: WITH BLOCK!
+  def respond(operation_class, params=self.params)
+    res, @operation = operation_class.run(params)
+
+    @form      = @operation.contract
+    @model     = @operation.model
+
+    yield @operation if block_given?
+
+    respond_with @operation
+  end
 end
