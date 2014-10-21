@@ -54,6 +54,8 @@ module Trailblazer
       def update_model(params)
         self.class.model_class.find(params[:id])
       end
+
+      alias_method :find_model, :update_model
     end
   end
 end

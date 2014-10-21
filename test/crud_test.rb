@@ -63,6 +63,20 @@ class CrudTest < MiniTest::Spec
     song.title.must_equal "The Rip"
   end
 
+  # Find == Update
+  class FindOperation < CreateOperation
+    action :find
+  end
+
+  # finds model and updates.
+  it do
+    song = CreateOperation[song: {title: "Anchor End"}].model
+    Song.find_result = song
+
+    FindOperation[id: song.id, song: {title: "The Rip"}].model.title.must_equal "The Rip"
+    song.title.must_equal "The Rip"
+  end
+
 
   class DefaultCreateOperation < Trailblazer::Operation
     include CRUD
@@ -77,14 +91,14 @@ class CrudTest < MiniTest::Spec
   it { DefaultCreateOperation[{}].model.must_equal Song.new }
 
   # model Song, :action
-  class ModelCreateOperation < CreateOperation
+  class ModelUpdateOperation < CreateOperation
     model Song, :update
   end
 
   # allows ::model, :action.
   it do
     Song.find_result = song = Song.new
-    ModelCreateOperation[{id: 1, song: {title: "Mercy Day For Mr. Vengeance"}}].model.must_equal song
+    ModelUpdateOperation[{id: 1, song: {title: "Mercy Day For Mr. Vengeance"}}].model.must_equal song
   end
 
   # no call to ::model raises error.
