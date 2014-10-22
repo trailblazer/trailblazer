@@ -24,7 +24,6 @@ module MyApp
       include CRUD
       include Responder
       model Song
-      namespace MyApp
 
       def process(params)
         invalid!(self) if params == false
@@ -65,10 +64,10 @@ class ResponderTestForModelWitNamespace < MiniTest::Spec
     it { MyApp::Song::Operation.model_name.element.must_equal "song" }
     it { MyApp::Song::Operation.model_name.human.must_equal "Song" }
     it { MyApp::Song::Operation.model_name.collection.must_equal "my_app/songs" }
-    it { MyApp::Song::Operation.model_name.param_key.must_equal "song" }
+    it { MyApp::Song::Operation.model_name.param_key.must_equal "my_app_song" } # "song" for AR.
     it { MyApp::Song::Operation.model_name.i18n_key.must_equal :"my_app/song" }
-    it { MyApp::Song::Operation.model_name.route_key.must_equal "songs" }
-    it { MyApp::Song::Operation.model_name.singular_route_key.must_equal "song" }
+    it { MyApp::Song::Operation.model_name.route_key.must_equal "my_app_songs" } # "songs" for AR.
+    it { MyApp::Song::Operation.model_name.singular_route_key.must_equal "my_app_song" } # "song" for AR.
 
     # #errors
     it { MyApp::Song::Operation[true].errors.must_equal [] }
