@@ -6,7 +6,13 @@ module Trailblazer::Operation::Responder
 
   module ClassMethods
     def model_name
-      ::ActiveModel::Name.new(model_class, namespace_name, model_class.to_s) # FIXME: dependency to CRUD.
+      return model_class.model_name
+      ::ActiveModel::Name.new(model_class, nil, model_class.to_s) # FIXME: dependency to CRUD.
+    end
+
+    # TODO: move this to Model if we need it elsewhere.
+    def namespace(*)
+
     end
   end
 

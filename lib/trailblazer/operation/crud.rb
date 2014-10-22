@@ -30,11 +30,6 @@ module Trailblazer
         def model_class # considered private.
           self.config[:model] or raise "[Trailblazer] You didn't call Operation::model." # TODO: infer model name.
         end
-        
-        def namespace_name # considered private.
-          return nil if self.config[:model].to_s.deconstantize == ""
-          self.config[:model].to_s.deconstantize.constantize or raise "[Trailblazer] You didn't call Operation::model." # TODO: infer model name.
-        end
       end
 
 

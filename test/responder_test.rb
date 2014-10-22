@@ -2,6 +2,8 @@ require 'test_helper'
 require 'trailblazer/operation/responder'
 
 class Song
+  extend ActiveModel::Naming
+
   class Operation < Trailblazer::Operation
     include CRUD
     model Song
@@ -16,10 +18,13 @@ end
 
 module MyApp
   class Song
+    extend ActiveModel::Naming
+
     class Operation < Trailblazer::Operation
       include CRUD
-      model Song
       include Responder
+      model Song
+      namespace MyApp
 
       def process(params)
         invalid!(self) if params == false
@@ -52,7 +57,7 @@ end
 
 
 class ResponderTestForModelWitNamespace < MiniTest::Spec
-  
+
     # test ::model_name
     it { MyApp::Song::Operation.model_name.name.must_equal "MyApp::Song" }
     it { MyApp::Song::Operation.model_name.singular.must_equal "my_app_song" }
