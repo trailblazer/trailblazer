@@ -111,6 +111,7 @@ module Trailblazer
   end
 end
 
+require 'trailblazer/operation/controller'
 require 'trailblazer/operation/crud'
 
 # run
