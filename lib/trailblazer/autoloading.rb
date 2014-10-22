@@ -1,5 +1,4 @@
-require 'trailblazer/operation/controller'
-require 'trailblazer/operation/responder'
-
-autoload :Controller, 'operation/controller'
-autoload :Responder, 'operation/responder'
+module Trailblazer::Operation
+  autoload :Controller, 'operation/controller'
+  autoload :Responder, 'operation/responder'
+end
