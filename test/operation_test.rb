@@ -99,8 +99,8 @@ class OperationTest < MiniTest::Spec
     end
   end
 
-  # contract is inferred from self::Contract.
-  it { assert_raises(NameError) { Operation.run(true) } }
+  # contract is retrieved from ::contract_class.
+  it { assert_raises(NoMethodError) { Operation.run({}) } } # TODO: if you call #validate without defining a contract, the error is quite cryptic.
 
   # no #process method defined.
   # DISCUSS: not sure if we need that.
