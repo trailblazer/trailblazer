@@ -13,6 +13,14 @@ module Trailblazer::Operation::Responder
   def to_param
     @model.to_param
   end
+  
+  def destroyed?
+    @model.destroyed?
+  end
+  
+  def persisted?
+    @model.persisted?
+  end
 
   def errors
     return [] if @valid
