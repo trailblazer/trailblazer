@@ -63,6 +63,7 @@ module Trailblazer::Operation::Controller
   private :present, :run
 
   # TODO: WITH BLOCK!
+  # TODO: what if it's JSON and we want OP:JSON to deserialise etc?
   def respond(operation_class, params=self.params)
     res, @operation = operation_class.run(params)
 

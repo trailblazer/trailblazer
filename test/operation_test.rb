@@ -1,7 +1,5 @@
 require 'test_helper'
 
-require 'trailblazer/operation'
-
 module Comparable
   # only used for test.
   def ==(b)
