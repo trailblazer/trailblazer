@@ -71,6 +71,15 @@ module Trailblazer::Operation::Controller
 
     yield @operation if block_given?
 
-    respond_with @operation
+    # After #destroy AR returns the object with #destroyed? true, frozen but *true*
+    # so responders consider as a valid object and redirect to model_path(@model.id)
+    #
+    # If it was destroyed, we pass the model instead of operation, and it returns
+    # correctly to models_path
+    if @model.destroyed?
+      respond_with @model
+    else
+      respond_with @operation
+    end
   end
 end
