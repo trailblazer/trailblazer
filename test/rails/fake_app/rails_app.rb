@@ -37,6 +37,7 @@ require 'fake_app/song/operations.rb'
 # controllers
 class ApplicationController < ActionController::Base; end
 class SongsController < ApplicationController
+  append_view_path "test/rails/fake_app/views"
   def index
     @users = Song.all.page params[:page]
     render :inline => <<-ERB
