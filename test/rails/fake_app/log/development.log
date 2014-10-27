@@ -1,0 +1,285 @@
+---------------------------------------------
+KaminariCellsTest: test_rendering_normal_cell
+---------------------------------------------
+DEPRECATION WARNING: You didn't set config.secret_key_base. Read the upgrade documentation to learn more about this new config option. (called from run at /Users/nick/.rvm/rubies/ruby-2.1.0/lib/ruby/2.1.0/minitest/unit.rb:1262)
+Processing by UsersController#index as HTML
+  Rendered inline template (17.5ms)
+  Rendered inline template (19.7ms)
+Completed 200 OK in 24ms (Views: 23.6ms)
+-------------------------------------------------
+KaminariCellsTest: test_rendering_view_model_cell
+-------------------------------------------------
+Processing by UsersController#show as HTML
+  Parameters: {"id"=>"1"}
+Completed 500 Internal Server Error in 8ms
+---------------------------------------------
+KaminariCellsTest: test_rendering_normal_cell
+---------------------------------------------
+DEPRECATION WARNING: You didn't set config.secret_key_base. Read the upgrade documentation to learn more about this new config option. (called from run at /Users/nick/.rvm/rubies/ruby-2.1.0/lib/ruby/2.1.0/minitest/unit.rb:1262)
+Processing by UsersController#index as HTML
+  Rendered inline template (20.7ms)
+  Rendered inline template (23.3ms)
+Completed 200 OK in 28ms (Views: 27.3ms)
+-------------------------------------------------
+KaminariCellsTest: test_rendering_view_model_cell
+-------------------------------------------------
+Processing by UsersController#show as HTML
+  Parameters: {"id"=>"1"}
+Completed 200 OK in 2ms (Views: 1.8ms)
+---------------------------------------------
+KaminariCellsTest: test_rendering_normal_cell
+---------------------------------------------
+DEPRECATION WARNING: You didn't set config.secret_key_base. Read the upgrade documentation to learn more about this new config option. (called from run at /Users/nick/.rvm/rubies/ruby-2.1.0/lib/ruby/2.1.0/minitest/unit.rb:1262)
+Processing by UsersController#index as HTML
+  Rendered inline template (18.2ms)
+  Rendered inline template (20.1ms)
+Completed 200 OK in 24ms (Views: 24.1ms)
+-------------------------------------------------
+KaminariCellsTest: test_rendering_view_model_cell
+-------------------------------------------------
+Processing by UsersController#show as HTML
+  Parameters: {"id"=>"1"}
+Completed 200 OK in 2ms (Views: 1.6ms)
+---------------------------------------------
+KaminariCellsTest: test_rendering_normal_cell
+---------------------------------------------
+DEPRECATION WARNING: You didn't set config.secret_key_base. Read the upgrade documentation to learn more about this new config option. (called from run at /Users/nick/.rvm/rubies/ruby-2.1.0/lib/ruby/2.1.0/minitest/unit.rb:1262)
+Processing by UsersController#index as HTML
+  Rendered inline template (28.4ms)
+  Rendered inline template (31.1ms)
+Completed 200 OK in 36ms (Views: 35.3ms)
+-------------------------------------------------
+KaminariCellsTest: test_rendering_view_model_cell
+-------------------------------------------------
+Processing by UsersController#show as HTML
+  Parameters: {"id"=>"1"}
+Completed 200 OK in 2ms (Views: 1.6ms)
+---------------------------------------------
+KaminariCellsTest: test_rendering_normal_cell
+---------------------------------------------
+DEPRECATION WARNING: You didn't set config.secret_key_base. Read the upgrade documentation to learn more about this new config option. (called from run at /Users/nick/.rvm/rubies/ruby-2.1.0/lib/ruby/2.1.0/minitest/unit.rb:1262)
+Processing by UsersController#index as HTML
+  Rendered inline template (26.2ms)
+  Rendered inline template (28.3ms)
+Completed 200 OK in 33ms (Views: 32.4ms)
+-------------------------------------------------
+KaminariCellsTest: test_rendering_view_model_cell
+-------------------------------------------------
+Processing by UsersController#show as HTML
+  Parameters: {"id"=>"1"}
+Completed 200 OK in 2ms (Views: 1.6ms)
+---------------------------------------------
+KaminariCellsTest: test_rendering_normal_cell
+---------------------------------------------
+DEPRECATION WARNING: You didn't set config.secret_key_base. Read the upgrade documentation to learn more about this new config option. (called from run at /Users/nick/.rvm/rubies/ruby-2.1.0/lib/ruby/2.1.0/minitest/unit.rb:1262)
+Processing by UsersController#index as HTML
+  Rendered inline template (17.5ms)
+  Rendered inline template (19.6ms)
+Completed 200 OK in 24ms (Views: 23.5ms)
+-------------------------------------------------
+KaminariCellsTest: test_rendering_view_model_cell
+-------------------------------------------------
+Processing by UsersController#show as HTML
+  Parameters: {"id"=>"1"}
+Completed 200 OK in 2ms (Views: 1.6ms)
+---------------------------------------------
+KaminariCellsTest: test_rendering_normal_cell
+---------------------------------------------
+DEPRECATION WARNING: You didn't set config.secret_key_base. Read the upgrade documentation to learn more about this new config option. (called from run at /Users/nick/.rvm/rubies/ruby-2.1.0/lib/ruby/2.1.0/minitest/unit.rb:1262)
+Processing by UsersController#index as HTML
+  Rendered inline template (16.6ms)
+  Rendered inline template (18.8ms)
+Completed 200 OK in 24ms (Views: 23.5ms)
+-------------------------------------------------
+KaminariCellsTest: test_rendering_view_model_cell
+-------------------------------------------------
+Processing by UsersController#show as HTML
+  Parameters: {"id"=>"1"}
+Completed 200 OK in 2ms (Views: 1.6ms)
+---------------------------------------------
+KaminariCellsTest: test_rendering_normal_cell
+---------------------------------------------
+DEPRECATION WARNING: You didn't set config.secret_key_base. Read the upgrade documentation to learn more about this new config option. (called from run at /Users/nick/.rvm/rubies/ruby-2.1.0/lib/ruby/2.1.0/minitest/unit.rb:1262)
+Processing by UsersController#index as HTML
+  Rendered inline template (15.5ms)
+  Rendered inline template (17.8ms)
+Completed 200 OK in 24ms (Views: 23.8ms)
+-------------------------------------------------
+KaminariCellsTest: test_rendering_view_model_cell
+-------------------------------------------------
+Processing by UsersController#show as HTML
+  Parameters: {"id"=>"1"}
+Completed 200 OK in 2ms (Views: 1.9ms)
+---------------------------------------------
+KaminariCellsTest: test_rendering_normal_cell
+---------------------------------------------
+DEPRECATION WARNING: You didn't set config.secret_key_base. Read the upgrade documentation to learn more about this new config option. (called from run at /Users/nick/.rvm/rubies/ruby-2.1.0/lib/ruby/2.1.0/minitest/unit.rb:1262)
+Processing by UsersController#index as HTML
+  Rendered inline template (30.0ms)
+  Rendered inline template (32.4ms)
+Completed 200 OK in 40ms (Views: 39.3ms)
+-------------------------------------------------
+KaminariCellsTest: test_rendering_view_model_cell
+-------------------------------------------------
+Processing by UsersController#show as HTML
+  Parameters: {"id"=>"1"}
+Completed 200 OK in 2ms (Views: 1.7ms)
+---------------------------------------------
+KaminariCellsTest: test_rendering_normal_cell
+---------------------------------------------
+DEPRECATION WARNING: You didn't set config.secret_key_base. Read the upgrade documentation to learn more about this new config option. (called from env_config at /Users/nick/.rvm/gems/ruby-1.9.3-p484/gems/railties-4.0.5/lib/rails/application.rb:141)
+Processing by UsersController#index as HTML
+  Rendered inline template (28.7ms)
+  Rendered inline template (31.8ms)
+Completed 200 OK in 52ms (Views: 51.9ms)
+-------------------------------------------------
+KaminariCellsTest: test_rendering_view_model_cell
+-------------------------------------------------
+Processing by UsersController#show as HTML
+  Parameters: {"id"=>"1"}
+Completed 200 OK in 2ms (Views: 1.9ms)
+---------------------------------------------
+KaminariCellsTest: test_rendering_normal_cell
+---------------------------------------------
+DEPRECATION WARNING: You didn't set config.secret_key_base. Read the upgrade documentation to learn more about this new config option. (called from env_config at /Users/nick/.rvm/gems/ruby-1.9.3-p484/gems/railties-4.0.5/lib/rails/application.rb:141)
+Processing by UsersController#index as HTML
+  Rendered inline template (22.9ms)
+  Rendered inline template (25.8ms)
+Completed 200 OK in 45ms (Views: 44.4ms)
+-------------------------------------------------
+KaminariCellsTest: test_rendering_view_model_cell
+-------------------------------------------------
+Processing by UsersController#show as HTML
+  Parameters: {"id"=>"1"}
+Completed 200 OK in 2ms (Views: 2.0ms)
+---------------------------------------------
+KaminariCellsTest: test_rendering_normal_cell
+---------------------------------------------
+Processing by UsersController#index as HTML
+  Rendered inline template (39.8ms)
+  Rendered inline template (42.2ms)
+Completed 200 OK in 49ms (Views: 48.2ms)
+-------------------------------------------------
+KaminariCellsTest: test_rendering_view_model_cell
+-------------------------------------------------
+Processing by UsersController#show as HTML
+  Parameters: {"id"=>"1"}
+Completed 200 OK in 2ms (Views: 1.8ms)
+---------------------------------------------
+KaminariCellsTest: test_rendering_normal_cell
+---------------------------------------------
+Processing by UsersController#index as HTML
+  Rendered inline template (11.9ms)
+  Rendered inline template (22.8ms)
+Completed 200 OK in 52ms (Views: 51.7ms)
+-------------------------------------------------
+KaminariCellsTest: test_rendering_view_model_cell
+-------------------------------------------------
+Processing by UsersController#show as HTML
+  Parameters: {"id"=>"1"}
+Completed 200 OK in 3ms (Views: 2.9ms)
+---------------------------------------------
+KaminariCellsTest: test_rendering_normal_cell
+---------------------------------------------
+Processing by UsersController#index as HTML
+  Rendered inline template (34.5ms)
+  Rendered inline template (36.5ms)
+Completed 200 OK in 41ms (Views: 41.2ms)
+-------------------------------------------------
+KaminariCellsTest: test_rendering_view_model_cell
+-------------------------------------------------
+Processing by UsersController#show as HTML
+  Parameters: {"id"=>"1"}
+Completed 200 OK in 2ms (Views: 2.0ms)
+---------------------------------------------
+KaminariCellsTest: test_rendering_normal_cell
+---------------------------------------------
+Processing by UsersController#index as HTML
+  Rendered inline template (7.6ms)
+  Rendered inline template (9.0ms)
+Completed 200 OK in 11ms (Views: 10.9ms)
+-------------------------------------------------
+KaminariCellsTest: test_rendering_view_model_cell
+-------------------------------------------------
+Processing by UsersController#show as HTML
+  Parameters: {"id"=>"1"}
+Completed 200 OK in 2ms (Views: 1.8ms)
+---------------------------------------------
+KaminariCellsTest: test_rendering_normal_cell
+---------------------------------------------
+Processing by UsersController#index as HTML
+Completed 500 Internal Server Error in 10ms
+-------------------------------------------------
+KaminariCellsTest: test_rendering_view_model_cell
+-------------------------------------------------
+Processing by UsersController#show as HTML
+  Parameters: {"id"=>"1"}
+Completed 500 Internal Server Error in 6ms
+---------------------------------------------
+KaminariCellsTest: test_rendering_normal_cell
+---------------------------------------------
+Processing by UsersController#index as HTML
+  Rendered inline template (2.9ms)
+  Rendered inline template (4.3ms)
+Completed 200 OK in 6ms (Views: 6.1ms)
+-------------------------------------------------
+KaminariCellsTest: test_rendering_view_model_cell
+-------------------------------------------------
+Processing by UsersController#show as HTML
+  Parameters: {"id"=>"1"}
+Completed 200 OK in 2ms (Views: 1.7ms)
+-----------------------------------------
+ResponderTest: test_rendering_normal_cell
+-----------------------------------------
+-----------------------------------------
+ResponderTest: test_rendering_normal_cell
+-----------------------------------------
+Processing by SongsController#create as HTML
+Completed 500 Internal Server Error in 0ms
+-----------------------------------------
+ResponderTest: test_rendering_normal_cell
+-----------------------------------------
+Processing by SongsController#create as HTML
+  Parameters: {"song"=>{"title"=>"You're Going Down"}}
+Completed 500 Internal Server Error in 24ms
+-----------------------------------------
+ResponderTest: test_rendering_normal_cell
+-----------------------------------------
+Processing by SongsController#create as HTML
+  Parameters: {"song"=>{"title"=>"You're Going Down"}}
+Completed 500 Internal Server Error in 6ms
+-----------------------------------------
+ResponderTest: test_rendering_normal_cell
+-----------------------------------------
+Processing by SongsController#create as HTML
+  Parameters: {"song"=>{"title"=>"You're Going Down"}}
+Redirected to 
+Completed 500 Internal Server Error in 34ms
+-----------------------------------------
+ResponderTest: test_rendering_normal_cell
+-----------------------------------------
+Processing by SongsController#create as HTML
+  Parameters: {"song"=>{"title"=>"You're Going Down"}}
+Redirected to 
+Completed 500 Internal Server Error in 20ms
+-----------------------------------------
+ResponderTest: test_rendering_normal_cell
+-----------------------------------------
+Processing by SongsController#create as HTML
+  Parameters: {"song"=>{"title"=>"You're Going Down"}}
+Redirected to http://test.host/songs/1
+Completed 302 Found in 12ms
+-----------------------------------------
+ResponderTest: test_rendering_normal_cell
+-----------------------------------------
+Processing by SongsController#create as HTML
+  Parameters: {"song"=>{"title"=>"You're Going Down"}}
+Redirected to http://test.host/songs/1
+Completed 302 Found in 12ms
+-----------------------------------------
+ResponderTest: test_rendering_normal_cell
+-----------------------------------------
+Processing by SongsController#create as HTML
+  Parameters: {"song"=>{"title"=>"You're Going Down"}}
+Redirected to http://test.host/songs/1
+Completed 302 Found in 34ms
