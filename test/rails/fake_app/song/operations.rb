@@ -16,4 +16,14 @@ class Song < ActiveRecord::Base
       end
     end
   end
+
+
+  class Delete < Create
+    action :find
+
+    def process(params)
+      model.destroy
+      self
+    end
+  end
 end

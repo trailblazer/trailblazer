@@ -21,6 +21,13 @@ class ResponderTest < ActionController::TestCase
     assert_equal @response.body, "{:title=&gt;[&quot;can&#39;t be blank&quot;]}"
   end
 
+  test "#respond Delete [valid]" do
+    song = Song::Create[song: {title: "You're Going Down"}].model
+    delete :destroy, id: song.id
+    assert_redirected_to songs_path
+    # assert that model is deleted.
+  end
+
   # TODO: #present
   # TODO: #run
 end

@@ -10,17 +10,8 @@ module Trailblazer::Operation::Responder
     end
   end
 
-  def to_param
-    @model.to_param
-  end
-  
-  def destroyed?
-    @model.destroyed?
-  end
-  
-  def persisted?
-    @model.persisted?
-  end
+  extend Forwardable
+  def_delegators :@model, :to_param, :destroyed?, :persisted?
 
   def errors
     return [] if @valid

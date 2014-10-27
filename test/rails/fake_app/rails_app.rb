@@ -51,6 +51,10 @@ ERB
   def create
     respond Song::Create
   end
+
+  def destroy
+    respond Song::Delete
+  end
 end
 
 # helpers
