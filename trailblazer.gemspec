@@ -27,6 +27,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake"
   spec.add_development_dependency "minitest"
   spec.add_development_dependency "actionpack" # dev only?
-  spec.add_development_dependency "sidekiq"
+  spec.add_development_dependency "sidekiq", "~> 3.1.0"
   spec.add_development_dependency "reform"
 end
