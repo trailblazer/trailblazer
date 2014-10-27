@@ -218,6 +218,21 @@ json
 
 ### Testing Operations
 
+### Loading Trailblazer on Okamase Stack
+
+If you are using Rails and need to load one of these files:
+
+* Controller
+* Responder
+
+You can just add
+
+```ruby
+require 'trailblazer/autoloading'
+```
+
+to any file in your application (suggest to add on _config/initializers/trailblazer.rb_) and these files will be "automatically" loaded.
+
 ## Domain
 ## Persistance
 ## Views
