@@ -2,15 +2,15 @@
 
 _Trailblazer is a thin layer on top of Rails. It gently enforces encapsulation, an intuitive code structure and gives you an object-oriented architecture._
 
-In a nutshell: Trailblazer makes you write **logic-less models** that purely act as data objects, don't contain callbacks, nested attributes, validations or domain logic. It **removes bulky controllers** and strong_parameters by supplying additional layers to put that code to and **completely replaces helpers**.
+In a nutshell: Trailblazer makes you write **logic-less models** that purely act as data objects, don't contain callbacks, nested attributes, validations or domain logic. It **removes bulky controllers** and strong_parameters by supplying additional layers to hold that code and **completely replaces helpers**.
 
 ## Mission
 
-While _Trailblazer_ offers you abstraction layers for all aspects of Ruby On Rails, it does _not_ missionize you. Whereever you want, you may fall back to the "Rails Way" with fat models, monolithic controllers, global helpers, etc. This is not a bad thing, but allows you to step-wise introduce Trailblazer's encapsulation in your app without having to rewrite it.
+While _Trailblazer_ offers you abstraction layers for all aspects of Ruby On Rails, it does _not_ missionize you. Wherever you want, you may fall back to the "Rails Way" with fat models, monolithic controllers, global helpers, etc. This is not a bad thing, but allows you to step-wise introduce Trailblazer's encapsulation in your app without having to rewrite it.
 
-Trailblazer is all about structure. It helps re-organizing existing code into smaller components where different concerns are handled in separated classes. Forms go into form objects, views are object-oriented MVC controllers, the business logic happens in dedicated domain objects backed by completely decoupled persistance objects.
+Trailblazer is all about structure. It helps re-organize existing code into smaller components where different concerns are handled in separated classes. Forms go into form objects, views are object-oriented MVC controllers, the business logic happens in dedicated domain objects backed by completely decoupled persistence objects.
 
-Again, you can pick which layers you want. Trailblazer doesn't impose technical implementations, it offers mature solutions for re-occuring problems in all types of Rails application.
+Again, you can pick which layers you want. Trailblazer doesn't impose technical implementations, it offers mature solutions for recurring problems in all types of Rails applications.
 
 Trailblazer is no "complex web of objects and indirection". It solves many problems that have been around for years with a cleanly layered architecture. Only use what you like. And that's the bottom line.
 
@@ -32,7 +32,7 @@ app
 │   │   ├── form.rb
 │   │   ├── operation.rb
 │   │   ├── twin.rb
-│   │   ├── persistance.rb
+│   │   ├── persistence.rb
 │   │   ├── representer
 │   │   ├── form
 │   │   │   ├── admin.rb
@@ -44,7 +44,7 @@ Files, classes and views that logically belong to one _concept_ are kept in one 
 
 1. **Routing** Traiblazer uses Rails routing to map URLs to controllers (we will add simplifications to routing soon).
 
-2. **Controllers** A controller usually contains authentication logic, only (e.g. using devise) and then delegates to an _Enpoint_ or, more often, an _Operation_.  (we will add simplifications to authentication soon)
+2. **Controllers** A controller usually contains authentication logic, only (e.g. using devise) and then delegates to an _Endpoint_ or, more often, an _Operation_.  (we will add simplifications to authentication soon)
 
 3. **Endpoint** Endpoints are the only classes with knowledge about HTTP. They delegate to an _Operation_.
 
@@ -62,9 +62,9 @@ Files, classes and views that logically belong to one _concept_ are kept in one 
 
 8. **HTTP API** Consuming and rendering API documents (e.g. JSON or XML) is done via [roar](https://github.com/apotonick/roar) and [representable](https://github.com/apotonick/representable). They usually inherit the schema from <em>Contract</em>s .
 
-9. **Model API** Working with your internal API explicitely is done by using <em>Operation</em>s . <em>Model</em>s should not be accessed directly anymore.
+9. **Model API** Working with your internal API explicitly is done by using <em>Operation</em>s . <em>Model</em>s should not be accessed directly anymore.
 
-10. **Tests** Subject to tests are mainly <em>Operation</em>s and <em>View Model</em>s , as they encapsulate endpoint behaviour of your app. As a nice side effect, factories are replaced by simple _Operation_ calls.
+10. **Tests** Subject to tests are mainly <em>Operation</em>s and <em>View Model</em>s, as they encapsulate endpoint behaviour of your app. As a nice side effect, factories are replaced by simple _Operation_ calls.
 
 Trailblazer is basically a mash-up of mature gems that have been developed over the past 10 years and are used in hundreds and thousands of production apps.
 
@@ -120,7 +120,7 @@ class Comment::Operation::Create < Trailblazer::Operation
 end
 ```
 
-A typical operations has three essential parts:
+A typical operation has three essential parts:
 
 1. Usually, an Operation has a form (or, contract) to validate incoming data. This form can also be used for rendering the operation's form in a UI, as known from Reform.
 2. The `#process` method implements the actual operation and is the only public instance method. You can do whatever you want in here.
@@ -170,7 +170,7 @@ class Comment::Operation::Create
   end
 ```
 
-Note that presently you have to derive the JSON operation from the original one. This will be available implicitely soon.
+Note that presently you have to derive the JSON operation from the original one. This will be available implicitly soon.
 
 ```ruby
 Comment::Operation::Create::JSON.run(request.body.string) do
@@ -190,14 +190,14 @@ Encapsulating an atomic operation into a stateless asset makes it easily detacha
 
 ### Functional Semantic
 
-Note that "stateless" doesn't mean you're not allowed to mess around with the application state: Internally, you can do whatever you need to meet your domain requirements! The statelessness is refering to the entire Operation and its flow seen from the caller's perspective.
+Note that "stateless" doesn't mean you're not allowed to mess around with the application state: Internally, you can do whatever you need to meet your domain requirements! The statelessness is referring to the entire Operation and its flow seen from the caller's perspective.
 
 Again, Operations are high-level entry points for your application. With one public method, they expose a rather functional behaviour. This is intended and doesn't break object-orientation at all. Within the operation, you can use as many models, state machines, workflows, etc you need - only the embracing operation is functional.
 
 
 ### Background Processing
 
-One design goal in Trailblazer's operation layer is to make asnynchronous processing a no-brainer. As operations are stateless that is easily achieved: Basically, any operation can be sent to a background process. Trailblazer makes you think in domain operations that come with free background processing. This is completely different to a monolithic model with hundreds of methods and the omnipresent thought of "How to make this part async?".
+One design goal in Trailblazer's operation layer is to make asynchronous processing a no-brainer. As operations are stateless that is easily achieved: Basically, any operation can be sent to a background process. Trailblazer makes you think in domain operations that come with free background processing. This is completely different to a monolithic model with hundreds of methods and the omnipresent thought of "How to make this part async?".
 
 {Notes: do validation in realtime, send work of Operation to bg}
 
@@ -234,7 +234,7 @@ require 'trailblazer/autoloading'
 to any file in your application (suggest to add on _config/initializers/trailblazer.rb_) and these files will be "automatically" loaded.
 
 ## Domain
-## Persistance
+## Persistence
 ## Views
 ## Forms
 ## Contracts
@@ -246,4 +246,4 @@ to any file in your application (suggest to add on _config/initializers/trailbla
 * Grouping code, views and assets by concepts increases the **maintainability** of your apps. Developers will find their way faster into your structure as the file layout is more intuitive.
 * Finding bugs gets less frustrating as encapsulated layers allow **testing components** in total isolation. Once you know your form and your view are ok, it must be the parsing code.
 * The reusability of code increases drastically as Trailblazer gently pushes you towards encapsulation. No more redundant helpers but clean inheritance.
-* No more surprises from ActiveRecord's massive API. The separation between persistance and domain automatically results in smaller, less destructive APIs for your models.
+* No more surprises from ActiveRecord's massive API. The separation between persistence and domain automatically results in smaller, less destructive APIs for your models.
