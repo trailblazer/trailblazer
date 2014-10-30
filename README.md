@@ -201,169 +201,147 @@ end
 
 Of course, this does _not_ throw an exception but simply skips the block when the operation is invalid.
 
-## Contract
+## Validations
+
+Operations usually have a form object which is simply a `Reform::Form` class. All the [API documented in Reform](https://github.com/apotonick/reform) can be applied and used.
+
+The operation makes use of the form object using the `#validate` method.
+
+```ruby
+class Comment < ActiveRecord::Base
+  class Create < Trailblazer::Operation
+    contract do
+      property :body, validates: {presence: true}
+    end
+
+    def process(params)
+      @model = Comment.new
+
+      validate(params[:comment], @model) do |f|
+        f.save
+      end
+    end
+  end
+end
+ ```
+
+The contract (aka _form_) is defined in the `::contract` block. You can implement nested forms, default values, validations, and everything else Reform provides.
+
+In case of a valid form the block for `#validate` is invoked. It receives the populated form object. You can use the form to save data or write your own logic.
+
+Technically speaking, what really happens in `Operation#validate` is the following.
+
+```ruby
+contract_class.new(@model).validate(params[:comment])
+```
+
+This is a familiar work-flow from Reform. Validation does _not_ touch the model.
 
 
-5. **Contract** Deserialization of the incoming data, populating an object graph and validating it is done in a _Contract_. This is usually a [reform](https://github.com/apotonick/reform) form which can also be rendered. _Contract_ and _Operation_ both work on the model.
+## Models
 
-6. **Model** The model can be implemented using any ORM you fancy, for instance [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord#active-record--object-relational-mapping-in-rails) or [Datamapper](http://datamapper.org/).
+Models for persistence can be implemented using any ORM you fancy, for instance [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord#active-record--object-relational-mapping-in-rails) or [Datamapper](http://datamapper.org/).
 
-    In Trailblazer, models are completely empty and solely configure database-relevant directives and associations.
+In Trailblazer, models are completely empty and solely configure database-relevant directives and associations. No business logic is allowed in models. Only operations, views and cells can access models directly.
 
-7. **Views** Rendering UI happens in _View Models_ as found in [cells](https://github.com/apotonick/cells). View models also replace helpers.
+## Views
+
+View rendering can happen using the controller as known from Rails. This is absolutely fine for simple views.
+
+More complex UI logic happens in _View Models_ as found in [Cells](https://github.com/apotonick/cells). View models also replace helpers.
+
+
+
 
 8. **HTTP API** Consuming and rendering API documents (e.g. JSON or XML) is done via [roar](https://github.com/apotonick/roar) and [representable](https://github.com/apotonick/representable). They usually inherit the schema from <em>Contract</em>s .
-
-9. **Model API** Working with your internal API explicitly is done by using <em>Operation</em>s . <em>Model</em>s should not be accessed directly anymore.
 
 10. **Tests** Subject to tests are mainly <em>Operation</em>s and <em>View Model</em>s, as they encapsulate endpoint behaviour of your app. As a nice side effect, factories are replaced by simple _Operation_ calls.
 
 Trailblazer is basically a mash-up of mature gems that have been developed over the past 10 years and are used in hundreds and thousands of production apps.
 
 
-## Naming
-
-Concept namespaces with layer names, no AdminController::UserController anymore.
 
 
-## Routing
+## Operation API
 
-Routing in Trailblazer is completely handled by Rails. As forwarding requests to controller actions works just fine, we didn't see a reason to add behaviour here, yet.
+### CRUD Semantics
 
-There are some enhancements planned, though. See TODO.
-
-## Controllers
-
-A typical controller should contain authentication, authorization and delegations to domain operations. You can leave your controller _configuration_ as it is - with devise, cancan and all the nifty tools. Behaviour should be delegated to `Operation`s.
-
-
-## Domain Layer: Operation
-
-Domain logic happens in `Operation`s: stateless but yet object-oriented instances that encapsulate your business. They are extremely reusable, easily testable and bring background-processing for free.
-
-### Operation
-
-Operations in Trailblazer implement high-level actions in your application domain: logic that gets invoked from a controller, the console, in tests, or from other components.
-
-This could be _“Validate and update a comment!”_ or _"Run and render a search!"_. Operations can also be nested, and implement something as in _“Process uploaded images!”_.
-
-In Trailblazer, controllers always simply delegate to an Operation. This is where the domain logic sits, this simplifies testing without the HTTP overhead and makes the action reusable as test factories.
-
-### API
-
-A very simple operation to create a comment could look as follows.
+You can make Trailblazer find and create models for you using the `CRUD` module.
 
 ```ruby
-class Comment::Operation::Create < Trailblazer::Operation
-  class Contract < Reform::Form
-    property :body
-    validates :body, presence: true
-  end
+require 'trailblazer/operation/crud'
 
+class Comment < ActiveRecord::Base
+  class Create < Trailblazer::Operation
+    include CRUD
+    model Comment, :create
 
-  def process(params)
-    comment = Comment.new
+    contract do
+      # ..
+    end
 
-    validate(params, comment) do |contract|
-      contract.save
-      # further after_save logic happens here
+    def process(params)
+      validate(params[:comment]) do |f|
+        f.save
+      end
     end
   end
 end
 ```
 
-A typical operation has three essential parts:
+You have to tell `CRUD` the model class and what action to implement using `::model`.
 
-1. Usually, an Operation has a form (or, contract) to validate incoming data. This form can also be used for rendering the operation's form in a UI, as known from Reform.
-2. The `#process` method implements the actual operation and is the only public instance method. You can do whatever you want in here.
-3. Within `#process` you may call `#validate` which will instantiate the operation's form, validate the data and, in case of a valid form state, call the block.
+Note how you do not have to pass the `@model` to validate anymore. Also, the `@model` gets created automatically and is accessable using `Operation#model`.
 
-**Note:** You don't _have_ to make use of form/contract here. This is a convention Trailblazer establishes, however, you're free to run your own logic. Instantiating and invoking the form happens in `Operation#validate`.
-
-
-### Flow Usage
-
-In a controller, you typically use the `::run` interface, which gives you a great flow API for dealing with valid and invalid invocations.
+In inherited operations, you can override the action, only, using `::action`.
 
 ```ruby
-def create
-  @operation = Comment::Operation::Create.run(params[:comment]) do |op|
-    return redirect_to(op.model) # success.
-  end
-
-  render :new # failure. re-render form.
+class Update < Create
+  action :update
 end
 ```
 
-Controller-specific logic is kept in the controller, everything else is encapsulated in the operation. Per default, the operation yields the internal contract to the successful block, or returns it so the failure code can make use of it.
-
-### Call Usage
-
-Sometimes you don't need to implement a flow. For instance, using an Operation as a test factory is straight-forward.
-
-```ruby
-let(:comment) { Comment::Operation::Create[params].model }
-```
-
-Using the call invocation doesn't allow a block and strictly returns the contract (or, whatever you return from `#process`). As an additional service, an exception is raised when the incoming `params` doesn't validate with the form.
-
-### Operations With JSON
-
-The internal Reform form object is extremely powerful, as it does not only work with hashes (e.g. `params`) but also with other formats such as JSON, YAML or XML!
-
-This basically means you could reuse an operation for your JSON API.
-
-```ruby
-class Comment::Operation::Create
-  class JSON < self
-    class Contract < Contract
-      include Json # Contract::JSON
-    end
-  end
-```
-
-Note that presently you have to derive the JSON operation from the original one. This will be available implicitly soon.
-
-```ruby
-Comment::Operation::Create::JSON.run(request.body.string) do
-  render :success
-end
-```
-
-You don't have to rewrite this over and over again as a lot of behaviour is implemented in Endpoint.
-
-
-### Stateless Operations
-
-`Operation` has a single entry point: a class method. While the class method instantly creates an instance and delegates further processing to the latter, this class method stresses the fact that an Operation is _stateless_.
-
-Encapsulating an atomic operation into a stateless asset makes it easily detachable, e.g. for background-processing with Sidekiq, Resque or whatever.
-
-
-### Functional Semantic
-
-Note that "stateless" doesn't mean you're not allowed to mess around with the application state: Internally, you can do whatever you need to meet your domain requirements! The statelessness is referring to the entire Operation and its flow seen from the caller's perspective.
-
-Again, Operations are high-level entry points for your application. With one public method, they expose a rather functional behaviour. This is intended and doesn't break object-orientation at all. Within the operation, you can use as many models, state machines, workflows, etc you need - only the embracing operation is functional.
-
+Another action is `:find` (which is currently doing the same as `:update`) to find a model by using `params[:id]`.
 
 ### Background Processing
 
-One design goal in Trailblazer's operation layer is to make asynchronous processing a no-brainer. As operations are stateless that is easily achieved: Basically, any operation can be sent to a background process. Trailblazer makes you think in domain operations that come with free background processing. This is completely different to a monolithic model with hundreds of methods and the omnipresent thought of "How to make this part async?".
+To run an operation in Sidekiq (ActiveJob-support coming!) all you need to do is include the `Worker` module.
 
-{Notes: do validation in realtime, send work of Operation to bg}
+```ruby
+require 'trailblazer/operation/worker'
 
-### Additional Semantics
+class Comment::Image::Crop < Trailblazer::Operation
+  include Worker
 
-::contract
-invalid!
-return from validate
-return value of ::run
+  def process(params)
+    # will be run asynchronous.
+  end
+end
+```
 
-testing invoked nested methods
+### Rendering Operation's Form
 
-create/find models automatically
-json
+You have access to an operation's form using `::contract`.
+
+```ruby
+Comment::Create.contract(params)
+```
+
+This will run the operation's `#process` method _without_ the validate block and return the contract.
+
+### Marking Operation as Invalid
+
+Sometimes you don't need a form object but still want the validity behavior of an operation.
+
+```ruby
+def process(params)
+  return invalid!(self) unless params[:id]
+
+  Comment.find(params[:id]).destroy
+  self
+end
+```
+
 
 ### Worker::FileMarshaller: needs representable 2.1.1 (.schema)
 
@@ -385,12 +363,6 @@ require 'trailblazer/autoloading'
 
 to any file in your application (suggest to add on _config/initializers/trailblazer.rb_) and these files will be "automatically" loaded.
 
-## Domain
-## Persistence
-## Views
-## Forms
-## Contracts
-## APIs
 
 
 ## Why?
