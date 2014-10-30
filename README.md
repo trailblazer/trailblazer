@@ -187,7 +187,7 @@ Note how this can easily be used for test factories.
 let(:comment) { Comment::Create[valid_comment_params].model }
 ```
 
-Using operations as test factories is a fundamental concept of Trailblazer for removing buggy redundancy in tests and manual factories.
+Using operations as test factories is a fundamental concept of Trailblazer to remove buggy redundancy in tests and manual factories.
 
 ### Run style
 
