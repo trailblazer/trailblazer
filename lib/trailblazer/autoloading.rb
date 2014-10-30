@@ -1,4 +1,4 @@
-module Trailblazer::Operation
-  autoload :Controller, 'operation/controller'
-  autoload :Responder, 'operation/responder'
+Trailblazer::Operation.class_eval do
+  autoload :Controller, 'trailblazer/operation/controller'
+  autoload :Responder, 'trailblazer/operation/responder'
 end
