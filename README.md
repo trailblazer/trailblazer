@@ -4,6 +4,8 @@ _Trailblazer is a thin layer on top of Rails. It gently enforces encapsulation, 
 
 In a nutshell: Trailblazer makes you write **logicless models** that purely act as data objects, don't contain callbacks, nested attributes, validations or domain logic. It **removes bulky controllers** and strong_parameters by supplying additional layers to hold that code and **completely replaces helpers**.
 
+Please sign up for my upcoming book [Trailblazer - A new architecture for Rails](https://leanpub.com/trailblazer) and check out the free sample chapter!
+
 ## Mission
 
 While _Trailblazer_ offers you abstraction layers for all aspects of Ruby On Rails, it does _not_ missionize you. Wherever you want, you may fall back to the "Rails Way" with fat models, monolithic controllers, global helpers, etc. This is not a bad thing, but allows you to step-wise introduce Trailblazer's encapsulation in your app without having to rewrite it.
@@ -43,21 +45,164 @@ The opposite is the case: Controller, view and model become lean endpoints for H
 
 ![The Trailblazer stack.](https://raw.github.com/apotonick/trailblazer/master/doc/Trb-The-Stack.png)
 
+## Routing
 
-call style for factories:
-op[].model
+Traiblazer uses Rails routing to map URLs to controllers (we will add simplifications to routing soon).
 
+## Controllers
 
+Controllers are lean endpoints for HTTP. They differentiate between request formats like HTML or JSON and immediately dispatch to an operation. Controllers do not contain any business logic.
 
-1. **Routing** Traiblazer uses Rails routing to map URLs to controllers (we will add simplifications to routing soon).
+Trailblazer provides three methods to present and invoke operations. But before that, you need to include the `Controller` module.
 
-2. **Controllers** A controller usually contains authentication logic, only (e.g. using devise) and then delegates to an _Endpoint_ or, more often, an _Operation_.  (we will add simplifications to authentication soon)
+```ruby
+class CommentsController < ApplicationController
+  include Trailblazer::Operation::Controller
 
-3. **Endpoint** Endpoints are the only classes with knowledge about HTTP. They delegate to an _Operation_.
+```
 
-4. **Operation** Business logic happens in operations. They replace ActiveRecord callbacks, cleanly group behaviour and encapsulate knowledge about operations like _Create_, _Update_, or _Crop_. Operations can be nested and use other operations.
+### Rendering the form object
 
-    An operation uses a _Contract_ to validate the incoming parameters.
+Operations can populate and present their form object so it can be used with `simple_form` and other form helpers.
+
+```ruby
+
+  def new
+    present Comment::Create
+  end
+```
+
+This will set the `@form` instance variable in the controller so it can be rendered.
+
+```haml
+= form_for @form do |f|
+  = f.input f.body
+```
+
+### Running an operation
+
+If you do not intend to maintain different request formats, the easiest is to use `#run` to process incoming data using an operation.
+
+```ruby
+def create
+  run Comment::Create
+end
+```
+
+This will simply run `Comment::Create[params]`.
+
+You can pass your own params, too.
+
+```ruby
+def create
+  run Comment::Create, params.merge({current_user: current_user})
+end
+```
+
+An additional block will be executed if the operation result is valid.
+
+```ruby
+def create
+  run Comment::Create do |op|
+    return redirect_to(comments_path, notice: op.message)
+  end
+end
+```
+
+Note that the operation instance is yield to the block.
+
+The case of an invalid response can be handled after the block.
+
+```ruby
+def create
+  run Comment::Create do |op|
+    # valid!
+  end
+
+  render action: :new
+end
+```
+
+### Responding
+
+Alternatively, you can use Rails' excellent `#respond_with` to let a responder take care of what to render. Operations can be passed into `respond_with`. This happens automatically in `#respond`, the third way to let Trailblazer invoke an operation.
+
+```ruby
+def create
+  respond Comment::Create
+end
+```
+
+This will simply run the operation and chuck the instance into the responder letting the latter sort out what to render or where to redirect. The operation delegates respective calls to its internal `model`.
+
+[TODO: add how we find JSON/XML pendants]
+
+You can also handle different formats in that block. It is totally fine to do that in the controller as this is _endpoint_ logic that is HTTP-specific and not business.
+
+```ruby
+def create
+  respond Comment::Create do |op, formats|
+    formats.html { redirect_to(op.model, :notice => "All good!") }
+    formats.json { render nothing: true }
+  end
+end
+```
+
+The format block is simply passed on to `#respond_with`.
+
+### Controller API
+
+In all three cases the following instance variables are assigned: `@operation`, `@form`, `@model`.
+
+## Operation
+
+Operations encapsulate business logic. One operation per high-level domain _function_ is used. Different formats or environments are handled in subclasses. Operations don't know about HTTP.
+
+```ruby
+class Comment < ActiveRecord::Base
+  class Create < Trailblazer::Operation
+    def process(params)
+      # do whatever you feel like.
+      self
+    end
+  end
+end
+ ```
+
+Operations only need to implement `#process` which receives the params from the caller.
+
+### Call style
+
+The simplest way of running an operation is the _call style_.
+
+```ruby
+op = Comment::Create[params]
+```
+
+Using `Operation#[]` will return the operation instance. In case of an invalid operation, this will raise an exception.
+
+Note how this can easily be used for test factories.
+
+```ruby
+let(:comment) { Comment::Create[valid_comment_params].model }
+```
+
+Using operations as test factories is a fundamental concept of Trailblazer for removing buggy redundancy in tests and manual factories.
+
+### Run style
+
+You can run an operation manually and use the same block semantics as found in the controller.
+
+```ruby
+Comment::Create.run(params) do |op|
+  # only run when valid.
+end
+```
+
+Of course, this does _not_ throw an exception but simply skips the block when the operation is invalid.
+
+## Contract
+
 
 5. **Contract** Deserialization of the incoming data, populating an object graph and validating it is done in a _Contract_. This is usually a [reform](https://github.com/apotonick/reform) form which can also be rendered. _Contract_ and _Operation_ both work on the model.
 
