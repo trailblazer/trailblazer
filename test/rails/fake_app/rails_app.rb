@@ -22,41 +22,19 @@ app.initialize!
 
 # routes
 app.routes.draw do
-  resources :songs
+  resources :songs do
+    member do # argh.
+      delete :destroy_with_formats
+    end
+  end
 end
 
 require 'trailblazer/operation/responder'
 require 'trailblazer/operation/controller'
 
-#models
+require 'fake_app/controllers'
 require 'fake_app/models'
 require 'fake_app/song/operations.rb'
 
-
-
-# controllers
-class ApplicationController < ActionController::Base; end
-class SongsController < ApplicationController
-  append_view_path "test/rails/fake_app/views"
-  def index
-    @users = Song.all.page params[:page]
-    render :inline => <<-ERB
-<%= render_cell(:user, :show, @users) %>
-ERB
-  end
-
-  include Trailblazer::Operation::Controller
-  respond_to :html
-
-  def create
-    respond Song::Create
-  end
-
-  def destroy
-    respond Song::Delete
-  end
-end
-
 # helpers
 Object.const_set(:ApplicationHelper, Module.new)
-

@@ -62,16 +62,16 @@ module Trailblazer::Operation::Controller
   end
   private :present, :run
 
-  # TODO: WITH BLOCK!
   # TODO: what if it's JSON and we want OP:JSON to deserialise etc?
-  def respond(operation_class, params=self.params)
+  def respond(operation_class, params=self.params, &block)
     res, @operation = operation_class.run(params)
 
     @form      = @operation.contract
     @model     = @operation.model
 
-    yield @operation if block_given?
+    return respond_with @operation if not block_given?
 
-    respond_with @operation
+    op = @operation
+    respond_with @operation, &Proc.new { |formats| block.call(op, formats) } if block_given?
   end
 end
