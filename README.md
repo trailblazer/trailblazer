@@ -67,12 +67,12 @@ Operations can populate and present their form object so it can be used with `si
 
 ```ruby
 
-  def new
-    present Comment::Create
-  end
+def new
+  present Comment::Create
+end
 ```
 
-This will set the `@form` instance variable in the controller so it can be rendered.
+This will run the operation but _not_ its `validate` code. It then sets the `@form` instance variable in the controller so it can be rendered.
 
 ```haml
 = form_for @form do |f|
