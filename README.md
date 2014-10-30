@@ -29,19 +29,19 @@ app
 │   │   │   ├── list.haml
 │   │   ├── assets
 │   │   │   ├── comment.css.sass
-│   │   ├── form.rb
 │   │   ├── operation.rb
 │   │   ├── twin.rb
-│   │   ├── persistence.rb
-│   │   ├── representer
-│   │   ├── form
-│   │   │   ├── admin.rb
 ```
 
 Files, classes and views that logically belong to one _concept_ are kept in one place. You are free to use additional namespaces within a concept. Trailblazer tries to keep it as simple as possible, though.
 
 ## Architecture
 
+Trailblazer extends the conventional MVC stack in Rails. Keep in mind that adding layers doesn't necessarily mean adding more code and complexity.
+
+The opposite is the case: Controller, view and model become lean endpoints for HTTP, rendering and persistence. Redundant code gets eliminated by putting very little application code into the right layer.
+
+![The Trailblazer stack.](https://raw.github.com/apotonick/trailblazer/master/doc/Trb-The-Stack.png)
 
 
 call style for factories:
