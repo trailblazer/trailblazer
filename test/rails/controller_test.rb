@@ -128,6 +128,6 @@ class ControllerPresentTest < ActionController::TestCase
   test "#present with block" do
     get :new_with_block
 
-    assert_select "b", "Band,Band,true,Band::Create"
+    assert_select "b", "Band,Band,true,Band::Create,Essen"
   end
 end

@@ -4,6 +4,8 @@ module Trailblazer::Operation::Controller
 private
   # Doesn't run #validate, just for HTML (e.g. #new and #edit).
   def present(operation_class, params=self.params)
+    process_params!(params)
+
     @operation = operation_class.new(:validate => false).run(params).last # FIXME: make that available via Operation.
     @form      = @operation.contract
     @model     = @operation.model

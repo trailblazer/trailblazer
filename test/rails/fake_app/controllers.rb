@@ -54,10 +54,11 @@ ERB
   def new_with_block
     present Band::Create do |op|
       @klass = op.model.class
+      @locality = params[:band][:locality]
     end
 
     render inline: <<-ERB
-<b><%= [@klass, @model.class, @form.is_a?(Reform::Form), @operation.class].join(",") %></b>
+<b><%= [@klass, @model.class, @form.is_a?(Reform::Form), @operation.class, @locality].join(",") %></b>
 ERB
   end
 
@@ -67,6 +68,7 @@ ERB
 
 private
   def process_params!(params) # this is where you set :current_user, etc.
+    params[:band] ||= {}
     params[:band][:locality] = "Essen"
   end
 end
