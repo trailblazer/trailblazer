@@ -5,4 +5,3 @@ gemspec path: '../'
 gem "railties"
 gem "activerecord"
 gem "sqlite3"
-gem "reform", git: "https://github.com/apotonick/reform.git"

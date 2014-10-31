@@ -1,19 +1,9 @@
-GIT
-  remote: https://github.com/apotonick/reform.git
-  revision: 3eed15e9c0f9ac88981c9c22f9386e25bec844b0
-  specs:
-    reform (1.1.1)
-      activemodel
-      disposable (~> 0.0.5)
-      representable (~> 2.1.0)
-      uber (~> 0.0.8)
-
 PATH
   remote: ../
   specs:
     trailblazer (0.0.1)
       actionpack (>= 3.0.0)
-      reform
+      reform (= 1.2.0.beta1)
       representable (>= 2.1.1, < 2.2.0)
       uber (>= 0.0.10)
 
@@ -71,7 +61,12 @@ GEM
     redis (3.1.0)
     redis-namespace (1.5.1)
       redis (~> 3.0, >= 3.0.4)
-    representable (2.1.1)
+    reform (1.2.0.beta1)
+      activemodel
+      disposable (~> 0.0.5)
+      representable (~> 2.1.0)
+      uber (~> 0.0.8)
+    representable (2.1.3)
       multi_json
       nokogiri
       uber (~> 0.0.7)
@@ -99,7 +94,6 @@ DEPENDENCIES
   minitest
   railties
   rake
-  reform!
   sidekiq (~> 3.1.0)
   sqlite3
   trailblazer!
