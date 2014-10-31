@@ -348,12 +348,9 @@ end
 
 ### Testing Operations
 
-### Loading Trailblazer on Okamase Stack
+## Autoloading
 
-If you are using Rails and need to load one of these files:
-
-* Controller
-* Responder
+Use our autoloading if you dislike explicit requires.
 
 You can just add
 
@@ -361,7 +358,7 @@ You can just add
 require 'trailblazer/autoloading'
 ```
 
-to any file in your application (suggest to add on _config/initializers/trailblazer.rb_) and these files will be "automatically" loaded.
+to `config/initializers/trailblazer.rb` and files will be "automatically" loaded.
 
 
 
