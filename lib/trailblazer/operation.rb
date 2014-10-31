@@ -70,6 +70,10 @@ module Trailblazer
 
     attr_reader :contract
 
+    def valid?
+      @valid
+    end
+
   private
 
     def setup!(*params)

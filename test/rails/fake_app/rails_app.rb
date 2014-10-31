@@ -29,6 +29,7 @@ app.routes.draw do
 
     collection do
       post :create_with_params
+      post :create_with_block
     end
   end
 

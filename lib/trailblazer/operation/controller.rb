@@ -14,6 +14,8 @@ private
   end
 
   # full-on Op[]
+  # Note: this is not documented on purpose as this concept is experimental. I don't like it too much and prefer
+  # returns in the valid block.
   class Else
     def initialize(op, run)
       @op  = op

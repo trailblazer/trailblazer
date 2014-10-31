@@ -67,6 +67,16 @@ class ResponderRespondTest < ActionController::TestCase
     # assert that model is deleted.
   end
 
+  test "respond with block [html/valid]" do
+    post :create_with_block, {song: {title: "You're Going Down"}}
+    assert_equal "block run, valid: true", response.body
+  end
+
+  test "respond with block [html/invalid]" do
+    post :create_with_block, {song: {title: ""}}
+    assert_equal "block run, valid: false", response.body
+  end
+
   # JSON
   test "Delete [json/valid]" do
     song = Song::Create[song: {title: "You're Going Down"}].model

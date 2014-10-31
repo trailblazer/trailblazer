@@ -24,6 +24,12 @@ ERB
     respond Song::Create, song: {title: "A Beautiful Indifference"}
   end
 
+  def create_with_block
+    respond Song::Create do |op, formats|
+      return render text: "block run, valid: #{op.valid?}"
+    end
+  end
+
   def destroy
     respond Song::Delete
   end

@@ -142,13 +142,15 @@ You can also handle different formats in that block. It is totally fine to do th
 ```ruby
 def create
   respond Comment::Create do |op, formats|
-    formats.html { redirect_to(op.model, :notice => "All good!") }
+    formats.html { redirect_to(op.model, :notice => op.valid? ? "All good!" : "Fail!") }
     formats.json { render nothing: true }
   end
 end
 ```
 
-The format block is simply passed on to `#respond_with`.
+The block passed to `#respond` is _always_ executed, regardless of the operation's validity result. Goal is to let the responder handle the validity of the operation.
+
+The `formats` object is simply passed on to `#respond_with`.
 
 ### Controller API
 
