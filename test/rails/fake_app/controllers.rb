@@ -8,7 +8,7 @@ class SongsController < ApplicationController
   append_view_path "test/rails/fake_app/views"
   def index
     @users = Song.all.page params[:page]
-    render :inline => <<-ERB
+    render inline: <<-ERB
 <%= render_cell(:user, :show, @users) %>
 ERB
   end
@@ -38,6 +38,28 @@ end
 class BandsController < ApplicationController
   include Trailblazer::Operation::Controller
   respond_to :html
+
+  def new
+    present Band::Create
+
+    render inline: <<-ERB
+<%= form_for @form do |f| %>
+  <%= f.text_field :name %>
+<% end %>
+
+<b><%= [@klass, @model.class, @form.is_a?(Reform::Form), @operation.class].join(",") %></b>
+ERB
+  end
+
+  def new_with_block
+    present Band::Create do |op|
+      @klass = op.model.class
+    end
+
+    render inline: <<-ERB
+<b><%= [@klass, @model.class, @form.is_a?(Reform::Form), @operation.class].join(",") %></b>
+ERB
+  end
 
   def create
     respond Band::Create

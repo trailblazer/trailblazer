@@ -1,6 +1,12 @@
 # BUNDLE_GEMFILE=gemfiles/Gemfile.rails bundle exec rake rails
 require 'test_helper'
 
+ActionController::TestCase.class_eval do
+  setup do
+    @routes = Rails.application.routes
+  end
+end
+
 class GenericResponderTest < ActionController::TestCase
   tests SongsController
 
@@ -104,5 +110,24 @@ class ResponderRunTest < ActionController::TestCase
 
   test "Create [html/valid]" do
 
+  end
+end
+
+
+# #present.
+class ControllerPresentTest < ActionController::TestCase
+  tests BandsController
+
+  test "#present" do
+    get :new
+
+    assert_select "form input#band_name"
+    assert_select "b", ",Band,true,Band::Create"
+  end
+
+  test "#present with block" do
+    get :new_with_block
+
+    assert_select "b", "Band,Band,true,Band::Create"
   end
 end

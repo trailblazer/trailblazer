@@ -35,6 +35,7 @@ app.routes.draw do
   resources :bands do
     collection do
       post :create
+      get :new_with_block
     end
   end
 end

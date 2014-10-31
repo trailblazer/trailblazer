@@ -34,6 +34,9 @@ class Band < ActiveRecord::Base
     model Band, :create
 
     contract do
+      include Reform::Form::ActiveModel
+      model Band
+
       property :name, validates: {presence: true}
       property :locality
     end
