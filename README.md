@@ -269,7 +269,7 @@ Trailblazer is basically a mash-up of mature gems that have been developed over 
 
 ### Normalizing params
 
-Override `#process_params!` to add or remove values to `params`. This is called in `#run`, `#respond` and `#present`.
+Override `#process_params!` to add or remove values to `params` before the operation is run. This is called in `#run`, `#respond` and `#present`.
 
 ```ruby
 class CommentsController < ApplicationController
