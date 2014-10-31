@@ -14,7 +14,24 @@ class GenericResponderTest < ActionController::TestCase
 
     song = Song.last
     assert_equal "A Beautiful Indifference", song.title
-    assert_equal nil, song.length
+    assert_equal nil, song.length # params overwritten from controller.
+  end
+end
+
+# overriding Controller#process_params.
+class ProcessParamsTest < ActionController::TestCase
+  tests BandsController
+
+  setup do
+    @routes = Rails.application.routes
+  end
+
+  test "Create with overridden #process_params" do
+    post :create, band: {name: "Kreator"}
+
+    band = Band.last
+    assert_equal "Kreator", band.name
+    assert_equal "Essen", band.locality
   end
 end
 

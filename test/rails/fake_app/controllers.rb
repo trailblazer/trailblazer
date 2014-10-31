@@ -36,5 +36,15 @@ ERB
 end
 
 class BandsController < ApplicationController
+  include Trailblazer::Operation::Controller
+  respond_to :html
 
+  def create
+    respond Band::Create
+  end
+
+private
+  def process_params!(params) # this is where you set :current_user, etc.
+    params[:band][:locality] = "Essen"
+  end
 end

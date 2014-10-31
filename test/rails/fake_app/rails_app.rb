@@ -31,6 +31,12 @@ app.routes.draw do
       post :create_with_params
     end
   end
+
+  resources :bands do
+    collection do
+      post :create
+    end
+  end
 end
 
 require 'trailblazer/operation/responder'

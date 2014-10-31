@@ -27,3 +27,21 @@ class Song < ActiveRecord::Base
     end
   end
 end
+
+class Band < ActiveRecord::Base
+  class Create < Trailblazer::Operation
+    include CRUD, Responder
+    model Band, :create
+
+    contract do
+      property :name, validates: {presence: true}
+      property :locality
+    end
+
+    def process(params)
+      validate(params[:band]) do
+        contract.save
+      end
+    end
+  end
+end

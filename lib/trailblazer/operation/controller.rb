@@ -1,6 +1,7 @@
 module Trailblazer::Operation::Controller
   # TODO: test me.
 
+private
   ## no #validate!
   # TODO: test without block, e.g. for #show
   def present(operation_class, params=self.params)
@@ -64,6 +65,8 @@ module Trailblazer::Operation::Controller
 
   # TODO: what if it's JSON and we want OP:JSON to deserialise etc?
   def respond(operation_class, params=self.params, &block)
+    process_params!(params)
+
     res, @operation = operation_class.run(params)
 
     @form      = @operation.contract
@@ -73,5 +76,8 @@ module Trailblazer::Operation::Controller
 
     op = @operation
     respond_with @operation, &Proc.new { |formats| block.call(op, formats) } if block_given?
+  end
+
+  def process_params!(params)
   end
 end
