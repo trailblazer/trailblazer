@@ -26,6 +26,10 @@ app.routes.draw do
     member do # argh.
       delete :destroy_with_formats
     end
+
+    collection do
+      post :create_with_params
+    end
   end
 end
 

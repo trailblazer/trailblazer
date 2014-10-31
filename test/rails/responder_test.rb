@@ -1,13 +1,28 @@
 # BUNDLE_GEMFILE=gemfiles/Gemfile.rails bundle exec rake rails
 require 'test_helper'
 
+class GenericResponderTest < ActionController::TestCase
+  tests SongsController
+
+  setup do
+    @routes = Rails.application.routes
+  end
+
+  test "Create with params" do
+    post :create_with_params, {song: {title: "You're Going Down", length: 120}}
+    assert_response 302
+
+    song = Song.last
+    assert_equal "A Beautiful Indifference", song.title
+    assert_equal nil, song.length
+  end
+end
+
 class ResponderRespondTest < ActionController::TestCase
   tests SongsController
 
   setup do
     @routes = Rails.application.routes
-
-    # 50.times {|i| User.create! :name => "user#{i}"}
   end
 
   # HTML

@@ -20,6 +20,10 @@ ERB
     respond Song::Create
   end
 
+  def create_with_params
+    respond Song::Create, song: {title: "A Beautiful Indifference"}
+  end
+
   def destroy
     respond Song::Delete
   end
