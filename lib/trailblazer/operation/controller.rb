@@ -27,9 +27,10 @@ private
     end
   end
 
-
   # Endpoint::Invocation
   def run(operation_class, params=self.params, &block)
+    process_params!(params)
+
     unless request.format == :html
       # FIXME: how do we know the "name" of the Operation body?
       # return respond_with User::Update::JSON.run(params.merge(user: request.body.string))
@@ -49,12 +50,12 @@ private
     @form      = @operation.contract
     @model     = @operation.model
 
-    yield @operation if res
+    yield @operation if res and block_given?
 
     Else.new(op, !res)
   end
-  private :present, :run
 
+  # The block passed to #respond is always run, regardless of the validity result.
   # TODO: what if it's JSON and we want OP:JSON to deserialise etc?
   def respond(operation_class, params=self.params, &block)
     process_params!(params)

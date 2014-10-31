@@ -38,6 +38,10 @@ app.routes.draw do
       post :create
       get :new_with_block
     end
+
+    member do
+      post :update_with_block
+    end
   end
 end
 

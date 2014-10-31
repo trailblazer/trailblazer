@@ -72,6 +72,18 @@ ERB
     respond Band::Create
   end
 
+  def update
+    run Band::Create
+
+    render text: "no block: #{@operation.model.name}, #{params[:band][:locality]}"
+  end
+
+  def update_with_block
+    run Band::Create do |op|
+      render text: "with block: #{op.model.name}, #{params[:band][:locality]}"
+    end
+  end
+
 private
   def process_params!(params) # this is where you set :current_user, etc.
     params[:band] ||= {}

@@ -118,8 +118,14 @@ end
 class ResponderRunTest < ActionController::TestCase
   tests BandsController
 
-  test "Create [html/valid]" do
+  test "[html/valid]" do
+    put :update, {id: 1, band: {name: "Nofx"}}
+    assert_equal "no block: Nofx, Essen", response.body
+  end
 
+  test "[html/invalid]" do
+    put :update_with_block, {id: 1, band: {name: "Nofx"}}
+    assert_equal "with block: Nofx, Essen", response.body
   end
 end
 

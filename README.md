@@ -99,7 +99,7 @@ def create
 end
 ```
 
-An additional block will be executed if the operation result is valid.
+An additional block will be executed _only if_ the operation result is valid.
 
 ```ruby
 def create
@@ -116,12 +116,15 @@ The case of an invalid response can be handled after the block.
 ```ruby
 def create
   run Comment::Create do |op|
-    # valid!
+    # valid code..
+    return
   end
 
   render action: :new
 end
 ```
+
+Don't forget to `return` from the valid block, otherwise both the valid block _and_ the invalid calls after it will be invoked.
 
 ### Responding
 
@@ -262,7 +265,24 @@ More complex UI logic happens in _View Models_ as found in [Cells](https://githu
 Trailblazer is basically a mash-up of mature gems that have been developed over the past 10 years and are used in hundreds and thousands of production apps.
 
 
+## Controller API
 
+### Normalizing params
+
+Override `#process_params!` to add or remove values to `params`. This is called in `#run`, `#respond` and `#present`.
+
+```ruby
+class CommentsController < ApplicationController
+  # ..
+
+private
+  def process_params!(params)
+    params.merge!(current_user: current_user)
+  end
+end
+```
+
+This centralizes params normalization and doesn't require you to do that in every action manually.
 
 ## Operation API
 
