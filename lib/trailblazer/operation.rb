@@ -65,7 +65,7 @@ module Trailblazer
     def run(*params)
       setup!(*params) # where do we assign/find the model?
 
-      [process(*params), @valid].reverse
+      [process(*params), valid?].reverse
     end
 
     attr_reader :contract
