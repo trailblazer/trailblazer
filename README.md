@@ -4,9 +4,11 @@ _Trailblazer is a thin layer on top of Rails. It gently enforces encapsulation, 
 
 In a nutshell: Trailblazer makes you write **logicless models** that purely act as data objects, don't contain callbacks, nested attributes, validations or domain logic. It **removes bulky controllers** and strong_parameters by supplying additional layers to hold that code and **completely replaces helpers**.
 
-Please sign up for my upcoming book [Trailblazer - A new architecture for Rails](https://leanpub.com/trailblazer) and check out the free sample chapter!
+<img style="float: right" src="https://raw.github.com/apotonick/trailblazer/master/docs/trb.jpg">
 
-The free [sample application] implements what we discuss in the book.
+Please sign up for my upcoming book [Trailblazer - A new architecture for Rails](https://leanpub.com/trailblazer), check out the free sample chapter and [let me know](http://twitter.com/apotonick) what you think!
+
+The [demo application](https://github.com/apotonick/gemgem-trbrb) implements what we discuss in the book.
 
 ## Mission
 
