@@ -2,8 +2,7 @@ module Trailblazer::Operation::Controller
   # TODO: test me.
 
 private
-  # Doesn't run #validate, just for HTML (e.g. #new and #edit).
-  def present(operation_class, params=self.params)
+  def form(operation_class, params=self.params) # consider private.
     process_params!(params)
 
     @operation = operation_class.new(:validate => false).run(params).last # FIXME: make that available via Operation.
@@ -11,6 +10,16 @@ private
     @model     = @operation.model
 
     yield @operation if block_given?
+  end
+
+  # Doesn't run #validate.
+  # TODO: allow only_setup.
+  # TODO: dependency to CRUD (::model_name)
+  def present(operation_class, params=self.params)
+    res, op = operation!(operation_class, params) { [true, operation_class.present(params)] }
+
+    yield op if block_given?
+    respond_with op
   end
 
   # full-on Op[]
@@ -29,48 +38,39 @@ private
 
   # Endpoint::Invocation
   def run(operation_class, params=self.params, &block)
-    process_params!(params)
+    res, op = operation!(operation_class, params) { operation_class.run(params) }
 
-    unless request.format == :html
-      # FIXME: how do we know the "name" of the Operation body?
-      # return respond_with User::Update::JSON.run(params.merge(user: request.body.string))
-      concept_name = operation_class.to_s.split("::").first.downcase # TODO: holy shit test this properly
-
-      res, op = operation_class.const_get(:JSON).run(params.merge(concept_name => request.body.string))
-
-
-
-      respond_with op
-      return Else.new(op, false)
-    end
-
-    # only if format==:html!!!!!!!
-    res, @operation = operation_class.run(params)
-
-    @form      = @operation.contract
-    @model     = @operation.model
-
-    yield @operation if res and block_given?
+    yield op if res and block_given?
 
     Else.new(op, !res)
   end
 
   # The block passed to #respond is always run, regardless of the validity result.
-  # TODO: what if it's JSON and we want OP:JSON to deserialise etc?
   def respond(operation_class, params=self.params, &block)
-    process_params!(params)
+    res, op = operation!(operation_class, params) { operation_class.run(params) }
 
-    res, @operation = operation_class.run(params)
-
-    @form      = @operation.contract
-    @model     = @operation.model
-
-    return respond_with @operation if not block_given?
-
-    op = @operation
-    respond_with @operation, &Proc.new { |formats| block.call(op, formats) } if block_given?
+    return respond_with op if not block_given?
+    respond_with op, &Proc.new { |formats| block.call(op, formats) } if block_given?
   end
 
   def process_params!(params)
+  end
+
+  # Normalizes parameters and invokes the operation (including its builders).
+  def operation!(operation_class, params)
+    process_params!(params)
+
+    unless request.format == :html
+      # this is what happens:
+      # respond_with Comment::Update::JSON.run(params.merge(comment: request.body.string))
+      concept_name = operation_class.model_name # this could be renamed to ::concept_name soon.
+      params.merge!(concept_name => request.body.string)
+    end
+
+    res, @operation = yield # Create.run(params)
+    @form  = @operation.contract
+    @model = @operation.model
+
+    [res, @operation] # DISCUSS: do we need result here? or can we just go pick op.valid?
   end
 end

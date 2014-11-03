@@ -37,7 +37,7 @@ module Trailblazer
 
       # Runs #process without validate and returns the form object.
       def present(*params)
-        new(:validate => false).run(*params).last.contract # not sure if i like this.
+        build_operation_class(*params).new(:validate => false).run(*params).last
       end
 
       def contract(&block)

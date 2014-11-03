@@ -123,25 +123,51 @@ class ResponderRunTest < ActionController::TestCase
     assert_equal "no block: Nofx, Essen", response.body
   end
 
-  test "[html/invalid]" do
+  test "with block [html/valid]" do
     put :update_with_block, {id: 1, band: {name: "Nofx"}}
-    assert_equal "with block: Nofx, Essen", response.body
+    assert_equal "[valid] with block: Nofx, Essen", response.body
+  end
+
+  test "with block [html/invalid]" do
+    put :update_with_block, {id: 1, band: {name: ""}}
+  end
+end
+
+#present.
+class ControllerPresentTest < ActionController::TestCase
+  tests BandsController
+
+  # let (:band) { }
+
+  test "#present" do
+    band = Band::Create[band: {name: "Nofx"}].model
+
+    get :show, id: band.id
+
+    assert_equal "bands/show.html: Band,Band,true,Band::Create,Essen\n", response.body
+  end
+
+  test "#present [JSON]" do
+    band = Band::Create[band: {name: "Nofx"}].model
+
+    get :show, id: band.id, format: :json
+    assert_equal "{\"name\":\"Nofx\"}", response.body
   end
 end
 
 
-# #present.
-class ControllerPresentTest < ActionController::TestCase
+# #form.
+class ControllerFormTest < ActionController::TestCase
   tests BandsController
 
-  test "#present" do
+  test "#form" do
     get :new
 
     assert_select "form input#band_name"
     assert_select "b", ",Band,true,Band::Create"
   end
 
-  test "#present with block" do
+  test "#form with block" do
     get :new_with_block
 
     assert_select "b", "Band,Band,true,Band::Create,Essen"

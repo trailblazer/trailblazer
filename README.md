@@ -6,6 +6,8 @@ In a nutshell: Trailblazer makes you write **logicless models** that purely act 
 
 Please sign up for my upcoming book [Trailblazer - A new architecture for Rails](https://leanpub.com/trailblazer) and check out the free sample chapter!
 
+The free [sample application] implements what we discuss in the book.
+
 ## Mission
 
 While _Trailblazer_ offers you abstraction layers for all aspects of Ruby On Rails, it does _not_ missionize you. Wherever you want, you may fall back to the "Rails Way" with fat models, monolithic controllers, global helpers, etc. This is not a bad thing, but allows you to step-wise introduce Trailblazer's encapsulation in your app without having to rewrite it.
@@ -53,7 +55,7 @@ Trailblazer uses Rails routing to map URLs to controllers (we will add simplific
 
 Controllers are lean endpoints for HTTP. They differentiate between request formats like HTML or JSON and immediately dispatch to an operation. Controllers do not contain any business logic.
 
-Trailblazer provides three methods to present and invoke operations. But before that, you need to include the `Controller` module.
+Trailblazer provides four methods to present and invoke operations. But before that, you need to include the `Controller` module.
 
 ```ruby
 class CommentsController < ApplicationController
@@ -68,7 +70,7 @@ Operations can populate and present their form object so it can be used with `si
 ```ruby
 
 def new
-  present Comment::Create
+  form Comment::Create
 end
 ```
 
@@ -78,6 +80,8 @@ This will run the operation but _not_ its `validate` code. It then sets the `@fo
 = form_for @form do |f|
   = f.input f.body
 ```
+
+`#form` is meant for HTML actions like `#new` and `#edit`, only.
 
 ### Running an operation
 
@@ -138,8 +142,6 @@ end
 
 This will simply run the operation and chuck the instance into the responder letting the latter sort out what to render or where to redirect. The operation delegates respective calls to its internal `model`.
 
-[TODO: add how we find JSON/XML pendants]
-
 You can also handle different formats in that block. It is totally fine to do that in the controller as this is _endpoint_ logic that is HTTP-specific and not business.
 
 ```ruby
@@ -154,6 +156,22 @@ end
 The block passed to `#respond` is _always_ executed, regardless of the operation's validity result. Goal is to let the responder handle the validity of the operation.
 
 The `formats` object is simply passed on to `#respond_with`.
+
+### Presenting
+
+For `#show` actions that simply present the model using a HTML page or a JSON or XML document the `#present` method comes in handy.
+
+```ruby
+def show
+  present Comment::Create
+end
+```
+
+Again, this will only run the operation's setup and provide the model in `@model`. You can then use a cell or controller view for HTML to present the model.
+
+For document-based APIs and request types that are not HTTP the operation will be advised to render the JSON or XML document using the operation's representer.
+
+Note that `#present` will also work instead of `#form` (allowing it to be used in `#new` and `#edit`, too) as the responder will _not_ trigger any rendering in those actions.
 
 ### Controller API
 
@@ -269,7 +287,7 @@ Trailblazer is basically a mash-up of mature gems that have been developed over 
 
 ### Normalizing params
 
-Override `#process_params!` to add or remove values to `params`. This is called in `#run`, `#respond` and `#present`.
+Override `#process_params!` to add or remove values to `params` before the operation is run. This is called in `#run`, `#respond` and `#present`.
 
 ```ruby
 class CommentsController < ApplicationController
@@ -283,6 +301,22 @@ end
 ```
 
 This centralizes params normalization and doesn't require you to do that in every action manually.
+
+
+### Different Request Formats
+
+The controller helpers `#present` and `#respond` automatically pass the request body into the operation via the `params` hash. It's up to the operation's builder to decide which class to instantiate.
+
+```ruby
+class Create < Trailblazer::Operation
+  builds do |params|
+    JSON if params[:format] == "json"
+  end
+end
+```
+
+[Note that this will soon be provided with a module.]
+
 
 ## Operation API
 
