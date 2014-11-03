@@ -47,7 +47,7 @@ The opposite is the case: Controller, view and model become lean endpoints for H
 
 ## Routing
 
-Traiblazer uses Rails routing to map URLs to controllers (we will add simplifications to routing soon).
+Trailblazer uses Rails routing to map URLs to controllers (we will add simplifications to routing soon).
 
 ## Controllers
 
