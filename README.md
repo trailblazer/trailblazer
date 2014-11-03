@@ -6,6 +6,8 @@ In a nutshell: Trailblazer makes you write **logicless models** that purely act 
 
 Please sign up for my upcoming book [Trailblazer - A new architecture for Rails](https://leanpub.com/trailblazer) and check out the free sample chapter!
 
+The free [sample application] implements what we discuss in the book.
+
 ## Mission
 
 While _Trailblazer_ offers you abstraction layers for all aspects of Ruby On Rails, it does _not_ missionize you. Wherever you want, you may fall back to the "Rails Way" with fat models, monolithic controllers, global helpers, etc. This is not a bad thing, but allows you to step-wise introduce Trailblazer's encapsulation in your app without having to rewrite it.
