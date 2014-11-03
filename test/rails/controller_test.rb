@@ -125,11 +125,11 @@ class ResponderRunTest < ActionController::TestCase
 
   test "with block [html/valid]" do
     put :update_with_block, {id: 1, band: {name: "Nofx"}}
-    assert_equal "with block: Nofx, Essen", response.body
+    assert_equal "[valid] with block: Nofx, Essen", response.body
   end
 
   test "with block [html/invalid]" do
-
+    put :update_with_block, {id: 1, band: {name: ""}}
   end
 end
 

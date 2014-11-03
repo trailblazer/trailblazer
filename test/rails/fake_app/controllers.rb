@@ -87,8 +87,10 @@ ERB
 
   def update_with_block
     run Band::Create do |op|
-      render text: "with block: #{op.model.name}, #{params[:band][:locality]}"
+      return render text: "[valid] with block: #{op.model.name}, #{params[:band][:locality]}"
     end
+
+    render text: "[invalid] with block: #{@operation.model.name}, #{params[:band][:locality]}"
   end
 
 private
