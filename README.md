@@ -303,7 +303,7 @@ This centralizes params normalization and doesn't require you to do that in ever
 
 ### Different Request Formats
 
-The controller helpers `#present`, `#respond` and friends automatically pass the request body into the operation via the `params` hash. It's up to the operation's builder to decide which class to instantiate.
+The controller helpers `#present` and `#respond` automatically pass the request body into the operation via the `params` hash. It's up to the operation's builder to decide which class to instantiate.
 
 ```ruby
 class Create < Trailblazer::Operation
