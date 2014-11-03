@@ -240,7 +240,7 @@ class OperationTest < MiniTest::Spec
     end
 
     def process(params)
-      @object = Object # arbitraty init code.
+      @object = Object # arbitrary init code.
 
       validate(params, Object) do
         raise "this should not be run."
@@ -248,7 +248,7 @@ class OperationTest < MiniTest::Spec
     end
   end
 
-  it { ContractOnlyOperation.present({})._model.must_equal Object }
+  it { ContractOnlyOperation.present({}).contract._model.must_equal Object }
 
 end
 

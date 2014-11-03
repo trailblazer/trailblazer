@@ -47,6 +47,7 @@ end
 
 require 'trailblazer/operation/responder'
 require 'trailblazer/operation/controller'
+require 'trailblazer/operation/representer'
 
 require 'fake_app/controllers'
 require 'fake_app/models'

@@ -46,5 +46,18 @@ class Band < ActiveRecord::Base
         contract.save
       end
     end
+
+    class JSON < self
+      action :find
+      include Representer
+      # self.representer_class = Class.new(contract_class)
+      # representer_class do
+      #   include Reform::Form::JSON
+      # end
+    end
+
+    builds do |params|
+      JSON if params[:format] == "json"
+    end
   end
 end

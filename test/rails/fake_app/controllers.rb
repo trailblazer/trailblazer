@@ -1,11 +1,11 @@
 # controllers
 class ApplicationController < ActionController::Base
+  append_view_path "test/rails/fake_app/views"
 end
 
 class SongsController < ApplicationController
   respond_to :json, :js
 
-  append_view_path "test/rails/fake_app/views"
   def index
     @users = Song.all.page params[:page]
     render inline: <<-ERB
@@ -43,10 +43,17 @@ end
 
 class BandsController < ApplicationController
   include Trailblazer::Operation::Controller
-  respond_to :html
+  respond_to :html, :json
+
+  def show
+    present Band::Create do |op|
+      @klass    = op.model.class
+      @locality = params[:band][:locality]
+    end # respond_to
+  end
 
   def new
-    present Band::Create
+    form Band::Create
 
     render inline: <<-ERB
 <%= form_for @form do |f| %>
@@ -58,7 +65,7 @@ ERB
   end
 
   def new_with_block
-    present Band::Create do |op|
+    form Band::Create do |op|
       @klass = op.model.class
       @locality = params[:band][:locality]
     end
