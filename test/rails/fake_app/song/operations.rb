@@ -53,9 +53,16 @@ class Band < ActiveRecord::Base
       # representer_class do
       #   include Reform::Form::JSON
       # end
+
+      require "reform/form/json"
+      contract do
+        include Reform::Form::JSON # FIXME: why doesn't this work?
+
+      end
     end
 
     builds do |params|
+      puts params.inspect
       JSON if params[:format] == "json"
     end
   end

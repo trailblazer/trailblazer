@@ -95,8 +95,8 @@ ERB
 
 private
   def process_params!(params) # this is where you set :current_user, etc.
-    # puts request.format
     return if params[:format] == "json"
+
     params[:band] ||= {}
     params[:band][:locality] = "Essen"
   end
