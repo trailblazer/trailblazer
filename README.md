@@ -393,12 +393,14 @@ Sometimes you don't need a form object but still want the validity behavior of a
 
 ```ruby
 def process(params)
-  return invalid!(self) unless params[:id]
+  return invalid! unless params[:id]
 
   Comment.find(params[:id]).destroy
   self
 end
 ```
+
+`#invalid!` returns `self` per default but accepts any result.
 
 
 ### Worker::FileMarshaller: needs representable 2.1.1 (.schema)

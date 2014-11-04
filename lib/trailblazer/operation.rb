@@ -94,7 +94,7 @@ module Trailblazer
       self
     end
 
-    def invalid!(result)
+    def invalid!(result=self)
       @valid = false
       result
     end

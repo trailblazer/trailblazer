@@ -183,7 +183,7 @@ class OperationTest < MiniTest::Spec
   it { OperationReassigningParams.run({:title => "Day Like This"}).must_equal [true, "Day Like This"] }
 
 
-  # #invalid!
+  # #invalid!(result)
   class OperationCallingInvalid < Trailblazer::Operation
     def process(params)
       return 1 if params
@@ -193,6 +193,16 @@ class OperationTest < MiniTest::Spec
 
   it { OperationCallingInvalid.run(true).must_equal [true, 1] }
   it { OperationCallingInvalid.run(nil).must_equal [false, 2] }
+
+  # #invalid! without result defaults to operation instance.
+  class OperationCallingInvalidWithoutResult < Trailblazer::Operation
+    include Comparable
+    def process(params)
+      invalid!
+    end
+  end
+
+  it { OperationCallingInvalidWithoutResult.run(true).must_equal [false, OperationCallingInvalidWithoutResult.new] }
 
 
   # calling return from #validate block leaves result true.
