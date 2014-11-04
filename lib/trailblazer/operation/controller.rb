@@ -63,7 +63,8 @@ private
     unless request.format == :html
       # this is what happens:
       # respond_with Comment::Update::JSON.run(params.merge(comment: request.body.string))
-      concept_name = operation_class.model_class # this could be renamed to ::concept_class soon.
+      concept_name = operation_class.model_class.to_s.underscore # this could be renamed to ::concept_class soon.
+
       params.merge!(concept_name => request.body.string)
     end
 

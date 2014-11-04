@@ -46,9 +46,9 @@ class BandsController < ApplicationController
   respond_to :html, :json
 
   def show
-    present Band::Create do |op|
+    present Band::Update do |op|
       @klass    = op.model.class
-      @locality = params[:band][:locality]
+      @locality = params[:band][:locality] unless params[:format] == "json"
     end # respond_to
   end
 
@@ -95,6 +95,8 @@ ERB
 
 private
   def process_params!(params) # this is where you set :current_user, etc.
+    # puts request.format
+    return if params[:format] == "json"
     params[:band] ||= {}
     params[:band][:locality] = "Essen"
   end

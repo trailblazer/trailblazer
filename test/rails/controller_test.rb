@@ -44,10 +44,6 @@ end
 class ResponderRespondTest < ActionController::TestCase
   tests SongsController
 
-  setup do
-    @routes = Rails.application.routes
-  end
-
   # HTML
   # #respond Create [valid]
   test "Create [html/valid]" do
@@ -100,18 +96,16 @@ class ResponderRespondTest < ActionController::TestCase
     assert_response 200
     assert_equal "Song slayer!", response.body
   end
+end
 
-  # TODO: #present
-  # TODO: #run
-
-  # describe "#run" do
-  #   test "#run" do
-
-  # end
-  # end
-
-
-
+class ResponderRespondWithJSONTest < ActionController::TestCase
+  tests BandsController
+  # JSON
+  test "Create [JSON/valid]" do
+    post :create, {name: "SNFU"}.to_json, format: :json
+    assert_response :success
+    assert_redirected_to band_path(Band.last)
+  end
 end
 
 
@@ -144,7 +138,7 @@ class ControllerPresentTest < ActionController::TestCase
 
     get :show, id: band.id
 
-    assert_equal "bands/show.html: Band,Band,true,Band::Create,Essen\n", response.body
+    assert_equal "bands/show.html: Band,Band,true,Band::Update,Essen\n", response.body
   end
 
   test "#present [JSON]" do

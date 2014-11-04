@@ -1,7 +1,7 @@
 PATH
   remote: ../
   specs:
-    trailblazer (0.0.1)
+    trailblazer (0.1.0)
       actionpack (>= 3.0.0)
       reform (= 1.2.0.beta1)
       representable (>= 2.1.1, < 2.2.0)
