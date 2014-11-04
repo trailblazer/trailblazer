@@ -372,7 +372,7 @@ class Comment::Image::Crop < Trailblazer::Operation
   include Worker
 
   def process(params)
-    # will be run asynchronous.
+    # will be run asynchronously.
   end
 end
 ```
