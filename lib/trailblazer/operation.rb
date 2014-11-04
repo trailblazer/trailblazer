@@ -10,7 +10,7 @@ module Trailblazer
     inheritable_attr :contract_class
     self.contract_class = Reform::Form.clone
     self.contract_class.class_eval do
-      def self.name # FIXME: rewrite validators and don't fucking use this piece of shit named ActiveModel. I hate Rails.
+      def self.name # FIXME: don't use ActiveModel::Validations in Reform, it sucks.
         # for whatever reason, validations climb up the inheritance tree and require _every_ class to have a name (4.1).
         "Reform::Form"
       end
