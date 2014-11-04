@@ -34,6 +34,7 @@ class ProcessParamsTest < ActionController::TestCase
 
   test "Create with overridden #process_params" do
     post :create, band: {name: "Kreator"}
+    assert_redirected_to band_path(Band.last)
 
     band = Band.last
     assert_equal "Kreator", band.name
@@ -53,6 +54,7 @@ class ResponderRespondTest < ActionController::TestCase
 
   test "Create [html/invalid]" do
     post :create, {song: {title: ""}}
+    assert_response 200
     assert_equal @response.body, "{:title=&gt;[&quot;can&#39;t be blank&quot;]}"
   end
 
@@ -65,11 +67,13 @@ class ResponderRespondTest < ActionController::TestCase
 
   test "respond with block [html/valid]" do
     post :create_with_block, {song: {title: "You're Going Down"}}
+    assert_response 200
     assert_equal "block run, valid: true", response.body
   end
 
   test "respond with block [html/invalid]" do
     post :create_with_block, {song: {title: ""}}
+    assert_response 200
     assert_equal "block run, valid: false", response.body
   end
 
@@ -100,11 +104,12 @@ end
 
 class ResponderRespondWithJSONTest < ActionController::TestCase
   tests BandsController
+
   # JSON
   test "Create [JSON/valid]" do
     post :create, {name: "SNFU"}.to_json, format: :json
-    assert_response :success
-    assert_redirected_to band_path(Band.last)
+    assert_response 201
+    assert_equal "SNFU", Band.last.name
   end
 end
 

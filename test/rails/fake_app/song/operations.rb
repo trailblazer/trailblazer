@@ -62,7 +62,6 @@ class Band < ActiveRecord::Base
     end
 
     builds do |params|
-      puts params.inspect
       JSON if params[:format] == "json"
     end
   end
