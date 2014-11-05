@@ -39,6 +39,14 @@ class Band < ActiveRecord::Base
 
       property :name, validates: {presence: true}
       property :locality
+
+      # class: Song #=> always create new song
+      # instance: { Song.find(params[:id]) or Song.new } # same as find_or_create ?
+      # this is what i want:
+      # maybe make populate_if_empty a representable feature?
+      collection :songs, populate_if_empty: Song do
+        property :title
+      end
     end
 
     def process(params)
@@ -49,15 +57,10 @@ class Band < ActiveRecord::Base
 
     class JSON < self
       include Representer
-      # self.representer_class = Class.new(contract_class)
-      # representer_class do
-      #   include Reform::Form::JSON
-      # end
 
       require "reform/form/json"
       contract do
-        include Reform::Form::JSON # FIXME: why doesn't this work?
-
+        include Reform::Form::JSON # this allows deserialising JSON.
       end
     end
 
@@ -72,6 +75,10 @@ class Band < ActiveRecord::Base
     # TODO: infer stuff per default.
     class JSON < self
       include Representer
+
+      representer do
+        collection :songs, inherit: true, render_empty: false # tested in ControllerPresentTest.
+      end
     end
 
     builds do |params|
