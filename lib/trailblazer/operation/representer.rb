@@ -3,15 +3,16 @@ module Trailblazer::Operation::Representer
     base.extend Uber::InheritableAttr
     base.inheritable_attr :representer_class
     # TODO: allow representer without contract?!
-    # TODO: we have to extract the schema here, not subclass the contract.
-    base.representer_class = Class.new(base.contract_class.schema)
-
     base.extend ClassMethods
   end
 
   module ClassMethods
     def representer(&block)
-      representer_class.class_eval(&block)
+      build_representer_class.class_eval(&block)
+    end
+
+    def build_representer_class
+      representer_class || self.representer_class= Class.new(contract_class.schema)
     end
   end
 end

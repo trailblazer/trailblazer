@@ -30,7 +30,7 @@ end
 
 class Band < ActiveRecord::Base
   class Create < Trailblazer::Operation
-    include CRUD, Responder
+    include CRUD, Responder, Representer
     model Band, :create
 
     contract do
@@ -56,8 +56,6 @@ class Band < ActiveRecord::Base
     end
 
     class JSON < self
-      include Representer
-
       require "reform/form/json"
       contract do
         include Reform::Form::JSON # this allows deserialising JSON.
@@ -78,8 +76,6 @@ class Band < ActiveRecord::Base
 
     # TODO: infer stuff per default.
     class JSON < self
-      include Representer
-
       self.contract_class = Create::JSON.contract_class
       self.representer_class = Create::JSON.representer_class
     end
