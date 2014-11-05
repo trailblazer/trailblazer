@@ -62,6 +62,10 @@ class Band < ActiveRecord::Base
       contract do
         include Reform::Form::JSON # this allows deserialising JSON.
       end
+
+      representer do
+        collection :songs, inherit: true, render_empty: false # tested in ControllerPresentTest.
+      end
     end
 
     builds do |params|
@@ -76,9 +80,8 @@ class Band < ActiveRecord::Base
     class JSON < self
       include Representer
 
-      representer do
-        collection :songs, inherit: true, render_empty: false # tested in ControllerPresentTest.
-      end
+      self.contract_class = Create::JSON.contract_class
+      self.representer_class = Create::JSON.representer_class
     end
 
     builds do |params|
