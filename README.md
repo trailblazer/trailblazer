@@ -379,10 +379,10 @@ end
 
 ### Rendering Operation's Form
 
-You have access to an operation's form using `::contract`.
+You have access to an operation's form using `::present`.
 
 ```ruby
-Comment::Create.contract(params)
+Comment::Create.present(params)
 ```
 
 This will run the operation's `#process` method _without_ the validate block and return the contract.
