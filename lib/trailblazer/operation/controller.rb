@@ -5,7 +5,7 @@ private
   def form(operation_class, params=self.params) # consider private.
     process_params!(params)
 
-    @operation = operation_class.new(:validate => false).run(params).last # FIXME: make that available via Operation.
+    @operation = operation_class.new.present(params)
     @form      = @operation.contract
     @model     = @operation.model
 
