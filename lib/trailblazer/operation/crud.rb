@@ -39,8 +39,8 @@ module Trailblazer
       end
 
     private
-      def setup!(params)
-        @model ||= instantiate_model(params)
+      def model!(params)
+        instantiate_model(params)
       end
 
       def instantiate_model(params)

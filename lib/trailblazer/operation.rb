@@ -85,11 +85,11 @@ module Trailblazer
   private
 
     def setup!(*params)
-      @model = model!(params)
+      @model = model!(*params)
     end
 
     # Implement #model! to find/create your operation model (if required).
-    def model!(params)
+    def model!(*params)
     end
 
     def validate(params, model, contract_class=nil) # NOT to be overridden?!! it creates Result for us.
