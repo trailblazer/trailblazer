@@ -238,8 +238,7 @@ class OperationTest < MiniTest::Spec
   it { OperationReceivingLottaArguments.run(Object, {}).must_equal([true, [Object, {}]]) }
 
 
-  # TODO: experimental.
-  # ::present to avoid running #validate.
+  # ::present only runs #setup! which runs #model!.
   class ContractOnlyOperation < Trailblazer::Operation
     self.contract_class = class Contract
       def initialize(model)
@@ -249,12 +248,12 @@ class OperationTest < MiniTest::Spec
       self
     end
 
-    def process(params)
-      @object = Object # arbitrary init code.
+    def model!(params)
+      Object
+    end
 
-      validate(params, Object) do
-        raise "this should not be run."
-      end
+    def process(params)
+      raise "This is not run!"
     end
   end
 

@@ -3,7 +3,7 @@ PATH
   specs:
     trailblazer (0.1.1)
       actionpack (>= 3.0.0)
-      reform (~> 1.2.1)
+      reform (~> 1.2.0)
       representable (>= 2.1.1, < 2.2.0)
       uber (>= 0.0.10)
 
@@ -83,7 +83,7 @@ GEM
       hitimes
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
-    uber (0.0.10)
+    uber (0.0.11)
 
 PLATFORMS
   ruby
