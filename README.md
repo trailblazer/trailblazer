@@ -165,7 +165,7 @@ For `#show` actions that simply present the model using a HTML page or a JSON or
 
 ```ruby
 def show
-  present Comment::Create
+  present Comment::Update
 end
 ```
 
