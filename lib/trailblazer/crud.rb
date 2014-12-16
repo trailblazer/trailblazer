@@ -1,0 +1,1 @@
+Dir.glob("app/concepts/**/crud.rb") { |f| require_dependency f, true }
