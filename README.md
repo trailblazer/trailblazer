@@ -418,8 +418,15 @@ You can just add
 require 'trailblazer/autoloading'
 ```
 
-to `config/initializers/trailblazer.rb` and files will be "automatically" loaded.
+to `config/initializers/trailblazer.rb` and implementation files like `Operation` will be automatically loaded.
 
+In case you structure your CRUD operations in the `app/concepts/thing/crud.rb` file layout we use in the book, you're gonna run into `Missing constant` trouble. As the `crud.rb` files are not found by Rails it is a good idea to enable CRUD autoloading.
+
+```ruby
+require trailblazer/crud_autoloading
+```
+
+This will go through `app/concepts/`, find all the `crud.rb` files, autload their corresponding namespace (e.g. `Thing`, which is a model) and then load the `crud` file.
 
 
 ## Why?

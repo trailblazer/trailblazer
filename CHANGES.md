@@ -1,3 +1,7 @@
+# 0.1.2
+
+* Add `crud_autoloading`.
+
 # 0.1.1
 
 * Use reform-1.2.0.
