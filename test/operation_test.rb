@@ -40,6 +40,8 @@ class OperationRunTest < MiniTest::Spec
 
   # return operation when ::call
   it { Operation.call(true).must_equal operation }
+  it { Operation.(true).must_equal operation }
+  # #[] is alias for .()
   it { Operation[true].must_equal operation }
 
   # ::[] raises exception when invalid.
@@ -88,7 +90,7 @@ class OperationRunTest < MiniTest::Spec
 
   # Operation#contract returns @contract
   let (:contract)  { Operation::Contract.new }
-  it { Operation[true].contract.must_equal contract }
+  it { Operation.(true).contract.must_equal contract }
 end
 
 
@@ -119,7 +121,7 @@ class OperationTest < MiniTest::Spec
   # ::run
   it { OperationWithoutValidateCall.run(Object).must_equal [true, Object] }
   # ::[]
-  it { OperationWithoutValidateCall[Object].must_equal(Object) }
+  it { OperationWithoutValidateCall.(Object).must_equal(Object) }
   # ::run with invalid!
   it { OperationWithoutValidateCall.run(nil).must_equal [false, nil] }
   # ::run with block, invalid
@@ -155,7 +157,7 @@ class OperationTest < MiniTest::Spec
   end
 
   it { OperationWithValidateBlock.run(false).last.secret_contract.must_equal nil }
-  it('zzz') { OperationWithValidateBlock[true].secret_contract.must_equal OperationWithValidateBlock.contract_class.new.extend(Comparable) }
+  it('zzz') { OperationWithValidateBlock.(true).secret_contract.must_equal OperationWithValidateBlock.contract_class.new.extend(Comparable) }
 
   # manually setting @valid
   class OperationWithManualValid < Trailblazer::Operation
@@ -168,7 +170,7 @@ class OperationTest < MiniTest::Spec
   # ::run
   it { OperationWithManualValid.run(Object).must_equal [false, Object] }
   # ::[]
-  it { OperationWithManualValid[Object].must_equal(Object) }
+  it { OperationWithManualValid.(Object).must_equal(Object) }
 
 
   # re-assign params
@@ -281,8 +283,8 @@ class OperationBuilderTest < MiniTest::Spec
   it { Operation.run({}).last.must_equal "operation" }
   it { Operation.run({sub: true}).last.must_equal "sub:operation" }
 
-  it { Operation[{}].must_equal "operation" }
-  it { Operation[{sub: true}].must_equal "sub:operation" }
+  it { Operation.({}).must_equal "operation" }
+  it { Operation.({sub: true}).must_equal "sub:operation" }
 end
 
 # ::contract builds Reform::Form class
