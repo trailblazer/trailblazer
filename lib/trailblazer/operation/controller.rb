@@ -64,8 +64,9 @@ private
       # this is what happens:
       # respond_with Comment::Update::JSON.run(params.merge(comment: request.body.string))
       concept_name = operation_class.model_class.to_s.underscore # this could be renamed to ::concept_class soon.
+      request_body = request.body.respond_to?(:string) ? request.body.string : request.body.read
 
-      params.merge!(concept_name => request.body.string)
+      params.merge!(concept_name => request_body)
     end
 
     res, @operation = yield # Create.run(params)
