@@ -6,7 +6,7 @@ In a nutshell: Trailblazer makes you write **logicless models** that purely act 
 
 ![](https://raw.githubusercontent.com/apotonick/trailblazer/master/doc/trb.jpg)
 
-Please sign up for my upcoming book [Trailblazer - A new architecture for Rails](https://leanpub.com/trailblazer), check out the free sample chapter and [let me know](http://twitter.com/apotonick) what you think!
+Please buy my book [Trailblazer - A new architecture for Rails](https://leanpub.com/trailblazer) and [let me know](http://twitter.com/apotonick) what you think! I am still working on the book but keep adding new chapters every other week. It will be about 300 pages and we're developing a real, full-blown Rails/Trb application.
 
 The [demo application](https://github.com/apotonick/gemgem-trbrb) implements what we discuss in the book.
 
