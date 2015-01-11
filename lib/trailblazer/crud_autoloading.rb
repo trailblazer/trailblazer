@@ -3,6 +3,10 @@
 Dir.glob("app/concepts/**/crud.rb") do |f|
   path = f.sub("app/concepts/", "")
 
-  path.sub("/crud.rb", "").camelize.constantize # load the model first (Thing).
+
+
+  model = path.sub("/crud.rb", "")
+
+  require_dependency "app/models/#{model}" # load the model file, first (thing.rb).
   require_dependency path # load model/crud.rb (Thing::Create, Thing::Update, and so on).
 end
