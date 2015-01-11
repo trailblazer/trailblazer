@@ -171,4 +171,10 @@ class ControllerFormTest < ActionController::TestCase
 
     assert_select "b", "Band,Band,true,Band::Create,Essen"
   end
+
+  test "#form with builder" do
+    get :new, admin: true
+
+    assert_select "b", ",Band,true,Band::Create::Admin"
+  end
 end

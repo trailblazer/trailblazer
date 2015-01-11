@@ -1,3 +1,8 @@
+# 0.1.3
+
+* `crud_autoloading` now simply `require_dependency`s model files, then does the same for the CRUD operation file. This should fix random undefined constant problems in development.
+* `Controller#form` did not use builders. This is fixed now.
+
 # 0.1.2
 
 * Add `crud_autoloading`.

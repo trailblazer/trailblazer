@@ -5,7 +5,7 @@ private
   def form(operation_class, params=self.params) # consider private.
     process_params!(params)
 
-    @operation = operation_class.new.present(params)
+    @operation = operation_class.present(params)
     @form      = @operation.contract
     @model     = @operation.model
 
