@@ -67,6 +67,11 @@ class Band < ActiveRecord::Base
     end
 
     class Admin < self
+      def process(params)
+        res = super
+        model.update_attribute :name, "#{model.name} [ADMIN]"
+        res
+      end
     end
 
     # TODO: wait for uber 0.0.10 and @dutow.

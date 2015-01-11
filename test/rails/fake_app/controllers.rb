@@ -82,7 +82,7 @@ ERB
   def update
     run Band::Create
 
-    render text: "no block: #{@operation.model.name}, #{params[:band][:locality]}"
+    render text: "no block: #{@operation.model.name}, #{params[:band][:locality]}, #{@operation.class}"
   end
 
   def update_with_block

@@ -113,13 +113,29 @@ class ResponderRespondWithJSONTest < ActionController::TestCase
   end
 end
 
+# TODO: merge with above tests on SongsController.
+class ControllerRespondTest < ActionController::TestCase
+  tests BandsController
+
+  test "#respond with builds" do
+    post :create, band: {name: "SNFU"}, admin: true
+    assert_response 302
+    assert_equal "SNFU [ADMIN]", Band.last.name
+  end
+end
+
 
 class ResponderRunTest < ActionController::TestCase
   tests BandsController
 
   test "[html/valid]" do
     put :update, {id: 1, band: {name: "Nofx"}}
-    assert_equal "no block: Nofx, Essen", response.body
+    assert_equal "no block: Nofx, Essen, Band::Create", response.body
+  end
+
+  test "[html/valid] with builds" do
+    put :update, {id: 1, band: {name: "Nofx"}, admin: true}
+    assert_equal "no block: Nofx [ADMIN], Essen, Band::Create::Admin", response.body
   end
 
   test "with block [html/valid]" do
@@ -146,6 +162,7 @@ class ControllerPresentTest < ActionController::TestCase
     assert_equal "bands/show.html: Band,Band,true,Band::Update,Essen\n", response.body
   end
 
+  # TODO: this implicitely tests builds. maybe have separate test for that?
   test "#present [JSON]" do
     band = Band::Create[band: {name: "Nofx"}].model
 
