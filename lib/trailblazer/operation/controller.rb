@@ -78,6 +78,6 @@ private
   def setup_instance_variables!
     @form = @operation.contract
     @model = @operation.model
-    instance_variable_set(:"@#{@model.table_name.singularize}", @model)
+    instance_variable_set(:"@#{@model.class.table_name.singularize}", @model)
   end
 end
