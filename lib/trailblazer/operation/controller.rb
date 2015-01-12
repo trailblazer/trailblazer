@@ -70,9 +70,14 @@ private
     end
 
     res, @operation = yield # Create.run(params)
-    @form  = @operation.contract
-    @model = @operation.model
+    setup_instance_variables!
 
     [res, @operation] # DISCUSS: do we need result here? or can we just go pick op.valid?
+  end
+
+  def setup_instance_variables!
+    @form = @operation.contract
+    @model = @operation.model
+    instance_variable_set(:"@#{@model.class.to_s.downcase}", @model)
   end
 end
