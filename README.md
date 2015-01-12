@@ -179,6 +179,19 @@ Note that `#present` will also work instead of `#form` (allowing it to be used i
 
 In all three cases the following instance variables are assigned: `@operation`, `@form`, `@model`.
 
+**Note:** If you want to include named instance variables for you views you must include another ActiveRecord specific module.
+
+```ruby
+require 'trailblazer/operation/controller/active_record'
+
+class ApplicationController < ActionController::Base
+  include Trailblazer::Operation::Controller
+  include Trailblazer::Operation::Controller::ActiveRecord
+end
+```
+
+This will give you acces to named instance variables of your entities. ex: `@song`, `@artist`, etc.
+
 ## Operation
 
 Operations encapsulate business logic. One operation per high-level domain _function_ is used. Different formats or environments are handled in subclasses. Operations don't know about HTTP.

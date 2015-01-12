@@ -78,6 +78,10 @@ private
   def setup_instance_variables!
     @form = @operation.contract
     @model = @operation.model
-    instance_variable_set(:"@#{@model.class.table_name.singularize}", @model)
+    setup_additional_instance_variables!
+  end
+
+  # overridden in Controller::ActiveRecord
+  def setup_additional_instance_variables!
   end
 end
