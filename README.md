@@ -422,8 +422,10 @@ to `config/initializers/trailblazer.rb` and implementation classes like `Operati
 
 If you structure your CRUD operations using the `app/concepts/*/crud.rb` file layout we use in the book, the `crud.rb` files are not gonna be found by Rails automatically. It is a good idea to enable CRUD autoloading.
 
+At the end of your `config/application.rb` file, add the following.
+
 ```ruby
-require "trailblazer/crud_autoloading"
+require "trailblazer/rails/railtie"
 ```
 
 This will go through `app/concepts/`, find all the `crud.rb` files, autoload their corresponding namespace (e.g. `Thing`, which is a model) and then load the `crud.rb` file.
