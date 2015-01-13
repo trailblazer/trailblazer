@@ -420,6 +420,8 @@ require "trailblazer/autoloading"
 
 to `config/initializers/trailblazer.rb` and implementation classes like `Operation` will be automatically loaded.
 
+## Operation Autoloading
+
 If you structure your CRUD operations using the `app/concepts/*/crud.rb` file layout we use in the book, the `crud.rb` files are not gonna be found by Rails automatically. It is a good idea to enable CRUD autoloading.
 
 At the end of your `config/application.rb` file, add the following.
