@@ -11,7 +11,9 @@ module Trailblazer
     end
 
     # thank you, http://stackoverflow.com/a/17573888/465070
-    initializer 'trailblazer.install' do |app|
+    initializer 'trailblazer.install', after: :load_config_initializers do |app|
+      # the trb autoloading has to be run after initializers have been loaded, so we can tweak inclusion of features in
+      # initializers.
       if Rails.configuration.cache_classes
         Trailblazer::Railtie.autoload_crud_operations(app)
       else
