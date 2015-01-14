@@ -1,3 +1,7 @@
+# 0.2.1
+
+* Added `Operation#setup_model(params)` that can be overridden to add nested objects or process models right after `model!`. Don't add deserialization logic here, let Reform/Representable do that.
+
 # 0.2.0
 
 ## API Changes

@@ -433,6 +433,16 @@ require "trailblazer/rails/railtie"
 This will go through `app/concepts/`, find all the `crud.rb` files, autoload their corresponding namespace (e.g. `Thing`, which is a model) and then load the `crud.rb` file.
 
 
+## Undocumented Features
+
+(Please don't read this section!)
+
+### Additional Model Setup
+
+Override `Operation#setup_model(params)` to add nested objects that can be infered from `params` or are static.
+
+This is called right after `#model!`.
+
 ## Why?
 
 * Grouping code, views and assets by concepts increases the **maintainability** of your apps. Developers will find their way faster into your structure as the file layout is more intuitive.

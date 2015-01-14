@@ -101,6 +101,18 @@ class CrudTest < MiniTest::Spec
     ModelUpdateOperation[{id: 1, song: {title: "Mercy Day For Mr. Vengeance"}}].model.must_equal song
   end
 
+
+  # Op#setup_model
+  class SetupModelOperation < CreateOperation
+    def setup_model(params)
+      model.instance_eval { @params = params; def params; @params.to_s; end }
+    end
+  end
+
+  it { SetupModelOperation[song: {title: "Emily Kane"}].model.params.must_equal "{:song=>{:title=>\"Emily Kane\"}}" }
+
+
+
   # no call to ::model raises error.
   class NoModelOperation < Trailblazer::Operation
     include CRUD
