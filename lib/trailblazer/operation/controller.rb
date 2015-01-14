@@ -19,7 +19,8 @@ private
     res, op = operation!(operation_class, params) { [true, operation_class.present(params)] }
 
     yield op if block_given?
-    respond_with op
+    # respond_with op
+    # TODO: implement respond(present: true)
   end
 
   # full-on Op[]
