@@ -33,6 +33,8 @@ app.routes.draw do
     end
   end
 
+  resources :active_record_bands
+
   resources :bands do
     collection do
       post :create

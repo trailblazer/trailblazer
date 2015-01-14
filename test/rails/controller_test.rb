@@ -124,7 +124,6 @@ class ControllerRespondTest < ActionController::TestCase
   end
 end
 
-
 class ResponderRunTest < ActionController::TestCase
   tests BandsController
 
@@ -171,7 +170,6 @@ class ControllerPresentTest < ActionController::TestCase
   end
 end
 
-
 # #form.
 class ControllerFormTest < ActionController::TestCase
   tests BandsController
@@ -193,5 +191,16 @@ class ControllerFormTest < ActionController::TestCase
     get :new, admin: true
 
     assert_select "b", ",Band,true,Band::Create::Admin"
+  end
+end
+
+class ActiveRecordPresentTest < ActionController::TestCase
+  tests ActiveRecordBandsController
+
+  test "#present" do
+    band = Band::Create[band: {name: "Nofx"}].model
+    get :show, id: band.id
+    assert_not_nil assigns(:band)
+    assert_equal "active_record_bands/show.html: Band,Band,true,Band::Update\n", response.body
   end
 end

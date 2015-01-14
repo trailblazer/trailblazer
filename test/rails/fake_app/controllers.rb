@@ -103,3 +103,14 @@ private
     params[:band][:locality] = "Essen"
   end
 end
+
+require 'trailblazer/operation/controller/active_record'
+class ActiveRecordBandsController < ApplicationController
+  include Trailblazer::Operation::Controller
+  include Trailblazer::Operation::Controller::ActiveRecord
+  respond_to :html, :json
+
+  def show
+    present Band::Update
+  end
+end
