@@ -49,6 +49,8 @@ class BandsController < ApplicationController
     present Band::Update do |op|
       @klass    = op.model.class
       @locality = params[:band][:locality] unless params[:format] == "json"
+
+      render json: op.to_json if params[:format] == "json"
     end # render :show
   end
 
