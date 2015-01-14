@@ -173,7 +173,7 @@ Again, this will only run the operation's setup and provide the model in `@model
 
 For document-based APIs and request types that are not HTTP the operation will be advised to render the JSON or XML document using the operation's representer.
 
-Note that `#present` will also work instead of `#form` (allowing it to be used in `#new` and `#edit`, too) as the responder will _not_ trigger any rendering in those actions.
+Note that `#present` will leave rendering up to you - `respond_to` is _not_ called.
 
 ### Controller API
 
@@ -433,10 +433,14 @@ require "trailblazer/autoloading"
 
 to `config/initializers/trailblazer.rb` and implementation classes like `Operation` will be automatically loaded.
 
+## Operation Autoloading
+
 If you structure your CRUD operations using the `app/concepts/*/crud.rb` file layout we use in the book, the `crud.rb` files are not gonna be found by Rails automatically. It is a good idea to enable CRUD autoloading.
 
+At the end of your `config/application.rb` file, add the following.
+
 ```ruby
-require "trailblazer/crud_autoloading"
+require "trailblazer/rails/railtie"
 ```
 
 This will go through `app/concepts/`, find all the `crud.rb` files, autoload their corresponding namespace (e.g. `Thing`, which is a model) and then load the `crud.rb` file.

@@ -1,3 +1,15 @@
+# 0.2.0
+
+## API Changes
+
+* `Controller#present` no longer calls `respond_to`, but lets you do the rendering. This will soon be re-introduced using `respond(present: true)`.
+* `Controller#form` did not respect builders, this is fixed now.
+* Use `request.body.read` in Unicorn/etc. environments in `Controller#respond`.
+
+## Stuff
+
+* Autoloading changed, again. We now `require_dependency` in every request in dev.
+
 # 0.1.3
 
 * `crud_autoloading` now simply `require_dependency`s model files, then does the same for the CRUD operation file. This should fix random undefined constant problems in development.
