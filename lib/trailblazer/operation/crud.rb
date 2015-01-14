@@ -5,13 +5,18 @@ module Trailblazer
     module CRUD
       attr_reader :model
 
-      def self.included(base)
-        base.extend Uber::InheritableAttr
-        base.inheritable_attr :config
-        base.config = {}
+      module Included
+        def included(base)
+          base.extend Uber::InheritableAttr
+          base.inheritable_attr :config
+          base.config = {}
 
-        base.extend ClassMethods
+          base.extend ClassMethods
+        end
       end
+      # this makes ::included overrideable, e.g. to add more featues like CRUD::ActiveModel.
+      extend Included
+
 
       module ClassMethods
         def model(name, action=nil)
