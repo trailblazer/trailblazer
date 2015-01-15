@@ -443,6 +443,24 @@ Override `Operation#setup_model(params)` to add nested objects that can be infer
 
 This is called right after `#model!`.
 
+### ActiveModel Semantics
+
+When using Reform::Form::ActiveModel (which is used automatically in a Rails environment to make form builders work) you need to invoke `model Comment` in the contract. This can be inferred automatically from the operation by including `CRUD::ActiveModel`.
+
+```ruby
+class Create < Trailblazer::Operation
+  include CRUD
+  include CRUD::ActiveModel
+
+  model Comment
+
+  contract do # no need to call ::model, here.
+    property :text
+  end
+```
+
+If you want that in all CRUD operations, check out [how you can include](https://github.com/apotonick/gemgem-trbrb/blob/chapter-5/config/initializers/trailblazer.rb#L26) it automatically.
+
 ## Why?
 
 * Grouping code, views and assets by concepts increases the **maintainability** of your apps. Developers will find their way faster into your structure as the file layout is more intuitive.
