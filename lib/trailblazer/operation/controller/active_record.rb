@@ -1,5 +1,12 @@
+# Assigns an additional instance variable for +@model+ named after the model's table name (e.g. @comment).
 module Trailblazer::Operation::Controller::ActiveRecord
-  def setup_additional_instance_variables!
-    instance_variable_set(:"@#{@model.class.table_name.singularize}", @model)
+private
+  def setup_operation_instance_variables!
+    super
+    instance_variable_set(:"@#{operation_model_name}", @model)
+  end
+
+  def operation_model_name
+    @model.class.table_name.singularize
   end
 end

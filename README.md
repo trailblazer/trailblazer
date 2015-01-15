@@ -179,18 +179,7 @@ Note that `#present` will leave rendering up to you - `respond_to` is _not_ call
 
 In all three cases the following instance variables are assigned: `@operation`, `@form`, `@model`.
 
-**Note:** If you want to include named instance variables for you views you must include another ActiveRecord specific module.
-
-```ruby
-require 'trailblazer/operation/controller/active_record'
-
-class ApplicationController < ActionController::Base
-  include Trailblazer::Operation::Controller
-  include Trailblazer::Operation::Controller::ActiveRecord
-end
-```
-
-This will give you acces to named instance variables of your entities. ex: `@song`, `@artist`, etc.
+Named instance variables can be included, too. This is documented [here](#named-controller-instance-variables).
 
 ## Operation
 
@@ -473,6 +462,21 @@ class Create < Trailblazer::Operation
 ```
 
 If you want that in all CRUD operations, check out [how you can include](https://github.com/apotonick/gemgem-trbrb/blob/chapter-5/config/initializers/trailblazer.rb#L26) it automatically.
+
+### Named Controller Instance Variables
+
+If you want to include named instance variables for you views you must include another ActiveRecord specific module.
+
+```ruby
+require 'trailblazer/operation/controller/active_record'
+
+class ApplicationController < ActionController::Base
+  include Trailblazer::Operation::Controller
+  include Trailblazer::Operation::Controller::ActiveRecord
+end
+```
+
+This will setup a named instance variable of your operation's model, for example `@song`.
 
 ## Why?
 

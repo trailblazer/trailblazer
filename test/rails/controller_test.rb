@@ -200,7 +200,7 @@ class ActiveRecordPresentTest < ActionController::TestCase
   test "#present" do
     band = Band::Create[band: {name: "Nofx"}].model
     get :show, id: band.id
-    assert_equal assigns(:band), band
-    assert_equal "active_record_bands/show.html: Band,Band,true,Band::Update\n", response.body
+
+    assert_equal "active_record_bands/show.html: Band, Band, true, Band::Update", response.body
   end
 end

@@ -108,9 +108,11 @@ require 'trailblazer/operation/controller/active_record'
 class ActiveRecordBandsController < ApplicationController
   include Trailblazer::Operation::Controller
   include Trailblazer::Operation::Controller::ActiveRecord
-  respond_to :html, :json
+  respond_to :html
 
   def show
     present Band::Update
+
+    render text: "active_record_bands/show.html: #{@model.class}, #{@band.class}, #{@form.is_a?(Reform::Form)}, #{@operation.class}"
   end
 end
