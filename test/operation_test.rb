@@ -7,15 +7,14 @@ module Comparable
   end
 end
 
-class OperationRunTestt < MiniTest::Spec
-  class Operation1 < Trailblazer::Operation
+class OperationProcessParamsTest < MiniTest::Spec
+  class OperationProcessParam < Trailblazer::Operation
     # allow providing your own contract.
     self.contract_class = class Contract
       def initialize(*)
       end
       def validate(params)
-        return false if params[:valid] == false
-        "local #{params}"
+        params
       end
 
       def errors
@@ -36,8 +35,8 @@ class OperationRunTestt < MiniTest::Spec
     end
   end
 
-  let (:operation) { Operation1.new.extend(Comparable) }
-  it { Operation1.run({valid: true}).must_equal  ["local #{ {valid: true, garrett: "Rocks!"} }", operation] }
+  let (:operation) { OperationProcessParam.new.extend(Comparable) }
+  it { OperationProcessParam.run({valid: true}).must_equal  [{valid: true, garrett: "Rocks!"}, operation] }
 end
 
 class OperationRunTest < MiniTest::Spec
