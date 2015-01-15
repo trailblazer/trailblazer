@@ -374,6 +374,39 @@ end
 
 Another action is `:find` (which is currently doing the same as `:update`) to find a model by using `params[:id]`.
 
+
+### Normalizing params
+
+Override #process_params! to add or remove values to params before the operation is run.
+
+```ruby
+require 'trailblazer/operation/crud'
+
+class Comment < ActiveRecord::Base
+  class Create < Trailblazer::Operation
+    include CRUD
+    model Comment, :create
+
+    contract do
+      # ..
+    end
+
+    def process(params)
+      validate(params[:comment]) do |f|
+        f.save
+      end
+    end
+
+  private
+    def process_params!(params)
+      params.merge!(rating: params[:rating]) if params[:rating]
+    end
+  end
+end
+```
+
+This centralizes params normalization and doesn't require you to do that manually in `#process`.
+
 ### Background Processing
 
 To run an operation in Sidekiq (ActiveJob-support coming!) all you need to do is include the `Worker` module.
