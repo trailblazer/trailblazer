@@ -445,7 +445,7 @@ This is called right after `#model!`.
 
 ### ActiveModel Semantics
 
-When using Reform::Form::ActiveModel (which is used automatically in a Rails environment to make form builders work) you need to invoke `model Comment` in the contract. This can be inferred automatically from the operation by including `CRUD::ActiveModel`.
+When using `Reform::Form::ActiveModel` (which is used automatically in a Rails environment to make form builders work) you need to invoke `model Comment` in the contract. This can be inferred automatically from the operation by including `CRUD::ActiveModel`.
 
 ```ruby
 class Create < Trailblazer::Operation
