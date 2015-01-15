@@ -71,9 +71,18 @@ private
     end
 
     res, @operation = yield # Create.run(params)
-    @form  = @operation.contract
-    @model = @operation.model
+    setup_instance_variables!
 
     [res, @operation] # DISCUSS: do we need result here? or can we just go pick op.valid?
+  end
+
+  def setup_instance_variables!
+    @form = @operation.contract
+    @model = @operation.model
+    setup_additional_instance_variables!
+  end
+
+  # overridden in Controller::ActiveRecord
+  def setup_additional_instance_variables!
   end
 end
