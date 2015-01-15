@@ -46,7 +46,6 @@ module Trailblazer
         contract_class.class_eval(&block)
       end
 
-
     private
       def build_operation_class(*params)
         class_builder.call(*params) # Uber::Builder::class_builder
@@ -54,7 +53,6 @@ module Trailblazer
     end
 
     include Uber::Builder
-
 
     def initialize(options={})
       @valid            = true
@@ -65,6 +63,8 @@ module Trailblazer
     #   Operation.run(body: "Fabulous!") #=> [true, <Comment body: "Fabulous!">]
     def run(*params)
       setup!(*params) # where do we assign/find the model?
+
+      process_params!(*params)
 
       [process(*params), valid?].reverse
     end
@@ -83,6 +83,9 @@ module Trailblazer
     end
 
   private
+
+    def process_params!(*params)
+    end
 
     def setup!(*params)
       @model = model!(*params)
