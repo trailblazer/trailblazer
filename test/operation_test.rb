@@ -7,6 +7,37 @@ module Comparable
   end
 end
 
+class OperationProcessParamsTest < MiniTest::Spec
+  class OperationProcessParam < Trailblazer::Operation
+    # allow providing your own contract.
+    self.contract_class = class Contract
+      def initialize(*)
+      end
+      def validate(params)
+        params
+      end
+
+      def errors
+        Struct.new(:to_s).new("Op just calls #to_s on Errors!")
+      end
+
+      include Comparable
+      self
+    end
+
+    def process(params)
+      model = Object
+      validate(params, model)
+    end
+
+    def process_params!(params)
+      params.merge!(garrett: "Rocks!")
+    end
+  end
+
+  let (:operation) { OperationProcessParam.new.extend(Comparable) }
+  it { OperationProcessParam.run({valid: true}).must_equal  [{valid: true, garrett: "Rocks!"}, operation] }
+end
 
 class OperationRunTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
@@ -93,7 +124,6 @@ class OperationRunTest < MiniTest::Spec
   it { Operation.(true).contract.must_equal contract }
 end
 
-
 class OperationTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
     def process(params)
@@ -172,7 +202,6 @@ class OperationTest < MiniTest::Spec
   # ::[]
   it { OperationWithManualValid.(Object).must_equal(Object) }
 
-
   # re-assign params
   class OperationReassigningParams < Trailblazer::Operation
     def process(params)
@@ -183,7 +212,6 @@ class OperationTest < MiniTest::Spec
 
   # ::run
   it { OperationReassigningParams.run({:title => "Day Like This"}).must_equal [true, "Day Like This"] }
-
 
   # #invalid!(result)
   class OperationCallingInvalid < Trailblazer::Operation
@@ -205,7 +233,6 @@ class OperationTest < MiniTest::Spec
   end
 
   it { OperationCallingInvalidWithoutResult.run(true).must_equal [false, OperationCallingInvalidWithoutResult.new] }
-
 
   # calling return from #validate block leaves result true.
   class OperationUsingReturnInValidate < Trailblazer::Operation
@@ -229,7 +256,6 @@ class OperationTest < MiniTest::Spec
   it { OperationUsingReturnInValidate.run(true).must_equal [true, 1] }
   it { OperationUsingReturnInValidate.run(false).must_equal [false, 2] }
 
-
   # unlimited arguments for ::run and friends.
   class OperationReceivingLottaArguments < Trailblazer::Operation
     def process(model, params)
@@ -238,7 +264,6 @@ class OperationTest < MiniTest::Spec
   end
 
   it { OperationReceivingLottaArguments.run(Object, {}).must_equal([true, [Object, {}]]) }
-
 
   # ::present only runs #setup! which runs #model!.
   class ContractOnlyOperation < Trailblazer::Operation
@@ -260,7 +285,6 @@ class OperationTest < MiniTest::Spec
   end
 
   it { ContractOnlyOperation.present({}).contract._model.must_equal Object }
-
 end
 
 class OperationBuilderTest < MiniTest::Spec
