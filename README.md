@@ -366,35 +366,24 @@ Another action is `:find` (which is currently doing the same as `:update`) to fi
 
 ### Normalizing params
 
-Override #process_params! to add or remove values to params before the operation is run.
+Override #setup_params! to add or remove values to params before the operation is run.
 
 ```ruby
-require 'trailblazer/operation/crud'
-
-class Comment < ActiveRecord::Base
-  class Create < Trailblazer::Operation
-    include CRUD
-    model Comment, :create
-
-    contract do
-      # ..
-    end
-
-    def process(params)
-      validate(params[:comment]) do |f|
-        f.save
-      end
-    end
+class Create < Trailblazer::Operation
+  def process(params)
+    params #=> {show_all: true, admin: true, .. }
+  end
 
   private
     def process_params!(params)
-      params.merge!(rating: params[:rating]) if params[:rating]
+      params.merge!(show_all: true) if params[:admin]
     end
   end
 end
 ```
 
 This centralizes params normalization and doesn't require you to do that manually in `#process`.
+
 
 ### Background Processing
 

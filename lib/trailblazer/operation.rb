@@ -64,8 +64,6 @@ module Trailblazer
     def run(*params)
       setup!(*params) # where do we assign/find the model?
 
-      process_params!(*params)
-
       [process(*params), valid?].reverse
     end
 
@@ -83,13 +81,11 @@ module Trailblazer
     end
 
   private
-
-    def process_params!(*params)
-    end
-
     def setup!(*params)
+      setup_params!(*params)
+
       @model = model!(*params)
-      setup_model(*params)
+      setup_model!(*params)
     end
 
     # Implement #model! to find/create your operation model (if required).
@@ -97,7 +93,10 @@ module Trailblazer
     end
 
     # Override to add attributes that can be infered from params.
-    def setup_model(*params)
+    def setup_model!(*params)
+    end
+
+    def setup_params!(*params)
     end
 
     def validate(params, model, contract_class=nil) # NOT to be overridden?!! it creates Result for us.

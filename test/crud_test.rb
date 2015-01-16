@@ -102,9 +102,9 @@ class CrudTest < MiniTest::Spec
   end
 
 
-  # Op#setup_model
+  # Op#setup_model!
   class SetupModelOperation < CreateOperation
-    def setup_model(params)
+    def setup_model!(params)
       model.instance_eval { @params = params; def params; @params.to_s; end }
     end
   end

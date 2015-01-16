@@ -7,36 +7,19 @@ module Comparable
   end
 end
 
-class OperationProcessParamsTest < MiniTest::Spec
-  class OperationProcessParam < Trailblazer::Operation
-    # allow providing your own contract.
-    self.contract_class = class Contract
-      def initialize(*)
-      end
-      def validate(params)
-        params
-      end
-
-      def errors
-        Struct.new(:to_s).new("Op just calls #to_s on Errors!")
-      end
-
-      include Comparable
-      self
-    end
-
+class OperationSetupParamsTest < MiniTest::Spec
+  class OperationSetupParam < Trailblazer::Operation
     def process(params)
-      model = Object
-      validate(params, model)
+      params
     end
 
-    def process_params!(params)
+    def setup_params!(params)
       params.merge!(garrett: "Rocks!")
     end
   end
 
-  let (:operation) { OperationProcessParam.new.extend(Comparable) }
-  it { OperationProcessParam.run({valid: true}).must_equal  [{valid: true, garrett: "Rocks!"}, operation] }
+  let (:operation) { OperationSetupParam.new }
+  it { OperationSetupParam.run({valid: true}).must_equal [true, {valid: true, garrett: "Rocks!"}] }
 end
 
 class OperationRunTest < MiniTest::Spec
