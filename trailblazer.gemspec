@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = Trailblazer::VERSION
   spec.authors       = ["Nick Sutterer"]
   spec.email         = ["apotonick@gmail.com"]
-  spec.description   = %q{Trailblazer is a thin layer on top of Rails. It gently enforces encapsulation, an intuitive code structure and gives you an object-oriented architecture.}
-  spec.summary       = %q{A New Architecture For Rails.}
-  spec.homepage      = ""
+  spec.description   = %q{A high-level, modular architecture for Rails with domain and form objects, view models, twin decorators and representers.}
+  spec.summary       = %q{A new architecture for Rails.}
+  spec.homepage      = "http://www.trailblazerb.org"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
