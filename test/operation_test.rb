@@ -340,3 +340,21 @@ class OperationInheritanceTest < MiniTest::Spec
     song.band.must_equal nil
   end
 end
+
+
+class OperationErrorsTest < MiniTest::Spec
+  class Operation < Trailblazer::Operation
+    contract do
+      property :title, validates: {presence: true}
+    end
+
+    def process(params)
+      validate(params, OpenStruct.new) {}
+    end
+  end
+
+  it do
+    res, op = Operation.run({})
+    op.errors.to_s.must_equal "{:title=>[\"can't be blank\"]}"
+  end
+end

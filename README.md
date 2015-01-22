@@ -467,6 +467,10 @@ Override `Operation#setup_model(params)` to add nested objects that can be infer
 
 This is called right after `#model!`.
 
+### Validation Errors
+
+You can access the contracts `Errors` object via `Operation#errors`.
+
 ### ActiveModel Semantics
 
 When using `Reform::Form::ActiveModel` (which is used automatically in a Rails environment to make form builders work) you need to invoke `model Comment` in the contract. This can be inferred automatically from the operation by including `CRUD::ActiveModel`.

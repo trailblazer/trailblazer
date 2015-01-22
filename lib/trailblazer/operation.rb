@@ -76,6 +76,10 @@ module Trailblazer
 
     attr_reader :contract
 
+    def errors
+      contract.errors
+    end
+
     def valid?
       @valid
     end
