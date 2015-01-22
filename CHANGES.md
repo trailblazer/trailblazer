@@ -1,3 +1,7 @@
+# 0.2.3
+
+* Fix autoloading problems with spring by simplifying it.
+
 # 0.2.2
 
 # Added Operation#errors as every operation maintains a contract.
