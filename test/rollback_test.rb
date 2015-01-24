@@ -1,5 +1,10 @@
 require "test_helper"
 
+# TODO: rollback for composed operations: this is basically implemented already as every operation knows how to rollback.
+# however, this has to be run for composed operations.
+# we can also add Transaction and Lock for real uniqueness validators, etc.
+#
+# i am keen to try integrating https://github.com/collectiveidea/interactor organizers!
 module Trailblazer::Operation::Rollback
   def run(params)
     begin
