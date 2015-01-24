@@ -1,0 +1,42 @@
+require "test_helper"
+
+module Trailblazer::Operation::Rollback
+  def run(params)
+    begin
+      super
+    rescue
+      rollback!(params, $!)
+      [false, self]
+    end
+  end
+end
+
+class RollbackTest < MiniTest::Spec
+  class ExceptionalOperation < Trailblazer::Operation
+    include Rollback
+
+    def process(params)
+      @_params = params
+      raise # something happens.
+    end
+
+    attr_reader :_params, :_rollback_args
+
+    def rollback!(params, exception)
+      @_rollback_args = [params, exception]
+    end
+  end
+
+  module Comparable
+    def ==(other)
+      self.class == other.class
+    end
+  end
+
+  it do
+    op = ExceptionalOperation.("amazing")
+    op._params.must_equal "amazing"
+
+    op._rollback_args.must_equal ["amazing", RuntimeError.new.extend(Comparable)]
+  end
+end
