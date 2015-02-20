@@ -115,7 +115,7 @@ def create
 end
 ```
 
-Note that the operation instance is yield to the block.
+Note that the operation instance is yielded to the block.
 
 The case of an invalid response can be handled after the block.
 
