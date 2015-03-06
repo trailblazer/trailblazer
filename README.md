@@ -366,7 +366,7 @@ Another action is `:find` (which is currently doing the same as `:update`) to fi
 
 ### Normalizing params
 
-Override #setup_params! to add or remove values to params before the operation is run.
+Override `#setup_params!` to add or remove values to params before the operation is run.
 
 ```ruby
 class Create < Trailblazer::Operation
@@ -375,7 +375,7 @@ class Create < Trailblazer::Operation
   end
 
   private
-    def process_params!(params)
+    def setup_params!(params)
       params.merge!(show_all: true) if params[:admin]
     end
   end
