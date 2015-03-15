@@ -83,6 +83,10 @@ module Trailblazer
     def valid?
       @valid
     end
+    
+    def to_model
+      @model
+    end
 
   private
     def setup!(*params)
