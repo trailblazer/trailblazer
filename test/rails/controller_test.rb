@@ -158,7 +158,7 @@ class ControllerPresentTest < ActionController::TestCase
 
     get :show, id: band.id
 
-    assert_equal "bands/show.html: Band,Band,true,Band::Update,Essen\n", response.body
+    assert_equal "bands/show.html: Band,Band,true,Band::Update,Nofx", response.body
   end
 
   # TODO: this implicitely tests builds. maybe have separate test for that?

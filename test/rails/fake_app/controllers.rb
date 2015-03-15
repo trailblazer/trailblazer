@@ -50,7 +50,11 @@ class BandsController < ApplicationController
       @klass    = op.model.class
       @locality = params[:band][:locality] unless params[:format] == "json"
 
-      render json: op.to_json if params[:format] == "json"
+      if params[:format] == "json"
+        render json: op.to_json
+      else
+        render text: "bands/show.html: #{@model.class},#{@klass},#{@form.is_a?(Reform::Form)},#{@operation.class},#{@operation.model.name}"
+      end
     end # render :show
   end
 
