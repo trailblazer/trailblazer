@@ -2,7 +2,7 @@
 
 _Trailblazer is a thin layer on top of Rails. It gently enforces encapsulation, an intuitive code structure and gives you an object-oriented architecture._
 
-In a nutshell: Trailblazer makes you write **logicless models** that purely act as data objects, don't contain callbacks, nested attributes, validations or domain logic. It **removes bulky controllers** and strong_parameters by supplying additional layers to hold that code and **completely replaces helpers**.
+In a nutshell: Trailblazer makes you write **logicless models** that purely act as data objects, don't contain callbacks, nested attributes, validations or domain logic. **Controllers** become lean HTTP endpoints. Your **business logic** (including validation) is decoupled from the actual Rails framework and modeled in _operations_.
 
 ![](https://raw.githubusercontent.com/apotonick/trailblazer/master/doc/trb.jpg)
 
@@ -55,14 +55,127 @@ Trailblazer uses Rails routing to map URLs to controllers (we will add simplific
 
 ## Controllers
 
-Controllers are lean endpoints for HTTP. They differentiate between request formats like HTML or JSON and immediately dispatch to an operation. Controllers do not contain any business logic.
+Controllers are lean endpoints for HTTP. They differentiate between request formats like HTML or JSON and do not contain any business logic. Actions immediately dispatch to an operation.
+
+```ruby
+class CommentsController < ApplicationController
+  def create
+    Comment::Create.(params)
+  end
+```
+
+This can be simplified using the `run` method and allows you a simple conditional to handle failing operations.
+
+```ruby
+class CommentsController < ApplicationController
+  def create
+    run Comment::Create do |op|
+      return redirect_to(comment_path op.model) # success.
+    end
+
+    render :new # re-render form.
+  end
+```
+
+Again, the controller only knows how to dispatch to the operation and what to do for success and invalid processing. While business affairs (e.g. logging or rollbacks) are to be handled in the operation, the controller invokes rendering or redirecting.
+
+## Operation
+
+The [API is documented here](http://trailblazerb.org/gems/operation/api.html).
+
+Operations encapsulate business logic and are the heart of a Trailblazer architecture. One operation per high-level domain _function_ is used. Different formats or environments are handled in subclasses. Operations don't know about HTTP or the environment.
+
+An operation is not just a monolithic replacement for your business code. An operation is a simple orchestrator between the form object, models and your business code.
+
+You don't have to use the form/contract if you don't want it, BTW.
+
+```ruby
+class Comment < ActiveRecord::Base
+  class Create < Trailblazer::Operation
+    def process(params)
+      # do whatever you feel like.
+    end
+  end
+end
+```
+
+Operations only need to implement `#process` which receives the params from the caller.
+
+## Validations
+
+Operations usually have a form object which is simply a `Reform::Form` class. All the [API documented in Reform](https://github.com/apotonick/reform) can be applied and used.
+
+The operation makes use of the form object using the `#validate` method.
+
+```ruby
+class Comment < ActiveRecord::Base
+  class Create < Trailblazer::Operation
+    contract do
+      property :body, validates: {presence: true}
+    end
+
+    def process(params)
+      @model = Comment.new
+
+      validate(params[:comment], @model) do |f|
+        f.save
+      end
+    end
+  end
+end
+```
+
+The contract (aka _form_) is defined in the `::contract` block. You can implement nested forms, default values, validations, and everything else Reform provides.
+
+In case of a valid form the block for `#validate` is invoked. It receives the populated form object. You can use the form to save data or write your own logic. This is where your business logic is implemented, and in turn could be an invocation of service objects or organizers.
+
+Technically speaking, what really happens in `Operation#validate` is the following.
+
+```ruby
+contract_class.new(@model).validate(params[:comment])
+```
+
+This is a familiar work-flow from Reform. Validation does _not_ touch the model.
+
+
+
+
+If you prefer keeping your forms in separate classes or even files, you're free to do so.
+
+```ruby
+class Create < Trailblazer::Operation
+  self.contract_class = MyCommentForm
+```
+
+## Models
+
+Models for persistence can be implemented using any ORM you fancy, for instance [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord#active-record--object-relational-mapping-in-rails) or [Datamapper](http://datamapper.org/).
+
+In Trailblazer, models are completely empty and solely configure database-relevant directives and associations. No business logic is allowed in models. Only operations, views and cells can access models directly.
+
+## Views
+
+View rendering can happen using the controller as known from Rails. This is absolutely fine for simple views.
+
+More complex UI logic happens in _View Models_ as found in [Cells](https://github.com/apotonick/cells). View models also replace helpers.
+
+8. **HTTP API** Consuming and rendering API documents (e.g. JSON or XML) is done via [roar](https://github.com/apotonick/roar) and [representable](https://github.com/apotonick/representable). They usually inherit the schema from <em>Contract</em>s .
+
+10. **Tests** Subject to tests are mainly <em>Operation</em>s and <em>View Model</em>s, as they encapsulate endpoint behaviour of your app. As a nice side effect, factories are replaced by simple _Operation_ calls.
+
+## Overview
+
+Trailblazer is basically a mash-up of mature gems that have been developed over the past 10 years and are used in hundreds and thousands of production apps.
+
+Using the different layers is completely optional and up to you: Both Cells and Reform can be excluded from your stack if you wish so.
+
+## Controller API
 
 Trailblazer provides four methods to present and invoke operations. But before that, you need to include the `Controller` module.
 
 ```ruby
 class CommentsController < ApplicationController
   include Trailblazer::Operation::Controller
-
 ```
 
 ### Rendering the form object
@@ -144,6 +257,12 @@ end
 
 This will simply run the operation and chuck the instance into the responder letting the latter sort out what to render or where to redirect. The operation delegates respective calls to its internal `model`.
 
+`#respond` will accept options to be passed on to `respond_with`, too
+
+```ruby
+respond Comment::Create, params, location: brandnew_comments_path
+```
+
 You can also handle different formats in that block. It is totally fine to do that in the controller as this is _endpoint_ logic that is HTTP-specific and not business.
 
 ```ruby
@@ -175,119 +294,11 @@ For document-based APIs and request types that are not HTTP the operation will b
 
 Note that `#present` will leave rendering up to you - `respond_to` is _not_ called.
 
-### Controller API
 
 In all three cases the following instance variables are assigned: `@operation`, `@form`, `@model`.
 
 Named instance variables can be included, too. This is documented [here](#named-controller-instance-variables).
 
-## Operation
-
-Operations encapsulate business logic. One operation per high-level domain _function_ is used. Different formats or environments are handled in subclasses. Operations don't know about HTTP.
-
-```ruby
-class Comment < ActiveRecord::Base
-  class Create < Trailblazer::Operation
-    def process(params)
-      # do whatever you feel like.
-      self
-    end
-  end
-end
- ```
-
-Operations only need to implement `#process` which receives the params from the caller.
-
-### Call style
-
-The simplest way of running an operation is the _call style_.
-
-```ruby
-op = Comment::Create[params]
-```
-
-Using `Operation#[]` will return the operation instance. In case of an invalid operation, this will raise an exception.
-
-Note how this can easily be used for test factories.
-
-```ruby
-let(:comment) { Comment::Create[valid_comment_params].model }
-```
-
-Using operations as test factories is a fundamental concept of Trailblazer to remove buggy redundancy in tests and manual factories.
-
-### Run style
-
-You can run an operation manually and use the same block semantics as found in the controller.
-
-```ruby
-Comment::Create.run(params) do |op|
-  # only run when valid.
-end
-```
-
-Of course, this does _not_ throw an exception but simply skips the block when the operation is invalid.
-
-## Validations
-
-Operations usually have a form object which is simply a `Reform::Form` class. All the [API documented in Reform](https://github.com/apotonick/reform) can be applied and used.
-
-The operation makes use of the form object using the `#validate` method.
-
-```ruby
-class Comment < ActiveRecord::Base
-  class Create < Trailblazer::Operation
-    contract do
-      property :body, validates: {presence: true}
-    end
-
-    def process(params)
-      @model = Comment.new
-
-      validate(params[:comment], @model) do |f|
-        f.save
-      end
-    end
-  end
-end
- ```
-
-The contract (aka _form_) is defined in the `::contract` block. You can implement nested forms, default values, validations, and everything else Reform provides.
-
-In case of a valid form the block for `#validate` is invoked. It receives the populated form object. You can use the form to save data or write your own logic.
-
-Technically speaking, what really happens in `Operation#validate` is the following.
-
-```ruby
-contract_class.new(@model).validate(params[:comment])
-```
-
-This is a familiar work-flow from Reform. Validation does _not_ touch the model.
-
-
-## Models
-
-Models for persistence can be implemented using any ORM you fancy, for instance [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord#active-record--object-relational-mapping-in-rails) or [Datamapper](http://datamapper.org/).
-
-In Trailblazer, models are completely empty and solely configure database-relevant directives and associations. No business logic is allowed in models. Only operations, views and cells can access models directly.
-
-## Views
-
-View rendering can happen using the controller as known from Rails. This is absolutely fine for simple views.
-
-More complex UI logic happens in _View Models_ as found in [Cells](https://github.com/apotonick/cells). View models also replace helpers.
-
-
-
-
-8. **HTTP API** Consuming and rendering API documents (e.g. JSON or XML) is done via [roar](https://github.com/apotonick/roar) and [representable](https://github.com/apotonick/representable). They usually inherit the schema from <em>Contract</em>s .
-
-10. **Tests** Subject to tests are mainly <em>Operation</em>s and <em>View Model</em>s, as they encapsulate endpoint behaviour of your app. As a nice side effect, factories are replaced by simple _Operation_ calls.
-
-Trailblazer is basically a mash-up of mature gems that have been developed over the past 10 years and are used in hundreds and thousands of production apps.
-
-
-## Controller API
 
 ### Normalizing params
 
@@ -323,6 +334,36 @@ end
 
 
 ## Operation API
+
+### Call style
+
+The simplest way of running an operation is the _call style_.
+
+```ruby
+op = Comment::Create[params]
+```
+
+Using `Operation#[]` will return the operation instance. In case of an invalid operation, this will raise an exception.
+
+Note how this can easily be used for test factories.
+
+```ruby
+let(:comment) { Comment::Create[valid_comment_params].model }
+```
+
+Using operations as test factories is a fundamental concept of Trailblazer to remove buggy redundancy in tests and manual factories.
+
+### Run style
+
+You can run an operation manually and use the same block semantics as found in the controller.
+
+```ruby
+Comment::Create.run(params) do |op|
+  # only run when valid.
+end
+```
+
+Of course, this does _not_ throw an exception but simply skips the block when the operation is invalid.
 
 ### CRUD Semantics
 
@@ -366,7 +407,7 @@ Another action is `:find` (which is currently doing the same as `:update`) to fi
 
 ### Normalizing params
 
-Override #setup_params! to add or remove values to params before the operation is run.
+Override `#setup_params!` to add or remove values to params before the operation is run.
 
 ```ruby
 class Create < Trailblazer::Operation
@@ -375,7 +416,7 @@ class Create < Trailblazer::Operation
   end
 
   private
-    def process_params!(params)
+    def setup_params!(params)
       params.merge!(show_all: true) if params[:admin]
     end
   end

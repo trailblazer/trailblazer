@@ -22,12 +22,14 @@ app.initialize!
 
 # routes
 app.routes.draw do
+
   resources :songs do
     member do # argh.
       delete :destroy_with_formats
     end
 
     collection do
+      post :other_create
       post :create_with_params
       post :create_with_block
     end
@@ -45,6 +47,8 @@ app.routes.draw do
       post :update_with_block
     end
   end
+
+  resources :tenants, only: [:show]
 end
 
 require 'trailblazer/operation/responder'

@@ -94,3 +94,4 @@ class Trailblazer::Operation
     end
   end
 end
+

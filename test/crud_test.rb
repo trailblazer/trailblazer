@@ -5,9 +5,14 @@ class CrudTest < MiniTest::Spec
   Song = Struct.new(:title, :id) do
     class << self
       attr_accessor :find_result # TODO: eventually, replace with AR test.
+      attr_accessor :all_records
 
       def find(id)
         find_result
+      end
+      
+      def all
+        all_records
       end
     end
   end
@@ -100,6 +105,45 @@ class CrudTest < MiniTest::Spec
     Song.find_result = song = Song.new
     ModelUpdateOperation[{id: 1, song: {title: "Mercy Day For Mr. Vengeance"}}].model.must_equal song
   end
+  
+  # model Song, :action
+  class FetchCollectionOperation < CreateOperation
+    model Song
+
+    contract do
+      property :title
+    end 
+    def setup_model!(params)
+      if @user_role == 'admin'
+        @collection = Song.all
+      else
+        @collection = nil
+      end
+    end
+    
+    def setup_params!(params)
+      @user_role = "admin" if params[:user_id] == 0
+    end
+  end
+
+  # allows ::model, :action.
+  it do
+    songs = []
+    songs << CreateOperation[song: {title: "Blue Rondo a la Turk"}].model
+    songs << CreateOperation[song: {title: "Mercy Day For Mr. Vengeance"}].model
+    Song.all_records = songs
+    op = FetchCollectionOperation.present({user_id: 0})
+    op.collection.must_equal songs
+  end
+  
+  it do
+    songs = []
+    songs << CreateOperation[song: {title: "Blue Rondo a la Turk"}].model
+    songs << CreateOperation[song: {title: "Mercy Day For Mr. Vengeance"}].model
+    Song.all_records = songs
+    op = FetchCollectionOperation.present({user_id: 99})
+    op.collection.must_equal nil
+  end
 
 
   # Op#setup_model!
@@ -141,4 +185,24 @@ class CrudTest < MiniTest::Spec
   end
 
   it { ContractKnowsModelNameOperation.present(song: {title: "Direct Hit"}).contract.class.model_name.to_s.must_equal "CrudTest::Song" }
+
+
+  # allow passing validate(params, model, contract_class)
+  class OperationWithPrivateContract < Trailblazer::Operation
+    include CRUD
+    model Song
+
+    class Contract < Reform::Form
+      property :title
+    end
+
+    def process(params)
+      validate(params[:song], model, Contract) do |f|
+        f.sync
+      end
+    end
+  end
+
+  # uses private Contract class.
+  it { OperationWithPrivateContract.(song: {title: "Blue Rondo a la Turk"}).model.title.must_equal "Blue Rondo a la Turk" }
 end

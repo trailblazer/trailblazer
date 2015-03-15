@@ -16,3 +16,4 @@ test/version_tmp
 tmp
 /**/*.log
 vendor/bundle
+vendor/cache

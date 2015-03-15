@@ -10,8 +10,7 @@ class Song
     include Responder
 
     def process(params)
-      invalid!(self) if params == false
-      self
+      invalid! if params == false
     end
   end
 end
@@ -26,8 +25,7 @@ module MyApp
       model Song
 
       def process(params)
-        invalid!(self) if params == false
-        self
+        invalid! if params == false
       end
     end
   end

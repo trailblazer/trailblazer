@@ -33,9 +33,9 @@ module Trailblazer
       # ::call only returns the Operation instance (or whatever was returned from #validate).
       # This is useful in tests or in irb, e.g. when using Op as a factory and you already know it's valid.
       def call(*params)
-        build_operation_class(*params).new(:raise_on_invalid => true).run(*params).last
+        build_operation_class(*params).new(raise_on_invalid: true).run(*params).last
       end
-      alias_method :[], :call
+      alias_method :[], :call # TODO: deprecate #[] in favor of .().
 
       # Runs #process without validate and returns the form object.
       def present(*params)
@@ -45,7 +45,7 @@ module Trailblazer
       def contract(&block)
         contract_class.class_eval(&block)
       end
-
+      
     private
       def build_operation_class(*params)
         class_builder.call(*params) # Uber::Builder::class_builder
@@ -53,10 +53,10 @@ module Trailblazer
     end
 
     include Uber::Builder
+    attr_reader :collection
 
     def initialize(options={})
       @valid            = true
-      # DISCUSS: use reverse_merge here?
       @raise_on_invalid = options[:raise_on_invalid] || false
     end
 
@@ -64,9 +64,11 @@ module Trailblazer
     def run(*params)
       setup!(*params) # where do we assign/find the model?
 
-      [process(*params), valid?].reverse
-    end
+      process(*params)
 
+      [valid?, self]
+    end
+    
     def present(*params)
       setup!(*params)
 
@@ -83,7 +85,7 @@ module Trailblazer
     def valid?
       @valid
     end
-
+    
   private
     def setup!(*params)
       setup_params!(*params)
@@ -103,7 +105,7 @@ module Trailblazer
     def setup_params!(*params)
     end
 
-    def validate(params, model, contract_class=nil) # NOT to be overridden?!! it creates Result for us.
+    def validate(params, model, contract_class=nil)
       @contract = contract_for(contract_class, model)
 
       if @valid = contract.validate(params)
@@ -112,7 +114,7 @@ module Trailblazer
         raise!(contract)
       end
 
-      self
+      @valid
     end
 
     def invalid!(result=self)
@@ -137,6 +139,7 @@ module Trailblazer
 end
 
 require 'trailblazer/operation/crud'
+require "trailblazer/operation/dispatch"
 
 # run
 #   setup

@@ -17,17 +17,19 @@ private
   # TODO: dependency to CRUD (::model_name)
   def present(operation_class, params=self.params)
     res, op = operation!(operation_class, params) { [true, operation_class.present(params)] }
+    @collection = op.collection
 
     yield op if block_given?
     # respond_with op
     # TODO: implement respond(present: true)
   end
+  alias_method :collection, :present
 
   # full-on Op[]
   # Note: this is not documented on purpose as this concept is experimental. I don't like it too much and prefer
   # returns in the valid block.
   class Else
-    def initialize(op, run)
+    def initialize(op, run = true)
       @op  = op
       @run = run
     end
@@ -47,11 +49,11 @@ private
   end
 
   # The block passed to #respond is always run, regardless of the validity result.
-  def respond(operation_class, params=self.params, &block)
+  def respond(operation_class, params=self.params, respond_options = {}, &block)
     res, op = operation!(operation_class, params) { operation_class.run(params) }
 
-    return respond_with op if not block_given?
-    respond_with op, &Proc.new { |formats| block.call(op, formats) } if block_given?
+    return respond_with op, respond_options if not block_given?
+    respond_with op, respond_options, &Proc.new { |formats| block.call(op, formats) } if block_given?
   end
 
   def process_params!(params)
@@ -72,7 +74,6 @@ private
 
     res, @operation = yield # Create.run(params)
     setup_operation_instance_variables!
-
     [res, @operation] # DISCUSS: do we need result here? or can we just go pick op.valid?
   end
 

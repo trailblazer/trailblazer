@@ -87,8 +87,10 @@ class WorkerFileMarshallerTest < MiniTest::Spec
     include Worker::FileMarshaller # should be ContractFileMarshaller
 
     def process(params)
-      params
+      @params = params
     end
+
+    attr_reader :params
   end
 
   # TODO: no image
@@ -104,7 +106,9 @@ class WorkerFileMarshallerTest < MiniTest::Spec
 
     args["album"]["image"]["filename"].must_equal "cells.png"
 
-    _, params = Operation.perform_one # deserialize.
+    _, op = Operation.perform_one # deserialize.
+
+    params = op.params
 
     params["title"].must_equal("Dragonfly")
     params[:title].must_equal("Dragonfly") # must allow indifferent_access.

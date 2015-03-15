@@ -52,10 +52,22 @@ class ResponderRespondTest < ActionController::TestCase
     assert_redirected_to song_path(Song.last)
   end
 
+  test "Create [html/valid/location]" do
+    post :other_create, {song: {title: "You're Going Down"}}
+    assert_redirected_to other_create_songs_path
+  end
+
   test "Create [html/invalid]" do
     post :create, {song: {title: ""}}
     assert_response 200
     assert_equal @response.body, "{:title=&gt;[&quot;can&#39;t be blank&quot;]}"
+  end
+
+  test "Create [html/invalid/action]" do
+    post :other_create, {song: {title: ""}}
+    assert_response 200
+    assert_equal @response.body, "OTHER SONG\n{:title=&gt;[&quot;can&#39;t be blank&quot;]}\n"
+    assert_template "songs/another_view"
   end
 
   test "Delete [html/valid]" do
@@ -170,6 +182,34 @@ class ControllerPresentTest < ActionController::TestCase
   end
 end
 
+#collection
+class ControllerCollectionTest < ActionController::TestCase
+  tests BandsController
+
+  # let (:band) { }
+
+  test "#collection" do
+    Band.destroy_all
+    Band::Create[band: {name: "Nofx"}]
+    Band::Create[band: {name: "Ramones"}]
+
+
+    get :index
+
+    assert_equal "bands/index.html: Nofx Ramones \n", response.body
+  end
+
+  # TODO: this implicitely tests builds. maybe have separate test for that?
+  test "#collection [JSON]" do
+    Band.destroy_all
+    Band::Create[band: {name: "Nofx"}]
+    Band::Create[band: {name: "Ramones"}]
+
+    get :index, format: :json
+    assert_equal "[{\"name\":\"Nofx\"},{\"name\":\"Ramones\"}]", response.body
+  end
+end
+
 # #form.
 class ControllerFormTest < ActionController::TestCase
   tests BandsController
@@ -204,3 +244,15 @@ class ActiveRecordPresentTest < ActionController::TestCase
     assert_equal "active_record_bands/show.html: Band, Band, true, Band::Update", response.body
   end
 end
+
+class PrefixedTablenameControllerTest < ActionController::TestCase
+  tests TenantsController
+
+  test "show" do
+    tenant = Tenant.create(name: "My Tenant") # yepp, I am not using an operation! blasphemy!!!
+    get :show, id: tenant.id
+
+    assert_equal "My Tenant", response.body
+  end
+end
+

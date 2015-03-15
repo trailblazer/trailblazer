@@ -1,6 +1,28 @@
+# 0.3.0
+
+## Changes
+
+* In Railtie, use `ActionDispatch::Reloader.to_prepare` for autoloading, nothing else. This should fix spring reloading.
+* Allow `Op#validate(params, model, Contract)` with CRUD.
+* Allows prefixed table names, e.g. `admin.users` in `Controller`. The instance variables will be `@user`. Thanks to @fernandes and especially @HuckyDucky.
+
+## API change
+
+1. The return value of #process is no longer returned from ::run and ::call. they always return the operation instance.
+2. The return value of #validate is true or false. this allows a more intuitive operation body.
+
+    ```ruby
+    def process(params)
+      if validate(params)
+        .. do valid
+      else
+        .. handle invalid
+      end
+    end
+    ```
+
 # 0.2.3
 
-* Fix autoloading problems with spring by simplifying it.
 
 # 0.2.2
 

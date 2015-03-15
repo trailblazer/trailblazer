@@ -7,9 +7,9 @@ class SongsController < ApplicationController
   respond_to :json, :js
 
   def index
-    @users = Song.all.page params[:page]
+    collection Song::Index(params[:page])
     render inline: <<-ERB
-<%= render_cell(:user, :show, @users) %>
+<%= render_cell(:user, :show, @songs) %>
 ERB
   end
 
@@ -18,6 +18,10 @@ ERB
 
   def create
     respond Song::Create
+  end
+
+  def other_create
+    respond Song::Create, params, { location: other_create_songs_path, action: :another_view }
   end
 
   def create_with_params
@@ -45,12 +49,24 @@ class BandsController < ApplicationController
   include Trailblazer::Operation::Controller
   respond_to :html, :json
 
+  def index
+    collection Band::Index do |op|
+      @klass    = op.model.class
+
+      render json: op.to_json if params[:format] == "json"
+    end # render :show
+  end
+
   def show
     present Band::Update do |op|
       @klass    = op.model.class
       @locality = params[:band][:locality] unless params[:format] == "json"
 
-      render json: op.to_json if params[:format] == "json"
+      if params[:format] == "json"
+        render json: op.to_json
+      else
+        render text: "bands/show.html: #{@model.class},#{@klass},#{@form.is_a?(Reform::Form)},#{@operation.class},#{@operation.model.name}"
+      end
     end # render :show
   end
 
@@ -110,9 +126,28 @@ class ActiveRecordBandsController < ApplicationController
   include Trailblazer::Operation::Controller::ActiveRecord
   respond_to :html
 
+  def index
+    collection Band::Index
+
+    render text: "active_record_bands/index.html: #{@collection.class}, #{@bands.class}, #{@operation.class}"
+  end
+
   def show
     present Band::Update
 
     render text: "active_record_bands/show.html: #{@model.class}, #{@band.class}, #{@form.is_a?(Reform::Form)}, #{@operation.class}"
   end
 end
+
+require 'trailblazer/operation/controller/active_record'
+class TenantsController < ApplicationController
+  include Trailblazer::Operation::Controller
+  include Trailblazer::Operation::Controller::ActiveRecord
+  respond_to :html
+
+  def show
+    present Tenant::Show
+    render text: "#{@tenant.name}" # model ivar doesn't contain table prefix `bla.xxx`.
+  end
+end
+

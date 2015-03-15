@@ -39,8 +39,8 @@ module Trailblazer
 
 
       # #validate no longer accepts a model since this module instantiates it for you.
-      def validate(params, *args)
-        super(params, @model, *args)
+      def validate(params, model=self.model, *args)
+        super(params, model, *args)
       end
 
     private
@@ -61,7 +61,6 @@ module Trailblazer
       end
 
       alias_method :find_model, :update_model
-
 
       # Rails-specific.
       # ActiveModel will automatically call Form::model when creating the contract and passes
