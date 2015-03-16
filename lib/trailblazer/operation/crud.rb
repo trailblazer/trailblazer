@@ -5,13 +5,18 @@ module Trailblazer
     module CRUD
       attr_reader :model
 
-      def self.included(base)
-        base.extend Uber::InheritableAttr
-        base.inheritable_attr :config
-        base.config = {}
+      module Included
+        def included(base)
+          base.extend Uber::InheritableAttr
+          base.inheritable_attr :config
+          base.config = {}
 
-        base.extend ClassMethods
+          base.extend ClassMethods
+        end
       end
+      # this makes ::included overrideable, e.g. to add more featues like CRUD::ActiveModel.
+      extend Included
+
 
       module ClassMethods
         def model(name, action=nil)
@@ -39,8 +44,8 @@ module Trailblazer
       end
 
     private
-      def setup!(params)
-        @model ||= instantiate_model(params)
+      def model!(params)
+        instantiate_model(params)
       end
 
       def instantiate_model(params)
@@ -56,6 +61,24 @@ module Trailblazer
       end
 
       alias_method :find_model, :update_model
+
+
+      # Rails-specific.
+      # ActiveModel will automatically call Form::model when creating the contract and passes
+      # the operation's +::model+, so you don't have to call it twice.
+      # This assumes that the form class includes Form::ActiveModel, though.
+      module ActiveModel
+        def self.included(base)
+          base.extend ClassMethods
+        end
+
+        module ClassMethods
+          def contract(&block)
+            super
+            contract_class.model(model_class) # this assumes that Form::ActiveModel is mixed in.
+          end
+        end
+      end
     end
   end
 end

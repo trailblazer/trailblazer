@@ -66,8 +66,25 @@ class Band < ActiveRecord::Base
       end
     end
 
+    class Admin < self
+      def process(params)
+        res = super
+        model.update_attribute :name, "#{model.name} [ADMIN]"
+        res
+      end
+    end
+
+    # TODO: wait for uber 0.0.10 and @dutow.
+    # builds -> (params)
+    #   return JSON if params[:format] == "json"
+    #   return Admin if params[:admin]
+    # end
     builds do |params|
-      JSON if params[:format] == "json"
+      if params[:format] == "json"
+        JSON
+      elsif params[:admin]
+        Admin
+      end
     end
   end
 

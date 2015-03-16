@@ -1,9 +1,9 @@
 PATH
   remote: ../
   specs:
-    trailblazer (0.1.0)
+    trailblazer (0.1.1)
       actionpack (>= 3.0.0)
-      reform (= 1.2.0.beta2)
+      reform (~> 1.2.0)
       representable (>= 2.1.1, < 2.2.0)
       uber (>= 0.0.10)
 
@@ -37,18 +37,18 @@ GEM
     celluloid (0.16.0)
       timers (~> 4.0.0)
     connection_pool (2.0.0)
-    disposable (0.0.8)
+    disposable (0.0.9)
       representable (~> 2.0)
       uber
     erubis (2.7.0)
     hitimes (1.2.2)
     i18n (0.6.11)
     json (1.8.1)
-    mini_portile (0.6.0)
+    mini_portile (0.6.1)
     minitest (5.4.2)
     multi_json (1.10.1)
-    nokogiri (1.6.3.1)
-      mini_portile (= 0.6.0)
+    nokogiri (1.6.4.1)
+      mini_portile (~> 0.6.0)
     rack (1.5.2)
     rack-test (0.6.2)
       rack (>= 1.0)
@@ -61,7 +61,7 @@ GEM
     redis (3.1.0)
     redis-namespace (1.5.1)
       redis (~> 3.0, >= 3.0.4)
-    reform (1.2.0.beta2)
+    reform (1.2.1)
       activemodel
       disposable (~> 0.0.5)
       representable (~> 2.1.0)
@@ -83,7 +83,7 @@ GEM
       hitimes
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
-    uber (0.0.10)
+    uber (0.0.11)
 
 PLATFORMS
   ruby

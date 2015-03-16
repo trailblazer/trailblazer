@@ -49,7 +49,9 @@ class BandsController < ApplicationController
     present Band::Update do |op|
       @klass    = op.model.class
       @locality = params[:band][:locality] unless params[:format] == "json"
-    end # respond_to
+
+      render json: op.to_json if params[:format] == "json"
+    end # render :show
   end
 
   def new
@@ -82,7 +84,7 @@ ERB
   def update
     run Band::Create
 
-    render text: "no block: #{@operation.model.name}, #{params[:band][:locality]}"
+    render text: "no block: #{@operation.model.name}, #{params[:band][:locality]}, #{@operation.class}"
   end
 
   def update_with_block
@@ -99,5 +101,18 @@ private
 
     params[:band] ||= {}
     params[:band][:locality] = "Essen"
+  end
+end
+
+require 'trailblazer/operation/controller/active_record'
+class ActiveRecordBandsController < ApplicationController
+  include Trailblazer::Operation::Controller
+  include Trailblazer::Operation::Controller::ActiveRecord
+  respond_to :html
+
+  def show
+    present Band::Update
+
+    render text: "active_record_bands/show.html: #{@model.class}, #{@band.class}, #{@form.is_a?(Reform::Form)}, #{@operation.class}"
   end
 end

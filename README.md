@@ -6,7 +6,7 @@ In a nutshell: Trailblazer makes you write **logicless models** that purely act 
 
 ![](https://raw.githubusercontent.com/apotonick/trailblazer/master/doc/trb.jpg)
 
-Please sign up for my upcoming book [Trailblazer - A new architecture for Rails](https://leanpub.com/trailblazer), check out the free sample chapter and [let me know](http://twitter.com/apotonick) what you think!
+Please buy my book [Trailblazer - A new architecture for Rails](https://leanpub.com/trailblazer) and [let me know](http://twitter.com/apotonick) what you think! I am still working on the book but keep adding new chapters every other week. It will be about 300 pages and we're developing a real, full-blown Rails/Trb application.
 
 The [demo application](https://github.com/apotonick/gemgem-trbrb) implements what we discuss in the book.
 
@@ -115,7 +115,7 @@ def create
 end
 ```
 
-Note that the operation instance is yield to the block.
+Note that the operation instance is yielded to the block.
 
 The case of an invalid response can be handled after the block.
 
@@ -165,7 +165,7 @@ For `#show` actions that simply present the model using a HTML page or a JSON or
 
 ```ruby
 def show
-  present Comment::Create
+  present Comment::Update
 end
 ```
 
@@ -173,11 +173,13 @@ Again, this will only run the operation's setup and provide the model in `@model
 
 For document-based APIs and request types that are not HTTP the operation will be advised to render the JSON or XML document using the operation's representer.
 
-Note that `#present` will also work instead of `#form` (allowing it to be used in `#new` and `#edit`, too) as the responder will _not_ trigger any rendering in those actions.
+Note that `#present` will leave rendering up to you - `respond_to` is _not_ called.
 
 ### Controller API
 
 In all three cases the following instance variables are assigned: `@operation`, `@form`, `@model`.
+
+Named instance variables can be included, too. This is documented [here](#named-controller-instance-variables).
 
 ## Operation
 
@@ -361,6 +363,28 @@ end
 
 Another action is `:find` (which is currently doing the same as `:update`) to find a model by using `params[:id]`.
 
+
+### Normalizing params
+
+Override #setup_params! to add or remove values to params before the operation is run.
+
+```ruby
+class Create < Trailblazer::Operation
+  def process(params)
+    params #=> {show_all: true, admin: true, .. }
+  end
+
+  private
+    def process_params!(params)
+      params.merge!(show_all: true) if params[:admin]
+    end
+  end
+end
+```
+
+This centralizes params normalization and doesn't require you to do that manually in `#process`.
+
+
 ### Background Processing
 
 To run an operation in Sidekiq (ActiveJob-support coming!) all you need to do is include the `Worker` module.
@@ -379,10 +403,10 @@ end
 
 ### Rendering Operation's Form
 
-You have access to an operation's form using `::contract`.
+You have access to an operation's form using `::present`.
 
 ```ruby
-Comment::Create.contract(params)
+Comment::Create.present(params)
 ```
 
 This will run the operation's `#process` method _without_ the validate block and return the contract.
@@ -415,12 +439,70 @@ Use our autoloading if you dislike explicit requires.
 You can just add
 
 ```ruby
-require 'trailblazer/autoloading'
+require "trailblazer/autoloading"
 ```
 
-to `config/initializers/trailblazer.rb` and files will be "automatically" loaded.
+to `config/initializers/trailblazer.rb` and implementation classes like `Operation` will be automatically loaded.
+
+## Operation Autoloading
+
+If you structure your CRUD operations using the `app/concepts/*/crud.rb` file layout we use in the book, the `crud.rb` files are not gonna be found by Rails automatically. It is a good idea to enable CRUD autoloading.
+
+At the end of your `config/application.rb` file, add the following.
+
+```ruby
+require "trailblazer/rails/railtie"
+```
+
+This will go through `app/concepts/`, find all the `crud.rb` files, autoload their corresponding namespace (e.g. `Thing`, which is a model) and then load the `crud.rb` file.
 
 
+## Undocumented Features
+
+(Please don't read this section!)
+
+### Additional Model Setup
+
+Override `Operation#setup_model(params)` to add nested objects that can be infered from `params` or are static.
+
+This is called right after `#model!`.
+
+### Validation Errors
+
+You can access the contracts `Errors` object via `Operation#errors`.
+
+### ActiveModel Semantics
+
+When using `Reform::Form::ActiveModel` (which is used automatically in a Rails environment to make form builders work) you need to invoke `model Comment` in the contract. This can be inferred automatically from the operation by including `CRUD::ActiveModel`.
+
+```ruby
+class Create < Trailblazer::Operation
+  include CRUD
+  include CRUD::ActiveModel
+
+  model Comment
+
+  contract do # no need to call ::model, here.
+    property :text
+  end
+```
+
+If you want that in all CRUD operations, check out [how you can include](https://github.com/apotonick/gemgem-trbrb/blob/chapter-5/config/initializers/trailblazer.rb#L26) it automatically.
+
+### Named Controller Instance Variables
+
+If you want to include named instance variables for you views you must include another ActiveRecord specific module.
+
+```ruby
+require 'trailblazer/operation/controller/active_record'
+
+class ApplicationController < ActionController::Base
+  include Trailblazer::Operation::Controller
+  include Trailblazer::Operation::Controller::ActiveRecord
+end
+```
+
+This will setup a named instance variable of your operation's model, for example `@song`.
 
 ## Why?
 

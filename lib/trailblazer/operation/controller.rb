@@ -5,7 +5,7 @@ private
   def form(operation_class, params=self.params) # consider private.
     process_params!(params)
 
-    @operation = operation_class.new(:validate => false).run(params).last # FIXME: make that available via Operation.
+    @operation = operation_class.present(params)
     @form      = @operation.contract
     @model     = @operation.model
 
@@ -19,7 +19,8 @@ private
     res, op = operation!(operation_class, params) { [true, operation_class.present(params)] }
 
     yield op if block_given?
-    respond_with op
+    # respond_with op
+    # TODO: implement respond(present: true)
   end
 
   # full-on Op[]
@@ -64,14 +65,19 @@ private
       # this is what happens:
       # respond_with Comment::Update::JSON.run(params.merge(comment: request.body.string))
       concept_name = operation_class.model_class.to_s.underscore # this could be renamed to ::concept_class soon.
+      request_body = request.body.respond_to?(:string) ? request.body.string : request.body.read
 
-      params.merge!(concept_name => request.body.string)
+      params.merge!(concept_name => request_body)
     end
 
     res, @operation = yield # Create.run(params)
-    @form  = @operation.contract
-    @model = @operation.model
+    setup_operation_instance_variables!
 
     [res, @operation] # DISCUSS: do we need result here? or can we just go pick op.valid?
+  end
+
+  def setup_operation_instance_variables!
+    @form = @operation.contract
+    @model = @operation.model
   end
 end

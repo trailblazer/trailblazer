@@ -113,13 +113,28 @@ class ResponderRespondWithJSONTest < ActionController::TestCase
   end
 end
 
+# TODO: merge with above tests on SongsController.
+class ControllerRespondTest < ActionController::TestCase
+  tests BandsController
+
+  test "#respond with builds" do
+    post :create, band: {name: "SNFU"}, admin: true
+    assert_response 302
+    assert_equal "SNFU [ADMIN]", Band.last.name
+  end
+end
 
 class ResponderRunTest < ActionController::TestCase
   tests BandsController
 
   test "[html/valid]" do
     put :update, {id: 1, band: {name: "Nofx"}}
-    assert_equal "no block: Nofx, Essen", response.body
+    assert_equal "no block: Nofx, Essen, Band::Create", response.body
+  end
+
+  test "[html/valid] with builds" do
+    put :update, {id: 1, band: {name: "Nofx"}, admin: true}
+    assert_equal "no block: Nofx [ADMIN], Essen, Band::Create::Admin", response.body
   end
 
   test "with block [html/valid]" do
@@ -146,6 +161,7 @@ class ControllerPresentTest < ActionController::TestCase
     assert_equal "bands/show.html: Band,Band,true,Band::Update,Essen\n", response.body
   end
 
+  # TODO: this implicitely tests builds. maybe have separate test for that?
   test "#present [JSON]" do
     band = Band::Create[band: {name: "Nofx"}].model
 
@@ -153,7 +169,6 @@ class ControllerPresentTest < ActionController::TestCase
     assert_equal "{\"name\":\"Nofx\"}", response.body
   end
 end
-
 
 # #form.
 class ControllerFormTest < ActionController::TestCase
@@ -170,5 +185,22 @@ class ControllerFormTest < ActionController::TestCase
     get :new_with_block
 
     assert_select "b", "Band,Band,true,Band::Create,Essen"
+  end
+
+  test "#form with builder" do
+    get :new, admin: true
+
+    assert_select "b", ",Band,true,Band::Create::Admin"
+  end
+end
+
+class ActiveRecordPresentTest < ActionController::TestCase
+  tests ActiveRecordBandsController
+
+  test "#present" do
+    band = Band::Create[band: {name: "Nofx"}].model
+    get :show, id: band.id
+
+    assert_equal "active_record_bands/show.html: Band, Band, true, Band::Update", response.body
   end
 end

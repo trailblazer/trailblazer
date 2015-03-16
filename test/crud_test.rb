@@ -101,6 +101,18 @@ class CrudTest < MiniTest::Spec
     ModelUpdateOperation[{id: 1, song: {title: "Mercy Day For Mr. Vengeance"}}].model.must_equal song
   end
 
+
+  # Op#setup_model!
+  class SetupModelOperation < CreateOperation
+    def setup_model!(params)
+      model.instance_eval { @params = params; def params; @params.to_s; end }
+    end
+  end
+
+  it { SetupModelOperation[song: {title: "Emily Kane"}].model.params.must_equal "{:song=>{:title=>\"Emily Kane\"}}" }
+
+
+
   # no call to ::model raises error.
   class NoModelOperation < Trailblazer::Operation
     include CRUD
@@ -112,4 +124,21 @@ class CrudTest < MiniTest::Spec
 
   # uses :create as default if not set via ::action.
   it { assert_raises(RuntimeError){ NoModelOperation[{}] } }
+
+
+
+  # contract infers model_name.
+  # TODO: this a Rails/ActiveModel-specific test.
+  class ContractKnowsModelNameOperation < Trailblazer::Operation
+    include CRUD
+    model Song
+    include CRUD::ActiveModel
+
+    contract do
+      include Reform::Form::ActiveModel # this usually happens in Reform::Form::Rails.
+      property :title
+    end
+  end
+
+  it { ContractKnowsModelNameOperation.present(song: {title: "Direct Hit"}).contract.class.model_name.to_s.must_equal "CrudTest::Song" }
 end

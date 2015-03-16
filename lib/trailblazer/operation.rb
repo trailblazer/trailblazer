@@ -4,6 +4,8 @@ require 'reform'
 
 # TODO: OP[] without wrapper, OP.run with (eg for params)
 
+# to be documented: only implement #setup! when not using CRUD and when ::present needed (make example for simple Op without #setup!)
+
 module Trailblazer
   class Operation
     extend Uber::InheritableAttr
@@ -37,13 +39,12 @@ module Trailblazer
 
       # Runs #process without validate and returns the form object.
       def present(*params)
-        build_operation_class(*params).new(:validate => false).run(*params).last
+        build_operation_class(*params).new.present(*params)
       end
 
       def contract(&block)
         contract_class.class_eval(&block)
       end
-
 
     private
       def build_operation_class(*params)
@@ -53,11 +54,9 @@ module Trailblazer
 
     include Uber::Builder
 
-
     def initialize(options={})
       @valid            = true
       # DISCUSS: use reverse_merge here?
-      @validate         = options[:validate] == false ? false : true
       @raise_on_invalid = options[:raise_on_invalid] || false
     end
 
@@ -68,22 +67,44 @@ module Trailblazer
       [process(*params), valid?].reverse
     end
 
+    def present(*params)
+      setup!(*params)
+
+      @contract = contract_for(nil, @model)
+      self
+    end
+
     attr_reader :contract
+
+    def errors
+      contract.errors
+    end
 
     def valid?
       @valid
     end
 
   private
-
     def setup!(*params)
+      setup_params!(*params)
+
+      @model = model!(*params)
+      setup_model!(*params)
+    end
+
+    # Implement #model! to find/create your operation model (if required).
+    def model!(*params)
+    end
+
+    # Override to add attributes that can be infered from params.
+    def setup_model!(*params)
+    end
+
+    def setup_params!(*params)
     end
 
     def validate(params, model, contract_class=nil) # NOT to be overridden?!! it creates Result for us.
-
       @contract = contract_for(contract_class, model)
-
-      return self unless @validate # Op.contract will return here.
 
       if @valid = contract.validate(params)
         yield contract if block_given?

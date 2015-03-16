@@ -7,6 +7,20 @@ module Comparable
   end
 end
 
+class OperationSetupParamsTest < MiniTest::Spec
+  class OperationSetupParam < Trailblazer::Operation
+    def process(params)
+      params
+    end
+
+    def setup_params!(params)
+      params.merge!(garrett: "Rocks!")
+    end
+  end
+
+  let (:operation) { OperationSetupParam.new }
+  it { OperationSetupParam.run({valid: true}).must_equal [true, {valid: true, garrett: "Rocks!"}] }
+end
 
 class OperationRunTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
@@ -40,6 +54,8 @@ class OperationRunTest < MiniTest::Spec
 
   # return operation when ::call
   it { Operation.call(true).must_equal operation }
+  it { Operation.(true).must_equal operation }
+  # #[] is alias for .()
   it { Operation[true].must_equal operation }
 
   # ::[] raises exception when invalid.
@@ -88,9 +104,8 @@ class OperationRunTest < MiniTest::Spec
 
   # Operation#contract returns @contract
   let (:contract)  { Operation::Contract.new }
-  it { Operation[true].contract.must_equal contract }
+  it { Operation.(true).contract.must_equal contract }
 end
-
 
 class OperationTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
@@ -119,7 +134,7 @@ class OperationTest < MiniTest::Spec
   # ::run
   it { OperationWithoutValidateCall.run(Object).must_equal [true, Object] }
   # ::[]
-  it { OperationWithoutValidateCall[Object].must_equal(Object) }
+  it { OperationWithoutValidateCall.(Object).must_equal(Object) }
   # ::run with invalid!
   it { OperationWithoutValidateCall.run(nil).must_equal [false, nil] }
   # ::run with block, invalid
@@ -155,7 +170,7 @@ class OperationTest < MiniTest::Spec
   end
 
   it { OperationWithValidateBlock.run(false).last.secret_contract.must_equal nil }
-  it('zzz') { OperationWithValidateBlock[true].secret_contract.must_equal OperationWithValidateBlock.contract_class.new.extend(Comparable) }
+  it('zzz') { OperationWithValidateBlock.(true).secret_contract.must_equal OperationWithValidateBlock.contract_class.new.extend(Comparable) }
 
   # manually setting @valid
   class OperationWithManualValid < Trailblazer::Operation
@@ -168,8 +183,7 @@ class OperationTest < MiniTest::Spec
   # ::run
   it { OperationWithManualValid.run(Object).must_equal [false, Object] }
   # ::[]
-  it { OperationWithManualValid[Object].must_equal(Object) }
-
+  it { OperationWithManualValid.(Object).must_equal(Object) }
 
   # re-assign params
   class OperationReassigningParams < Trailblazer::Operation
@@ -181,7 +195,6 @@ class OperationTest < MiniTest::Spec
 
   # ::run
   it { OperationReassigningParams.run({:title => "Day Like This"}).must_equal [true, "Day Like This"] }
-
 
   # #invalid!(result)
   class OperationCallingInvalid < Trailblazer::Operation
@@ -203,7 +216,6 @@ class OperationTest < MiniTest::Spec
   end
 
   it { OperationCallingInvalidWithoutResult.run(true).must_equal [false, OperationCallingInvalidWithoutResult.new] }
-
 
   # calling return from #validate block leaves result true.
   class OperationUsingReturnInValidate < Trailblazer::Operation
@@ -227,7 +239,6 @@ class OperationTest < MiniTest::Spec
   it { OperationUsingReturnInValidate.run(true).must_equal [true, 1] }
   it { OperationUsingReturnInValidate.run(false).must_equal [false, 2] }
 
-
   # unlimited arguments for ::run and friends.
   class OperationReceivingLottaArguments < Trailblazer::Operation
     def process(model, params)
@@ -237,9 +248,7 @@ class OperationTest < MiniTest::Spec
 
   it { OperationReceivingLottaArguments.run(Object, {}).must_equal([true, [Object, {}]]) }
 
-
-  # TODO: experimental.
-  # ::present to avoid running #validate.
+  # ::present only runs #setup! which runs #model!.
   class ContractOnlyOperation < Trailblazer::Operation
     self.contract_class = class Contract
       def initialize(model)
@@ -249,17 +258,16 @@ class OperationTest < MiniTest::Spec
       self
     end
 
-    def process(params)
-      @object = Object # arbitrary init code.
+    def model!(params)
+      Object
+    end
 
-      validate(params, Object) do
-        raise "this should not be run."
-      end
+    def process(params)
+      raise "This is not run!"
     end
   end
 
   it { ContractOnlyOperation.present({}).contract._model.must_equal Object }
-
 end
 
 class OperationBuilderTest < MiniTest::Spec
@@ -282,8 +290,8 @@ class OperationBuilderTest < MiniTest::Spec
   it { Operation.run({}).last.must_equal "operation" }
   it { Operation.run({sub: true}).last.must_equal "sub:operation" }
 
-  it { Operation[{}].must_equal "operation" }
-  it { Operation[{sub: true}].must_equal "sub:operation" }
+  it { Operation.({}).must_equal "operation" }
+  it { Operation.({sub: true}).must_equal "sub:operation" }
 end
 
 # ::contract builds Reform::Form class
@@ -330,5 +338,23 @@ class OperationInheritanceTest < MiniTest::Spec
 
     song.genre.must_equal "Punkrock"
     song.band.must_equal nil
+  end
+end
+
+
+class OperationErrorsTest < MiniTest::Spec
+  class Operation < Trailblazer::Operation
+    contract do
+      property :title, validates: {presence: true}
+    end
+
+    def process(params)
+      validate(params, OpenStruct.new) {}
+    end
+  end
+
+  it do
+    res, op = Operation.run({})
+    op.errors.to_s.must_equal "{:title=>[\"can't be blank\"]}"
   end
 end
