@@ -45,6 +45,17 @@ module Trailblazer
       def contract(&block)
         contract_class.class_eval(&block)
       end
+      
+      def collection(*params, &block)
+        res, op = build_operation_class(*params).new.fetch_collection(*params)
+
+        if block_given?
+          yield op if res
+          return op
+        end
+
+        [res, op]
+      end
 
     private
       def build_operation_class(*params)
@@ -65,6 +76,18 @@ module Trailblazer
       setup!(*params) # where do we assign/find the model?
 
       [process(*params), valid?].reverse
+    end
+    
+    def fetch_collection(*params)
+      setup_collection!(*params)
+      
+      @collection = fetch(*params)
+
+      [self, valid?].reverse
+    end
+    
+    def collection
+      @collection
     end
 
     def present(*params)
@@ -89,6 +112,10 @@ module Trailblazer
     end
 
   private
+    def setup_collection!(*params)
+      setup_params!(*params)
+    end
+  
     def setup!(*params)
       setup_params!(*params)
 

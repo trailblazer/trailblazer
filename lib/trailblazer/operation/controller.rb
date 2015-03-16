@@ -12,6 +12,15 @@ private
     yield @operation if block_given?
   end
 
+  def collection(operation_class, params=self.params, &block)
+    @fetching_collection = true
+    res, op = operation!(operation_class, params) { operation_class.collection(params) }
+
+    yield op if res and block_given?
+
+    Else.new(op, !res)
+  end
+  
   # Doesn't run #validate.
   # TODO: allow only_setup.
   # TODO: dependency to CRUD (::model_name)
@@ -71,7 +80,12 @@ private
     end
 
     res, @operation = yield # Create.run(params)
-    setup_operation_instance_variables!
+
+    if @fetching_collection
+      setup_operation_collection_variables!
+    else
+      setup_operation_instance_variables!
+    end
 
     [res, @operation] # DISCUSS: do we need result here? or can we just go pick op.valid?
   end
@@ -79,5 +93,11 @@ private
   def setup_operation_instance_variables!
     @form = @operation.contract
     @model = @operation.model
+  end
+  
+  def setup_operation_collection_variables!
+    @collection = @operation.collection
+    operation_collection_name = @operation.collection.model.table_name
+    instance_variable_set(:"@#{operation_collection_name}", @collection)
   end
 end

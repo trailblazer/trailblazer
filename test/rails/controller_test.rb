@@ -170,6 +170,34 @@ class ControllerPresentTest < ActionController::TestCase
   end
 end
 
+#collection
+class ControllerCollectionTest < ActionController::TestCase
+  tests BandsController
+
+  # let (:band) { }
+
+  test "#collection" do
+    Band.destroy_all
+    Band::Create[band: {name: "Nofx"}]
+    Band::Create[band: {name: "Ramones"}]
+
+
+    get :index
+
+    assert_equal "bands/index.html: Nofx Ramones \n", response.body
+  end
+
+  # TODO: this implicitely tests builds. maybe have separate test for that?
+  test "#collection [JSON]" do
+    Band.destroy_all
+    Band::Create[band: {name: "Nofx"}]
+    Band::Create[band: {name: "Ramones"}]
+
+    get :index, format: :json
+    assert_equal "[{\"name\":\"Nofx\"},{\"name\":\"Ramones\"}]", response.body
+  end
+end
+
 # #form.
 class ControllerFormTest < ActionController::TestCase
   tests BandsController
