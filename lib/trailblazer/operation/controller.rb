@@ -20,6 +20,7 @@ private
 
     Else.new(op, !res)
   end
+  alias_method :fetch, :collection
   
   # Doesn't run #validate.
   # TODO: allow only_setup.
