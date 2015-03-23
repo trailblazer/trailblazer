@@ -3,6 +3,3 @@ rvm:
   - 2.1.2
   - 2.0.0
   - 1.9.3
-script:
-  - bundle exec rake test
-  - bundle exec rake rails
