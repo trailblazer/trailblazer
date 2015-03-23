@@ -15,6 +15,7 @@ private
   def collection(operation_class, params=self.params, &block)
     @fetching_collection = true
     res, op = operation!(operation_class, params) { operation_class.collection(params) }
+    @search = op.search
 
     yield op if res and block_given?
 

@@ -19,9 +19,11 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "actionpack", '>= 3.0.0' # this framework works on Rails.
-  spec.add_dependency "uber", ">= 0.0.10" # no builder inheritance.
+  spec.add_dependency "kaminari", "~> 0.16.3"
+  spec.add_dependency "ransack", "~> 1.6.3"
   spec.add_dependency "representable", ">= 2.1.1", "<2.2.0" # Representable::apply.
   spec.add_dependency "reform", "~> 1.2.0"
+  spec.add_dependency "uber", ">= 0.0.10" # no builder inheritance.
 
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "database_cleaner"

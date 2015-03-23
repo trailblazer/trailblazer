@@ -57,6 +57,7 @@ module Trailblazer
 
         op
       end
+      alias_method :fetch, :collection
 
     private
       def build_operation_class(*params)
@@ -65,6 +66,7 @@ module Trailblazer
     end
 
     include Uber::Builder
+    attr_reader :collection, :search
 
     def initialize(options={})
       @valid            = true
@@ -83,12 +85,10 @@ module Trailblazer
       setup_collection!(*params)
       
       @collection = fetch(*params)
+      @search = perform_search(*params) if self.respond_to?(:perform_search)
+      @collection = perform_pagination(*params) if self.respond_to?(:perform_pagination)
 
       [self, valid?].reverse
-    end
-    
-    def collection
-      @collection
     end
 
     def present(*params)
