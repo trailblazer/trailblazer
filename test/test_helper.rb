@@ -22,10 +22,11 @@ end
 
 module TmpUploads
   extend ActiveSupport::Concern
+  fs_dir = File.join(File.dirname(__FILE__), '..', 'tmp', 'uploads')
+  FileUtils.mkdir_p(fs_dir) unless File.exist?(fs_dir)
 
   included do
-    let (:tmp_dir) { "/tmp/uploads" }
-    before { Dir.mkdir(tmp_dir) unless File.exists?(tmp_dir) }
+    let(:tmp_dir) { File.expand_path(fs_dir) }
   end
 end
 
