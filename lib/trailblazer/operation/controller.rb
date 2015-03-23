@@ -14,12 +14,12 @@ private
 
   def collection(operation_class, params=self.params, &block)
     @fetching_collection = true
-    res, op = operation!(operation_class, params) { operation_class.collection(params) }
+    op = operation!(operation_class, params) { operation_class.collection(params) }
     @search = op.search
 
-    yield op if res and block_given?
+    yield op if block_given?
 
-    Else.new(op, !res)
+    Else.new(op)
   end
   alias_method :fetch, :collection
   
@@ -38,7 +38,7 @@ private
   # Note: this is not documented on purpose as this concept is experimental. I don't like it too much and prefer
   # returns in the valid block.
   class Else
-    def initialize(op, run)
+    def initialize(op, run = true)
       @op  = op
       @run = run
     end
@@ -81,15 +81,15 @@ private
       params.merge!(concept_name => request_body)
     end
 
-    res, @operation = yield # Create.run(params)
-
     if @fetching_collection
+      @operation = yield # Create.run(params)
       setup_operation_collection_variables!
+      @operation # DISCUSS: do we need result here? or can we just go pick op.valid?
     else
+      res, @operation = yield # Create.run(params)
       setup_operation_instance_variables!
+      [res, @operation] # DISCUSS: do we need result here? or can we just go pick op.valid?
     end
-
-    [res, @operation] # DISCUSS: do we need result here? or can we just go pick op.valid?
   end
 
   def setup_operation_instance_variables!
