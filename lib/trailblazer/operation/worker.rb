@@ -74,7 +74,7 @@ class Trailblazer::Operation
 
             # TODO: where do we set /tmp/uploads?
             dfn.merge!(
-              :serialize   => lambda { |file, *| Trailblazer::Operation::UploadedFile.new(file, :tmp_dir => "/tmp/uploads").to_hash },
+              :serialize   => lambda { |file, *| Trailblazer::Operation::UploadedFile.new(file, :tmp_dir => File.join(File.dirname(__FILE__), '../../..', 'tmp', 'uploads')).to_hash },
               :deserialize => lambda { |object, hash, *| Trailblazer::Operation::UploadedFile.from_hash(hash) },
               :class       => Hash
             )
