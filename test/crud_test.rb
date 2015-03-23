@@ -129,7 +129,7 @@ class CrudTest < MiniTest::Spec
     songs << CreateOperation[song: {title: "Blue Rondo a la Turk"}].model
     songs << CreateOperation[song: {title: "Mercy Day For Mr. Vengeance"}].model
     Song.all_records = songs
-    res, op = FetchCollectionOperation.collection({user_id: 0})
+    op = FetchCollectionOperation.collection({user_id: 0})
     op.collection.must_equal songs
   end
   
@@ -138,7 +138,7 @@ class CrudTest < MiniTest::Spec
     songs << CreateOperation[song: {title: "Blue Rondo a la Turk"}].model
     songs << CreateOperation[song: {title: "Mercy Day For Mr. Vengeance"}].model
     Song.all_records = songs
-    res, op = FetchCollectionOperation.collection({user_id: 99})
+    op = FetchCollectionOperation.collection({user_id: 99})
     op.collection.must_equal nil
   end
 

@@ -47,6 +47,7 @@ module Trailblazer
       end
       
       def collection(*params, &block)
+        *params = {} if params.empty?
         res, op = build_operation_class(*params).new.fetch_collection(*params)
 
         if block_given?
@@ -54,7 +55,7 @@ module Trailblazer
           return op
         end
 
-        [res, op]
+        op
       end
 
     private
