@@ -15,7 +15,7 @@ private
   def collection(operation_class, params=self.params, &block)
     @fetching_collection = true
     op = operation!(operation_class, params) { operation_class.collection(params) }
-    @search = op.search
+    @search = op.search if op.respond_to?(:search)
 
     yield op if block_given?
 
