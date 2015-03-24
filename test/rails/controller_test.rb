@@ -232,3 +232,19 @@ class ActiveRecordPresentTest < ActionController::TestCase
     assert_equal "active_record_bands/show.html: Band, Band, true, Band::Update", response.body
   end
 end
+
+class ControllerAuthorizationTest < ActionController::TestCase
+  tests BandsController
+
+  test "allows" do
+    get :allow
+
+    assert_equal "Action Allowed", response.body
+  end
+
+  test "not allows" do
+    get :not_allow
+
+    assert_equal "Action Not Allowed", response.body
+  end
+end

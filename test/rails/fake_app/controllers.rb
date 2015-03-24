@@ -106,6 +106,18 @@ ERB
 
     render text: "[invalid] with block: #{@operation.model.name}, #{params[:band][:locality]}"
   end
+  
+  def allow
+    run Band::Allow
+    render text: "Action Allowed"
+  end
+  
+  def not_allow
+    run Band::NotAllow
+    render text: "Action Allowed"
+  rescue Trailblazer::Operation::NotAuthorized
+    render text: "Action Not Allowed"
+  end
 
 private
   def process_params!(params) # this is where you set :current_user, etc.
