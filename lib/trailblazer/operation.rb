@@ -98,7 +98,7 @@ module Trailblazer
       self
     end
 
-    attr_reader :contract
+    attr_reader :contract, :policy
 
     def errors
       contract.errors
@@ -121,7 +121,9 @@ module Trailblazer
       setup_params!(*params)
 
       @model = model!(*params)
+      
       setup_model!(*params)
+      setup_policy!(*params) if respond_to?(:setup_policy!)
     end
 
     # Implement #model! to find/create your operation model (if required).
@@ -166,6 +168,7 @@ module Trailblazer
     class InvalidContract < RuntimeError
     end
   end
+  class Trailblazer::Operation::NotAuthorized < Exception; end
 end
 
 require 'trailblazer/operation/crud'

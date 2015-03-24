@@ -121,4 +121,20 @@ class Band < ActiveRecord::Base
       self.representer_class = BandRepresenter
     end
   end
+  
+  class Allow < Create
+    require 'trailblazer/operation/policy'
+    include Policy
+    policy do
+      allow_guest true
+    end
+  end
+  
+  class NotAllow < Create
+    require 'trailblazer/operation/policy'
+    include Policy
+    policy do
+      allow_guest false
+    end
+  end
 end
