@@ -55,7 +55,117 @@ Trailblazer uses Rails routing to map URLs to controllers (we will add simplific
 
 ## Controllers
 
-Controllers are lean endpoints for HTTP. They differentiate between request formats like HTML or JSON and immediately dispatch to an operation. Controllers do not contain any business logic.
+Controllers are lean endpoints for HTTP. They differentiate between request formats like HTML or JSON and do not contain any business logic. Actions immediately dispatch to an operation.
+
+```ruby
+class CommentsController < ApplicationController
+  def create
+    Comment::Create.(params)
+  end
+```
+
+This can be simplified using the `run` method and allows you a simple conditional to handle failing operations.
+
+```ruby
+class CommentsController < ApplicationController
+  def create
+    run Comment::Create do |op|
+      return redirect_to(comment_path op.model) # success.
+    end
+
+    render :new # re-render form.
+  end
+```
+
+Again, the controller only knows how to dispatch to the operation and what to do for success and invalid processing. While business affairs (e.g. logging or rollbacks) are to be handled in the operation, the controller invokes rendering or redirecting.
+
+## Operation
+
+Operations encapsulate business logic and are the heart of a Trailblazer architecture. One operation per high-level domain _function_ is used. Different formats or environments are handled in subclasses. Operations don't know about HTTP or the environment.
+
+An operation is not just a monolithic replacement for your business code. An operation is a simple orchestrator between the form object, models and your business code.
+
+You don't have to use the form/contract if you don't want it, BTW.
+
+```ruby
+class Comment < ActiveRecord::Base
+  class Create < Trailblazer::Operation
+    def process(params)
+      # do whatever you feel like.
+      self
+    end
+  end
+end
+```
+
+Operations only need to implement `#process` which receives the params from the caller.
+
+## Validations
+
+Operations usually have a form object which is simply a `Reform::Form` class. All the [API documented in Reform](https://github.com/apotonick/reform) can be applied and used.
+
+The operation makes use of the form object using the `#validate` method.
+
+```ruby
+class Comment < ActiveRecord::Base
+  class Create < Trailblazer::Operation
+    contract do
+      property :body, validates: {presence: true}
+    end
+
+    def process(params)
+      @model = Comment.new
+
+      validate(params[:comment], @model) do |f|
+        f.save
+      end
+    end
+  end
+end
+```
+
+The contract (aka _form_) is defined in the `::contract` block. You can implement nested forms, default values, validations, and everything else Reform provides.
+
+In case of a valid form the block for `#validate` is invoked. It receives the populated form object. You can use the form to save data or write your own logic. This is where your business logic is implemented, and in turn could be an invocation of service objects or organizers.
+
+Technically speaking, what really happens in `Operation#validate` is the following.
+
+```ruby
+contract_class.new(@model).validate(params[:comment])
+```
+
+This is a familiar work-flow from Reform. Validation does _not_ touch the model.
+
+If you prefer keeping your forms in separate classes or even files, you're free to do so.
+
+```ruby
+class Create < Trailblazer::Operation
+  self.contract_class = MyCommentForm
+```
+
+## Models
+
+Models for persistence can be implemented using any ORM you fancy, for instance [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord#active-record--object-relational-mapping-in-rails) or [Datamapper](http://datamapper.org/).
+
+In Trailblazer, models are completely empty and solely configure database-relevant directives and associations. No business logic is allowed in models. Only operations, views and cells can access models directly.
+
+## Views
+
+View rendering can happen using the controller as known from Rails. This is absolutely fine for simple views.
+
+More complex UI logic happens in _View Models_ as found in [Cells](https://github.com/apotonick/cells). View models also replace helpers.
+
+8. **HTTP API** Consuming and rendering API documents (e.g. JSON or XML) is done via [roar](https://github.com/apotonick/roar) and [representable](https://github.com/apotonick/representable). They usually inherit the schema from <em>Contract</em>s .
+
+10. **Tests** Subject to tests are mainly <em>Operation</em>s and <em>View Model</em>s, as they encapsulate endpoint behaviour of your app. As a nice side effect, factories are replaced by simple _Operation_ calls.
+
+## Overview
+
+Trailblazer is basically a mash-up of mature gems that have been developed over the past 10 years and are used in hundreds and thousands of production apps.
+
+Using the different layers is completely optional and up to you: Both Cells and Reform can be excluded from your stack if you wish so.
+
+## Controller API
 
 Trailblazer provides four methods to present and invoke operations. But before that, you need to include the `Controller` module.
 
@@ -175,28 +285,19 @@ For document-based APIs and request types that are not HTTP the operation will b
 
 Note that `#present` will leave rendering up to you - `respond_to` is _not_ called.
 
-### Controller API
 
 In all three cases the following instance variables are assigned: `@operation`, `@form`, `@model`.
 
 Named instance variables can be included, too. This is documented [here](#named-controller-instance-variables).
 
-## Operation
 
-Operations encapsulate business logic. One operation per high-level domain _function_ is used. Different formats or environments are handled in subclasses. Operations don't know about HTTP.
 
-```ruby
-class Comment < ActiveRecord::Base
-  class Create < Trailblazer::Operation
-    def process(params)
-      # do whatever you feel like.
-      self
-    end
-  end
-end
- ```
 
-Operations only need to implement `#process` which receives the params from the caller.
+
+
+
+
+
 
 ### Call style
 
@@ -228,63 +329,7 @@ end
 
 Of course, this does _not_ throw an exception but simply skips the block when the operation is invalid.
 
-## Validations
 
-Operations usually have a form object which is simply a `Reform::Form` class. All the [API documented in Reform](https://github.com/apotonick/reform) can be applied and used.
-
-The operation makes use of the form object using the `#validate` method.
-
-```ruby
-class Comment < ActiveRecord::Base
-  class Create < Trailblazer::Operation
-    contract do
-      property :body, validates: {presence: true}
-    end
-
-    def process(params)
-      @model = Comment.new
-
-      validate(params[:comment], @model) do |f|
-        f.save
-      end
-    end
-  end
-end
- ```
-
-The contract (aka _form_) is defined in the `::contract` block. You can implement nested forms, default values, validations, and everything else Reform provides.
-
-In case of a valid form the block for `#validate` is invoked. It receives the populated form object. You can use the form to save data or write your own logic.
-
-Technically speaking, what really happens in `Operation#validate` is the following.
-
-```ruby
-contract_class.new(@model).validate(params[:comment])
-```
-
-This is a familiar work-flow from Reform. Validation does _not_ touch the model.
-
-
-## Models
-
-Models for persistence can be implemented using any ORM you fancy, for instance [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord#active-record--object-relational-mapping-in-rails) or [Datamapper](http://datamapper.org/).
-
-In Trailblazer, models are completely empty and solely configure database-relevant directives and associations. No business logic is allowed in models. Only operations, views and cells can access models directly.
-
-## Views
-
-View rendering can happen using the controller as known from Rails. This is absolutely fine for simple views.
-
-More complex UI logic happens in _View Models_ as found in [Cells](https://github.com/apotonick/cells). View models also replace helpers.
-
-
-
-
-8. **HTTP API** Consuming and rendering API documents (e.g. JSON or XML) is done via [roar](https://github.com/apotonick/roar) and [representable](https://github.com/apotonick/representable). They usually inherit the schema from <em>Contract</em>s .
-
-10. **Tests** Subject to tests are mainly <em>Operation</em>s and <em>View Model</em>s, as they encapsulate endpoint behaviour of your app. As a nice side effect, factories are replaced by simple _Operation_ calls.
-
-Trailblazer is basically a mash-up of mature gems that have been developed over the past 10 years and are used in hundreds and thousands of production apps.
 
 
 ## Controller API
