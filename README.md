@@ -172,7 +172,6 @@ Trailblazer provides four methods to present and invoke operations. But before t
 ```ruby
 class CommentsController < ApplicationController
   include Trailblazer::Operation::Controller
-
 ```
 
 ### Rendering the form object
@@ -291,49 +290,6 @@ In all three cases the following instance variables are assigned: `@operation`, 
 Named instance variables can be included, too. This is documented [here](#named-controller-instance-variables).
 
 
-
-
-
-
-
-
-
-
-### Call style
-
-The simplest way of running an operation is the _call style_.
-
-```ruby
-op = Comment::Create[params]
-```
-
-Using `Operation#[]` will return the operation instance. In case of an invalid operation, this will raise an exception.
-
-Note how this can easily be used for test factories.
-
-```ruby
-let(:comment) { Comment::Create[valid_comment_params].model }
-```
-
-Using operations as test factories is a fundamental concept of Trailblazer to remove buggy redundancy in tests and manual factories.
-
-### Run style
-
-You can run an operation manually and use the same block semantics as found in the controller.
-
-```ruby
-Comment::Create.run(params) do |op|
-  # only run when valid.
-end
-```
-
-Of course, this does _not_ throw an exception but simply skips the block when the operation is invalid.
-
-
-
-
-## Controller API
-
 ### Normalizing params
 
 Override `#process_params!` to add or remove values to `params` before the operation is run. This is called in `#run`, `#respond` and `#present`.
@@ -368,6 +324,36 @@ end
 
 
 ## Operation API
+
+### Call style
+
+The simplest way of running an operation is the _call style_.
+
+```ruby
+op = Comment::Create[params]
+```
+
+Using `Operation#[]` will return the operation instance. In case of an invalid operation, this will raise an exception.
+
+Note how this can easily be used for test factories.
+
+```ruby
+let(:comment) { Comment::Create[valid_comment_params].model }
+```
+
+Using operations as test factories is a fundamental concept of Trailblazer to remove buggy redundancy in tests and manual factories.
+
+### Run style
+
+You can run an operation manually and use the same block semantics as found in the controller.
+
+```ruby
+Comment::Create.run(params) do |op|
+  # only run when valid.
+end
+```
+
+Of course, this does _not_ throw an exception but simply skips the block when the operation is invalid.
 
 ### CRUD Semantics
 
