@@ -2,18 +2,23 @@ require 'test_helper'
 require 'trailblazer/operation/scope'
 
 class ScopeTest < MiniTest::Spec
-  class Thing < ActiveRecord::Base
+  class Band < ActiveRecord::Base
     class Index < Trailblazer::Operation
       include CRUD, Scope
       model Thing
+      def fetch(params)
+        return Band.where(locality: "FR")
+      end
     end
   end
 
   before(:each) do
-    Thing.create(title: "Band Nofx")
-    Thing.create(title: "Singer Jim")
-    Thing.create(title: "My Band Ramones")
+    Band.create(name: "Band Daft Punk", locality: "FR")
+    Band.create(name: "Band Justice", locality: "FR")
+    Band.create(name: "Band MSTRKRFT", locality: "CA")
+    Band.create(name: "DJ Mr. Oizo", locality: "FR")
+    Band.create(name: "DJ Gui Boratto", locality: "BR")
   end
-  let (:search) { Thing::Index.fetch({q: {title_cont: "Band"}}).search }
+  let (:search) { Band::Index.fetch({q: {name_cont: "Band"}}).search }
   it { search.result.count.must_equal (2) }
 end

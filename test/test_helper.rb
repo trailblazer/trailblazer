@@ -18,6 +18,11 @@ ActiveRecord::Schema.define do
     table.column :title, :string
     table.column :active, :boolean, default: true
   end
+  
+  create_table(:bands) do |table|
+    table.column :name, :string
+    table.column :locality, :string
+  end
 end
 
 module TmpUploads
