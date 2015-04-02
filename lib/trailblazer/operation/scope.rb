@@ -6,7 +6,7 @@ module Trailblazer::Operation::Scope
   end
 
   def perform_search(params)
-    search = all_model(params).ransack(params[:q])
+    search = @collection.ransack(params[:q])
     @collection = search.result
     search
   end
