@@ -158,7 +158,7 @@ class ControllerPresentTest < ActionController::TestCase
 
     get :show, id: band.id
 
-    assert_equal "bands/show.html: Band,Band,true,Band::Update,Essen\n", response.body
+    assert_equal "bands/show.html: Band,Band,true,Band::Update,Nofx", response.body
   end
 
   # TODO: this implicitely tests builds. maybe have separate test for that?
@@ -167,6 +167,34 @@ class ControllerPresentTest < ActionController::TestCase
 
     get :show, id: band.id, format: :json
     assert_equal "{\"name\":\"Nofx\"}", response.body
+  end
+end
+
+#collection
+class ControllerCollectionTest < ActionController::TestCase
+  tests BandsController
+
+  # let (:band) { }
+
+  test "#collection" do
+    Band.destroy_all
+    Band::Create[band: {name: "Nofx"}]
+    Band::Create[band: {name: "Ramones"}]
+
+
+    get :index
+
+    assert_equal "bands/index.html: Nofx Ramones \n", response.body
+  end
+
+  # TODO: this implicitely tests builds. maybe have separate test for that?
+  test "#collection [JSON]" do
+    Band.destroy_all
+    Band::Create[band: {name: "Nofx"}]
+    Band::Create[band: {name: "Ramones"}]
+
+    get :index, format: :json
+    assert_equal "[{\"name\":\"Nofx\"},{\"name\":\"Ramones\"}]", response.body
   end
 end
 

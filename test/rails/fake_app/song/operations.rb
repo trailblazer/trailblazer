@@ -101,4 +101,24 @@ class Band < ActiveRecord::Base
       JSON if params[:format] == "json"
     end
   end
+  
+  class Index < Create
+    
+    def fetch(params)
+      Band.all
+    end
+    
+    builds do |params|
+      JSON if params[:format] == "json"
+    end
+    
+    class JSON < self
+      module BandRepresenter
+        include Representable::JSON
+        property :name
+      end
+
+      self.representer_class = BandRepresenter
+    end
+  end
 end
