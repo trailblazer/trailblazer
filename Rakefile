@@ -1,7 +1,9 @@
 require "bundler/gem_tasks"
 require "rake/testtask"
 
-task :default => [:test]
+task :default => [:build]
+default_task = Rake::Task[:build]
+
 Rake::TestTask.new(:test) do |test|
   test.libs << 'test'
   test.test_files = FileList['test/*_test.rb']
@@ -13,3 +15,8 @@ Rake::TestTask.new(:rails) do |test|
   test.test_files = FileList['test/rails/*_test.rb']
   test.verbose = true
 end
+
+rails_task = Rake::Task["rails"]
+test_task = Rake::Task["test"]
+default_task.enhance { test_task.invoke }
+default_task.enhance { rails_task.invoke }
