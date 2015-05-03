@@ -137,6 +137,7 @@ module Trailblazer
 end
 
 require 'trailblazer/operation/crud'
+require "trailblazer/operation/dispatch"
 
 # run
 #   setup
