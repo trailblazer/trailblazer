@@ -8,7 +8,9 @@ module Trailblazer
         require_dependency "#{app.root}/app/models/#{model}" # load the model file, first (thing.rb).
         require_dependency "#{app.root}/#{f}" # load app/concepts/{concept}/crud.rb (Thing::Create, Thing::Update, and so on).
       end
+    end
 
+    def self.autoload_cells(app)
       Dir.glob("app/concepts/**/*cell.rb") do |f|
         require_dependency "#{app.root}/#{f}" # load app/concepts/{concept}/cell.rb.
       end
@@ -20,9 +22,11 @@ module Trailblazer
       # initializers.
       if Rails.configuration.cache_classes
         Trailblazer::Railtie.autoload_operations(app)
+        Trailblazer::Railtie.autoload_cells(app)
       else
         ActionDispatch::Reloader.to_prepare do
           Trailblazer::Railtie.autoload_operations(app)
+          Trailblazer::Railtie.autoload_cells(app)
         end
       end
     end
