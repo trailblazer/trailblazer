@@ -45,6 +45,19 @@ module Trailblazer
       def contract(&block)
         contract_class.class_eval(&block)
       end
+      
+      def collection(*params, &block)
+        *params = {} if params.empty?
+        res, op = build_operation_class(*params).new.fetch_collection(*params)
+
+        if block_given?
+          yield op if res
+          return op
+        end
+
+        op
+      end
+      alias_method :fetch, :collection
 
     private
       def build_operation_class(*params)
@@ -53,6 +66,7 @@ module Trailblazer
     end
 
     include Uber::Builder
+    attr_reader :collection, :search
 
     def initialize(options={})
       @valid            = true
@@ -66,6 +80,16 @@ module Trailblazer
 
       [process(*params), valid?].reverse
     end
+    
+    def fetch_collection(*params)
+      setup_collection!(*params)
+      
+      @collection = fetch(*params)
+      @search = perform_search(*params) if self.respond_to?(:perform_search)
+      @collection = perform_pagination(*params) if self.respond_to?(:perform_pagination)
+
+      [self, valid?].reverse
+    end
 
     def present(*params)
       setup!(*params)
@@ -74,7 +98,7 @@ module Trailblazer
       self
     end
 
-    attr_reader :contract
+    attr_reader :contract, :policy
 
     def errors
       contract.errors
@@ -83,13 +107,23 @@ module Trailblazer
     def valid?
       @valid
     end
+    
+    def to_model
+      @model
+    end
 
   private
+    def setup_collection!(*params)
+      setup_params!(*params)
+    end
+  
     def setup!(*params)
       setup_params!(*params)
 
       @model = model!(*params)
+      
       setup_model!(*params)
+      setup_policy!(*params) if respond_to?(:setup_policy!)
     end
 
     # Implement #model! to find/create your operation model (if required).
@@ -134,6 +168,7 @@ module Trailblazer
     class InvalidContract < RuntimeError
     end
   end
+  class Trailblazer::Operation::NotAuthorized < Exception; end
 end
 
 require 'trailblazer/operation/crud'

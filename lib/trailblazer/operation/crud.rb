@@ -62,6 +62,13 @@ module Trailblazer
 
       alias_method :find_model, :update_model
 
+      def all_model(params)
+        self.class.model_class.all
+      end
+      
+      def fetch(params)
+        all_model(params)
+      end
 
       # Rails-specific.
       # ActiveModel will automatically call Form::model when creating the contract and passes

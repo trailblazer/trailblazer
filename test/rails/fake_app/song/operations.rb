@@ -101,4 +101,40 @@ class Band < ActiveRecord::Base
       JSON if params[:format] == "json"
     end
   end
+  
+  class Index < Create
+    
+    def fetch(params)
+      Band.all
+    end
+    
+    builds do |params|
+      JSON if params[:format] == "json"
+    end
+    
+    class JSON < self
+      module BandRepresenter
+        include Representable::JSON
+        property :name
+      end
+
+      self.representer_class = BandRepresenter
+    end
+  end
+  
+  class Allow < Create
+    require 'trailblazer/operation/policy'
+    include Policy
+    policy do
+      allow_guest true
+    end
+  end
+  
+  class NotAllow < Create
+    require 'trailblazer/operation/policy'
+    include Policy
+    policy do
+      allow_guest false
+    end
+  end
 end

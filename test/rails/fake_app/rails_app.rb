@@ -39,6 +39,8 @@ app.routes.draw do
     collection do
       post :create
       get :new_with_block
+      get :allow
+      get :not_allow
     end
 
     member do
