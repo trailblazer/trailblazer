@@ -52,10 +52,22 @@ class ResponderRespondTest < ActionController::TestCase
     assert_redirected_to song_path(Song.last)
   end
 
+  test "Create [html/valid/location]" do
+    post :other_create, {song: {title: "You're Going Down"}}
+    assert_redirected_to other_song_path
+  end
+
   test "Create [html/invalid]" do
     post :create, {song: {title: ""}}
     assert_response 200
     assert_equal @response.body, "{:title=&gt;[&quot;can&#39;t be blank&quot;]}"
+  end
+
+  test "Create [html/invalid/action]" do
+    post :other_create, {song: {title: ""}}
+    assert_response 200
+    assert_equal @response.body, "OTHER SONG\n{:title=&gt;[&quot;can&#39;t be blank&quot;]}\n"
+    assert_template "songs/another_view"
   end
 
   test "Delete [html/valid]" do

@@ -20,6 +20,10 @@ ERB
     respond Song::Create
   end
 
+  def other_create
+    respond Song::Create, params, { location: other_song_path, action: :another_view }
+  end
+
   def create_with_params
     respond Song::Create, song: {title: "A Beautiful Indifference"}
   end

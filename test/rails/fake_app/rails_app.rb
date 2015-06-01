@@ -22,6 +22,10 @@ app.initialize!
 
 # routes
 app.routes.draw do
+  post "other_song", to: "songs#other_create"
+  get "other_song/:id", to: "songs#other_show"
+  get "other_song/new", to: "songs#other_new"
+
   resources :songs do
     member do # argh.
       delete :destroy_with_formats
