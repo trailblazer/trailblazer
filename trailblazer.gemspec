@@ -30,5 +30,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "sidekiq", "~> 3.1.0"
   spec.add_development_dependency "rails"
   spec.add_development_dependency "sqlite3"
-  spec.add_development_dependency "responders", "~> 2.0" # currently, we use respond_to.
+  spec.add_development_dependency "responders"#, "~> 2.0" # currently, we use respond_to.
 end
