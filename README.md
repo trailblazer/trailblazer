@@ -253,6 +253,12 @@ end
 
 This will simply run the operation and chuck the instance into the responder letting the latter sort out what to render or where to redirect. The operation delegates respective calls to its internal `model`.
 
+`#respond` will accept options to be passed on to `respond_with`, too
+
+```ruby
+respond Comment::Create, params, location: brandnew_comments_path
+```
+
 You can also handle different formats in that block. It is totally fine to do that in the controller as this is _endpoint_ logic that is HTTP-specific and not business.
 
 ```ruby
