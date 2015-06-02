@@ -54,7 +54,7 @@ class ResponderRespondTest < ActionController::TestCase
 
   test "Create [html/valid/location]" do
     post :other_create, {song: {title: "You're Going Down"}}
-    assert_redirected_to other_song_path
+    assert_redirected_to other_create_songs_path
   end
 
   test "Create [html/invalid]" do
