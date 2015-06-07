@@ -156,6 +156,35 @@ class OperationTest < MiniTest::Spec
   it { OperationWithValidateBlock.(true).secret_contract.must_equal OperationWithValidateBlock::Contract }
 
 
+  # test validate wit if/else
+  class OperationWithValidateAndIf < Trailblazer::Operation
+    self.contract_class = class Contract
+      def initialize(*)
+      end
+
+      def validate(params)
+        params
+      end
+      self
+    end
+
+    def process(params)
+      if validate(params, Object.new)
+        @secret_contract = contract.class
+      else
+        @secret_contract = "so wrong!"
+      end
+    end
+
+    attr_reader :secret_contract
+  end
+
+  it { OperationWithValidateAndIf.run(false).last.secret_contract.must_equal "so wrong!" }
+  it { OperationWithValidateAndIf.(true).secret_contract.must_equal OperationWithValidateAndIf::Contract }
+
+
+
+
   # unlimited arguments for ::run and friends.
   class OperationReceivingLottaArguments < Trailblazer::Operation
     def process(model, params)
