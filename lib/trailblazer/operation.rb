@@ -33,9 +33,9 @@ module Trailblazer
       # ::call only returns the Operation instance (or whatever was returned from #validate).
       # This is useful in tests or in irb, e.g. when using Op as a factory and you already know it's valid.
       def call(*params)
-        build_operation_class(*params).new(:raise_on_invalid => true).run(*params).last
+        build_operation_class(*params).new(raise_on_invalid: true).run(*params).last
       end
-      alias_method :[], :call
+      alias_method :[], :call # TODO: deprecate #[] in favor of .().
 
       # Runs #process without validate and returns the form object.
       def present(*params)
@@ -56,7 +56,6 @@ module Trailblazer
 
     def initialize(options={})
       @valid            = true
-      # DISCUSS: use reverse_merge here?
       @raise_on_invalid = options[:raise_on_invalid] || false
     end
 
@@ -64,7 +63,9 @@ module Trailblazer
     def run(*params)
       setup!(*params) # where do we assign/find the model?
 
-      [process(*params), valid?].reverse
+      process(*params)
+
+      [valid?, self]
     end
 
     def present(*params)
@@ -112,7 +113,7 @@ module Trailblazer
         raise!(contract)
       end
 
-      self
+      @valid
     end
 
     def invalid!(result=self)
