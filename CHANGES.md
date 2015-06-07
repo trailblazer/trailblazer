@@ -12,7 +12,7 @@
 
     ```ruby
     def process(params)
-      if validate(params) do
+      if validate(params)
         .. do valid
       else
         .. handle invalid
