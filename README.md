@@ -81,6 +81,8 @@ Again, the controller only knows how to dispatch to the operation and what to do
 
 ## Operation
 
+The [API is documented here](http://trailblazerb.org/gems/operation/api.html).
+
 Operations encapsulate business logic and are the heart of a Trailblazer architecture. One operation per high-level domain _function_ is used. Different formats or environments are handled in subclasses. Operations don't know about HTTP or the environment.
 
 An operation is not just a monolithic replacement for your business code. An operation is a simple orchestrator between the form object, models and your business code.
@@ -92,7 +94,6 @@ class Comment < ActiveRecord::Base
   class Create < Trailblazer::Operation
     def process(params)
       # do whatever you feel like.
-      self
     end
   end
 end
@@ -135,6 +136,9 @@ contract_class.new(@model).validate(params[:comment])
 ```
 
 This is a familiar work-flow from Reform. Validation does _not_ touch the model.
+
+
+
 
 If you prefer keeping your forms in separate classes or even files, you're free to do so.
 
