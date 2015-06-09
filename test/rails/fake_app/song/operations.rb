@@ -104,26 +104,9 @@ class Band < ActiveRecord::Base
 end
 
 class Tenant < ActiveRecord::Base
-  class Create < Trailblazer::Operation
-    include CRUD, Responder, Representer
-    model Tenant, :create
-
-    contract do
-      include Reform::Form::ActiveModel
-      model Tenant
-
-      property :name, validates: {presence: true}
-    end
-
-    def process(params)
-      validate(params[:tenant]) do
-        contract.save
-      end
-    end
-  end
-
   class Show < Create
-    action :update
+    include CRUD
+    model Tenant, :update
   end
 end
 

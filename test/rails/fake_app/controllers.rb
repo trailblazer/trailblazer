@@ -129,7 +129,7 @@ class TenantsController < ApplicationController
 
   def show
     present Tenant::Show
-    render text: "#{@tenant.name}"
+    render text: "#{@tenant.name}" # model ivar doesn't contain table prefix `bla.xxx`.
   end
 end
 

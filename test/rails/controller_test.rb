@@ -217,11 +217,11 @@ class ActiveRecordPresentTest < ActionController::TestCase
   end
 end
 
-class TenantsControllerTest < ActionController::TestCase
+class PrefixedTablenameControllerTest < ActionController::TestCase
   tests TenantsController
 
   test "show" do
-    tenant = Tenant::Create[tenant: {name: "My Tenant"}].model
+    tenant = Tenant.create(name: "My Tenant") # yepp, I am not using an operation! blasphemy!!!
     get :show, id: tenant.id
 
     assert_equal "My Tenant", response.body
