@@ -7,6 +7,6 @@ private
   end
 
   def operation_model_name
-    @model.class.table_name.singularize
+    @model.class.table_name.split(".").last.singularize
   end
 end
