@@ -120,3 +120,16 @@ class ActiveRecordBandsController < ApplicationController
     render text: "active_record_bands/show.html: #{@model.class}, #{@band.class}, #{@form.is_a?(Reform::Form)}, #{@operation.class}"
   end
 end
+
+require 'trailblazer/operation/controller/active_record'
+class TenantsController < ApplicationController
+  include Trailblazer::Operation::Controller
+  include Trailblazer::Operation::Controller::ActiveRecord
+  respond_to :html
+
+  def show
+    present Tenant::Show
+    render text: "#{@tenant.name}"
+  end
+end
+

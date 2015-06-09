@@ -216,3 +216,15 @@ class ActiveRecordPresentTest < ActionController::TestCase
     assert_equal "active_record_bands/show.html: Band, Band, true, Band::Update", response.body
   end
 end
+
+class TenantsControllerTest < ActionController::TestCase
+  tests TenantsController
+
+  test "show" do
+    tenant = Tenant::Create[tenant: {name: "My Tenant"}].model
+    get :show, id: tenant.id
+
+    assert_equal "My Tenant", response.body
+  end
+end
+

@@ -47,6 +47,8 @@ app.routes.draw do
       post :update_with_block
     end
   end
+
+  resources :tenants, only: [:show]
 end
 
 require 'trailblazer/operation/responder'
