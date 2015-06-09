@@ -141,4 +141,24 @@ class CrudTest < MiniTest::Spec
   end
 
   it { ContractKnowsModelNameOperation.present(song: {title: "Direct Hit"}).contract.class.model_name.to_s.must_equal "CrudTest::Song" }
+
+
+  # allow passing validate(params, model, contract_class)
+  class OperationWithPrivateContract < Trailblazer::Operation
+    include CRUD
+    model Song
+
+    class Contract < Reform::Form
+      property :title
+    end
+
+    def process(params)
+      validate(params[:song], model, Contract) do |f|
+        f.sync
+      end
+    end
+  end
+
+  # uses private Contract class.
+  it { OperationWithPrivateContract.(song: {title: "Blue Rondo a la Turk"}).model.title.must_equal "Blue Rondo a la Turk" }
 end

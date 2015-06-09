@@ -104,7 +104,7 @@ module Trailblazer
     def setup_params!(*params)
     end
 
-    def validate(params, model, contract_class=nil) # NOT to be overridden?!! it creates Result for us.
+    def validate(params, model, contract_class=nil)
       @contract = contract_for(contract_class, model)
 
       if @valid = contract.validate(params)
