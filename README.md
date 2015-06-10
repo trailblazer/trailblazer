@@ -2,7 +2,7 @@
 
 _Trailblazer is a thin layer on top of Rails. It gently enforces encapsulation, an intuitive code structure and gives you an object-oriented architecture._
 
-In a nutshell: Trailblazer makes you write **logicless models** that purely act as data objects, don't contain callbacks, nested attributes, validations or domain logic. It **removes bulky controllers** and strong_parameters by supplying additional layers to hold that code and **completely replaces helpers**.
+In a nutshell: Trailblazer makes you write **logicless models** that purely act as data objects, don't contain callbacks, nested attributes, validations or domain logic. **Controllers** become lean HTTP endpoints. Your **business logic** (including validation) is decoupled from the actual Rails framework and modeled in _operations_.
 
 ![](https://raw.githubusercontent.com/apotonick/trailblazer/master/doc/trb.jpg)
 
@@ -81,6 +81,8 @@ Again, the controller only knows how to dispatch to the operation and what to do
 
 ## Operation
 
+The [API is documented here](http://trailblazerb.org/gems/operation/api.html).
+
 Operations encapsulate business logic and are the heart of a Trailblazer architecture. One operation per high-level domain _function_ is used. Different formats or environments are handled in subclasses. Operations don't know about HTTP or the environment.
 
 An operation is not just a monolithic replacement for your business code. An operation is a simple orchestrator between the form object, models and your business code.
@@ -92,7 +94,6 @@ class Comment < ActiveRecord::Base
   class Create < Trailblazer::Operation
     def process(params)
       # do whatever you feel like.
-      self
     end
   end
 end
@@ -135,6 +136,9 @@ contract_class.new(@model).validate(params[:comment])
 ```
 
 This is a familiar work-flow from Reform. Validation does _not_ touch the model.
+
+
+
 
 If you prefer keeping your forms in separate classes or even files, you're free to do so.
 
@@ -252,6 +256,12 @@ end
 ```
 
 This will simply run the operation and chuck the instance into the responder letting the latter sort out what to render or where to redirect. The operation delegates respective calls to its internal `model`.
+
+`#respond` will accept options to be passed on to `respond_with`, too
+
+```ruby
+respond Comment::Create, params, location: brandnew_comments_path
+```
 
 You can also handle different formats in that block. It is totally fine to do that in the controller as this is _endpoint_ logic that is HTTP-specific and not business.
 

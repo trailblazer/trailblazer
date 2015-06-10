@@ -20,6 +20,10 @@ ERB
     respond Song::Create
   end
 
+  def other_create
+    respond Song::Create, params, { location: other_create_songs_path, action: :another_view }
+  end
+
   def create_with_params
     respond Song::Create, song: {title: "A Beautiful Indifference"}
   end
@@ -134,3 +138,16 @@ class ActiveRecordBandsController < ApplicationController
     render text: "active_record_bands/show.html: #{@model.class}, #{@band.class}, #{@form.is_a?(Reform::Form)}, #{@operation.class}"
   end
 end
+
+require 'trailblazer/operation/controller/active_record'
+class TenantsController < ApplicationController
+  include Trailblazer::Operation::Controller
+  include Trailblazer::Operation::Controller::ActiveRecord
+  respond_to :html
+
+  def show
+    present Tenant::Show
+    render text: "#{@tenant.name}" # model ivar doesn't contain table prefix `bla.xxx`.
+  end
+end
+

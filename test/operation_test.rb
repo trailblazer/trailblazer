@@ -1,26 +1,29 @@
-require 'test_helper'
+require "test_helper"
 
-module Comparable
-  # only used for test.
-  def ==(b)
-    self.class == b.class
+module Inspect
+  def inspect
+    "<#{self.class.to_s.split("::").last} @model=#{@model}>"
   end
+  alias_method :to_s, :inspect
 end
 
 class OperationSetupParamsTest < MiniTest::Spec
   class OperationSetupParam < Trailblazer::Operation
     def process(params)
-      params
+      @model = params
     end
 
     def setup_params!(params)
       params.merge!(garrett: "Rocks!")
     end
+
+    include Inspect
   end
 
-  let (:operation) { OperationSetupParam.new }
-  it { OperationSetupParam.run({valid: true}).must_equal [true, {valid: true, garrett: "Rocks!"}] }
+  # allows you changing params in #setup_params!.
+  it { OperationSetupParam.run({valid: true}).to_s.must_equal "[true, <OperationSetupParam @model={:valid=>true, :garrett=>\"Rocks!\"}>]" }
 end
+
 
 class OperationRunTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
@@ -29,15 +32,13 @@ class OperationRunTest < MiniTest::Spec
       def initialize(*)
       end
       def validate(params)
-        return false if params == false # used in ::[] with exception test.
-        "local #{params}"
+        return true if params == "yes, true"
+        false
       end
 
       def errors
         Struct.new(:to_s).new("Op just calls #to_s on Errors!")
       end
-
-      include Comparable
       self
     end
 
@@ -45,67 +46,65 @@ class OperationRunTest < MiniTest::Spec
       model = Object
       validate(params, model)
     end
+
+    include Inspect
   end
 
-  let (:operation) { Operation.new.extend(Comparable) }
-
   # contract is inferred from self::contract_class.
-  it { Operation.run(true).must_equal ["local true", operation] }
+  # ::run returns result set when run without block.
+  it { Operation.run("not true").to_s.must_equal %{[false, <Operation @model=>]} }
+  it { Operation.run("yes, true").to_s.must_equal %{[true, <Operation @model=>]} }
 
-  # return operation when ::call
-  it { Operation.call(true).must_equal operation }
-  it { Operation.(true).must_equal operation }
-  # #[] is alias for .()
-  it { Operation[true].must_equal operation }
-
-  # ::[] raises exception when invalid.
+  # ::call raises exception when invalid.
   it do
-    exception = assert_raises(Trailblazer::Operation::InvalidContract) { Operation[false] }
+    exception = assert_raises(Trailblazer::Operation::InvalidContract) { Operation.("not true") }
     exception.message.must_equal "Op just calls #to_s on Errors!"
   end
 
-  # ::run without block returns result set.
-  it { Operation.run(true).must_equal  ["local true", operation] }
-  it { Operation.run(false).must_equal [false, operation] }
+  # return operation when ::call
+  it { Operation.("yes, true").to_s.must_equal %{<Operation @model=>} }
+  # #[] is alias for .()
+  it { Operation["yes, true"].to_s.must_equal %{<Operation @model=>} }
+
 
   # ::run with block returns operation.
   # valid executes block.
   it "block" do
     outcome = nil
-    res = Operation.run(true) do
+    res = Operation.run("yes, true") do
       outcome = "true"
     end
 
     outcome.must_equal "true" # block was executed.
-    res.must_equal operation
+    res.to_s.must_equal %{<Operation @model=>}
   end
 
   # invalid doesn't execute block.
   it "block, invalid" do
     outcome = nil
-    res = Operation.run(false) do
+    res = Operation.run("no, not true, false") do
       outcome = "true"
     end
 
     outcome.must_equal nil # block was _not_ executed.
-    res.must_equal operation
+    res.to_s.must_equal %{<Operation @model=>}
   end
 
   # block yields operation
   it do
     outcome = nil
-    res = Operation.run(true) do |op|
+    res = Operation.run("yes, true") do |op|
       outcome = op
     end
 
-    outcome.must_equal operation # block was executed.
-    res.must_equal operation
+    outcome.to_s.must_equal %{<Operation @model=>} # block was executed.
+    res.to_s.must_equal %{<Operation @model=>}
   end
 
-  # Operation#contract returns @contract
-  let (:contract)  { Operation::Contract.new }
-  it { Operation.(true).contract.must_equal contract }
+  # # Operation#contract returns @contract
+  it { Operation.("yes, true").contract.class.to_s.must_equal "OperationRunTest::Operation::Contract" }
 end
+
 
 class OperationTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
@@ -117,36 +116,20 @@ class OperationTest < MiniTest::Spec
   # contract is retrieved from ::contract_class.
   it { assert_raises(NoMethodError) { Operation.run({}) } } # TODO: if you call #validate without defining a contract, the error is quite cryptic.
 
-  # no #process method defined.
-  # DISCUSS: not sure if we need that.
-  # class OperationWithoutProcessMethod < Trailblazer::Operation
-  # end
-
-  # it { OperationWithoutProcessMethod[{}].must_be_kind_of OperationWithoutProcessMethod }
-
-  # #process and no validate.
+  # test #invalid!
   class OperationWithoutValidateCall < Trailblazer::Operation
     def process(params)
       params || invalid!(params)
     end
+
+    include Inspect
   end
 
   # ::run
-  it { OperationWithoutValidateCall.run(Object).must_equal [true, Object] }
-  # ::[]
-  it { OperationWithoutValidateCall.(Object).must_equal(Object) }
-  # ::run with invalid!
-  it { OperationWithoutValidateCall.run(nil).must_equal [false, nil] }
-  # ::run with block, invalid
-  it do
-    OperationWithoutValidateCall.run(false) { @outcome = "true" }.must_equal false
-    @outcome.must_equal nil
-  end
-  # ::run with block, valid
-  it do
-    OperationWithoutValidateCall.run(true) { @outcome = "true" }.must_equal true
-    @outcome.must_equal "true"
-  end
+  it { OperationWithoutValidateCall.run(true).to_s.must_equal %{[true, <OperationWithoutValidateCall @model=>]} }
+  # invalid.
+  it { OperationWithoutValidateCall.run(false).to_s.must_equal %{[false, <OperationWithoutValidateCall @model=>]} }
+
 
   # #validate yields contract when valid
   class OperationWithValidateBlock < Trailblazer::Operation
@@ -162,7 +145,7 @@ class OperationTest < MiniTest::Spec
 
     def process(params)
       validate(params, Object.new) do |c|
-        @secret_contract = c
+        @secret_contract = c.class
       end
     end
 
@@ -170,58 +153,15 @@ class OperationTest < MiniTest::Spec
   end
 
   it { OperationWithValidateBlock.run(false).last.secret_contract.must_equal nil }
-  it('zzz') { OperationWithValidateBlock.(true).secret_contract.must_equal OperationWithValidateBlock.contract_class.new.extend(Comparable) }
+  it { OperationWithValidateBlock.(true).secret_contract.must_equal OperationWithValidateBlock::Contract }
 
-  # manually setting @valid
-  class OperationWithManualValid < Trailblazer::Operation
-    def process(params)
-      @valid = false
-      params
-    end
-  end
 
-  # ::run
-  it { OperationWithManualValid.run(Object).must_equal [false, Object] }
-  # ::[]
-  it { OperationWithManualValid.(Object).must_equal(Object) }
-
-  # re-assign params
-  class OperationReassigningParams < Trailblazer::Operation
-    def process(params)
-      params = params[:title]
-      params
-    end
-  end
-
-  # ::run
-  it { OperationReassigningParams.run({:title => "Day Like This"}).must_equal [true, "Day Like This"] }
-
-  # #invalid!(result)
-  class OperationCallingInvalid < Trailblazer::Operation
-    def process(params)
-      return 1 if params
-      invalid!(2)
-    end
-  end
-
-  it { OperationCallingInvalid.run(true).must_equal [true, 1] }
-  it { OperationCallingInvalid.run(nil).must_equal [false, 2] }
-
-  # #invalid! without result defaults to operation instance.
-  class OperationCallingInvalidWithoutResult < Trailblazer::Operation
-    include Comparable
-    def process(params)
-      invalid!
-    end
-  end
-
-  it { OperationCallingInvalidWithoutResult.run(true).must_equal [false, OperationCallingInvalidWithoutResult.new] }
-
-  # calling return from #validate block leaves result true.
-  class OperationUsingReturnInValidate < Trailblazer::Operation
+  # test validate wit if/else
+  class OperationWithValidateAndIf < Trailblazer::Operation
     self.contract_class = class Contract
       def initialize(*)
       end
+
       def validate(params)
         params
       end
@@ -229,24 +169,31 @@ class OperationTest < MiniTest::Spec
     end
 
     def process(params)
-      validate(params, Object) do
-        return 1
+      if validate(params, Object.new)
+        @secret_contract = contract.class
+      else
+        @secret_contract = "so wrong!"
       end
-      2
     end
+
+    attr_reader :secret_contract
   end
 
-  it { OperationUsingReturnInValidate.run(true).must_equal [true, 1] }
-  it { OperationUsingReturnInValidate.run(false).must_equal [false, 2] }
+  it { OperationWithValidateAndIf.run(false).last.secret_contract.must_equal "so wrong!" }
+  it { OperationWithValidateAndIf.(true).secret_contract.must_equal OperationWithValidateAndIf::Contract }
+
+
+
 
   # unlimited arguments for ::run and friends.
   class OperationReceivingLottaArguments < Trailblazer::Operation
     def process(model, params)
-      [model, params]
+      @model = [model, params]
     end
+    include Inspect
   end
 
-  it { OperationReceivingLottaArguments.run(Object, {}).must_equal([true, [Object, {}]]) }
+  it { OperationReceivingLottaArguments.run(Object, {}).to_s.must_equal %{[true, <OperationReceivingLottaArguments @model=[Object, {}]>]} }
 
   # ::present only runs #setup! which runs #model!.
   class ContractOnlyOperation < Trailblazer::Operation
@@ -270,16 +217,13 @@ class OperationTest < MiniTest::Spec
   it { ContractOnlyOperation.present({}).contract._model.must_equal Object }
 end
 
+
 class OperationBuilderTest < MiniTest::Spec
-  class Operation < Trailblazer::Operation
+  class ParentOperation < Trailblazer::Operation
     def process(params)
-      "operation"
     end
 
     class Sub < self
-      def process(params)
-        "sub:operation"
-      end
     end
 
     builds do |params|
@@ -287,12 +231,12 @@ class OperationBuilderTest < MiniTest::Spec
     end
   end
 
-  it { Operation.run({}).last.must_equal "operation" }
-  it { Operation.run({sub: true}).last.must_equal "sub:operation" }
-
-  it { Operation.({}).must_equal "operation" }
-  it { Operation.({sub: true}).must_equal "sub:operation" }
+  it { ParentOperation.run({}).last.class.must_equal ParentOperation }
+  it { ParentOperation.run({sub: true}).last.class.must_equal ParentOperation::Sub }
+  it { ParentOperation.({}).class.must_equal ParentOperation }
+  it { ParentOperation.({sub: true}).class.must_equal ParentOperation::Sub }
 end
+
 
 # ::contract builds Reform::Form class
 class OperationInheritanceTest < MiniTest::Spec

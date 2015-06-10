@@ -58,11 +58,11 @@ private
   end
 
   # The block passed to #respond is always run, regardless of the validity result.
-  def respond(operation_class, params=self.params, &block)
+  def respond(operation_class, params=self.params, respond_options = {}, &block)
     res, op = operation!(operation_class, params) { operation_class.run(params) }
 
-    return respond_with op if not block_given?
-    respond_with op, &Proc.new { |formats| block.call(op, formats) } if block_given?
+    return respond_with op, respond_options if not block_given?
+    respond_with op, respond_options, &Proc.new { |formats| block.call(op, formats) } if block_given?
   end
 
   def process_params!(params)

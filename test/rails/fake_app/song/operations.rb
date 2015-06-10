@@ -122,3 +122,11 @@ class Band < ActiveRecord::Base
     end
   end
 end
+
+class Tenant < ActiveRecord::Base
+  class Show < Create
+    include CRUD
+    model Tenant, :update
+  end
+end
+
