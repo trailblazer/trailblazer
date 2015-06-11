@@ -20,4 +20,4 @@ end
 rails_task = Rake::Task["rails"]
 test_task = Rake::Task["test"]
 default_task.enhance { test_task.invoke }
-# default_task.enhance { rails_task.invoke }
+default_task.enhance { rails_task.invoke }

@@ -104,8 +104,9 @@ class Band < ActiveRecord::Base
   
   class Index < Create
     
-    def fetch(params)
-      Band.all
+    def process_model!(params)
+      @collection = Band.all
+      super
     end
     
     builds do |params|
@@ -116,6 +117,7 @@ class Band < ActiveRecord::Base
       module BandRepresenter
         include Representable::JSON
         property :name
+        property :locality
       end
 
       self.representer_class = BandRepresenter
@@ -124,7 +126,7 @@ class Band < ActiveRecord::Base
 end
 
 class Tenant < ActiveRecord::Base
-  class Show < Create
+  class Show < Trailblazer::Operation
     include CRUD
     model Tenant, :update
   end

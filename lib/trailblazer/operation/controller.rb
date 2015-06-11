@@ -12,27 +12,19 @@ private
     yield @operation if block_given?
   end
 
-  def collection(operation_class, params=self.params, &block)
-    @fetching_collection = true
-    op = operation!(operation_class, params) { operation_class.collection(params) }
-    @search = op.search if op.respond_to?(:search)
-
-    yield op if block_given?
-
-    Else.new(op)
-  end
-  alias_method :fetch, :collection
   
   # Doesn't run #validate.
   # TODO: allow only_setup.
   # TODO: dependency to CRUD (::model_name)
   def present(operation_class, params=self.params)
     res, op = operation!(operation_class, params) { [true, operation_class.present(params)] }
+    @collection = op.collection
 
     yield op if block_given?
     # respond_with op
     # TODO: implement respond(present: true)
   end
+  alias_method :collection, :present
 
   # full-on Op[]
   # Note: this is not documented on purpose as this concept is experimental. I don't like it too much and prefer
@@ -81,25 +73,13 @@ private
       params.merge!(concept_name => request_body)
     end
 
-    if @fetching_collection
-      @operation = yield # Create.run(params)
-      setup_operation_collection_variables!
-      @operation # DISCUSS: do we need result here? or can we just go pick op.valid?
-    else
-      res, @operation = yield # Create.run(params)
-      setup_operation_instance_variables!
-      [res, @operation] # DISCUSS: do we need result here? or can we just go pick op.valid?
-    end
+    res, @operation = yield # Create.run(params)
+    setup_operation_instance_variables!
+    [res, @operation] # DISCUSS: do we need result here? or can we just go pick op.valid?
   end
 
   def setup_operation_instance_variables!
     @form = @operation.contract
     @model = @operation.model
-  end
-  
-  def setup_operation_collection_variables!
-    @collection = @operation.collection
-    operation_collection_name = @operation.collection.model.table_name
-    instance_variable_set(:"@#{operation_collection_name}", @collection)
   end
 end

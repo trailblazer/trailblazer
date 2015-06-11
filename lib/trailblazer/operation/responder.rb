@@ -19,10 +19,7 @@ module Trailblazer::Operation::Responder
   end
 
   def to_json(*)
-    unless self.model.nil?
-      self.class.representer_class.new(model).to_json
-    else
-      self.collection.extend(self.class.representer_class.for_collection).to_json
-    end
+    return self.collection.extend(self.class.representer_class.for_collection).to_json if self.collection
+    self.class.representer_class.new(model).to_json
   end
 end

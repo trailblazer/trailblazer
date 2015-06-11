@@ -109,12 +109,15 @@ class CrudTest < MiniTest::Spec
   # model Song, :action
   class FetchCollectionOperation < CreateOperation
     model Song
-    
-    def fetch(params)
+
+    contract do
+      property :title
+    end 
+    def setup_model!(params)
       if @user_role == 'admin'
-        return Song.all
+        @collection = Song.all
       else
-        return nil
+        @collection = nil
       end
     end
     
@@ -129,7 +132,7 @@ class CrudTest < MiniTest::Spec
     songs << CreateOperation[song: {title: "Blue Rondo a la Turk"}].model
     songs << CreateOperation[song: {title: "Mercy Day For Mr. Vengeance"}].model
     Song.all_records = songs
-    op = FetchCollectionOperation.collection({user_id: 0})
+    op = FetchCollectionOperation.present({user_id: 0})
     op.collection.must_equal songs
   end
   
@@ -138,7 +141,7 @@ class CrudTest < MiniTest::Spec
     songs << CreateOperation[song: {title: "Blue Rondo a la Turk"}].model
     songs << CreateOperation[song: {title: "Mercy Day For Mr. Vengeance"}].model
     Song.all_records = songs
-    op = FetchCollectionOperation.collection({user_id: 99})
+    op = FetchCollectionOperation.present({user_id: 99})
     op.collection.must_equal nil
   end
 

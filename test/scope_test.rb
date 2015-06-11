@@ -5,9 +5,10 @@ class ScopeTest < MiniTest::Spec
   class Band < ActiveRecord::Base
     class Index < Trailblazer::Operation
       include CRUD, Scope
-      model Thing
-      def fetch(params)
-        return Band.where(locality: "FR")
+      model Band
+      def process_model!(params)
+        @collection = Band.where(locality: "FR")
+        super
       end
     end
   end
@@ -19,6 +20,6 @@ class ScopeTest < MiniTest::Spec
     Band.create(name: "DJ Mr. Oizo", locality: "FR")
     Band.create(name: "DJ Gui Boratto", locality: "BR")
   end
-  let (:search) { Band::Index.fetch({q: {name_cont: "Band"}}).search }
-  it { search.result.count.must_equal (2) }
+  let (:collection) { Band::Index.present({q: {name_cont: "Band"}}).collection }
+  it { collection.search.result.count.must_equal (2) }
 end

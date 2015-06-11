@@ -46,19 +46,6 @@ module Trailblazer
         contract_class.class_eval(&block)
       end
       
-      def collection(*params, &block)
-        *params = {} if params.empty?
-        res, op = build_operation_class(*params).new.fetch_collection(*params)
-
-        if block_given?
-          yield op if res
-          return op
-        end
-
-        op
-      end
-      alias_method :fetch, :collection
-
     private
       def build_operation_class(*params)
         class_builder.call(*params) # Uber::Builder::class_builder
@@ -66,7 +53,7 @@ module Trailblazer
     end
 
     include Uber::Builder
-    attr_reader :collection, :search
+    attr_reader :collection
 
     def initialize(options={})
       @valid            = true
@@ -82,16 +69,6 @@ module Trailblazer
       [valid?, self]
     end
     
-    def fetch_collection(*params)
-      setup_collection!(*params)
-      
-      @collection = fetch(*params)
-      @search = perform_search(*params) if self.respond_to?(:perform_search)
-      @collection = perform_pagination(*params) if self.respond_to?(:perform_pagination)
-
-      [self, valid?].reverse
-    end
-
     def present(*params)
       setup!(*params)
 
@@ -114,15 +91,13 @@ module Trailblazer
     end
 
   private
-    def setup_collection!(*params)
-      setup_params!(*params)
-    end
-  
     def setup!(*params)
       setup_params!(*params)
 
       @model = model!(*params)
       setup_model!(*params)
+      process_model!(*params)
+      @model
     end
 
     # Implement #model! to find/create your operation model (if required).
@@ -134,6 +109,11 @@ module Trailblazer
     end
 
     def setup_params!(*params)
+    end
+
+    # Override if you want to process your model after was set
+    # It can be used for pagination, scope, whatever you need
+    def process_model!(*params)
     end
 
     def validate(params, model, contract_class=nil)

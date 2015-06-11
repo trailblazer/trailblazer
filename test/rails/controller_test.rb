@@ -33,7 +33,7 @@ class ProcessParamsTest < ActionController::TestCase
   end
 
   test "Create with overridden #process_params" do
-    post :create, band: {name: "Kreator"}
+    post :create, band: {name: "Kreator", locality: "Essen"}
     assert_redirected_to band_path(Band.last)
 
     band = Band.last

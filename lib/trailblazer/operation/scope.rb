@@ -5,9 +5,9 @@ module Trailblazer::Operation::Scope
     attr_reader :search
   end
 
-  def perform_search(params)
-    search = @collection.ransack(params[:q])
-    @collection = search.result
-    search
+  def process_model!(params)
+    @search = @collection.ransack(params[:q])
+    @collection = @search.result
+    super
   end
 end
