@@ -86,10 +86,6 @@ module Trailblazer
       @valid
     end
     
-    def to_model
-      @model
-    end
-
   private
     def setup!(*params)
       setup_params!(*params)
@@ -97,7 +93,6 @@ module Trailblazer
       @model = model!(*params)
       setup_model!(*params)
       process_model!(*params)
-      @model
     end
 
     # Implement #model! to find/create your operation model (if required).

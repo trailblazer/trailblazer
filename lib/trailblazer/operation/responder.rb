@@ -22,4 +22,8 @@ module Trailblazer::Operation::Responder
     return self.collection.extend(self.class.representer_class.for_collection).to_json if self.collection
     self.class.representer_class.new(model).to_json
   end
+
+  def to_model
+    @model
+  end
 end
