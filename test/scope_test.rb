@@ -6,7 +6,7 @@ class ScopeTest < MiniTest::Spec
     class Index < Trailblazer::Operation
       include CRUD, Scope
       model Band
-      def process_model!(params)
+      def setup_model!(params)
         @collection = Band.where(locality: "FR")
         super
       end

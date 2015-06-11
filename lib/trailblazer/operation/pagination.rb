@@ -6,7 +6,7 @@ module Trailblazer::Operation::Pagination
     ::ActiveRecord::Base.send :include, Kaminari::ActiveRecordExtension
   end
   
-  def process_model!(params)
+  def setup_model!(params)
     @collection = @collection.page(params[:page]).per(params[:per_page])
     super
   end

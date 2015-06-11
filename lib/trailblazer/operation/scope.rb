@@ -5,7 +5,7 @@ module Trailblazer::Operation::Scope
     attr_reader :search
   end
 
-  def process_model!(params)
+  def setup_model!(params)
     @search = @collection.ransack(params[:q])
     @collection = @search.result
     super

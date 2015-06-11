@@ -104,7 +104,7 @@ class Band < ActiveRecord::Base
   
   class Index < Create
     
-    def process_model!(params)
+    def setup_model!(params)
       @collection = Band.all
       super
     end

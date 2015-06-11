@@ -92,7 +92,6 @@ module Trailblazer
 
       @model = model!(*params)
       setup_model!(*params)
-      process_model!(*params)
     end
 
     # Implement #model! to find/create your operation model (if required).
@@ -104,11 +103,6 @@ module Trailblazer
     end
 
     def setup_params!(*params)
-    end
-
-    # Override if you want to process your model after was set
-    # It can be used for pagination, scope, whatever you need
-    def process_model!(*params)
     end
 
     def validate(params, model, contract_class=nil)

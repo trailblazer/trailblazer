@@ -10,7 +10,7 @@ class PaginationSetupTest < MiniTest::Spec
 
       model Thing, :create
 
-      def process_model!(params)
+      def setup_model!(params)
         @collection = Thing.all
         super
       end
@@ -35,7 +35,7 @@ class PaginationTotalPagesTest < MiniTest::Spec
 
       model Thing, :create
 
-      def process_model!(params)
+      def setup_model!(params)
         @collection = Thing.all
         super
       end
