@@ -45,7 +45,7 @@ module Trailblazer
       def contract(&block)
         contract_class.class_eval(&block)
       end
-
+      
     private
       def build_operation_class(*params)
         class_builder.call(*params) # Uber::Builder::class_builder
@@ -53,6 +53,7 @@ module Trailblazer
     end
 
     include Uber::Builder
+    attr_reader :collection
 
     def initialize(options={})
       @valid            = true
@@ -67,7 +68,7 @@ module Trailblazer
 
       [valid?, self]
     end
-
+    
     def present(*params)
       setup!(*params)
 
@@ -84,7 +85,7 @@ module Trailblazer
     def valid?
       @valid
     end
-
+    
   private
     def setup!(*params)
       setup_params!(*params)

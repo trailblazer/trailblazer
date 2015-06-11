@@ -12,22 +12,25 @@ private
     yield @operation if block_given?
   end
 
+  
   # Doesn't run #validate.
   # TODO: allow only_setup.
   # TODO: dependency to CRUD (::model_name)
   def present(operation_class, params=self.params)
     res, op = operation!(operation_class, params) { [true, operation_class.present(params)] }
+    @collection = op.collection
 
     yield op if block_given?
     # respond_with op
     # TODO: implement respond(present: true)
   end
+  alias_method :collection, :present
 
   # full-on Op[]
   # Note: this is not documented on purpose as this concept is experimental. I don't like it too much and prefer
   # returns in the valid block.
   class Else
-    def initialize(op, run)
+    def initialize(op, run = true)
       @op  = op
       @run = run
     end
@@ -72,7 +75,6 @@ private
 
     res, @operation = yield # Create.run(params)
     setup_operation_instance_variables!
-
     [res, @operation] # DISCUSS: do we need result here? or can we just go pick op.valid?
   end
 

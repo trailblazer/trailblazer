@@ -62,7 +62,6 @@ module Trailblazer
 
       alias_method :find_model, :update_model
 
-
       # Rails-specific.
       # ActiveModel will automatically call Form::model when creating the contract and passes
       # the operation's +::model+, so you don't have to call it twice.

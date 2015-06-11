@@ -74,7 +74,7 @@ class UploadedFileTest < MiniTest::Spec
       }
 
       it { @subject.must_match /\w+_trailblazer_upload$/ }
-      it { @subject.must_match /^\/tmp\/uploads\// }
+      it { @subject.must_match /^#{tmp_dir}/ }
 
       it { File.exists?(@subject).must_equal true }
       it { File.size(@subject).must_equal image.size }
