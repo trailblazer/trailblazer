@@ -33,7 +33,7 @@ class ProcessParamsTest < ActionController::TestCase
   end
 
   test "Create with overridden #process_params" do
-    post :create, band: {name: "Kreator", locality: "Essen"}
+    post :create, band: {name: "Kreator"}
     assert_redirected_to band_path(Band.last)
 
     band = Band.last
@@ -170,7 +170,7 @@ class ControllerPresentTest < ActionController::TestCase
 
     get :show, id: band.id
 
-    assert_equal "bands/show.html: Band,Band,true,Band::Update,Nofx", response.body
+    assert_equal "bands/show.html: Band,Band,true,Band::Update,Essen\n", response.body
   end
 
   # TODO: this implicitely tests builds. maybe have separate test for that?
