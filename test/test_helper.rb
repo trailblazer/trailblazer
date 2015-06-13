@@ -3,6 +3,9 @@ require 'minitest/autorun'
 require 'active_record'
 require 'database_cleaner'
 
+require 'fileutils'
+FileUtils::mkdir_p '/tmp/uploads'
+
 # ActiveRecord Connection
 # ActiveRecord::Base.logger = Logger.new(STDERR)
 ActiveRecord::Base.logger = false
