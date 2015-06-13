@@ -101,10 +101,31 @@ class Band < ActiveRecord::Base
       JSON if params[:format] == "json"
     end
   end
+
+  class Index < Create
+    def setup_model!(params)
+      @collection = Band.all
+      super
+    end
+
+    builds do |params|
+      JSON if params[:format] == "json"
+    end
+
+    class JSON < self
+      module BandRepresenter
+        include Representable::JSON
+        property :name
+        property :locality
+      end
+
+      self.representer_class = BandRepresenter
+    end
+  end
 end
 
 class Tenant < ActiveRecord::Base
-  class Show < Create
+  class Show < Trailblazer::Operation
     include CRUD
     model Tenant, :update
   end

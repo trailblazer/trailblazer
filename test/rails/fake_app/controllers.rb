@@ -49,6 +49,10 @@ class BandsController < ApplicationController
   include Trailblazer::Operation::Controller
   respond_to :html, :json
 
+  def index
+    collection Band::Index
+  end
+
   def show
     present Band::Update do |op|
       @klass    = op.model.class
@@ -113,6 +117,11 @@ class ActiveRecordBandsController < ApplicationController
   include Trailblazer::Operation::Controller
   include Trailblazer::Operation::Controller::ActiveRecord
   respond_to :html
+
+  def index
+    collection Band::Index
+    render text: "active_record_bands/index.html: #{@collection.class}, #{@bands.class}, #{@operation.class}"
+  end
 
   def show
     present Band::Update

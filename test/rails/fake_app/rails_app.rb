@@ -5,6 +5,7 @@
 require 'action_controller/railtie'
 require 'action_view/railtie'
 require 'active_record'
+require 'responders'
 
 require 'fake_app/config'
 
