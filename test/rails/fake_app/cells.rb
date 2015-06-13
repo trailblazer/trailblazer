@@ -4,7 +4,7 @@ class UserCell < Cell::Rails
   def show(users)
     @users = users
 
-    render :inline => <<-ERB
+    render inline: <<-ERB
 <%= paginate @users %>
 ERB
   end
@@ -14,7 +14,7 @@ class ViewModelCell < Cell::ViewModel
   include Kaminari::Cells
 
   def show
-    render :inline => <<-ERB
+    render inline: <<-ERB
 <%= paginate model %>
 ERB
   end

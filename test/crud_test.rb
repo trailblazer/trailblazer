@@ -109,7 +109,7 @@ class CrudTest < MiniTest::Spec
     end
   end
 
-  it { SetupModelOperation[song: {title: "Emily Kane"}].model.params.must_equal "{:song=>{:title=>\"Emily Kane\"}}" }
+  it { SetupModelOperation[song: {title: "Emily Kane"}].model.params.must_equal "{song:{title:\"Emily Kane\"}}" }
 
 
 

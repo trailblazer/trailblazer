@@ -28,7 +28,7 @@ class WorkerTest < MiniTest::Spec
 
   # test basic worker functionality.
   describe "with sidekiq" do
-    before { @res = Operation.run(:title => "Dragonfly") }
+    before { @res = Operation.run(title: "Dragonfly") }
 
     it { @res.kind_of?(String).must_equal true } # for now, we return the job from sidekiq.
     it { Operation.jobs[0]["args"].must_equal([{"title"=>"Dragonfly"}]) }
@@ -36,7 +36,7 @@ class WorkerTest < MiniTest::Spec
   end
 
   # without sidekiq, we don't have indifferent_access automatically.
-  it { NoBackgroundOperation.run(:title => "Dragonfly").must_equal "I was working hard on {:title=>\"Dragonfly\"}. title:Dragonfly \"title\"=>" }
+  it { NoBackgroundOperation.run(title: "Dragonfly").must_equal "I was working hard on {title:\"Dragonfly\"}. title:Dragonfly \"title\"=>" }
 
 
   # test manual serialisation (to be done with UploadedFile etc automatically).
@@ -44,7 +44,7 @@ class WorkerTest < MiniTest::Spec
     include Worker
 
     def self.serializable(params)
-      {:wrap => params}
+      {wrap: params}
     end
 
     def deserializable(params)
@@ -53,7 +53,7 @@ class WorkerTest < MiniTest::Spec
   end
 
   describe "with serialization in sidekiq" do
-    before { @res = SerializingOperation.run(:title => "Dragonfly") }
+    before { @res = SerializingOperation.run(title: "Dragonfly") }
 
     it { @res.kind_of?(String).must_equal true } # for now, we return the job from sidekiq.
     it { SerializingOperation.jobs[0]["args"].must_equal([{"wrap"=>{"title"=>"Dragonfly"}}]) }
@@ -68,9 +68,9 @@ class WorkerFileMarshallerTest < MiniTest::Spec
     tmp.write File.open("test/fixtures/#{name}").read
 
     ActionDispatch::Http::UploadedFile.new(
-    :tempfile => tmp,
-    :filename => name,
-    :type     => "image/png")
+    tempfile: tmp,
+    filename: name,
+    type: "image/png")
   end
 
   class Operation < Trailblazer::Operation

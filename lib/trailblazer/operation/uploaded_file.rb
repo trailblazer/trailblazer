@@ -18,9 +18,9 @@ module Trailblazer
       path = persist!
 
       hash = {
-        :filename       => @uploaded.original_filename,
-        :type           => @uploaded.content_type,
-        :tempfile_path  => path
+        filename: @uploaded.original_filename,
+        type: @uploaded.content_type,
+        tempfile_path: path
       }
 
       cleanup!
@@ -40,7 +40,7 @@ module Trailblazer
       file.close # TODO: can we test that?
       File.unlink(file)
 
-      ActionDispatch::Http::UploadedFile.new(hash.merge(:tempfile => tmp))
+      ActionDispatch::Http::UploadedFile.new(hash.merge(tempfile: tmp))
     end
 
   private
