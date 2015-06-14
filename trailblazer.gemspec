@@ -30,4 +30,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "sidekiq", "~> 3.1.0"
   spec.add_development_dependency "rails"
   spec.add_development_dependency "sqlite3"
+  spec.add_development_dependency "responders"
+  spec.add_development_dependency "database_cleaner"
 end

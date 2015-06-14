@@ -53,6 +53,7 @@ module Trailblazer
     end
 
     include Uber::Builder
+    attr_reader :collection
 
     def initialize(options={})
       @valid            = true

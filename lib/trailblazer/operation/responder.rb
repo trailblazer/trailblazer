@@ -21,4 +21,8 @@ module Trailblazer::Operation::Responder
   def to_json(*)
     self.class.representer_class.new(model).to_json
   end
+
+  def to_model
+    @model
+  end
 end
