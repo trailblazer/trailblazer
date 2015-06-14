@@ -37,7 +37,7 @@ module Trailblazer
       end
       alias_method :[], :call # TODO: deprecate #[] in favor of .().
 
-      # Runs #process without validate and returns the form object.
+      # Runs #setup! and returns the form object.
       def present(*params)
         build_operation_class(*params).new.present(*params)
       end
