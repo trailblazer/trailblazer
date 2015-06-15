@@ -65,18 +65,18 @@ class Trailblazer::Operation
             dfn.delete!(:prepare)
 
             dfn.merge!(
-              :getter => lambda { |*| self[dfn.name.to_sym] },
-              :setter => lambda { |fragment, *| self[dfn.name.to_s] = fragment }
+              getter: lambda { |*| self[dfn.name.to_sym] },
+              setter: lambda { |fragment, *| self[dfn.name.to_s] = fragment }
             ) # FIXME: allow both sym and str.
 
-            dfn.merge!(:class => Hash) and next if dfn[:form] # nested properties need a class for deserialization.
+            dfn.merge!(class: Hash) and next if dfn[:form] # nested properties need a class for deserialization.
             next unless dfn[:file]
 
             # TODO: where do we set /tmp/uploads?
             dfn.merge!(
-              :serialize   => lambda { |file, *| Trailblazer::Operation::UploadedFile.new(file, :tmp_dir => "/tmp/uploads").to_hash },
-              :deserialize => lambda { |object, hash, *| Trailblazer::Operation::UploadedFile.from_hash(hash) },
-              :class       => Hash
+              serialize: lambda { |file, *| Trailblazer::Operation::UploadedFile.new(file, tmp_dir: "/tmp/uploads").to_hash },
+              deserialize: lambda { |object, hash, *| Trailblazer::Operation::UploadedFile.from_hash(hash) },
+              class: Hash
             )
           end
         end

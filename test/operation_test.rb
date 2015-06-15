@@ -21,7 +21,7 @@ class OperationSetupParamsTest < MiniTest::Spec
   end
 
   # allows you changing params in #setup_params!.
-  it { OperationSetupParam.run({valid: true}).to_s.must_equal "[true, <OperationSetupParam @model={:valid=>true, :garrett=>\"Rocks!\"}>]" }
+  it { OperationSetupParam.run({valid: true}).to_s.must_equal "[true, <OperationSetupParam @model={valid:true, garrett:\"Rocks!\"}>]" }
 end
 
 # Operation#model.
@@ -286,7 +286,7 @@ class OperationInheritanceTest < MiniTest::Spec
 
     form = Operation::JSON.contract_class.new(OpenStruct.new)
     form.validate({})#.must_equal true
-    form.errors.to_s.must_equal "{:genre=>[\"can't be blank\"]}"
+    form.errors.to_s.must_equal "{genre:[\"can't be blank\"]}"
   end
 
   # allows overriding options
@@ -314,6 +314,6 @@ class OperationErrorsTest < MiniTest::Spec
 
   it do
     res, op = Operation.run({})
-    op.errors.to_s.must_equal "{:title=>[\"can't be blank\"]}"
+    op.errors.to_s.must_equal "{title:[\"can't be blank\"]}"
   end
 end

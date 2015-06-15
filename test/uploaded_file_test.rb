@@ -13,9 +13,9 @@ class UploadedFileTest < MiniTest::Spec
    }
 
   let (:upload) { ActionDispatch::Http::UploadedFile.new(
-    :tempfile => tempfile,
-    :filename => "apotomo.png",
-    :type     => "image/png")
+    tempfile: tempfile,
+    filename: "apotomo.png",
+    type: "image/png")
   }
 
   describe "#to_hash" do
@@ -69,7 +69,7 @@ class UploadedFileTest < MiniTest::Spec
   describe "with custom tmp directory" do
     describe "#to_hash" do
       before {
-        @uploaded = Trailblazer::Operation::UploadedFile.new(upload, :tmp_dir => tmp_dir)
+        @uploaded = Trailblazer::Operation::UploadedFile.new(upload, tmp_dir: tmp_dir)
         @subject  = @uploaded.to_hash[:tempfile_path]
       }
 
