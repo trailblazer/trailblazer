@@ -233,6 +233,15 @@ class ActiveRecordPresentTest < ActionController::TestCase
 
     assert_equal "active_record_bands/show.html: Band, Band, true, Band::Update", response.body
   end
+
+  test "#collection" do
+    Band.destroy_all
+    Band::Create[band: {name: "Nofx"}]
+
+    get :index
+
+    assert_equal "active_record_bands/index.html: Band::ActiveRecord_Relation, Band::ActiveRecord_Relation, Band::Index", response.body
+  end
 end
 
 class PrefixedTablenameControllerTest < ActionController::TestCase
