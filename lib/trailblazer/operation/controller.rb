@@ -1,5 +1,4 @@
 module Trailblazer::Operation::Controller
-  # TODO: test me.
 
 private
   def form(operation_class, params=self.params) # consider private.
@@ -17,13 +16,19 @@ private
   # TODO: dependency to CRUD (::model_name)
   def present(operation_class, params=self.params)
     res, op = operation!(operation_class, params) { [true, operation_class.present(params)] }
-    @collection = op.collection
 
     yield op if block_given?
     # respond_with op
     # TODO: implement respond(present: true)
   end
-  alias_method :collection, :present
+
+  def collection(operation_class, params=self.params)
+    # TODO: merge with #present.
+    res, op = operation!(operation_class, params) { [true, operation_class.present(params)] }
+    @collection = @model
+
+    yield op if block_given?
+  end
 
   # full-on Op[]
   # Note: this is not documented on purpose as this concept is experimental. I don't like it too much and prefer

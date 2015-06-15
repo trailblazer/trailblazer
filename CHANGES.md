@@ -5,6 +5,8 @@
 * In Railtie, use `ActionDispatch::Reloader.to_prepare` for autoloading, nothing else. This should fix spring reloading.
 * Allow `Op#validate(params, model, Contract)` with CRUD.
 * Allows prefixed table names, e.g. `admin.users` in `Controller`. The instance variables will be `@user`. Thanks to @fernandes and especially @HuckyDucky.
+* Added `Operation::Collection` which will allow additional behavior like pagination and scoping. Thanks to @fernandes for his work on this.
+* Added `Operation::collection` to run `setup!` without instantiating a contract. This is called in the new `Controller#collection` method.
 
 ## API change
 

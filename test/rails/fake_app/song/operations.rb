@@ -103,6 +103,8 @@ class Band < ActiveRecord::Base
   end
 
   class Index < Create
+    include Collection
+
     def setup_model!(params)
       @collection = Band.all
       super
