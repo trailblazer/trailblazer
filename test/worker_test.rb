@@ -36,7 +36,7 @@ class WorkerTest < MiniTest::Spec
   end
 
   # without sidekiq, we don't have indifferent_access automatically.
-  it { NoBackgroundOperation.run(title: "Dragonfly").must_equal "I was working hard on {title:\"Dragonfly\"}. title:Dragonfly \"title\"=>" }
+  it { NoBackgroundOperation.run(title: "Dragonfly").must_equal "I was working hard on {:title=>\"Dragonfly\"}. title:Dragonfly \"title\"=>" }
 
 
   # test manual serialisation (to be done with UploadedFile etc automatically).
