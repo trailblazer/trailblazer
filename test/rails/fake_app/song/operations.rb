@@ -105,7 +105,7 @@ class Band < ActiveRecord::Base
   end
 
   class Index < Trailblazer::Operation
-    include Collection, Representer
+    include Collection
 
     def model!(params)
       Band.all
@@ -116,6 +116,8 @@ class Band < ActiveRecord::Base
     end
 
     class JSON < self
+      include Representer
+
       module BandRepresenter
         include Representable::JSON
         property :name
