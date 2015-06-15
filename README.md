@@ -425,6 +425,9 @@ end
 
 This centralizes params normalization and doesn't require you to do that manually in `#process`.
 
+### Collections
+
+Operations can also be used to present (and soon to process) collections of objects, e.g. for an `Index` operation. This is [documented here](http://trailblazerb.org/gems/operation/collection.html).
 
 ### Background Processing
 
