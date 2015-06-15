@@ -3,8 +3,6 @@ module Trailblazer
     # The CRUD module will automatically create/find models for the configured +action+.
     # It adds a public  +Operation#model+ reader to access the model (after performing).
     module CRUD
-      attr_reader :model
-
       module Included
         def included(base)
           base.extend Uber::InheritableAttr

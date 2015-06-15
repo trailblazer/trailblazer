@@ -76,6 +76,7 @@ module Trailblazer
     end
 
     attr_reader :contract
+    attr_reader :model
 
     def errors
       contract.errors
