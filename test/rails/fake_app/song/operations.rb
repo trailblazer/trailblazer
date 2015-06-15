@@ -1,3 +1,5 @@
+require 'trailblazer/autoloading'
+
 class Song < ActiveRecord::Base
   class Create < Trailblazer::Operation
     include CRUD
@@ -102,12 +104,11 @@ class Band < ActiveRecord::Base
     end
   end
 
-  class Index < Create
-    include Collection
+  class Index < Trailblazer::Operation
+    include Collection, Representer
 
-    def setup_model!(params)
-      @collection = Band.all
-      super
+    def model!(params)
+      Band.all
     end
 
     builds do |params|
