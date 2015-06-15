@@ -8,7 +8,7 @@ private
 
   def operation_model_name
     # set the right variable name if collection
-    if @model.class.to_s.match(/ActiveRecord_Relation\z/)
+    if @operation.is_a?(Trailblazer::Operation::Collection)
       return @model.model.table_name.split(".").last
     end
     @model.class.table_name.split(".").last.singularize
