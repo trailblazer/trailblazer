@@ -68,7 +68,7 @@ private
   def operation!(operation_class, params)
     process_params!(params)
 
-    unless request.format == :html
+    if request.format == :json
       # this is what happens:
       # respond_with Comment::Update::JSON.run(params.merge(comment: request.body.string))
       concept_name = operation_class.model_class.to_s.underscore # this could be renamed to ::concept_class soon.
