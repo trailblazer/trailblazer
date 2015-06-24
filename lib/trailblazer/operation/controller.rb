@@ -67,12 +67,25 @@ private
 
   # Normalizes parameters and invokes the operation (including its builders).
   def operation!(operation_class, params, &block)
-    Trailblazer::Endpoint.new(self, operation_class, params, request).(&block)
+    Trailblazer::Endpoint.new(self, operation_class, params, request, {document_formats: self.class._operation[:document_formats]}).(&block)
   end
 
   def setup_operation_instance_variables!(operation)
     @operation = operation
     @form      = operation.contract
     @model     = operation.model
+  end
+
+  def self.included(includer)
+    includer.extend Uber::InheritableAttr
+    includer.inheritable_attr :_operation
+    includer._operation = {document_formats: {}}
+    includer.extend ClassMethods
+  end
+
+  module ClassMethods
+    def operation(options)
+      _operation[:document_formats][options[:document_formats]] = true
+    end
   end
 end

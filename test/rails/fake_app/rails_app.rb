@@ -49,6 +49,15 @@ app.routes.draw do
     end
   end
 
+  namespace :rails_endpoint do
+    namespace :unconfigured_test do
+      resources :bands
+    end
+    namespace :configured_test do
+      resources :bands
+    end
+  end
+
   resources :tenants, only: [:show]
 end
 
