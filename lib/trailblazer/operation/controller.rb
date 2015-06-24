@@ -67,7 +67,7 @@ private
 
   # Normalizes parameters and invokes the operation (including its builders).
   def operation!(operation_class, params, &block)
-    Trailblazer::Endpoint.new(self, operation_class, params, request, {document_formats: self.class._operation[:document_formats]}).(&block)
+    Trailblazer::Endpoint.new(self, operation_class, params, request, self.class._operation).(&block)
   end
 
   def setup_operation_instance_variables!(operation)
