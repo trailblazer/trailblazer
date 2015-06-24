@@ -320,7 +320,17 @@ This centralizes params normalization and doesn't require you to do that in ever
 
 ### Different Request Formats
 
-The controller helpers `#present` and `#respond` automatically pass the request body into the operation via the `params` hash. It's up to the operation's builder to decide which class to instantiate.
+In case you have document-API operations that use representers to deserialize the incoming JSON or XML: You can configure the controller to pass the original request body into the operation via `params["comment"]` - instead of the pre-parsed hash from Rails.
+
+You need to configure this in the controller.
+
+```ruby
+class CommentsController < ApplicationController
+  operation document_formats: :json
+```
+
+
+It's up to the operation's builder to decide which class to instantiate.
 
 ```ruby
 class Create < Trailblazer::Operation
