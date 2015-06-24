@@ -1,5 +1,6 @@
-module Trailblazer::Operation::Controller
+require "trailblazer/endpoint"
 
+module Trailblazer::Operation::Controller
 private
   def form(operation_class, params=self.params) # consider private.
     process_params!(params)
@@ -65,26 +66,13 @@ private
   end
 
   # Normalizes parameters and invokes the operation (including its builders).
-  def operation!(operation_class, params)
-    process_params!(params)
-
-    unless request.format == :html
-      # this is what happens:
-      # respond_with Comment::Update::JSON.run(params.merge(comment: request.body.string))
-      concept_name = operation_class.model_class.to_s.underscore # this could be renamed to ::concept_class soon.
-      request_body = request.body.respond_to?(:string) ? request.body.string : request.body.read
-
-      params.merge!(concept_name => request_body)
-    end
-
-    res, @operation = yield # Create.run(params)
-    setup_operation_instance_variables!
-
-    [res, @operation] # DISCUSS: do we need result here? or can we just go pick op.valid?
+  def operation!(operation_class, params, &block)
+    Trailblazer::Endpoint.new(self, operation_class, params, request).(&block)
   end
 
-  def setup_operation_instance_variables!
-    @form = @operation.contract
-    @model = @operation.model
+  def setup_operation_instance_variables!(operation)
+    @operation = operation
+    @form      = operation.contract
+    @model     = operation.model
   end
 end
