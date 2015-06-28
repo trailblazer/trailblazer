@@ -12,7 +12,7 @@ module Trailblazer::Operation::Representer
     end
 
     def build_representer_class
-      representer_class || self.representer_class= Class.new(contract_class.schema)
+      self.representer_class ||= Class.new(contract_class.schema(include: [Representable::JSON]))
     end
   end
 end

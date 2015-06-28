@@ -24,6 +24,8 @@
     end
     ```
 
+* `Worker` only works with Reform >= 2.0.0.
+
 # 0.2.3
 
 
