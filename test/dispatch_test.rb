@@ -1,17 +1,28 @@
 require 'test_helper'
 
 class OperationCallbackTest < MiniTest::Spec
+  Song = Struct.new(:name)
+
   class Create < Trailblazer::Operation
     include Dispatch
 
-    def process(params)
-      dispatch :notify_me!
-      dispatch :notify_you!, params
+    contract do
+      property :name
+    end
 
-      # TODO:
-      # dispatch :notify_whoever, Callable
-      # dispatch :notify_whoever, lambda { |args| block }
-      self
+    callback do
+      on_change :notify_me!
+      on_change :notify_you!
+    end
+
+    # TODO: always dispatch, pass params.
+
+    def process(params)
+      @model = Song.new
+
+      validate(params, @model) do
+        dispatch!
+      end
     end
 
     def dispatched
@@ -19,28 +30,33 @@ class OperationCallbackTest < MiniTest::Spec
     end
 
   private
-    def notify_me!
+    def notify_me!(*)
       dispatched << :notify_me!
     end
 
-    def notify_you!(params)
+    def notify_you!(*)
       dispatched << :notify_you!
     end
   end
 
 
   class Update < Create
-    skip_dispatch :notify_me!
+    # TODO: allow skipping groups.
+    # skip_dispatch :notify_me!
+
+    callback do
+      remove! :on_change, :notify_me!
+    end
   end
 
 
   it "invokes all callbacks" do
-    op = Create.({})
+    op = Create.({"name"=>"Keep On Running"})
     op.dispatched.must_equal [:notify_me!, :notify_you!]
   end
 
-  it "does not invoke skipped callbacks" do
-    op = Update.({})
+  it "does not invoke removed callbacks" do
+    op = Update.({"name"=>"Keep On Running"})
     op.dispatched.must_equal [:notify_you!]
   end
 end
