@@ -23,4 +23,12 @@ module Trailblazer::Operation::Representer
       )
     end
   end
+
+  def validate_contract(params)
+    deserializer = self.class.build_representer_class
+
+    contract.validate(params) do |json|
+      deserializer.new(contract).from_json(json)
+    end
+  end
 end
