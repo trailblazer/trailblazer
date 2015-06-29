@@ -1,5 +1,6 @@
 require 'test_helper'
 
+# callbacks are tested in Disposable::Callback::Group.
 class OperationCallbackTest < MiniTest::Spec
   Song = Struct.new(:name)
 
