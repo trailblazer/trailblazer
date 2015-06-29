@@ -21,14 +21,11 @@ class RepresenterTest < MiniTest::Spec
 
 
     # TODO: rename #build_contract
-    def contract_for(contract_class, model)
-      _deserializer = self.class.build_representer_class
-      self.class.contract_class.new(model).instance_eval do
-        @_deserializer = _deserializer
-        def deserialize(params)
-          @_deserializer.new(self).from_json(params)
-        end
-        self
+    def validate_contract(model)
+      deserializer = self.class.build_representer_class
+
+      contract.validate(params) do |json|
+        deserializer.new(form).from_json(json)
       end
     end
 
