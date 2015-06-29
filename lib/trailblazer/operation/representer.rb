@@ -3,6 +3,8 @@
 # Instead of treating params as a hash and letting the form object deserialize it,
 # a representer will be infered from the contract. This representer is then passed as
 # deserializer into Form#validate.
+#
+# TODO: so far, we only support JSON, but it's two lines to change to support any kind of format.
 module Trailblazer::Operation::Representer
   def self.included(base)
     base.extend Uber::InheritableAttr
@@ -25,13 +27,14 @@ module Trailblazer::Operation::Representer
 
     def infer_representer_class
       Disposable::Twin::Schema.from(contract_class,
-        include: [Representable::JSON],
-        options_from: :deserializer, # use :instance etc. in deserializer.
+        include:          [Representable::JSON],
+        options_from:     :deserializer, # use :instance etc. in deserializer.
         superclass:       Representable::Decorator,
         representer_from: lambda { |inline| inline.representer_class },
       )
     end
   end
+
 
   def validate_contract(params)
     # use the inferred representer from the contract for deserialization in #validate.
@@ -39,4 +42,12 @@ module Trailblazer::Operation::Representer
       self.class.representer_class.new(contract).from_json(json)
     end
   end
+
+
+  module Rendering
+    def to_json(*)
+      self.class.representer_class.new(contract).to_json
+    end
+  end
+  include Rendering
 end

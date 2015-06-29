@@ -30,11 +30,7 @@ class RepresenterTest < MiniTest::Spec
   class Show < Create
     def process(params)
       @model = Album.new("After The War", Artist.new("Gary Moore"))
-    end
-
-
-    def to_json
-      self.class.representer_class.new(@model).to_json
+      @contract = @model
     end
   end
 
@@ -52,11 +48,7 @@ class RepresenterTest < MiniTest::Spec
   class HypermediaShow < HypermediaCreate
     def process(params)
       @model = Album.new("After The War", Artist.new("Gary Moore"))
-    end
-
-
-    def to_json
-      self.class.representer_class.new(@model).to_json
+      @contract = @model
     end
   end
 
@@ -116,10 +108,7 @@ class RepresenterTest < MiniTest::Spec
   class JsonApiShow < JsonApiCreate
     def process(params)
       @model = Album.new("After The War", Artist.new("Gary Moore"))
-    end
-
-    def to_json
-      self.class.representer_class.new(@model).to_json
+      @contract = @model
     end
   end
 
