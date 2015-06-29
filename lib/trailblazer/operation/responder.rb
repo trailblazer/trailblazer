@@ -18,10 +18,6 @@ module Trailblazer::Operation::Responder
     [1]
   end
 
-  def to_json(*)
-    self.class.representer_class.new(model).to_json
-  end
-
   def to_model
     @model
   end
