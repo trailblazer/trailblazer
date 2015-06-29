@@ -4,8 +4,8 @@ source 'https://rubygems.org'
 gemspec
 
 # gem "representable", path: "../representable"
-gem "reform", path: "../reform"
+# gem "reform", path: "../reform"
 # gem "disposable", path: "../disposable"
 gem "virtus"
-# gem "reform", git: "https://github.com/apotonick/reform.git"
+gem "reform", github: "apotonick/reform"
 
