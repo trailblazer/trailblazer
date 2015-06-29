@@ -21,13 +21,12 @@ class RepresenterTest < MiniTest::Spec
 
     def process(params)
       @model = Album.new # NO artist!!!
-      validate(params[:album], @model) do
-        @all_good = true
-      end
+      validate(params[:album], @model)
     end
   end
 
 
+  # Infers representer from contract, no customization.
   class Show < Create
     def process(params)
       @model = Album.new("After The War", Artist.new("Gary Moore"))
@@ -35,16 +34,29 @@ class RepresenterTest < MiniTest::Spec
 
 
     def to_json
-      self.class.build_representer_class.new(@model).to_json
+      self.class.representer_class.new(@model).to_json
     end
   end
 
+
+  # Infers representer, adds hypermedia.
   require "roar/json/hal"
-  class HypermediaShow < Show
+  class HypermediaCreate < Create
     representer do
       include Roar::JSON::HAL
 
       link(:self) { "//album/#{represented.title}" }
+    end
+  end
+
+  class HypermediaShow < HypermediaCreate
+    def process(params)
+      @model = Album.new("After The War", Artist.new("Gary Moore"))
+    end
+
+
+    def to_json
+      self.class.representer_class.new(@model).to_json
     end
   end
 
@@ -68,5 +80,58 @@ class RepresenterTest < MiniTest::Spec
     res, op = Create.run(album: %{{"title":"Run For Cover","artist":{"name":"Gary Moore"}}})
     op.contract.title.must_equal "Run For Cover"
     op.contract.artist.name.must_equal "Gary Moore"
+  end
+
+  it do
+    res, op = HypermediaCreate.run(album: %{{"title":"After The War","artist":{"name":"Gary Moore"},"_links":{"self":{"href":"//album/After The War"}}}})
+    op.contract.title.must_equal "After The War"
+    op.contract.artist.name.must_equal "Gary Moore"
+  end
+
+
+
+
+
+  # explicit representer set with ::representer_class=.
+  require "roar/decorator"
+  class JsonApiCreate < Trailblazer::Operation
+    include Representer
+
+    contract do # we still need contract as the representer writes to the contract twin.
+      property :title
+    end
+
+    class AlbumRepresenter < Roar::Decorator
+      include Roar::JSON
+      property :title
+    end
+    self.representer_class = AlbumRepresenter
+
+    def process(params)
+      @model = Album.new # NO artist!!!
+      validate(params[:album], @model)
+    end
+  end
+
+  class JsonApiShow < JsonApiCreate
+    def process(params)
+      @model = Album.new("After The War", Artist.new("Gary Moore"))
+    end
+
+    def to_json
+      self.class.representer_class.new(@model).to_json
+    end
+  end
+
+  # render.
+  it do
+    res, op = JsonApiShow.run({})
+    op.to_json.must_equal %{{"title":"After The War"}}
+  end
+
+  # parse.
+  it do
+    res, op = JsonApiCreate.run(album: %{{"title":"Run For Cover"}})
+    op.contract.title.must_equal "Run For Cover"
   end
 end
