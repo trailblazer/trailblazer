@@ -12,7 +12,15 @@ module Trailblazer::Operation::Representer
     end
 
     def build_representer_class
-      self.representer_class ||= Class.new(contract_class.schema(include: [Representable::JSON]))
+      self.representer_class ||= Class.new(
+
+        Disposable::Twin::Schema.from(contract_class,
+          include: [Representable::JSON],
+          options_from: :deserializer, # use :instance etc. in deserializer.
+          superclass:       Representable::Decorator,
+          representer_from: lambda { |inline| inline.representer_class },
+        )
+      )
     end
   end
 end

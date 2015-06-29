@@ -20,7 +20,27 @@ class RepresenterTest < MiniTest::Spec
     end
 
 
+    # TODO: rename #build_contract
+    def contract_for(contract_class, model)
+      _deserializer = self.class.build_representer_class
+      self.class.contract_class.new(model).instance_eval do
+        @_deserializer = _deserializer
+        def deserialize(params)
+          @_deserializer.new(self).from_json(params)
+        end
+        self
+      end
+    end
+
+
+    def process(params)
+      @model = Album.new # NO artist!!!
+      validate(params[:album], @model) do
+        @all_good = true
+      end
+    end
   end
+
 
   class Show < Create
     def process(params)
@@ -29,7 +49,6 @@ class RepresenterTest < MiniTest::Spec
 
 
     def to_json
-      # raise self.class.representer_class.inspect
       self.class.build_representer_class.new(@model).to_json
     end
   end
@@ -54,5 +73,13 @@ class RepresenterTest < MiniTest::Spec
   it do
     res, op = HypermediaShow.run({})
     op.to_json.must_equal %{{"title":"After The War","artist":{"name":"Gary Moore"},"_links":{"self":{"href":"//album/After The War"}}}}
+  end
+
+
+  # parsing
+  it do
+    res, op = Create.run(album: %{{"title":"Run For Cover","artist":{"name":"Gary Moore"}}})
+    op.contract.title.must_equal "Run For Cover"
+    op.contract.artist.name.must_equal "Gary Moore"
   end
 end
