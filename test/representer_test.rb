@@ -19,17 +19,6 @@ class RepresenterTest < MiniTest::Spec
       end
     end
 
-
-    # TODO: rename #build_contract
-    def validate_contract(model)
-      deserializer = self.class.build_representer_class
-
-      contract.validate(params) do |json|
-        deserializer.new(form).from_json(json)
-      end
-    end
-
-
     def process(params)
       @model = Album.new # NO artist!!!
       validate(params[:album], @model) do
@@ -60,6 +49,7 @@ class RepresenterTest < MiniTest::Spec
   end
 
 
+  # rendering
   # generic contract -> representer
   it do
     res, op = Show.run({})
