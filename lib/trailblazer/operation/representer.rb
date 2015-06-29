@@ -36,10 +36,11 @@ module Trailblazer::Operation::Representer
   end
 
 
+private
   def validate_contract(params)
     # use the inferred representer from the contract for deserialization in #validate.
-    contract.validate(params) do |json|
-      self.class.representer_class.new(contract).from_json(json)
+    contract.validate(params) do |document|
+      self.class.representer_class.new(contract).from_json(document)
     end
   end
 
