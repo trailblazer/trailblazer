@@ -108,13 +108,17 @@ module Trailblazer
     def validate(params, model, contract_class=nil)
       @contract = contract_for(contract_class, model)
 
-      if @valid = contract.validate(params)
+      if @valid = validate_contract(params)
         yield contract if block_given?
       else
         raise!(contract)
       end
 
       @valid
+    end
+
+    def validate_contract(params)
+      contract.validate(params)
     end
 
     def invalid!(result=self)
