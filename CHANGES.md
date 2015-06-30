@@ -9,11 +9,12 @@
 * Added `Operation::collection` to run `setup!` without instantiating a contract. This is called in the new `Controller#collection` method.
 * Added `Operation#model` as this is a fundamental concept now.
 * Improved the undocumented `Representer` module which allows inferring representers from contract, using them to deserialize documents for the form, and rendering documents.
+* Changed `Operation::Dispatch` which now provides imperative callbacks.
 
 ## API change
 
-1. The return value of #process is no longer returned from ::run and ::call. they always return the operation instance.
-2. The return value of #validate is true or false. this allows a more intuitive operation body.
+1. The return value of #process is no longer returned from ::run and ::call. They always return the operation instance.
+2. The return value of #validate is `true` or `false`. This allows a more intuitive operation body.
 
     ```ruby
     def process(params)
