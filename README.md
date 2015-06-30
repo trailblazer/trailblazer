@@ -4,12 +4,6 @@ _Trailblazer is a thin layer on top of Rails. It gently enforces encapsulation, 
 
 In a nutshell: Trailblazer makes you write **logicless models** that purely act as data objects, don't contain callbacks, nested attributes, validations or domain logic. **Controllers** become lean HTTP endpoints. Your **business logic** (including validation) is decoupled from the actual Rails framework and modeled in _operations_.
 
-![](https://raw.githubusercontent.com/apotonick/trailblazer/master/doc/trb.jpg)
-
-Please buy my book [Trailblazer - A new architecture for Rails](https://leanpub.com/trailblazer) and [let me know](http://twitter.com/apotonick) what you think! I am still working on the book but keep adding new chapters every other week. It will be about 300 pages and we're developing a real, full-blown Rails/Trb application.
-
-The [demo application](https://github.com/apotonick/gemgem-trbrb) implements what we discuss in the book.
-
 ## Mission
 
 While _Trailblazer_ offers you abstraction layers for all aspects of Ruby On Rails, it does _not_ missionize you. Wherever you want, you may fall back to the "Rails Way" with fat models, monolithic controllers, global helpers, etc. This is not a bad thing, but allows you to step-wise introduce Trailblazer's encapsulation in your app without having to rewrite it.
@@ -455,31 +449,6 @@ class Comment::Image::Crop < Trailblazer::Operation
 end
 ```
 
-### Rendering Operation's Form
-
-You have access to an operation's form using `::present`.
-
-```ruby
-Comment::Create.present(params)
-```
-
-This will run the operation's `#process` method _without_ the validate block and return the contract.
-
-### Marking Operation as Invalid
-
-Sometimes you don't need a form object but still want the validity behavior of an operation.
-
-```ruby
-def process(params)
-  return invalid! unless params[:id]
-
-  Comment.find(params[:id]).destroy
-  self
-end
-```
-
-`#invalid!` returns `self` per default but accepts any result.
-
 
 ### Worker::FileMarshaller: needs representable 2.1.1 (.schema)
 
@@ -515,33 +484,7 @@ This will go through `app/concepts/`, find all the `crud.rb` files, autoload the
 
 (Please don't read this section!)
 
-### Additional Model Setup
 
-Override `Operation#setup_model(params)` to add nested objects that can be infered from `params` or are static.
-
-This is called right after `#model!`.
-
-### Validation Errors
-
-You can access the contracts `Errors` object via `Operation#errors`.
-
-### ActiveModel Semantics
-
-When using `Reform::Form::ActiveModel` (which is used automatically in a Rails environment to make form builders work) you need to invoke `model Comment` in the contract. This can be inferred automatically from the operation by including `CRUD::ActiveModel`.
-
-```ruby
-class Create < Trailblazer::Operation
-  include CRUD
-  include CRUD::ActiveModel
-
-  model Comment
-
-  contract do # no need to call ::model, here.
-    property :text
-  end
-```
-
-If you want that in all CRUD operations, check out [how you can include](https://github.com/apotonick/gemgem-trbrb/blob/chapter-5/config/initializers/trailblazer.rb#L26) it automatically.
 
 ### Named Controller Instance Variables
 
@@ -557,6 +500,14 @@ end
 ```
 
 This will setup a named instance variable of your operation's model, for example `@song`.
+
+## The Book
+
+![](https://raw.githubusercontent.com/apotonick/trailblazer/master/doc/trb.jpg)
+
+Please buy my book [Trailblazer - A new architecture for Rails](https://leanpub.com/trailblazer) and [let me know](http://twitter.com/apotonick) what you think! I am still working on the book but keep adding new chapters every other week. It will be about 300 pages and we're developing a real, full-blown Rails/Trb application.
+
+The [demo application](https://github.com/apotonick/gemgem-trbrb) implements what we discuss in the book.
 
 ## Why?
 
