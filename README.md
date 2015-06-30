@@ -141,11 +141,58 @@ class Create < Trailblazer::Operation
   self.contract_class = MyCommentForm
 ```
 
+## Callbacks
+
+Post-processing logic (also known as _callbacks_) is configured in operations.
+
+Following the schema of your contract, you can define callbacks for events tracked by the form's twin.
+
+```ruby
+class Create < Trailblazer::Operation
+  callback(:after_save) do
+    on_change :upload_file, property: :file
+
+    property :user do
+      on_create :notify_user!
+    end
+  end
+```
+
+The _Imperative Callback_ pattern then allows you to call this _callback group_ whereever you need it.
+
+```ruby
+class Create < Trailblazer::Operation
+
+  def process(params)
+    validate(params) do
+      contract.save
+      dispatch!(:after_save)
+    end
+  end
+end
+```
+
+No magical triggering of unwanted logic anymore, but explicit invocations where you want it.
+
+
 ## Models
 
 Models for persistence can be implemented using any ORM you fancy, for instance [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord#active-record--object-relational-mapping-in-rails) or [Datamapper](http://datamapper.org/).
 
-In Trailblazer, models are completely empty and solely configure database-relevant directives and associations. No business logic is allowed in models. Only operations, views and cells can access models directly.
+In Trailblazer, models are completely empty. They solely contain associations and finders. No business logic is allowed in models.
+
+```ruby
+class Thing < ActiveRecord::Base
+  has_many :comments, -> { order(created_at: :desc) }
+  has_many :users, through: :authorships
+  has_many :authorships
+
+  scope :latest, lambda { all.limit(9).order("id DESC") }
+end
+```
+
+Only operations and views/cells can access models directly.
+
 
 ## Views
 
@@ -153,9 +200,31 @@ View rendering can happen using the controller as known from Rails. This is abso
 
 More complex UI logic happens in _View Models_ as found in [Cells](https://github.com/apotonick/cells). View models also replace helpers.
 
-8. **HTTP API** Consuming and rendering API documents (e.g. JSON or XML) is done via [roar](https://github.com/apotonick/roar) and [representable](https://github.com/apotonick/representable). They usually inherit the schema from <em>Contract</em>s .
 
-10. **Tests** Subject to tests are mainly <em>Operation</em>s and <em>View Model</em>s, as they encapsulate endpoint behaviour of your app. As a nice side effect, factories are replaced by simple _Operation_ calls.
+## Representers
+
+Operations can use representers from [Roar](https://github.com/apotonick/roar) to serialize and parse JSON and XML documents for APIs.
+
+Representers can be inferred automatically from your contract, then may be refined, e.g. with hypermedia or a format like `JSON-API`.
+
+```ruby
+class Create < Trailblazer::Operation
+
+  representer do
+    # inherited :body
+    include Roar::JSON::HAL
+
+    link(:self) { comment_path(represented.id) }
+  end
+```
+
+The operation can then parse incoming JSON documents in `validate` and render a document via `to_json`. The full [documentation is here](http://trailblazerb.org/gems/operation/representer.html) or in the [Trailblazer book](https://leanpub.com/trailblazer), chapter _Hypermedia APIs_.
+
+## Tests
+
+Subject to tests are mainly _Operation_s and _View Model_s, as they encapsulate endpoint behaviour of your app. As a nice side effect, factories are replaced by simple _Operation_ calls.
+
+
 
 ## Overview
 
