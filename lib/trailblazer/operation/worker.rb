@@ -1,10 +1,10 @@
 require 'sidekiq/worker'
-# require 'active_support/hash_with_indifferent_access'
 require 'active_support/core_ext/hash/indifferent_access'
 
 
 class Trailblazer::Operation
   # only kicks in when Operation::run, #run will still do it real-time
+  # Works with Reform 2, only.
   module Worker
     def self.included(base)
       base.send(:include, Sidekiq::Worker) # TODO: this will work with any bg gem.
