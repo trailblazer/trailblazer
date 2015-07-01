@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "actionpack", '>= 3.0.0' # this framework works on Rails.
+
   spec.add_dependency "uber", ">= 0.0.10" # no builder inheritance.
   # spec.add_dependency "representable", ">= 2.1.1", "<2.3.0" # Representable::apply.
   spec.add_dependency "reform", ">= 1.2.0"
@@ -28,6 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest"
   # spec.add_development_dependency "minitest-spec-rails" # TODO: can anyone make this work (test/rails).
   spec.add_development_dependency "sidekiq", "~> 3.1.0"
+  spec.add_development_dependency "actionpack", '>= 3.0.0' # Rails is optional.
   spec.add_development_dependency "rails"
   spec.add_development_dependency "sqlite3"
   spec.add_development_dependency "responders"
