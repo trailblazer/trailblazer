@@ -436,6 +436,28 @@ Comment::Create.run(params) do |op|
 end
 ```
 
+## Form API
+
+Usually, an operation has a form object.
+
+```ruby
+class Create < Trailblazer::Operation
+  contract do
+    property :body
+    validates :body: presence: true, length: {max: 160}
+  end
+```
+
+A `::contract` block simply opens a new Reform class for you.
+
+```ruby
+contract do #=> Class.new(Reform::Form) do
+```
+
+This allows using Reform's API in the block.
+
+When inheriting, the block is `class_eval`ed in the inherited class' context and allows adding, removing and customizing the sub contract.
+
 ### CRUD Semantics
 
 You can make Trailblazer find and create models for you using the `CRUD` module.
