@@ -413,30 +413,28 @@ end
 The simplest way of running an operation is the _call style_.
 
 ```ruby
-op = Comment::Create[params]
+op = Comment::Create.(params)
 ```
 
-Using `Operation#[]` will return the operation instance. In case of an invalid operation, this will raise an exception.
+The call style runs the operation and return the operation instance, only.
 
-Note how this can easily be used for test factories.
-
-```ruby
-let(:comment) { Comment::Create[valid_comment_params].model }
-```
-
-Using operations as test factories is a fundamental concept of Trailblazer to remove buggy redundancy in tests and manual factories.
+In case of an invalid operation, this will raise an exception.
 
 ### Run style
 
-You can run an operation manually and use the same block semantics as found in the controller.
+The _run style_ will do the same as call, but won't raise an exception in case of an invalid result. Instead, it returns result _and_ the operation instance.
+
+```ruby
+result, op = Comment::Create.run(params)
+```
+
+Additionally, it accepts a block that's only run for a valid state.
 
 ```ruby
 Comment::Create.run(params) do |op|
   # only run when valid.
 end
 ```
-
-Of course, this does _not_ throw an exception but simply skips the block when the operation is invalid.
 
 ### CRUD Semantics
 
