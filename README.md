@@ -234,6 +234,8 @@ Using the different layers is completely optional and up to you: Both Cells and 
 
 ## Controller API
 
+[Learn more](http://trailblazerb.org/gems/operation/controller.html)
+
 Trailblazer provides four methods to present and invoke operations. But before that, you need to include the `Controller` module.
 
 ```ruby
@@ -361,24 +363,6 @@ Note that `#present` will leave rendering up to you - `respond_to` is _not_ call
 In all three cases the following instance variables are assigned: `@operation`, `@form`, `@model`.
 
 Named instance variables can be included, too. This is documented [here](#named-controller-instance-variables).
-
-
-### Normalizing params
-
-Override `#process_params!` to add or remove values to `params` before the operation is run. This is called in `#run`, `#respond` and `#present`.
-
-```ruby
-class CommentsController < ApplicationController
-  # ..
-
-private
-  def process_params!(params)
-    params.merge!(current_user: current_user)
-  end
-end
-```
-
-This centralizes params normalization and doesn't require you to do that in every action manually.
 
 
 ### Different Request Formats
