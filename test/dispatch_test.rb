@@ -1,11 +1,12 @@
 require 'test_helper'
+require "trailblazer/operation/dispatch"
 
 # callbacks are tested in Disposable::Callback::Group.
 class OperationCallbackTest < MiniTest::Spec
   Song = Struct.new(:name)
 
   class Create < Trailblazer::Operation
-    include Dispatch
+    include Trailblazer::Operation::Dispatch
 
     contract do
       property :name
