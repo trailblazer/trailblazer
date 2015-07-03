@@ -1,3 +1,7 @@
+# 0.3.1
+
+* Autoload `Dispatch`.
+
 # 0.3.0
 
 ## Changes

@@ -3,4 +3,5 @@ Trailblazer::Operation.class_eval do
   autoload :Responder,  "trailblazer/operation/responder"
   autoload :CRUD,       "trailblazer/operation/crud"
   autoload :Collection, "trailblazer/operation/collection"
+  autoload :Dispatch,   "trailblazer/operation/dispatch"
 end
