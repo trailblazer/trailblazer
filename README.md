@@ -420,6 +420,76 @@ Comment::Create.run(params) do |op|
 end
 ```
 
+### Inheritance
+
+Operations fully support inheritance and will copy the contract, the callback groups and any methods from the original operation class.
+
+```ruby
+class Create < Trailblazer::Operation
+  contract do
+    property :title
+  end
+
+  callback(:before_save) do
+    on_change :notify!
+  end
+
+  def notify!(*)
+  end
+end
+```
+
+This happens with normal Ruby inheritance.
+
+```
+class Update < Create
+  # inherited:
+  # contract
+  # callback(:before_save)
+  # def notify!(*)
+end
+```
+
+You can customize callback groups and contracts using the `:inherit` option, add and remove properties or add methods.
+
+[Learn more](http://trailblazerb.org/gems/operation/inheritance.html)
+
+### Modules
+
+In case inheritance is not enough for you, use modules to share common functionality.
+
+```ruby
+module ExtendedCreate
+  include Trailblazer::Operation::Module
+
+  contract do
+    property :id
+  end
+
+  callback do
+    on_update :update!
+  end
+
+  def update!(song)
+    # do something
+  end
+end
+```
+
+Modules can be included and will simply run the declarations in the including class.
+
+```ruby
+class Create::Admin < Create
+  include ExtendedCreate
+
+  # contract has :title and :id now.
+```
+
+Modules are often used to modify an existing operation for admin or signed-in roles.
+
+[Learn more](http://trailblazerb.org/gems/operation/inheritance.html)
+
+
 ## Form API
 
 Usually, an operation has a form object.
