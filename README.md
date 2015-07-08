@@ -441,7 +441,7 @@ end
 
 This happens with normal Ruby inheritance.
 
-```
+```ruby
 class Update < Create
   # inherited:
   # contract
