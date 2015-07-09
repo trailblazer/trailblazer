@@ -75,7 +75,6 @@ module Trailblazer
       self
     end
 
-    attr_reader :contract
     attr_reader :model
 
     def errors
@@ -84,6 +83,10 @@ module Trailblazer
 
     def valid?
       @valid
+    end
+
+    def contract(*args)
+      contract!(*args)
     end
 
   private
@@ -105,8 +108,8 @@ module Trailblazer
     def setup_params!(*params)
     end
 
-    def validate(params, model, contract_class=nil)
-      @contract = contract_for(contract_class, model)
+    def validate(params, model=nil, contract_class=nil)
+      contract!(contract_class, model)
 
       if @valid = validate_contract(params)
         yield contract if block_given?
@@ -133,8 +136,15 @@ module Trailblazer
 
     # Instantiate the contract, either by using the user's contract passed into #validate
     # or infer the Operation contract.
-    def contract_for(contract_class, *model)
-      (contract_class || self.class.contract_class).new(*model)
+    def contract_for(contract_class=nil, model=nil)
+      contract_class ||= self.class.contract_class
+      model          ||= self.model
+
+      contract_class.new(model)
+    end
+
+    def contract!(*args)
+      @contract ||= contract_for(*args)
     end
 
     class InvalidContract < RuntimeError
