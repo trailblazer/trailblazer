@@ -59,12 +59,34 @@ class Band < ActiveRecord::Base
 
     class JSON < self
       include Representer
-      require "reform/form/json"
+      # require "reform/form/json"
+      require "representable/json"
       contract do
-        include Reform::Form::JSON # this allows deserialising JSON.
+        #include Reform::Form::JSON # this allows deserialising JSON.
+
+        # FIXME: this should be in ::representer.
+        module Json
+          def deserialize(params)
+            deserializer.new(self).
+            # extend(Representable::Debug).
+              from_json(params)
+          end
+
+
+          # FIXME: the representer has to be used here!
+          def deserializer
+            deserializer = Disposable::Twin::Schema.from(self.class,
+              include:          [Representable::JSON],
+              superclass:       Representable::Decorator,
+              representer_from: lambda { |inline| inline.representer_class },
+              options_from:     :deserializer
+            )
+          end
+        end
       end
 
       representer do
+        include
         collection :songs, inherit: true, render_empty: false # tested in ControllerPresentTest.
       end
     end
