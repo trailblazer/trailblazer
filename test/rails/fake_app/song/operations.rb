@@ -74,17 +74,9 @@ class Band < ActiveRecord::Base
       end
     end
 
-    # TODO: wait for uber 0.0.10 and @dutow.
-    # builds -> (params)
-    #   return JSON if params[:format] == "json"
-    #   return Admin if params[:admin]
-    # end
-    builds do |params|
-      if params[:format] == "json"
-        JSON
-      elsif params[:admin]
-        Admin
-      end
+    builds -> (params) do
+      return JSON if params[:format] == "json"
+      return Admin if params[:admin]
     end
   end
 
