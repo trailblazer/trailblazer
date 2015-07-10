@@ -57,7 +57,7 @@ class Band < ActiveRecord::Base
       end
     end
 
-    require "representable/json"
+    require "representable/"
     class JSON < self
       include Representer
 
@@ -74,9 +74,17 @@ class Band < ActiveRecord::Base
       end
     end
 
-    builds -> (params) do
-      return JSON if params[:format] == "json"
-      return Admin if params[:admin]
+    # TODO: wait for uber 0.0.10 and @dutow.
+    # builds -> (params) do
+    #   return JSON if params[:format] == "json"
+    #   return Admin if params[:admin]
+    # end
+    builds do |params|
+      if params[:format] == "json"
+        JSON
+      elsif params[:admin]
+        Admin
+      end
     end
   end
 
