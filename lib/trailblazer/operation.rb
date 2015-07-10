@@ -70,8 +70,7 @@ module Trailblazer
 
     def present(*params)
       setup!(*params)
-
-      @contract = contract_for(nil, @model)
+      contract!
       self
     end
 
@@ -109,7 +108,7 @@ module Trailblazer
     end
 
     def validate(params, model=nil, contract_class=nil)
-      contract!(contract_class, model)
+      contract!(model, contract_class)
 
       if @valid = validate_contract(params)
         yield contract if block_given?
@@ -136,9 +135,9 @@ module Trailblazer
 
     # Instantiate the contract, either by using the user's contract passed into #validate
     # or infer the Operation contract.
-    def contract_for(contract_class=nil, model=nil)
-      contract_class ||= self.class.contract_class
+    def contract_for(model=nil, contract_class=nil)
       model          ||= self.model
+      contract_class ||= self.class.contract_class
 
       contract_class.new(model)
     end

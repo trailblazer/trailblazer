@@ -1,3 +1,7 @@
+# 0.3.2
+
+* New signature for `Operation#contract_for(model, contract_class)`. It used to be contract, then model.
+
 # 0.3.1
 
 * Autoload `Dispatch`.
