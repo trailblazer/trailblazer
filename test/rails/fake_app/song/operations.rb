@@ -57,7 +57,7 @@ class Band < ActiveRecord::Base
       end
     end
 
-    require "representable/"
+    require "representable/json"
     class JSON < self
       include Representer
 
