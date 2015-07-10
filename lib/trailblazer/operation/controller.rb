@@ -12,9 +12,7 @@ private
     yield @operation if block_given?
   end
 
-  # Doesn't run #validate.
-  # TODO: allow only_setup.
-  # TODO: dependency to CRUD (::model_name)
+  # Doesn't run #process.
   def present(operation_class, params=self.params)
     res, op = operation!(operation_class, params) { [true, operation_class.present(params)] }
 

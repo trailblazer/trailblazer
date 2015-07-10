@@ -1,5 +1,6 @@
 # 0.3.2
 
+* Allow to use `#contract` before `#validate`. The contract will be instantiated once per `#run` using `#contract` and then memoized. This allows to add/modify the contract _before_ you validate it using `#validate`.
 * New signature for `Operation#contract_for(model, contract_class)`. It used to be contract, then model.
 
 # 0.3.1

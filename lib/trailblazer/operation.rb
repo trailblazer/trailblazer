@@ -1,10 +1,6 @@
-require 'uber/builder'
-# TODO: extract all reform-contract stuff into optional module.
-require 'reform'
+require "uber/builder"
+require "reform"
 
-# TODO: OP[] without wrapper, OP.run with (eg for params)
-
-# to be documented: only implement #setup! when not using CRUD and when ::present needed (make example for simple Op without #setup!)
 
 module Trailblazer
   class Operation
@@ -152,9 +148,3 @@ module Trailblazer
 end
 
 require 'trailblazer/operation/crud'
-
-# run
-#   setup
-#   process
-#     contract
-#     validate
