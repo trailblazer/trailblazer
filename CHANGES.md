@@ -1,3 +1,8 @@
+# 0.3.3
+
+* Add `Operation::reject` which will run the block when _invalid_.
+* In the railtie, require `trailblazer/autoloading` as I am assuming Rails users want maximum comfort.
+
 # 0.3.2
 
 * Allow to use `#contract` before `#validate`. The contract will be instantiated once per `#run` using `#contract` and then memoized. This allows to add/modify the contract _before_ you validate it using `#validate`.
