@@ -21,8 +21,9 @@ class OperationRejectTest < MiniTest::Spec
 
   it do
     run = nil
-    Operation.reject(true) { run = true }
+    op = Operation.reject(true) { run = true }
     run.must_equal nil
+    op.must_be_instance_of Operation
   end
 
   it do

@@ -28,9 +28,9 @@ module Trailblazer
 
       # Like ::run, but yield block when invalid.
       def reject(*args)
-        run(*args).tap do |res, op|
-          yield op if res == false
-        end
+        res, op = run(*args)
+        yield op if res == false
+        return op
       end
 
       # ::call only returns the Operation instance (or whatever was returned from #validate).
