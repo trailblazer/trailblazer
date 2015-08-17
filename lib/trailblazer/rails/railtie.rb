@@ -16,6 +16,11 @@ module Trailblazer
       end
     end
 
+    # This is to autoload Operation::Dispatch, etc. I'm simply assuming people find this helpful in Rails.
+    initializer "trailblazer.library_autoloading" do
+      require "trailblazer/autoloading"
+    end
+
     # thank you, http://stackoverflow.com/a/17573888/465070
     initializer 'trailblazer.install', after: :load_config_initializers do |app|
       # the trb autoloading has to be run after initializers have been loaded, so we can tweak inclusion of features in

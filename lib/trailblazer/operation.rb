@@ -26,6 +26,13 @@ module Trailblazer
         [res, op]
       end
 
+      # Like ::run, but yield block when invalid.
+      def reject(*args)
+        res, op = run(*args)
+        yield op if res == false
+        return op
+      end
+
       # ::call only returns the Operation instance (or whatever was returned from #validate).
       # This is useful in tests or in irb, e.g. when using Op as a factory and you already know it's valid.
       def call(*params)

@@ -630,6 +630,19 @@ require "trailblazer/rails/railtie"
 This will go through `app/concepts/`, find all the `crud.rb` files, autoload their corresponding namespace (e.g. `Thing`, which is a model) and then load the `crud.rb` file.
 
 
+## Installation
+
+The obvious needs to be in your `Gemfile`.
+
+```ruby
+gem "trailblazer"
+gem "cells"
+```
+
+Cells is _not_ required per default! Add it if you use it, which is highly recommended.
+
+A few quirks are required at the moment as Rails autoloading is giving us a hard time. The setup of an app [is documented here](https://github.com/apotonick/gemgem-trbrb/wiki/Things-You-Should-Know).
+
 ## Undocumented Features
 
 (Please don't read this section!)
