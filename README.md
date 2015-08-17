@@ -2,7 +2,14 @@
 
 _Trailblazer is a thin layer on top of Rails. It gently enforces encapsulation, an intuitive code structure and gives you an object-oriented architecture._
 
-In a nutshell: Trailblazer makes you write **logicless models** that purely act as data objects, don't contain callbacks, nested attributes, validations or domain logic. **Controllers** become lean HTTP endpoints. Your **business logic** (including validation) is decoupled from the actual Rails framework and modeled in _operations_.
+
+## Trailblazer In A Nutshell
+
+1. All business logic is encapsulated in **operations**, which are service objects. This comprises validations, callbacks and persistence code.
+2. Every operation maintains a Reform **form object** which can be rendered and validate the input.
+3. Controllers instantly delegate to an operation. No business code in controllers, only HTTP-specific logic.
+4. Models solely define associations and scopes. No business code is to be found here. No validations, no callbacks.
+
 
 ## Mission
 
