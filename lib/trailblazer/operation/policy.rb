@@ -4,25 +4,26 @@ module Trailblazer
 
   module Operation::Policy
     def self.included(includer)
-      # includer.extend Uber::InheritableAttr
-      # includer.inheritable_attr :_representer_class
+      includer.extend Uber::InheritableAttr
+      includer.inheritable_attr :policy_block
       includer.extend ClassMethods
     end
 
     module ClassMethods
       def policy(*args, &block)
-        @policies = [block]
+        self.policy_block = block
       end
-
-      attr_reader :policies
     end
 
 
+  private
     def setup!(params)
       super
-      instance_exec params, &self.class.policies.first or raise NotAuthorizedError
-      #
-      # NotAuthorizedError.new(query: query, record: record, policy: policy)
+      evaluate_policy(params)
+    end
+
+    def evaluate_policy(params)
+      instance_exec(params, &self.class.policy_block) or raise NotAuthorizedError
     end
 
 

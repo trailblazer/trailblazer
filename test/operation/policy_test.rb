@@ -4,7 +4,7 @@ require "trailblazer/operation/policy"
 class OpPolicyTest < MiniTest::Spec
   Song = Struct.new(:name)
 
-  class BlaOperation < Trailblazer::Operation
+  class Create < Trailblazer::Operation
     include Policy
 
     def model!(*)
@@ -21,14 +21,32 @@ class OpPolicyTest < MiniTest::Spec
 
   # valid.
   it do
-    op = BlaOperation.(valid: true)
+    op = Create.(valid: true)
 
   end
 
   # invalid.
   it do
     assert_raises Trailblazer::NotAuthorizedError do
-      op = BlaOperation.(valid: false)
+      op = Create.(valid: false)
+    end
+  end
+
+
+  describe "inheritance" do
+    class Update < Create
+      policy do |params|
+        params[:valid] == "correct"
+      end
+    end
+
+    class Delete < Create
+    end
+
+    it do
+      Create.(valid: true).wont_equal nil
+      Delete.(valid: true).wont_equal nil
+      Update.(valid: "correct").wont_equal nil
     end
   end
 end
