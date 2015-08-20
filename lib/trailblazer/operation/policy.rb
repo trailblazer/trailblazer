@@ -55,4 +55,17 @@ module Trailblazer
       end
     end
   end
+
+
+  module Operation::Deny
+    def self.included(includer)
+      includer.extend ClassMethods
+    end
+
+    module ClassMethods
+      def deny!
+        raise NotAuthorizedError
+      end
+    end
+  end
 end

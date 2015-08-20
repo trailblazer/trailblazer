@@ -34,6 +34,40 @@ class OpPolicyTest < MiniTest::Spec
 end
 
 
+class OpBuilderDenyTest < MiniTest::Spec
+  Song = Struct.new(:name)
+
+  class Create < Trailblazer::Operation
+    include Deny
+
+    builds do |params|
+      deny! unless params[:valid]
+    end
+
+    def process(params)
+    end
+  end
+
+  class Update < Create
+    builds -> (params) do
+      deny! unless params[:valid]
+    end
+  end
+
+  # valid.
+  it do
+    op = Create.(valid: true)
+  end
+
+  # invalid.
+  it do
+    assert_raises Trailblazer::NotAuthorizedError do
+      op = Create.(valid: false)
+    end
+  end
+end
+
+
 
 class OpPunditPolicyTest < MiniTest::Spec
   Song = Struct.new(:name)
