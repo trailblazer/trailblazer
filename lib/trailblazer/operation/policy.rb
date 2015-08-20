@@ -23,7 +23,8 @@ module Trailblazer
     end
 
     def evaluate_policy(params)
-      instance_exec(params, &self.class.policy_block) or raise NotAuthorizedError
+      policy_block = self.class.policy_block or return
+      instance_exec(params, &policy_block) or raise NotAuthorizedError
     end
 
 

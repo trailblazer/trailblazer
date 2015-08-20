@@ -49,6 +49,18 @@ class OpPolicyTest < MiniTest::Spec
       Update.(valid: "correct").wont_equal nil
     end
   end
+
+
+  describe "no policy defined, but included" do
+    class Show < Trailblazer::Operation
+      include Policy
+
+      def process(*)
+      end
+    end
+
+    it { Show.({}).wont_equal nil }
+  end
 end
 
 
