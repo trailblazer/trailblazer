@@ -30,7 +30,7 @@ module Trailblazer
       def reject(*args)
         res, op = run(*args)
         yield op if res == false
-        return op
+        op
       end
 
       # ::call only returns the Operation instance (or whatever was returned from #validate).
