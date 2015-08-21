@@ -5,13 +5,13 @@ module Trailblazer
   module Operation::Policy
     def self.included(includer)
       includer.extend Uber::InheritableAttr
-      includer.inheritable_attr :policy_block
+      includer.inheritable_attr :policy_class
       includer.extend ClassMethods
     end
 
     module ClassMethods
       def policy(*args, &block)
-        self.policy_block = block
+        self.policy_class = block
       end
     end
 
@@ -23,7 +23,7 @@ module Trailblazer
     end
 
     def evaluate_policy(params)
-      policy_block = self.class.policy_block or return
+      policy_block = self.class.policy_class or return
       instance_exec(params, &policy_block) or raise NotAuthorizedError.new
     end
 
