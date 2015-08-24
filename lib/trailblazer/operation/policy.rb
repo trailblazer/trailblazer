@@ -15,7 +15,6 @@ module Trailblazer
       end
     end
 
-
   private
     def setup!(params)
       super
@@ -34,33 +33,28 @@ module Trailblazer
     require "pundit"
     module Pundit
       def self.included(includer)
+        includer.send(:include, Trailblazer::Operation::Policy)
         includer.extend ClassMethods
+        includer.send(:include, EvaluatePolicy)
       end
 
       module ClassMethods
-        def policy(policy_class, action, &block)
-          @pundit_config = [policy_class, action]
-          #@policies = [block]
+        def policy(policy_class, action)
+          self.policy_class = [policy_class, action]
         end
-
-        attr_reader :pundit_config
       end
 
       attr_reader :policy
 
-    private
-      def setup!(params)
-        super
-        # instance_exec params, &self.class.policies.first or raise NotAuthorizedError
-        evaluate_policy(params)
-      end
+      module EvaluatePolicy
+      private
+        def evaluate_policy(params)
+          class_name, action = self.class.policy_class
+          @policy = class_name.new(params[:current_user], model)
 
-      def evaluate_policy(params)
-        class_name, action = self.class.pundit_config
-        @policy = class_name.new(params[:current_user], model)
-
-        # DISCUSS: this flow should be used via pundit's API, which we might have to extend.
-        @policy.send(action) or raise ::Pundit::NotAuthorizedError.new(query: action, record: model, policy: @policy)
+          # DISCUSS: this flow should be used via pundit's API, which we might have to extend.
+          @policy.send(action) or raise ::Pundit::NotAuthorizedError.new(query: action, record: model, policy: @policy)
+        end
       end
     end
   end
