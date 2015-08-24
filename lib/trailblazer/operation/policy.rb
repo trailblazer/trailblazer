@@ -46,14 +46,21 @@ module Trailblazer
         attr_reader :pundit_config
       end
 
+      attr_reader :policy
+
+    private
       def setup!(params)
         super
         # instance_exec params, &self.class.policies.first or raise NotAuthorizedError
+        evaluate_policy(params)
+      end
+
+      def evaluate_policy(params)
         class_name, action = self.class.pundit_config
-        policy = class_name.new(params[:current_user], model)
+        @policy = class_name.new(params[:current_user], model)
 
         # DISCUSS: this flow should be used via pundit's API, which we might have to extend.
-        policy.send(action) or raise ::Pundit::NotAuthorizedError.new(query: action, record: model, policy: policy)
+        @policy.send(action) or raise ::Pundit::NotAuthorizedError.new(query: action, record: model, policy: @policy)
       end
     end
   end

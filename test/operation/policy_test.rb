@@ -112,6 +112,10 @@ class OpPunditPolicyTest < MiniTest::Spec
     def create?
       @user.is_a?(User) and @song.is_a?(Song)
     end
+
+    def edit?
+      "yepp"
+    end
   end
 
   class BlaOperation < Trailblazer::Operation
@@ -130,6 +134,8 @@ class OpPunditPolicyTest < MiniTest::Spec
   it do
     op = BlaOperation.({current_user: User.new})
 
+    # #policy provides the Policy instance.
+    op.policy.edit?.must_equal "yepp"
   end
 
   # invalid.
