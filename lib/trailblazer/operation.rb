@@ -30,7 +30,7 @@ module Trailblazer
       def reject(*args)
         res, op = run(*args)
         yield op if res == false
-        return op
+        op
       end
 
       # ::call only returns the Operation instance (or whatever was returned from #validate).
@@ -69,7 +69,7 @@ module Trailblazer
 
     #   Operation.run(body: "Fabulous!") #=> [true, <Comment body: "Fabulous!">]
     def run(*params)
-      setup!(*params) # where do we assign/find the model?
+      setup!(*params) # assign/find the model
 
       process(*params)
 
@@ -97,23 +97,26 @@ module Trailblazer
     end
 
   private
-    def setup!(*params)
-      setup_params!(*params)
+    module Setup
+      def setup!(*params)
+        setup_params!(*params)
 
-      @model = model!(*params)
-      setup_model!(*params)
-    end
+        @model = model!(*params)
+        setup_model!(*params)
+      end
 
-    # Implement #model! to find/create your operation model (if required).
-    def model!(*params)
-    end
+      # Implement #model! to find/create your operation model (if required).
+      def model!(*params)
+      end
 
-    # Override to add attributes that can be infered from params.
-    def setup_model!(*params)
-    end
+      # Override to add attributes that can be infered from params.
+      def setup_model!(*params)
+      end
 
-    def setup_params!(*params)
+      def setup_params!(*params)
+      end
     end
+    include Setup
 
     def validate(params, model=nil, contract_class=nil)
       contract!(model, contract_class)

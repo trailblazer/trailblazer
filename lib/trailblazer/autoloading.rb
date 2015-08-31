@@ -6,4 +6,5 @@ Trailblazer::Operation.class_eval do
   autoload :Dispatch,   "trailblazer/operation/dispatch"
   autoload :Module,     "trailblazer/operation/module"
   autoload :Representer,"trailblazer/operation/representer"
+  autoload :Policy,     "trailblazer/operation/policy"
 end
