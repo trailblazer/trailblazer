@@ -1,3 +1,5 @@
+require "trailblazer/operation/crud/dsl"
+
 module Trailblazer
   class Operation
     # The CRUD module will automatically create/find models for the configured +action+.
@@ -5,37 +7,14 @@ module Trailblazer
     module CRUD
       module Included
         def included(base)
-          base.extend Uber::InheritableAttr
-          base.inheritable_attr :config
-          base.config = {}
-
-          base.extend ClassMethods
+          base.extend DSL
         end
       end
       # this makes ::included overrideable, e.g. to add more featues like CRUD::ActiveModel.
       extend Included
 
 
-      module ClassMethods
-        def model(name, action=nil)
-          self.config[:model] = name
-          action(action) if action # coolest line ever.
-        end
-
-        def action(name)
-          self.config[:action] = name
-        end
-
-        def action_name # considered private.
-          self.config[:action] or :create
-        end
-
-        def model_class # considered private.
-          self.config[:model] or raise "[Trailblazer] You didn't call Operation::model." # TODO: infer model name.
-        end
-      end
-
-
+      # Methods to create the model according to class configuration and params.
       module ModelBuilder
         def model!(params)
           instantiate_model(params)
