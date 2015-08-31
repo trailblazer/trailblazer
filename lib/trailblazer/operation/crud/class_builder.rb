@@ -25,8 +25,9 @@ class Trailblazer::Operation
       module ClassMethods
       private
         def build_operation(params, options={})
-          model = model!(params)
-          build_operation_class(model, params).new(model, options)
+          puts "@@@@@=====> #{params.inspect}"
+          model = model!(*params)
+          build_operation_class(model, *params).new(model, options)
           # super([model, params], [model, options]) # calls: builds ->(model, params), and Op.new(model, params)
         end
       end
