@@ -144,4 +144,21 @@ class OpPunditPolicyTest < MiniTest::Spec
       op = BlaOperation.({current_user: nil})
     end
   end
+
+
+  # no policy set
+  class NoPolicyOperation < Trailblazer::Operation
+    include Policy::Pundit
+    # no policy.
+
+    def process(*)
+      @model = Song.new
+    end
+  end
+
+  # valid.
+  it do
+    op = NoPolicyOperation.({})
+    op.model.must_be_instance_of Song
+  end
 end

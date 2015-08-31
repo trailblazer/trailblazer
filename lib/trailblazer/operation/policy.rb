@@ -49,7 +49,9 @@ module Trailblazer
       module EvaluatePolicy
       private
         def evaluate_policy(params)
-          class_name, action = self.class.policy_class
+          class_name, action = (self.class.policy_class )
+          return true unless class_name
+
           @policy = class_name.new(params[:current_user], model)
 
           # DISCUSS: this flow should be used via pundit's API, which we might have to extend.
