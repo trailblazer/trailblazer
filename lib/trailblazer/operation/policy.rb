@@ -6,12 +6,17 @@ module Trailblazer
     def self.included(includer)
       includer.extend Uber::InheritableAttr
       includer.inheritable_attr :policy_config
+      includer.policy_config = []
       includer.extend ClassMethods
     end
 
     module ClassMethods
       def policy(*args, &block)
-        self.policy_config = block
+        self.policy_config = [block]
+      end
+
+      def policy_class
+        policy_config.first
       end
     end
 
@@ -22,7 +27,7 @@ module Trailblazer
     end
 
     def evaluate_policy(params)
-      policy_block = self.class.policy_config or return
+      policy_block = self.class.policy_class or return
       instance_exec(params, &policy_block) or raise NotAuthorizedError.new
     end
 
@@ -42,40 +47,39 @@ module Trailblazer
         def policy(policy_class, action)
           self.policy_config = [policy_class, action]
         end
+
+        # def policy_class # DISCUSS: might get removed.
+        #   policy_config.first
+        # end
+
+
       end
 
       attr_reader :policy
 
 
       module BuildPolicy
-        def build_policy_for(params, class_name)
+        def build_policy(model, params, class_name=self.policy_class)
+          return unless class_name
 
-
-          class_name.new(params[:current_user], model)
+          build_policy_for(params, model, class_name)
         end
 
-        # def policy(policy_class=self.policy_class)
-
-        # end
+        def build_policy_for(params, model, class_name)
+          class_name.new(params[:current_user], model)
+        end
       end
       include BuildPolicy
 
       module EvaluatePolicy
       private
         def evaluate_policy(params)
-          class_name, action = policy_class
-
-          return true unless class_name
-
-          @policy = build_policy_for(params, class_name) or return true
+          @policy = build_policy(model, params, self.class.policy_class) or return true
 
           # DISCUSS: this flow should be used via pundit's API, which we might have to extend.
+          action = self.class.policy_config.last
           @policy.send(action) or raise ::Pundit::NotAuthorizedError.new(query: action, record: model, policy: @policy)
         end
-      end
-
-      def policy_class
-        self.class.policy_config
       end
     end
   end
