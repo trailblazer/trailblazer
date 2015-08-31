@@ -15,7 +15,7 @@ module Trailblazer
 
 
       # Methods to create the model according to class configuration and params.
-      module ModelBuilder
+      module BuildModel
         def model!(params)
           instantiate_model(params)
         end
@@ -40,7 +40,7 @@ module Trailblazer
       end
 
     private
-      include ModelBuilder
+      include BuildModel
       alias_method :find_model, :update_model
 
       def model_class

@@ -7,7 +7,7 @@ class Trailblazer::Operation
     module ClassBuilder # CRUD::ForClass :OnClass ModelFromClass ClassModel ExternalModel
       def self.included(includer)
         includer.extend CRUD::DSL
-        includer.extend CRUD::ModelBuilder
+        includer.extend CRUD::BuildModel
         includer.extend ClassMethods
       end
 
