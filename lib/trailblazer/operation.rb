@@ -1,9 +1,10 @@
-require "uber/builder"
 require "reform"
-
 
 module Trailblazer
   class Operation
+    require "trailblazer/operation/builder"
+    extend Builder # imports ::builder_class and ::build_operation.
+
     extend Uber::InheritableAttr
     inheritable_attr :contract_class
     self.contract_class = Reform::Form.clone
@@ -48,19 +49,8 @@ module Trailblazer
       def contract(&block)
         contract_class.class_eval(&block)
       end
-
-    private
-      # Runs the builders for this operation class to figure out the actual class.
-      def build_operation_class(*params)
-        class_builder.call(*params) # Uber::Builder::class_builder
-      end
-
-      def build_operation(params, options={})
-        build_operation_class(*params).new(options)
-      end
     end
 
-    include Uber::Builder
 
     def initialize(options={})
       @valid            = true

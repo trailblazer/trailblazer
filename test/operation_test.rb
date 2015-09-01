@@ -233,26 +233,6 @@ class OperationTest < MiniTest::Spec
 end
 
 
-class OperationBuilderTest < MiniTest::Spec
-  class ParentOperation < Trailblazer::Operation
-    def process(params)
-    end
-
-    class Sub < self
-    end
-
-    builds do |params|
-      Sub if params[:sub]
-    end
-  end
-
-  it { ParentOperation.run({}).last.class.must_equal ParentOperation }
-  it { ParentOperation.run({sub: true}).last.class.must_equal ParentOperation::Sub }
-  it { ParentOperation.({}).class.must_equal ParentOperation }
-  it { ParentOperation.({sub: true}).class.must_equal ParentOperation::Sub }
-end
-
-
 # ::contract builds Reform::Form class
 class OperationInheritanceTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
