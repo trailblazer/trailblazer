@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
 
-  spec.add_dependency "uber", ">= 0.0.10" # no builder inheritance.
+  spec.add_dependency "uber", ">= 0.0.15"
   # spec.add_dependency "representable", ">= 2.1.1", "<2.3.0" # Representable::apply.
   spec.add_dependency "reform", ">= 1.2.0"
 
