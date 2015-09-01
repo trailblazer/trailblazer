@@ -40,6 +40,7 @@ module Trailblazer
       def self.included(includer)
         includer.send(:include, Trailblazer::Operation::Policy)
         includer.extend ClassMethods
+        includer.extend BuildPolicy # so we can use ::build_policy in builders.
         includer.send(:include, EvaluatePolicy)
       end
 
@@ -47,12 +48,6 @@ module Trailblazer
         def policy(policy_class, action)
           self.policy_config = [policy_class, action]
         end
-
-        # def policy_class # DISCUSS: might get removed.
-        #   policy_config.first
-        # end
-
-
       end
 
       attr_reader :policy
@@ -70,6 +65,7 @@ module Trailblazer
         end
       end
       include BuildPolicy
+
 
       module EvaluatePolicy
       private
