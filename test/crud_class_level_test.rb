@@ -26,7 +26,7 @@ class CrudClassLevelTest < MiniTest::Spec
     end
   end
 
-  let (:song) { Song.new(name: "Numbers") }
+  let (:song) { Song.new("Numbers") }
 
   before do
     Song.find_result = song
@@ -58,7 +58,7 @@ class CrudClassLevelTest < MiniTest::Spec
     end
   end
 
-  describe "#what" do
+  describe "::builds args" do
     it do
       OpWithBuilder.(id: 1, user: "different").must_be_instance_of OpWithBuilder
     end
