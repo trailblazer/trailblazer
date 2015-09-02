@@ -31,6 +31,8 @@ module Trailblazer
         def update_model(params)
           model_class.find(params[:id])
         end
+
+        alias_method :find_model, :update_model
       end
 
 
@@ -41,7 +43,6 @@ module Trailblazer
 
     private
       include BuildModel
-      alias_method :find_model, :update_model
 
       def model_class
         self.class.model_class
