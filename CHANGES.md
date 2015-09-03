@@ -1,3 +1,7 @@
+# 0.4.0
+
+setup in initialize: when Op.run() with Worker, the policy will be run "delayed" and not with the actual permission set. this will result in many crashing sidekiq workers.
+
 # 0.3.3
 
 * Add `Operation::reject` which will run the block when _invalid_.

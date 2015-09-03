@@ -2,21 +2,21 @@ module Trailblazer
   class NotAuthorizedError < RuntimeError
   end
 
+  # Adds #evaluate_policy to Operation#setup!
   module Operation::Policy
     def self.included(includer)
-      includer.extend Uber::InheritableAttr
       includer.inheritable_attr :policy_config
-      includer.policy_config = []
+      includer.policy_config = Permission.new { true } # return true per default.
       includer.extend ClassMethods
     end
 
     module ClassMethods
       def policy(*args, &block)
-        self.policy_config = [block]
+        self.policy_config = permission_class.new(*args, &block)
       end
 
-      def policy_class
-        policy_config.first
+      def permission_class
+        Permission
       end
     end
 
@@ -27,8 +27,19 @@ module Trailblazer
     end
 
     def evaluate_policy(params)
-      policy_block = self.class.policy_class or return
-      instance_exec(params, &policy_block) or raise NotAuthorizedError.new
+      self.class.policy_config.(self, params) or raise NotAuthorizedError.new
+    end
+
+
+    # Encapsulates the operation's policy which is usually called in Op#setup!.
+    class Permission
+      def initialize(*args, &block)
+        @callable, @args = Uber::Options::Value.new(block), args
+      end
+
+      def call(context, *args)
+        @callable.(context, *args)
+      end
     end
 
 
@@ -37,6 +48,26 @@ module Trailblazer
 
     require "pundit"
     module Pundit
+      class Permission
+        def initialize(policy_class, action)
+          @policy_class, @action = policy_class, action
+        end
+
+        def call(user, model)
+          policy = policy(user, model)
+          [policy.send(@action), policy]
+        end
+
+        def policy(user, model)
+          @policy_class.new(user, model)
+        end
+
+      # private
+        def action
+          @action
+        end
+      end
+
       def self.included(includer)
         includer.send(:include, Trailblazer::Operation::Policy)
         includer.extend ClassMethods
@@ -45,8 +76,8 @@ module Trailblazer
       end
 
       module ClassMethods
-        def policy(policy_class, action)
-          self.policy_config = [policy_class, action]
+        def permission_class
+          Permission
         end
       end
 
@@ -54,14 +85,8 @@ module Trailblazer
 
 
       module BuildPolicy
-        def build_policy(model, params, class_name=self.policy_class)
-          return unless class_name
-
-          build_policy_for(params, model, class_name)
-        end
-
-        def build_policy_for(params, model, class_name)
-          class_name.new(params[:current_user], model)
+        def build_policy(model, params, permission=self.policy_config)
+          permission.policy(params[:current_user], model)
         end
       end
       include BuildPolicy
@@ -70,11 +95,25 @@ module Trailblazer
       module EvaluatePolicy
       private
         def evaluate_policy(params)
-          @policy = build_policy(model, params, self.class.policy_class) or return true
+          puts "@@@@@ #{self.class.policy_config.inspect}"
+          result, @policy = self.class.policy_config.(params[:current_user], model)
+          result or raise policy_exception(@policy, self.class.policy_config.action, model)
+          # policy!(model, params, self.class.policy_config)
 
-          # DISCUSS: this flow should be used via pundit's API, which we might have to extend.
-          action = self.class.policy_config.last
-          @policy.send(action) or raise ::Pundit::NotAuthorizedError.new(query: action, record: model, policy: @policy)
+          # # DISCUSS: this flow should be used via pundit's API, which we might have to extend.
+          # evaluate_policy!(@policy, action, model)
+        end
+
+        # def policy!(model, params, policy_class)
+        #   @policy = build_policy(model, params, policy_class)
+        # end
+
+        # def evaluate_policy!(policy, action, model)
+        #   policy.send(action) or raise policy_exception(policy, action, model)
+        # end
+
+        def policy_exception(policy, action, model)
+          ::Pundit::NotAuthorizedError.new(query: action, record: model, policy: policy)
         end
       end
     end

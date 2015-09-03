@@ -1,6 +1,7 @@
 require "test_helper"
 require "trailblazer/operation/policy"
 
+
 class OpPolicyTest < MiniTest::Spec
   Song = Struct.new(:name)
 
@@ -20,7 +21,7 @@ class OpPolicyTest < MiniTest::Spec
   end
 
   # valid.
-  it do
+  it "whoo" do
     op = Create.(valid: true)
 
   end
