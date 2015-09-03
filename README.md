@@ -201,6 +201,52 @@ end
 
 Only operations and views/cells can access models directly.
 
+## Policies
+
+The full documenation for [Policy is here](http://trailblazerb.org/gems/operation/policy.html).
+
+You can abort running an operation using a policy. "[Pundit](https://github.com/elabs/pundit)-style" policy classes define the rules.
+
+```ruby
+class Thing::Policy
+  def initialize(user, thing)
+    @user, @thing = user, thing
+  end
+
+  def create?
+    @user.admin?
+  end
+end
+```
+
+The rule is enabled via the `::policy` call.
+
+```ruby
+class Thing::Create < Trailblazer::Operation
+  include Policy
+
+  policy Thing::Policy, :create?
+```
+
+The policy is evaluated in `#setup!`, raises an exception if `false` and suppresses running `#process`.
+
+```ruby
+Thing::Create.(current_user: User.find(1), thing: {}) # raises Trailblazer::NotAuthorizedError.
+```
+
+You can query the `policy` object at any point in your operation.
+
+To [use policies in your builders](http://trailblazerb.org/gems/operation/resolver.html), please read the documentation.
+
+```ruby
+class Thing::Create < Trailblazer::Operation
+  include Resolver
+
+  builder-> (model, policy, params) do
+    return Admin if policy.admin?
+    return SignedIn if params[:current_user]
+  end
+```
 
 ## Views
 
