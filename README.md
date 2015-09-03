@@ -231,10 +231,10 @@ class Thing::Create < Trailblazer::Operation
 The policy is evaluated in `#setup!`, raises an exception if `false` and suppresses running `#process`.
 
 ```ruby
-Thing::Create.(current_user: User.find(1), thing: {}) # raises Trailblazer::NotAuthorizedError.
+Thing::Create.(current_user: User.find(1), thing: {}) # raises exception.
 ```
 
-You can query the `policy` object at any point in your operation.
+You can query the `policy` object at any point in your operation without raising an exception.
 
 To [use policies in your builders](http://trailblazerb.org/gems/operation/resolver.html), please read the documentation.
 
