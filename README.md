@@ -236,7 +236,7 @@ Thing::Create.(current_user: User.find(1), thing: {}) # raises exception.
 
 You can query the `policy` object at any point in your operation without raising an exception.
 
-To [use policies in your builders](http://trailblazerb.org/gems/operation/resolver.html), please read the documentation.
+To [use policies in your builders](http://trailblazerb.org/gems/operation/builder#resolver.html), please read the documentation.
 
 ```ruby
 class Thing::Create < Trailblazer::Operation
