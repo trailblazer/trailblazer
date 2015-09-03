@@ -4,10 +4,10 @@ module Trailblazer
 
   # Adds #evaluate_policy to #setup!, and ::policy.
   module Operation::Policy
+    require "trailblazer/operation/policy/guard"
+
     def self.included(includer)
       includer.extend DSL
-      includer.extend BuildPolicy # so we can use ::build_policy in builders.
-      includer.send(:include, EvaluatePolicy)
     end
 
     module DSL
@@ -36,25 +36,16 @@ module Trailblazer
     end
     include Setup
 
-    module BuildPolicy
-      def build_policy(model, params, permission=self.policy_config)
-        permission.policy(params[:current_user], model)
-      end
-    end
-    include BuildPolicy
 
-
-    module EvaluatePolicy
     private
-      def evaluate_policy(params)
-        result, @policy, action = self.class.policy_config.(params[:current_user], model)
+    def evaluate_policy(params)
+      result, @policy, action = self.class.policy_config.(params[:current_user], model)
 
-        result or raise policy_exception(@policy, action, model)
-      end
+      result or raise policy_exception(@policy, action, model)
+    end
 
-      def policy_exception(policy, action, model)
-        NotAuthorizedError.new(query: action, record: model, policy: policy)
-      end
+    def policy_exception(policy, action, model)
+      NotAuthorizedError.new(query: action, record: model, policy: policy)
     end
 
     # Encapsulate building the Policy object and calling the defined query action.
@@ -70,39 +61,6 @@ module Trailblazer
 
       def policy(user, model)
         @policy_class.new(user, model)
-      end
-    end
-  end
-
-  # Adds #evaluate_policy to Operation#setup!
-  module Operation::Policy
-    module Guard
-      def self.included(includer)
-        includer.extend(Trailblazer::Operation::Policy::DSL)
-        includer.extend(ClassMethods)
-        includer.send(:include, Setup)
-      end
-
-      module ClassMethods
-        # Use Guard::Permission.
-        def permission_class
-          Permission
-        end
-      end
-
-      def evaluate_policy(params)
-        self.class.policy_config.(self, params) or raise NotAuthorizedError.new
-      end
-
-      # Encapsulates the operation's policy which is usually called in Op#setup!.
-      class Permission
-        def initialize(*args, &block)
-          @callable, @args = Uber::Options::Value.new(block), args
-        end
-
-        def call(context, *args)
-          @callable.(context, *args)
-        end
       end
     end
   end
