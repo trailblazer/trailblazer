@@ -49,6 +49,7 @@ module Trailblazer
     end
 
     # Encapsulate building the Policy object and calling the defined query action.
+    # This assumes the policy class is "pundit-style", as in Policy.new(user, model).edit?.
     class Permission
       def initialize(policy_class, action)
         @policy_class, @action = policy_class, action
