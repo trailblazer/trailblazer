@@ -30,14 +30,27 @@ class WorkerTest < MiniTest::Spec
   describe "with sidekiq" do
     before { @res = Operation.run(title: "Dragonfly") }
 
-    it { @res.kind_of?(String).must_equal true } # for now, we return the job from sidekiq.
-    it { Operation.jobs[0]["args"].must_equal([{"title"=>"Dragonfly"}]) }
-    it { Operation.perform_one.must_equal "I was working hard on {\"title\"=>\"Dragonfly\"}. title:Dragonfly \"title\"=>Dragonfly" }
+    it 'returns a string' do
+      @res.kind_of?(String).must_equal true # for now, we return the job from sidekiq.
+    end
+
+    it 'creates a job with the proper arguments' do
+      Operation.jobs[0]["args"].must_equal([{"title"=>"Dragonfly"}])
+    end
+
+    it 'returns the proper result' do
+      Operation.perform_one.must_equal(
+        "I was working hard on {\"title\"=>\"Dragonfly\"}. title:Dragonfly \"title\"=>Dragonfly"
+      )
+    end
   end
 
   # without sidekiq, we don't have indifferent_access automatically.
-  it { NoBackgroundOperation.run(title: "Dragonfly").must_equal "I was working hard on {:title=>\"Dragonfly\"}. title:Dragonfly \"title\"=>" }
-
+  it 'returns results with indifferent_access' do
+    NoBackgroundOperation.run(title: "Dragonfly").must_equal(
+      "I was working hard on {:title=>\"Dragonfly\"}. title:Dragonfly \"title\"=>"
+    )
+  end
 
   # test manual serialisation (to be done with UploadedFile etc automatically).
   class SerializingOperation < Operation
@@ -55,9 +68,19 @@ class WorkerTest < MiniTest::Spec
   describe "with serialization in sidekiq" do
     before { @res = SerializingOperation.run(title: "Dragonfly") }
 
-    it { @res.kind_of?(String).must_equal true } # for now, we return the job from sidekiq.
-    it { SerializingOperation.jobs[0]["args"].must_equal([{"wrap"=>{"title"=>"Dragonfly"}}]) }
-    it { SerializingOperation.perform_one.must_equal "I was working hard on {\"title\"=>\"Dragonfly\"}. title:Dragonfly \"title\"=>Dragonfly" }
+    it 'returns a string' do
+      @res.kind_of?(String).must_equal true # for now, we return the job from sidekiq.
+    end
+
+    it 'creates a job with the proper arguments' do
+      SerializingOperation.jobs[0]["args"].must_equal([{"wrap"=>{"title"=>"Dragonfly"}}])
+    end
+
+    it 'returns the proper result' do
+      SerializingOperation.perform_one.must_equal(
+        "I was working hard on {\"title\"=>\"Dragonfly\"}. title:Dragonfly \"title\"=>Dragonfly"
+      )
+    end
   end
 end
 
@@ -96,7 +119,7 @@ class WorkerFileMarshallerTest < MiniTest::Spec
   # TODO: no image
 
   # with image serializes the file for later retrieval.
-  it do
+  it 'serializes the file for later retrieval' do
     Operation.run(title: "Dragonfly", image: uploaded_file("apotomo.png"), album: {image: uploaded_file("cells.png")})
 
     args = Operation.jobs[0]["args"].first
