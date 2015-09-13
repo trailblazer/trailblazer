@@ -89,7 +89,7 @@ Operations encapsulate business logic and are the heart of a Trailblazer archite
 
 An operation is not just a monolithic replacement for your business code. An operation is a simple orchestrator between the form object, models and your business code.
 
-You don't have to use the form/contract if you don't want it, BTW.
+You don't have to use the form/contract if you don't want it.
 
 ```ruby
 class Comment < ActiveRecord::Base
@@ -166,7 +166,7 @@ class Create < Trailblazer::Operation
   end
 ```
 
-The _Imperative Callback_ pattern then allows you to call this _callback group_ whereever you need it.
+The _Imperative Callback_ pattern then allows you to call this _callback group_ wherever you need it.
 
 ```ruby
 class Create < Trailblazer::Operation
@@ -203,7 +203,7 @@ Only operations and views/cells can access models directly.
 
 ## Policies
 
-The full documenation for [Policy is here](http://trailblazerb.org/gems/operation/policy.html).
+The full documentation for [Policy is here](http://trailblazerb.org/gems/operation/policy.html).
 
 You can abort running an operation using a policy. "[Pundit](https://github.com/elabs/pundit)-style" policy classes define the rules.
 
@@ -276,13 +276,13 @@ The operation can then parse incoming JSON documents in `validate` and render a 
 
 ## Tests
 
-Subject to tests are mainly _Operation_s and _View Model_s, as they encapsulate endpoint behaviour of your app. As a nice side effect, factories are replaced by simple _Operation_ calls.
+Subject to tests are mainly _Operation_s and _View Model_s, as they encapsulate endpoint behavior of your app. As a nice side effect, factories are replaced by simple _Operation_ calls.
 
 
 
 ## Overview
 
-Trailblazer is basically a mash-up of mature gems that have been developed over the past 10 years and are used in hundreds and thousands of production apps.
+Trailblazer is a collection of mature gems that have been developed over the past 10 years and are used in thousands of production apps.
 
 Using the different layers is completely optional and up to you: Both Cells and Reform can be excluded from your stack if you wish so.
 
@@ -593,7 +593,7 @@ end
 
 You have to tell `CRUD` the model class and what action to implement using `::model`.
 
-Note how you do not have to pass the `@model` to validate anymore. Also, the `@model` gets created automatically and is accessable using `Operation#model`.
+Note how you do not have to pass the `@model` to validate anymore. Also, the `@model` gets created automatically and is accessible using `Operation#model`.
 
 In inherited operations, you can override the action, only, using `::action`.
 
