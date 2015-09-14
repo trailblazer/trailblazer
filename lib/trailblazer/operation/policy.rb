@@ -31,7 +31,7 @@ module Trailblazer
     module Setup
       def setup!(params)
         super
-        evaluate_policy(params)
+        evaluate_policy(@params)
       end
     end
     include Setup

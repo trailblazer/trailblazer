@@ -14,8 +14,8 @@ class Trailblazer::Operation
       end
 
 
-      def initialize(model, options)
-        super(options) # TODO: run #setup! here.
+      def initialize(model, *args)
+        super(*args) # TODO: run #setup! here.
         @model = model
       end # in #run, @model is overridden, again. this is only because we want sidekiq-style (op.new()) actually i don't like this.
 
@@ -28,8 +28,8 @@ class Trailblazer::Operation
       module ClassMethods
       private
         def build_operation(params, options={})
-          model = model!(*params)
-          build_operation_class(model, *params).new(model, options)
+          model = model!(params)
+          build_operation_class(model, params).new(model, params, options)
           # super([model, params], [model, options]) # calls: builds ->(model, params), and Op.new(model, params)
         end
       end

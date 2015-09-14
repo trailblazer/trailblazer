@@ -4,7 +4,6 @@ module Trailblazer
   class Operation
     require "trailblazer/operation/builder"
     extend Builder # imports ::builder_class and ::build_operation.
-
     extend Uber::InheritableAttr
     inheritable_attr :contract_class
     self.contract_class = Reform::Form.clone
@@ -16,8 +15,8 @@ module Trailblazer
     end
 
     class << self
-      def run(*params, &block) # Endpoint behaviour
-        res, op = build_operation(params).run(*params)
+      def run(params, &block) # Endpoint behaviour
+        res, op = build_operation(params).run#(*params)
 
         if block_given?
           yield op if res
@@ -36,14 +35,14 @@ module Trailblazer
 
       # ::call only returns the Operation instance (or whatever was returned from #validate).
       # This is useful in tests or in irb, e.g. when using Op as a factory and you already know it's valid.
-      def call(*params)
-        build_operation(params, raise_on_invalid: true).run(*params).last
+      def call(params)
+        build_operation(params, raise_on_invalid: true).run.last
       end
       alias_method :[], :call # TODO: deprecate #[] in favor of .().
 
       # Runs #setup! and returns the form object.
-      def present(*params)
-        build_operation(params).present(*params)
+      def present(params)
+        build_operation(params).present#(*params)
       end
 
       def contract(&block)
@@ -52,22 +51,25 @@ module Trailblazer
     end
 
 
-    def initialize(options={})
+    def initialize(params, options={})
       @valid            = true
       @raise_on_invalid = options[:raise_on_invalid] || false
+
+      @params = params
+      setup!(params) # assign/find the model
     end
 
     #   Operation.run(body: "Fabulous!") #=> [true, <Comment body: "Fabulous!">]
-    def run(*params)
-      setup!(*params) # assign/find the model
+    def run#(*params)
+      # setup!(*params) # assign/find the model
 
-      process(*params)
+      process(@params)
 
       [valid?, self]
     end
 
-    def present(*params)
-      setup!(*params)
+    def present#(*params)
+      # setup!(*params)
       contract!
       self
     end
@@ -88,22 +90,22 @@ module Trailblazer
 
   private
     module Setup
-      def setup!(*params)
-        setup_params!(*params)
+      def setup!(params)
+        setup_params!(params)
 
-        @model = model!(*params)
-        setup_model!(*params)
+        @model = model!(params)
+        setup_model!(params)
       end
 
       # Implement #model! to find/create your operation model (if required).
-      def model!(*params)
+      def model!(params)
       end
 
       # Override to add attributes that can be infered from params.
-      def setup_model!(*params)
+      def setup_model!(params)
       end
 
-      def setup_params!(*params)
+      def setup_params!(params)
       end
     end
     include Setup

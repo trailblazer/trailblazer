@@ -16,11 +16,11 @@ module Trailblazer::Operation::Builder
 
 private
   # Runs the builders for this operation class to figure out the actual class.
-  def build_operation_class(*params)
-    class_builder(self).call(*params) # Uber::Builder::class_builder(context)
+  def build_operation_class(*args)
+    class_builder(self).(*args) # Uber::Builder::class_builder(context)
   end
 
   def build_operation(params, options={})
-    build_operation_class(*params).new(options)
+    build_operation_class(params).new(params, options)
   end
 end
