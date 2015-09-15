@@ -46,7 +46,7 @@ module Trailblazer
 
       # Runs #setup! and returns the form object.
       def present(params)
-        build_operation(params).present#(*params)
+        build_operation(params).present
       end
 
       def contract(&block)
@@ -56,24 +56,21 @@ module Trailblazer
 
 
     def initialize(params, options={})
+      @params           = params
       @valid            = true
       @raise_on_invalid = options[:raise_on_invalid] || false
 
-      @params = params
       setup!(params) # assign/find the model
     end
 
     #   Operation.run(body: "Fabulous!") #=> [true, <Comment body: "Fabulous!">]
-    def run#(*params)
-      # setup!(*params) # assign/find the model
-
+    def run
       process(@params)
 
       [valid?, self]
     end
 
-    def present#(*params)
-      # setup!(*params)
+    def present
       contract!
       self
     end
@@ -98,6 +95,7 @@ module Trailblazer
         setup_params!(params)
 
         @model = model!(params)
+        puts "model: #{@model.inspect}"
         setup_model!(params)
       end
 
@@ -157,5 +155,3 @@ module Trailblazer
     end
   end
 end
-
-require 'trailblazer/operation/crud'

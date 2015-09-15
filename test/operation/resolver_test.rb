@@ -17,7 +17,7 @@ class ResolverTest < MiniTest::Spec
     end
 
     def admin?
-      @user and @user.name == "admin"
+      @user && @user.name == "admin" && @song.is_a?(Song)
     end
   end
 
@@ -33,7 +33,7 @@ class ResolverTest < MiniTest::Spec
       return SignedIn if params[:current_user] && params[:current_user].name
     end
 
-    def model!(params)
+    def self.model!(params)
       Song.new(params[:title])
     end
 

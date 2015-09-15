@@ -1,5 +1,6 @@
 require "test_helper"
 require "trailblazer/operation/collection"
+require "trailblazer/operation/crud"
 
 class CollectionTest < MiniTest::Spec
   Song = Struct.new(:title, :id) do

@@ -1,3 +1,5 @@
+require "trailblazer/operation/crud"
+
 class Trailblazer::Operation
   module CRUD
     # Builds (finds or creates) the model _before_ the operation is instantiated.
@@ -15,8 +17,8 @@ class Trailblazer::Operation
 
 
       def initialize(model, *args)
-        super(*args) # TODO: run #setup! here.
         @model = model
+        super(*args) # TODO: run #setup! here.
       end # in #run, @model is overridden, again. this is only because we want sidekiq-style (op.new()) actually i don't like this.
 
       def model!(*) # FIXME: move #setup! etc into #initialize.

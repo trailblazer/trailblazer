@@ -31,7 +31,7 @@ module Trailblazer
     module Setup
       def setup!(params)
         super
-        evaluate_policy(@params)
+        evaluate_policy(params)
       end
     end
     include Setup
@@ -39,8 +39,8 @@ module Trailblazer
 
     private
     def evaluate_policy(params)
+      puts "evaluate_policy::: @@#{self}@@@ #{params.inspect}, #{model}"
       result, @policy, action = self.class.policy_config.(params[:current_user], model)
-
       result or raise policy_exception(@policy, action, model)
     end
 
