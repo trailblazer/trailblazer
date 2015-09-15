@@ -38,7 +38,11 @@ module Trailblazer
       def call(params)
         build_operation(params, raise_on_invalid: true).run.last
       end
-      alias_method :[], :call # TODO: deprecate #[] in favor of .().
+
+      def [](*args) # TODO: remove in 1.1.
+        warn "[Trailblazer] Operation[] is deprecated. Please use Operation.() and have a nice day."
+        call(*args)
+      end
 
       # Runs #setup! and returns the form object.
       def present(params)

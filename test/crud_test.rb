@@ -32,9 +32,9 @@ class CrudTest < MiniTest::Spec
 
 
   # creates model for you.
-  it { CreateOperation[song: {title: "Blue Rondo a la Turk"}].model.title.must_equal "Blue Rondo a la Turk" }
+  it { CreateOperation.(song: {title: "Blue Rondo a la Turk"}).model.title.must_equal "Blue Rondo a la Turk" }
   # exposes #model.
-  it { CreateOperation[song: {title: "Blue Rondo a la Turk"}].model.must_be_instance_of Song }
+  it { CreateOperation.(song: {title: "Blue Rondo a la Turk"}).model.must_be_instance_of Song }
 
   class ModifyingCreateOperation < CreateOperation
     def process(params)
@@ -47,8 +47,8 @@ class CrudTest < MiniTest::Spec
   end
 
   # lets you modify model.
-  it { ModifyingCreateOperation[song: {title: "Blue Rondo a la Turk"}].model.title.must_equal "Blue Rondo a la Turk" }
-  it { ModifyingCreateOperation[song: {title: "Blue Rondo a la Turk"}].model.genre.must_equal "Punkrock" }
+  it { ModifyingCreateOperation.(song: {title: "Blue Rondo a la Turk"}).model.title.must_equal "Blue Rondo a la Turk" }
+  it { ModifyingCreateOperation.(song: {title: "Blue Rondo a la Turk"}).model.genre.must_equal "Punkrock" }
 
   # Update
   class UpdateOperation < CreateOperation
@@ -57,10 +57,10 @@ class CrudTest < MiniTest::Spec
 
   # finds model and updates.
   it do
-    song = CreateOperation[song: {title: "Anchor End"}].model
+    song = CreateOperation.(song: {title: "Anchor End"}).model
     Song.find_result = song
 
-    UpdateOperation[id: song.id, song: {title: "The Rip"}].model.title.must_equal "The Rip"
+    UpdateOperation.(id: song.id, song: {title: "The Rip"}).model.title.must_equal "The Rip"
     song.title.must_equal "The Rip"
   end
 
@@ -71,10 +71,10 @@ class CrudTest < MiniTest::Spec
 
   # finds model and updates.
   it do
-    song = CreateOperation[song: {title: "Anchor End"}].model
+    song = CreateOperation.(song: {title: "Anchor End"}).model
     Song.find_result = song
 
-    FindOperation[id: song.id, song: {title: "The Rip"}].model.title.must_equal "The Rip"
+    FindOperation.(id: song.id, song: {title: "The Rip"}).model.title.must_equal "The Rip"
     song.title.must_equal "The Rip"
   end
 
@@ -89,7 +89,7 @@ class CrudTest < MiniTest::Spec
   end
 
   # uses :create as default if not set via ::action.
-  it { DefaultCreateOperation[{}].model.must_equal Song.new }
+  it { DefaultCreateOperation.({}).model.must_equal Song.new }
 
   # model Song, :action
   class ModelUpdateOperation < CreateOperation
@@ -99,7 +99,7 @@ class CrudTest < MiniTest::Spec
   # allows ::model, :action.
   it do
     Song.find_result = song = Song.new
-    ModelUpdateOperation[{id: 1, song: {title: "Mercy Day For Mr. Vengeance"}}].model.must_equal song
+    ModelUpdateOperation.({id: 1, song: {title: "Mercy Day For Mr. Vengeance"}}).model.must_equal song
   end
 
 
@@ -111,7 +111,7 @@ class CrudTest < MiniTest::Spec
     end
   end
 
-  it { SetupModelOperation[song: {title: "Emily Kane"}].model.params.must_equal "{:song=>{:title=>\"Emily Kane\"}}" }
+  it { SetupModelOperation.(song: {title: "Emily Kane"}).model.params.must_equal "{:song=>{:title=>\"Emily Kane\"}}" }
 
 
 
@@ -125,7 +125,7 @@ class CrudTest < MiniTest::Spec
   end
 
   # uses :create as default if not set via ::action.
-  it { assert_raises(RuntimeError){ NoModelOperation[{}] } }
+  it { assert_raises(RuntimeError){ NoModelOperation.({}) } }
 
 
 

@@ -46,8 +46,8 @@ class ResponderTestForModelWithoutNamespace < MiniTest::Spec
   it { Song::Operation.model_name.singular_route_key.must_equal "song" }
 
   # #errors
-  it { Song::Operation[true].errors.must_equal [] }
-  it { Song::Operation[false].errors.must_equal [1] } # TODO: since we don't want responder to render anything, just return _one_ error. :)
+  it { Song::Operation.(true).errors.must_equal [] }
+  it { Song::Operation.(false).errors.must_equal [1] } # TODO: since we don't want responder to render anything, just return _one_ error. :)
 
   # TODO: integration test with Controller.
 end
@@ -68,8 +68,8 @@ class ResponderTestForModelWitNamespace < MiniTest::Spec
     it { MyApp::Song::Operation.model_name.singular_route_key.must_equal "my_app_song" } # "song" for AR.
 
     # #errors
-    it { MyApp::Song::Operation[true].errors.must_equal [] }
-    it { MyApp::Song::Operation[false].errors.must_equal [1] } # TODO: since we don't want responder to render anything, just return _one_ error. :)
+    it { MyApp::Song::Operation.(true).errors.must_equal [] }
+    it { MyApp::Song::Operation.(false).errors.must_equal [1] } # TODO: since we don't want responder to render anything, just return _one_ error. :)
 
     # TODO: integration test with Controller.
 end
