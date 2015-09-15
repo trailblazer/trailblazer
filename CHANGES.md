@@ -1,5 +1,6 @@
 # 0.4.0
 
+* `Operation[{..}]` is deprecated in favor of `Operation.({..})`.
 setup in initialize: when Op.run() with Worker, the policy will be run "delayed" and not with the actual permission set. this will result in many crashing sidekiq workers.
 
 # 0.3.4
