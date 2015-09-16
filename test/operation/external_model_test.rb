@@ -1,7 +1,7 @@
 require "test_helper"
-require "trailblazer/operation/crud/class_builder"
+require "trailblazer/operation/crud/external_model"
 
-class CrudClassLevelTest < MiniTest::Spec
+class ExternalModelTest < MiniTest::Spec
    Song = Struct.new(:title, :id) do
     class << self
       attr_accessor :find_result # TODO: eventually, replace with AR test.
@@ -19,7 +19,7 @@ class CrudClassLevelTest < MiniTest::Spec
 
 
   class Bla < Trailblazer::Operation
-    include CRUD::ClassBuilder
+    include CRUD::ExternalModel
     model Song, :update
 
     def process(params)

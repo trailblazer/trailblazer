@@ -7,8 +7,9 @@ class Trailblazer::Operation
     #
     #   builds ->(model, params)
     #
-    # Note: THIS IS EXPERIMENTAL!!!
-    module ClassBuilder # CRUD::ForClass :OnClass ModelFromClass ClassModel ExternalModel
+    # The initializer will now expect you to pass the model in via options[:model]. This
+    # happens automatically when coming from a builder.
+    module ExternalModel
       def self.included(includer)
         includer.extend CRUD::DSL
         includer.extend CRUD::BuildModel
@@ -16,11 +17,11 @@ class Trailblazer::Operation
       end
 
       def initialize(params, options={})
-        @model = options[:model]
+        @model = options[:model] #
         super
       end
 
-      def assign_model!(*)
+      def assign_model!(*) # i don't like to "disable" the `@model =` like this but it's the simplest for now.
       end
 
 
