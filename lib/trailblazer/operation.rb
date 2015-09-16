@@ -16,7 +16,7 @@ module Trailblazer
 
     class << self
       def run(params, &block) # Endpoint behaviour
-        res, op = build_operation(params).run#(*params)
+        res, op = build_operation(params).run
 
         if block_given?
           yield op if res
@@ -99,9 +99,9 @@ module Trailblazer
       def setup_params!(params)
       end
 
-      def build_model!(*params)
-        assign_model!(*params) # @model = ..
-        setup_model!(*params)
+      def build_model!(*args)
+        assign_model!(*args) # @model = ..
+        setup_model!(*args)
       end
 
       def assign_model!(*args)
