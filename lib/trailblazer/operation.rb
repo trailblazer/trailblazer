@@ -95,7 +95,6 @@ module Trailblazer
         setup_params!(params)
 
         @model = model!(params)
-        puts "model: #{@model.inspect}"
         setup_model!(params)
       end
 
