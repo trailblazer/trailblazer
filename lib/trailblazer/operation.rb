@@ -93,9 +93,19 @@ module Trailblazer
     module Setup
       def setup!(params)
         setup_params!(params)
+        build_model!(params)
+      end
 
-        @model = model!(params)
-        setup_model!(params)
+      def setup_params!(params)
+      end
+
+      def build_model!(*params)
+        assign_model!(*params) # @model = ..
+        setup_model!(*params)
+      end
+
+      def assign_model!(*args)
+        @model = model!(*args)
       end
 
       # Implement #model! to find/create your operation model (if required).
@@ -104,9 +114,6 @@ module Trailblazer
 
       # Override to add attributes that can be infered from params.
       def setup_model!(params)
-      end
-
-      def setup_params!(params)
       end
     end
     include Setup
