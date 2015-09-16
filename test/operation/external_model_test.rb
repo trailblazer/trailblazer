@@ -32,6 +32,7 @@ class ExternalModelTest < MiniTest::Spec
     Song.find_result = song
   end
 
+  # ::model!
   it do
     Bla.model!(id: 1).must_equal song
     song.id.must_equal 1

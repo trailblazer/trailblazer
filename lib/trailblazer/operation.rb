@@ -57,8 +57,8 @@ module Trailblazer
 
     def initialize(params, options={})
       @params           = params
+      @options          = options
       @valid            = true
-      @raise_on_invalid = options[:raise_on_invalid] || false
 
       setup!(params) # assign/find the model
     end
@@ -141,7 +141,7 @@ module Trailblazer
 
     # When using Op::[], an invalid contract will raise an exception.
     def raise!(contract)
-      raise InvalidContract.new(contract.errors.to_s) if @raise_on_invalid
+      raise InvalidContract.new(contract.errors.to_s) if @options[:raise_on_invalid]
     end
 
     # Instantiate the contract, either by using the user's contract passed into #validate

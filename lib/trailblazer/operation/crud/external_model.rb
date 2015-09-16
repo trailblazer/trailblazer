@@ -16,21 +16,17 @@ class Trailblazer::Operation
         includer.extend ClassMethods
       end
 
-      def initialize(params, options={})
-        @model = options[:model] #
-        super
-      end
-
       def assign_model!(*) # i don't like to "disable" the `@model =` like this but it's the simplest for now.
+        @model = @options[:model]
       end
 
 
       module ClassMethods
       private
-        def build_operation(params, options={})
+        def build_operation(params, options={}) # TODO: merge with Resolver::build_operation.
           model = model!(params)
-          build_operation_class(model, params).new(params, options.merge(model: model))
-          # super([model, params], [model, options]) # calls: builds ->(model, params), and Op.new(model, params)
+          build_operation_class(model, params). # calls builds->(model, params).
+            new(params, options.merge(model: model))
         end
       end
     end
