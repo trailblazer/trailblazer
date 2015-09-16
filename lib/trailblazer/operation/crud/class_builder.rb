@@ -15,15 +15,12 @@ class Trailblazer::Operation
         includer.extend ClassMethods
       end
 
+      def initialize(params, options={})
+        @model = options[:model]
+        super
+      end
 
-      def initialize(model, *args)
-        @model = model
-        super(*args) # TODO: run #setup! here.
-      end # in #run, @model is overridden, again. this is only because we want sidekiq-style (op.new()) actually i don't like this.
-
-      def model!(*) # FIXME: move #setup! etc into #initialize.
-        # then we don't have to override this and can simply assign @model after super in initialize.
-        @model
+      def assign_model!(*)
       end
 
 
@@ -31,7 +28,7 @@ class Trailblazer::Operation
       private
         def build_operation(params, options={})
           model = model!(params)
-          build_operation_class(model, params).new(model, params, options)
+          build_operation_class(model, params).new(params, options.merge(model: model))
           # super([model, params], [model, options]) # calls: builds ->(model, params), and Op.new(model, params)
         end
       end

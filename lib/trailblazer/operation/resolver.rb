@@ -16,7 +16,7 @@ class Trailblazer::Operation
       def build_operation(params, options={})
         model  = model!(params)
         policy = policy_config.policy(params[:current_user], model)
-        build_operation_class(model, policy, params).new(model, params, options)
+        build_operation_class(model, policy, params).new(params, options.merge(model: model))
         # super([model, params], [model, options]) # calls: builds ->(model, params), and Op.new(model, params)
       end
     end
