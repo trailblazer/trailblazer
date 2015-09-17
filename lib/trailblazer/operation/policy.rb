@@ -39,9 +39,11 @@ module Trailblazer
 
     private
     def evaluate_policy(params)
-      puts "evaluate_policy::: @@#{self}@@@ #{params.inspect}, #{model}"
-      result, @policy, action = self.class.policy_config.(params[:current_user], model)
-      result or raise policy_exception(@policy, action, model)
+      user = params[:current_user]
+
+      @policy = self.class.policy_config.(user, model, @policy) do |policy, action|
+        raise policy_exception(policy, action, model)
+      end
     end
 
     def policy_exception(policy, action, model)
@@ -55,13 +57,17 @@ module Trailblazer
         @policy_class, @action = policy_class, action
       end
 
-      def call(user, model)
-        policy = policy(user, model)
-        [policy.send(@action), policy, @action]
+      # Without a block, return the policy object (which is usually a Pundit-style class).
+      # When block is passed evaluate the default rule and run block when false.
+      def call(user, model, external_policy=nil)
+        build_policy(user, model, external_policy).tap do |policy|
+          policy.send(@action) || yield(policy, @action) if block_given?
+        end
       end
 
-      def policy(user, model)
-        @policy_class.new(user, model)
+    private
+      def build_policy(user, model, policy)
+        policy or @policy_class.new(user, model)
       end
     end
   end

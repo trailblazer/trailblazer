@@ -1,6 +1,5 @@
 require "test_helper"
-require "trailblazer/operation/policy"
-
+require "trailblazer/operation/resolver"
 
 class ResolverTest < MiniTest::Spec
   Song = Struct.new(:title)
@@ -19,9 +18,12 @@ class ResolverTest < MiniTest::Spec
     def admin?
       @user && @user.name == "admin" && @song.is_a?(Song)
     end
+
+    def true?
+      true
+    end
   end
 
-  require "trailblazer/operation/resolver"
   class Create < Trailblazer::Operation
     include Resolver
     model Song, :create
@@ -55,6 +57,27 @@ class ResolverTest < MiniTest::Spec
   it do
     assert_raises Trailblazer::NotAuthorizedError do
       Create.({})
+    end
+  end
+
+
+  describe "passes policy into operation" do
+    class Update < Trailblazer::Operation
+      include Resolver
+      model Song, :create
+      policy MyKitchenRules, :true?
+
+      builds-> (model, policy, params) do
+        policy.instance_eval { def whoami; "me!" end }
+        nil
+      end
+
+      def process(*)
+      end
+    end
+
+    it do
+      Update.({}).policy.whoami.must_equal "me!"
     end
   end
 end

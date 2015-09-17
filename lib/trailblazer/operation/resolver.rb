@@ -1,4 +1,5 @@
 require "trailblazer/operation/crud/external_model"
+require "trailblazer/operation/policy"
 
 class Trailblazer::Operation
   # Provides builds-> (model, policy, params).
@@ -15,9 +16,15 @@ class Trailblazer::Operation
     module BuildOperation
       def build_operation(params, options={})
         model  = model!(params)
-        policy = policy_config.policy(params[:current_user], model)
-        build_operation_class(model, policy, params).new(params, options.merge(model: model))
+        policy = policy_config.call(params[:current_user], model)
+        build_operation_class(model, policy, params).
+          new(params, options.merge(model: model, policy: policy))
       end
+    end
+
+    def initialize(params, options)
+      @policy = options[:policy]
+      super
     end
   end
 end
