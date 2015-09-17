@@ -7,7 +7,7 @@ class Trailblazer::Operation
   # Works with Reform 2, only.
   module Worker
     def self.included(base)
-      base.send(:include, Sidekiq::Worker) # TODO: this will work with any bg gem.
+      base.send(:include, Sidekiq::Worker)
       base.extend(ClassMethods)
     end
 
@@ -17,10 +17,28 @@ class Trailblazer::Operation
           return perform_async(serializable(params))
         end
 
-        new.run(params)
+        super(params)
+      end
+
+      def new(*args)
+        return super if args.any?
+        # sidekiq behavior: (not a big fan of this)
+        self
+      end
+
+      def perform(params) # called by Sidekiq.
+        build_operation(params).perform
+      end
+
+      def jid=(jid)
+        puts "@@@@@ #{jid.inspect}"
       end
 
     private
+      def perform_async(*args)
+        client_push('class' => self, 'args' => args) # calls class.new.perform(params)
+      end
+
       def background? # TODO: make configurable.
         true
         # if Rails.env == "production" or Rails.env == "staging"
@@ -32,16 +50,15 @@ class Trailblazer::Operation
     end
 
 
-    # called from Sidekiq.
-    def perform(params)
+    def perform#(params)
       # the serialized params hash from Sidekiq contains a Op::UploadedFile hash.
 
       # the following code is basically what happens in a controller.
       # this is a bug in Rails, it doesn't work without requiring as/hash/ina
       # params = ActiveSupport::HashWithIndifferentAccess.new_from_hash_copying_default(params) # TODO: this might make it ultra-slow as Reform converts it back to strings.
-      params = params.with_indifferent_access
-
-      run(deserializable(params))
+      params = @params.with_indifferent_access
+      @params = deserializable(params)
+      run
     end
 
   private

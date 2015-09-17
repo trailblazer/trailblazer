@@ -13,10 +13,10 @@ class WorkerTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
     include Worker
 
-    def run(params)
+    def process(params)
       with_symbol = params[:title]
       with_string = params["title"]
-      "I was working hard on #{params.inspect}. title:#{with_symbol} \"title\"=>#{with_string}"
+      @model = "I was working hard on #{params.inspect}. title:#{with_symbol} \"title\"=>#{with_string}"
     end
   end
 
@@ -27,16 +27,18 @@ class WorkerTest < MiniTest::Spec
   end
 
   # test basic worker functionality.
-  describe "with sidekiq" do
-    before { @res = Operation.run(title: "Dragonfly") }
+  describe "with sidekiq ss" do
+    it do
+      res = Operation.run(title: "Dragonfly")
 
-    it { @res.kind_of?(String).must_equal true } # for now, we return the job from sidekiq.
-    it { Operation.jobs[0]["args"].must_equal([{"title"=>"Dragonfly"}]) }
-    it { Operation.perform_one.must_equal "I was working hard on {\"title\"=>\"Dragonfly\"}. title:Dragonfly \"title\"=>Dragonfly" }
+      res.kind_of?(String).must_equal true # for now, we return the job from sidekiq
+      Operation.jobs[0]["args"].must_equal([{"title"=>"Dragonfly"}])
+      Operation.perform_one.last.model.must_equal "I was working hard on {\"title\"=>\"Dragonfly\"}. title:Dragonfly \"title\"=>Dragonfly"
+    end
   end
 
   # without sidekiq, we don't have indifferent_access automatically.
-  it { NoBackgroundOperation.run(title: "Dragonfly").must_equal "I was working hard on {:title=>\"Dragonfly\"}. title:Dragonfly \"title\"=>" }
+  it { NoBackgroundOperation.run(title: "Dragonfly").last.model.must_equal "I was working hard on {:title=>\"Dragonfly\"}. title:Dragonfly \"title\"=>" }
 
 
   # test manual serialisation (to be done with UploadedFile etc automatically).
