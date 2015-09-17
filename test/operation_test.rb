@@ -201,14 +201,14 @@ class OperationTest < MiniTest::Spec
 
 
   # unlimited arguments for ::run and friends.
-  class OperationReceivingLottaArguments < Trailblazer::Operation
-    def process(model, params)
-      @model = [model, params]
-    end
-    include Inspect
-  end
+  # class OperationReceivingLottaArguments < Trailblazer::Operation
+  #   def process(model, params)
+  #     @model = [model, params]
+  #   end
+  #   include Inspect
+  # end
 
-  it { OperationReceivingLottaArguments.run(Object, {}).to_s.must_equal %{[true, <OperationReceivingLottaArguments @model=[Object, {}]>]} }
+  # it { OperationReceivingLottaArguments.run(Object, {}).to_s.must_equal %{[true, <OperationReceivingLottaArguments @model=[Object, {}]>]} }
 
   # ::present only runs #setup! which runs #model!.
   class ContractOnlyOperation < Trailblazer::Operation

@@ -59,11 +59,13 @@ class WorkerTest < MiniTest::Spec
 
     it { @res.kind_of?(String).must_equal true } # for now, we return the job from sidekiq.
     it { SerializingOperation.jobs[0]["args"].must_equal([{"wrap"=>{"title"=>"Dragonfly"}}]) }
-    it { SerializingOperation.perform_one.must_equal "I was working hard on {\"title\"=>\"Dragonfly\"}. title:Dragonfly \"title\"=>Dragonfly" }
+    it { SerializingOperation.perform_one.last.model.must_equal "I was working hard on {\"title\"=>\"Dragonfly\"}. title:Dragonfly \"title\"=>Dragonfly" }
   end
 end
 
 
+require "trailblazer/operation/uploaded_file"
+require "action_dispatch/http/upload"
 class WorkerFileMarshallerTest < MiniTest::Spec
   def uploaded_file(name)
     tmp = Tempfile.new("bla")

@@ -6,11 +6,11 @@ require "test_helper"
 #
 # i am keen to try integrating https://github.com/collectiveidea/interactor organizers!
 module Trailblazer::Operation::Rollback
-  def run(params)
+  def run
     begin
       super
     rescue
-      rollback!(params, $!)
+      rollback!(@params, $!)
       [false, self]
     end
   end
