@@ -5,14 +5,9 @@ module Trailblazer
     # The Model module will automatically create/find models for the configured +action+.
     # It adds a public  +Operation#model+ reader to access the model (after performing).
     module Model
-      module Included
-        def included(base)
-          base.extend DSL
-        end
+      def self.included(base)
+        base.extend DSL
       end
-      # this makes ::included overrideable, e.g. to add more featues like Model::ActiveModel.
-      extend Included
-
 
       # Methods to create the model according to class configuration and params.
       module BuildModel
@@ -49,24 +44,6 @@ module Trailblazer
       end
       def action_name
         self.class.action_name
-      end
-
-
-      # Rails-specific.
-      # ActiveModel will automatically call Form::model when creating the contract and passes
-      # the operation's +::model+, so you don't have to call it twice.
-      # This assumes that the form class includes Form::ActiveModel, though.
-      module ActiveModel
-        def self.included(base)
-          base.extend ClassMethods
-        end
-
-        module ClassMethods
-          def contract(&block)
-            super
-            contract_class.model(model_class) # this assumes that Form::ActiveModel is mixed in.
-          end
-        end
       end
     end
   end

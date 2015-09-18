@@ -127,24 +127,6 @@ class ModelTest < MiniTest::Spec
   # uses :create as default if not set via ::action.
   it { assert_raises(RuntimeError){ NoModelOperation.({}) } }
 
-
-
-  # contract infers model_name.
-  # TODO: this a Rails/ActiveModel-specific test.
-  class ContractKnowsModelNameOperation < Trailblazer::Operation
-    include Model
-    model Song
-    include Model::ActiveModel
-
-    contract do
-      include Reform::Form::ActiveModel # this usually happens in Reform::Form::Rails.
-      property :title
-    end
-  end
-
-  it { ContractKnowsModelNameOperation.present(song: {title: "Direct Hit"}).contract.class.model_name.to_s.must_equal "ModelTest::Song" }
-
-
   # allow passing validate(params, model, contract_class)
   class OperationWithPrivateContract < Trailblazer::Operation
     include Model

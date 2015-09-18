@@ -1,5 +1,6 @@
+require "rails/railtie"
 module Trailblazer
-  class Railtie < Rails::Railtie
+  class Railtie < ::Rails::Railtie
     def self.autoload_operations(app)
       Dir.glob("app/concepts/**/crud.rb") do |f|
         path  = f.sub("app/concepts/", "")
