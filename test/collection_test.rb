@@ -1,6 +1,6 @@
 require "test_helper"
 require "trailblazer/operation/collection"
-require "trailblazer/operation/crud"
+require "trailblazer/operation/model"
 
 class CollectionTest < MiniTest::Spec
   Song = Struct.new(:title, :id) do
@@ -15,7 +15,7 @@ class CollectionTest < MiniTest::Spec
 
 
   class CreateOperation < Trailblazer::Operation
-    include CRUD
+    include Model
     model Song
     action :create
 

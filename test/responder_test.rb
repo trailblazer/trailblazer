@@ -5,7 +5,7 @@ class Song
   extend ActiveModel::Naming
 
   class Operation < Trailblazer::Operation
-    include CRUD
+    include Model
     model Song
     include Responder
 
@@ -20,7 +20,7 @@ module MyApp
     extend ActiveModel::Naming
 
     class Operation < Trailblazer::Operation
-      include CRUD
+      include Model
       include Responder
       model Song
 

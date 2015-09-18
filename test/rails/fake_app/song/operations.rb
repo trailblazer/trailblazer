@@ -2,7 +2,7 @@ require 'trailblazer/autoloading'
 
 class Song < ActiveRecord::Base
   class Create < Trailblazer::Operation
-    include CRUD
+    include Model
     include Responder
     model Song, :create
 
@@ -32,7 +32,7 @@ end
 
 class Band < ActiveRecord::Base
   class Create < Trailblazer::Operation
-    include CRUD, Responder#, Representer
+    include Model, Responder#, Representer
     model Band, :create
 
     contract do
@@ -130,7 +130,7 @@ end
 
 class Tenant < ActiveRecord::Base
   class Show < Trailblazer::Operation
-    include CRUD
+    include Model
     model Tenant, :update
   end
 end

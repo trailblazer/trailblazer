@@ -1,5 +1,5 @@
 require "test_helper"
-require "trailblazer/operation/crud/external_model"
+require "trailblazer/operation/model/external"
 
 class ExternalModelTest < MiniTest::Spec
    Song = Struct.new(:title, :id) do
@@ -19,7 +19,7 @@ class ExternalModelTest < MiniTest::Spec
 
 
   class Bla < Trailblazer::Operation
-    include CRUD::ExternalModel
+    include Model::External
     model Song, :update
 
     def process(params)

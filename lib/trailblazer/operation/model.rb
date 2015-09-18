@@ -1,16 +1,16 @@
-require "trailblazer/operation/crud/dsl"
+require "trailblazer/operation/model/dsl"
 
 module Trailblazer
   class Operation
-    # The CRUD module will automatically create/find models for the configured +action+.
+    # The Model module will automatically create/find models for the configured +action+.
     # It adds a public  +Operation#model+ reader to access the model (after performing).
-    module CRUD
+    module Model
       module Included
         def included(base)
           base.extend DSL
         end
       end
-      # this makes ::included overrideable, e.g. to add more featues like CRUD::ActiveModel.
+      # this makes ::included overrideable, e.g. to add more featues like Model::ActiveModel.
       extend Included
 
 

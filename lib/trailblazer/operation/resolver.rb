@@ -1,4 +1,4 @@
-require "trailblazer/operation/crud/external_model"
+require "trailblazer/operation/model/external"
 require "trailblazer/operation/policy"
 
 class Trailblazer::Operation
@@ -7,7 +7,7 @@ class Trailblazer::Operation
     def self.included(includer)
       includer.class_eval do
         include Policy # ::build_policy
-        include CRUD::ExternalModel # ::build_operation_class
+        include Model::External # ::build_operation_class
 
         extend BuildOperation # ::build_operation
       end

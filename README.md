@@ -576,14 +576,14 @@ When inheriting, the block is `class_eval`ed in the inherited class' context and
 
 ### CRUD Semantics
 
-You can make Trailblazer find and create models for you using the `CRUD` module.
+You can make Trailblazer find and create models for you using the `Model` module.
 
 ```ruby
-require 'trailblazer/operation/crud'
+require 'trailblazer/operation/model'
 
 class Comment < ActiveRecord::Base
   class Create < Trailblazer::Operation
-    include CRUD
+    include Model
     model Comment, :create
 
     contract do
@@ -599,7 +599,7 @@ class Comment < ActiveRecord::Base
 end
 ```
 
-You have to tell `CRUD` the model class and what action to implement using `::model`.
+You have to tell `Model` the model class and what action to implement using `::model`.
 
 Note how you do not have to pass the `@model` to validate anymore. Also, the `@model` gets created automatically and is accessible using `Operation#model`.
 

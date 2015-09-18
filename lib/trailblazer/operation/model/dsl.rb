@@ -1,5 +1,5 @@
 class Trailblazer::Operation
-  module CRUD
+  module Model
     # Imports ::model and ::action into an operation.
     module DSL
       def self.extended(extender)

@@ -4,7 +4,7 @@ module RailsEndpoint
   # this tests "the rails way" where both JSON and HTML operation use the pre-parsed params hash.
   class UnconfiguredTest < ActionDispatch::IntegrationTest
     class Create < Trailblazer::Operation
-      include CRUD
+      include Model
       model Band
 
       def process(params)
@@ -41,7 +41,7 @@ module RailsEndpoint
 
   class ConfiguredTest < ActionDispatch::IntegrationTest
     class Create < Trailblazer::Operation
-      include CRUD
+      include Model
       model Band
 
       def process(params)
@@ -50,7 +50,7 @@ module RailsEndpoint
     end
 
     class JSONCreate < Trailblazer::Operation
-      include CRUD
+      include Model
       model Band
 
       def process(params)

@@ -1,7 +1,7 @@
-require "trailblazer/operation/crud"
+require "trailblazer/operation/model"
 
 class Trailblazer::Operation
-  module CRUD
+  module Model
     # Builds (finds or creates) the model _before_ the operation is instantiated.
     # Passes the model instance into the builder with the following signature.
     #
@@ -9,10 +9,10 @@ class Trailblazer::Operation
     #
     # The initializer will now expect you to pass the model in via options[:model]. This
     # happens automatically when coming from a builder.
-    module ExternalModel
+    module External
       def self.included(includer)
-        includer.extend CRUD::DSL
-        includer.extend CRUD::BuildModel
+        includer.extend Model::DSL
+        includer.extend Model::BuildModel
         includer.extend ClassMethods
       end
 

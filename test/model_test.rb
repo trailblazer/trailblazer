@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'trailblazer/operation'
 
-class CrudTest < MiniTest::Spec
+class ModelTest < MiniTest::Spec
   Song = Struct.new(:title, :id) do
     class << self
       attr_accessor :find_result # TODO: eventually, replace with AR test.
@@ -14,7 +14,7 @@ class CrudTest < MiniTest::Spec
   end
 
   class CreateOperation < Trailblazer::Operation
-    include CRUD
+    include Model
     model Song
     action :create
 
@@ -80,7 +80,7 @@ class CrudTest < MiniTest::Spec
 
 
   class DefaultCreateOperation < Trailblazer::Operation
-    include CRUD
+    include Model
     model Song
 
     def process(params)
@@ -117,7 +117,7 @@ class CrudTest < MiniTest::Spec
 
   # no call to ::model raises error.
   class NoModelOperation < Trailblazer::Operation
-    include CRUD
+    include Model
 
     def process(params)
       self
@@ -132,9 +132,9 @@ class CrudTest < MiniTest::Spec
   # contract infers model_name.
   # TODO: this a Rails/ActiveModel-specific test.
   class ContractKnowsModelNameOperation < Trailblazer::Operation
-    include CRUD
+    include Model
     model Song
-    include CRUD::ActiveModel
+    include Model::ActiveModel
 
     contract do
       include Reform::Form::ActiveModel # this usually happens in Reform::Form::Rails.
@@ -142,12 +142,12 @@ class CrudTest < MiniTest::Spec
     end
   end
 
-  it { ContractKnowsModelNameOperation.present(song: {title: "Direct Hit"}).contract.class.model_name.to_s.must_equal "CrudTest::Song" }
+  it { ContractKnowsModelNameOperation.present(song: {title: "Direct Hit"}).contract.class.model_name.to_s.must_equal "ModelTest::Song" }
 
 
   # allow passing validate(params, model, contract_class)
   class OperationWithPrivateContract < Trailblazer::Operation
-    include CRUD
+    include Model
     model Song
 
     class Contract < Reform::Form
