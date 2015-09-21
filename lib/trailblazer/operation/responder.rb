@@ -1,5 +1,4 @@
 module Trailblazer::Operation::Responder
-  # TODO: test me.
   def self.included(base)
     base.extend ClassMethods
   end
