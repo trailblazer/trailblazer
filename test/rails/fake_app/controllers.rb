@@ -48,7 +48,6 @@ end
 class BandsController < ApplicationController
   include Trailblazer::Operation::Controller
   respond_to :html, :json
-  operation document_formats: :json
 
   def index
     collection Band::Index

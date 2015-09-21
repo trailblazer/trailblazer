@@ -62,7 +62,6 @@ module RailsEndpoint
     class BandsController < ApplicationController
       include Trailblazer::Operation::Controller
       respond_to :html, :json
-      operation document_formats: :json
 
       def create
         run Create if request.format == :html

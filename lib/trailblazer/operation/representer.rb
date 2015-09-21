@@ -49,12 +49,23 @@ private
 
 
   module Deserializer
-  private
-    def validate_contract(params)
-      # use the inferred representer from the contract for deserialization in #validate.
-      contract.validate(params) do |document|
-        self.class.representer_class.new(contract).from_json(document)
+    module Hash
+      def validate_contract(params)
+        # use the inferred representer from the contract for deserialization in #validate.
+        contract.validate(params) do |document|
+          self.class.representer_class.new(contract).from_hash(document)
+        end
+      end
+    end
+
+    module JSON
+      def validate_contract(params)
+        # use the inferred representer from the contract for deserialization in #validate.
+        contract.validate(params) do |document|
+          self.class.representer_class.new(contract).from_json(document)
+        end
       end
     end
   end
+  include Deserializer::Hash # per default, we expect params[:comment] to be a hash.
 end

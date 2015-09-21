@@ -52,7 +52,7 @@ private
 
   # The block passed to #respond is always run, regardless of the validity result.
   def respond(operation_class, params=self.params, respond_options = {}, &block)
-    res, op = operation!(operation_class, params) { operation_class.run(params) }
+    res, op = operation!(operation_class, params, respond_options) { operation_class.run(params) }
 
     return respond_with op, respond_options if not block_given?
     respond_with op, respond_options, &Proc.new { |formats| block.call(op, formats) } if block_given?
@@ -62,26 +62,16 @@ private
   end
 
   # Normalizes parameters and invokes the operation (including its builders).
-  def operation!(operation_class, params, &block)
-    Trailblazer::Endpoint.new(self, operation_class, params, request, self.class._operation).(&block)
+  def operation!(operation_class, params, options={}, &block)
+    # Per default, only treat :html as non-document.
+    options[:is_document] ||= request.format == :html ? false : true
+
+    Trailblazer::Endpoint.new(self, operation_class, params, request, options).(&block)
   end
 
   def setup_operation_instance_variables!(operation)
     @operation = operation
     @form      = operation.contract
     @model     = operation.model
-  end
-
-  def self.included(includer)
-    includer.extend Uber::InheritableAttr
-    includer.inheritable_attr :_operation
-    includer._operation = {document_formats: {}}
-    includer.extend ClassMethods
-  end
-
-  module ClassMethods
-    def operation(options)
-      _operation[:document_formats][options[:document_formats]] = true
-    end
   end
 end

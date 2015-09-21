@@ -1,12 +1,12 @@
 module Trailblazer
   # To be used in Lotus, Roda, Rails, etc.
   class Endpoint
-    def initialize(controller, operation_class, params, request, config)
+    def initialize(controller, operation_class, params, request, options)
       @controller = controller
       @operation_class = operation_class
       @params  = params
       @request = request
-      @config  = config
+      @is_document  = options[:is_document]
     end
 
     def call
@@ -24,8 +24,7 @@ module Trailblazer
     attr_reader :params, :operation_class, :request, :controller
 
     def document_request?
-      # request.format == :html
-      @config[:document_formats][request.format.to_sym]
+      @is_document
     end
 
     def document_body!
