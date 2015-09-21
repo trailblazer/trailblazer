@@ -27,7 +27,6 @@ private
     yield op if block_given?
   end
 
-  # full-on Op[]
   # Note: this is not documented on purpose as this concept is experimental. I don't like it too much and prefer
   # returns in the valid block.
   class Else
@@ -51,11 +50,12 @@ private
   end
 
   # The block passed to #respond is always run, regardless of the validity result.
-  def respond(operation_class, params=self.params, respond_options = {}, &block)
-    res, op = operation!(operation_class, params, respond_options) { operation_class.run(params) }
+  def respond(operation_class, options={}, params=self.params, &block)
+    res, op   = operation!(operation_class, params, options) { operation_class.run(params) }
+    namespace = options.delete(:namespace) || []
 
-    return respond_with op, respond_options if not block_given?
-    respond_with op, respond_options, &Proc.new { |formats| block.call(op, formats) } if block_given?
+    return respond_with *namespace, op, options if not block_given?
+    respond_with *namespace, op, options, &Proc.new { |formats| block.call(op, formats) } if block_given?
   end
 
   def process_params!(params)

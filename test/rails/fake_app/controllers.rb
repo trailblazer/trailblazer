@@ -21,11 +21,11 @@ ERB
   end
 
   def other_create
-    respond Song::Create, params, { location: other_create_songs_path, action: :another_view }
+    respond Song::Create, { location: other_create_songs_path, action: :another_view }
   end
 
   def create_with_params
-    respond Song::Create, song: {title: "A Beautiful Indifference"}
+    respond Song::Create, {}, song: {title: "A Beautiful Indifference"}
   end
 
   def create_with_block

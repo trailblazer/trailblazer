@@ -83,3 +83,6 @@ module RailsEndpoint
     end
   end
 end
+
+# test :is_document
+# test :namespace

@@ -58,6 +58,9 @@ private
       end
     end
 
+    # This looks crazy, but all it does is using a Reform hook in #validate where we can use
+    # our own representer for deserialization. After the object graph is set up, Reform will
+    # run its validation without even knowing this came from JSON.
     module JSON
       def validate_contract(params)
         # use the inferred representer from the contract for deserialization in #validate.
@@ -67,5 +70,5 @@ private
       end
     end
   end
-  include Deserializer::Hash # per default, we expect params[:comment] to be a hash.
+  include Deserializer::JSON
 end

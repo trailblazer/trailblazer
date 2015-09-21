@@ -60,7 +60,6 @@ class Band < ActiveRecord::Base
     require "representable/json"
     class JSON < self
       include Representer
-      include Representer::Deserializer::JSON
 
       representer do
         collection :songs, inherit: true, render_empty: false # tested in ControllerPresentTest.
