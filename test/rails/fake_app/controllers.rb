@@ -21,7 +21,7 @@ ERB
   end
 
   def other_create
-    respond Song::Create, { location: other_create_songs_path, action: :another_view }
+    respond Song::Create, location: other_create_songs_path, action: :another_view
   end
 
   def create_with_params
@@ -32,6 +32,10 @@ ERB
     respond Song::Create do |op, formats|
       return render text: "block run, valid: #{op.valid?}"
     end
+  end
+
+  def create_with_namespace
+    respond Song::Create, namespace: [:api]
   end
 
   def destroy

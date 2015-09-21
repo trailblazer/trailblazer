@@ -33,6 +33,7 @@ app.routes.draw do
       post :other_create
       post :create_with_params
       post :create_with_block
+      post :create_with_namespace
     end
   end
 
