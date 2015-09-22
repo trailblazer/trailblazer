@@ -47,7 +47,7 @@ class DslRepresenterTest < MiniTest::Spec
     end
 
     class OpWithExternalRepresenter < Trailblazer::Operation
-      include Representer, Responder
+      include Representer
       include SongProcess
       representer SongRepresenter
     end
@@ -62,13 +62,13 @@ class DslRepresenterTest < MiniTest::Spec
     end
 
     class OpNotExtendingRepresenter < Trailblazer::Operation
-      include Representer, Responder
+      include Representer
       include SongProcess
       representer HitRepresenter
     end
 
     class OpExtendingRepresenter < Trailblazer::Operation
-      include Representer, Responder
+      include Representer
       include SongProcess
       representer HitRepresenter do
         property :genre
@@ -91,6 +91,30 @@ class DslRepresenterTest < MiniTest::Spec
     end
   end
 
+  describe "Op.representer (inferring)" do
+    class OpWithContract < Trailblazer::Operation
+      include Representer
+      include SongProcess
+
+      contract do
+        property :songTitle
+      end
+    end
+
+    class OpWithContract2 < Trailblazer::Operation
+      include Representer
+      include SongProcess
+
+      contract OpWithContract.contract
+      representer do
+        property :genre
+      end
+    end
+
+    it { OpWithContract.("songTitle"=>"Monsterparty", "genre"=>"Punk").to_json.must_equal %{{"songTitle":"Monsterparty"}} }
+    it { OpWithContract2.("songTitle"=>"Monsterparty", "genre"=>"Punk").to_json.must_equal %{{"songTitle":"Monsterparty","genre":"Punk"}} }
+  end
+
   describe "Op.representer_class" do
     class PlayRepresenter < Representable::Decorator
       include Representable::JSON
@@ -98,13 +122,13 @@ class DslRepresenterTest < MiniTest::Spec
     end
 
     class OpSettingRepresenter < Trailblazer::Operation
-      include Representer, Responder
+      include Representer
       include SongProcess
       self.representer_class= PlayRepresenter
     end
 
     class OpExtendRepresenter < Trailblazer::Operation
-      include Representer, Responder
+      include Representer
       include SongProcess
       self.representer_class= PlayRepresenter
       representer do

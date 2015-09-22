@@ -7,7 +7,6 @@
 # TODO: so far, we only support JSON, but it's two lines to change to support any kind of format.
 module Trailblazer::Operation::Representer
   def self.included(base)
-    base.extend Uber::InheritableAttr
     base.inheritable_attr :_representer_class
     base.extend ClassMethods
   end
