@@ -90,4 +90,30 @@ class DslRepresenterTest < MiniTest::Spec
       HitRepresenter.new(OpenStruct.new(title: "Monsterparty", genre: "Punk")).to_json.must_equal %{{"title":"Monsterparty"}}
     end
   end
+
+  describe "Op.representer_class" do
+    class PlayRepresenter < Representable::Decorator
+      include Representable::JSON
+      property :title
+    end
+
+    class OpSettingRepresenter < Trailblazer::Operation
+      include Representer, Responder
+      include SongProcess
+      self.representer_class= PlayRepresenter
+    end
+
+    class OpExtendRepresenter < Trailblazer::Operation
+      include Representer, Responder
+      include SongProcess
+      self.representer_class= PlayRepresenter
+      representer do
+        property :genre
+      end
+    end
+
+    # both operations produce the same as the representer is shared, not copied.
+    it { OpSettingRepresenter.("title"=>"Monsterparty", "genre"=>"Punk").to_json.must_equal %{{"title":"Monsterparty","genre":"Punk"}} }
+    it { OpExtendRepresenter.("title"=>"Monsterparty", "genre"=>"Punk").to_json.must_equal %{{"title":"Monsterparty","genre":"Punk"}} }
+  end
 end
