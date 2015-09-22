@@ -9,7 +9,6 @@ class RepresenterTest < MiniTest::Spec
   class Create < Trailblazer::Operation
     require "trailblazer/operation/representer"
     include Representer
-    include Representer::Deserializer::JSON
 
     contract do
       property :title
@@ -89,7 +88,6 @@ class RepresenterTest < MiniTest::Spec
   require "roar/decorator"
   class JsonApiCreate < Trailblazer::Operation
     include Representer
-    include Representer::Deserializer::JSON
 
     contract do # we still need contract as the representer writes to the contract twin.
       property :title
