@@ -233,54 +233,6 @@ class OperationTest < MiniTest::Spec
 end
 
 
-# ::contract builds Reform::Form class
-class OperationInheritanceTest < MiniTest::Spec
-  class Operation < Trailblazer::Operation
-    contract do
-      property :title
-      property :band
-
-      # TODO/DISCUSS: this is needed in order to "handle" the anon forms. but in Trb, that
-      # doesn't really matter as AM is automatically included?
-      def self.name
-        "Song"
-      end
-    end
-
-    class JSON < self
-      # inherit Contract
-      contract do
-        property :genre, validates: {presence: true}
-        property :band, virtual: true
-      end
-    end
-  end
-
-  # inherits subclassed Contract.
-  it { Operation.contract_class.wont_equal Operation::JSON.contract_class }
-
-  it do
-    form = Operation.contract_class.new(OpenStruct.new)
-    form.validate({})#.must_equal true
-    form.errors.to_s.must_equal "{}"
-
-    form = Operation::JSON.contract_class.new(OpenStruct.new)
-    form.validate({})#.must_equal true
-    form.errors.to_s.must_equal "{:genre=>[\"can't be blank\"]}"
-  end
-
-  # allows overriding options
-  it do
-    form = Operation::JSON.contract_class.new(song = OpenStruct.new)
-    form.validate({genre: "Punkrock", band: "Osker"}).must_equal true
-    form.sync
-
-    song.genre.must_equal "Punkrock"
-    song.band.must_equal nil
-  end
-end
-
-
 class OperationErrorsTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
     contract do

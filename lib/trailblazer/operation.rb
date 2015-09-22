@@ -49,8 +49,12 @@ module Trailblazer
         build_operation(params).present
       end
 
-      def contract(&block)
-        contract_class.class_eval(&block)
+      # This is a DSL method. Use ::contract_class and ::contract_class= for the explicit version.
+      def contract(constant=nil, &block)
+        return contract_class unless constant or block_given?
+
+        self.contract_class=(Class.new(constant)) if constant
+        contract_class.class_eval(&block) if block_given?
       end
     end
 
