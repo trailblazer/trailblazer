@@ -35,7 +35,7 @@ ERB
   end
 
   def create_with_namespace
-    respond Song::Create, namespace: [:api]
+    respond Song::Create::Json, namespace: [:api]
   end
 
   def destroy

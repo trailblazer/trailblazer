@@ -63,7 +63,6 @@ private
     # run its validation without even knowing this came from JSON.
     module JSON
       def validate_contract(params)
-        # use the inferred representer from the contract for deserialization in #validate.
         contract.validate(params) do |document|
           self.class.representer_class.new(contract).from_json(document)
         end

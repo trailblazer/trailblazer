@@ -17,6 +17,13 @@ class Song < ActiveRecord::Base
         contract.save
       end
     end
+
+
+    class Json < Create
+      def process(params)
+        @model = Song.create(JSON.parse(params[:song]))
+      end
+    end
   end
 
 

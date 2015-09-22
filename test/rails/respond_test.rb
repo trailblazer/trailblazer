@@ -47,14 +47,6 @@ class ResponderRespondTest < ActionController::TestCase
     assert_equal "block run, valid: false", response.body
   end
 
-  # TODO: use rack-test for all those tests and NEVER EVER AGAIN USE ActionController::TestCase.
-  test "respond with :namespace" do
-    post :create_with_namespace, {song: {title: ""}}, format: :json# "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT"=>"application/json"
-    skip
-    puts response.inspect
-    response.headers["Location"].must_equal "http://example.org/api/things/1"
-  end
-
   # JSON
   test "Delete [json/valid]" do
     song = Song::Create[song: {title: "You're Going Down"}].model

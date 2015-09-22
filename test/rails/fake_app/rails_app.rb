@@ -59,6 +59,10 @@ app.routes.draw do
     end
   end
 
+  namespace :api do
+    resources :songs
+  end
+
   resources :tenants, only: [:show]
 end
 
