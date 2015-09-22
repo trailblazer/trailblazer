@@ -50,6 +50,10 @@ module Trailblazer
       end
 
       # This is a DSL method. Use ::contract_class and ::contract_class= for the explicit version.
+      #   Op.contract #=> returns contract class
+      #   Op.contract do .. end # defines contract
+      #   Op.contract CommentForm # copies (and subclasses) external contract.
+      #   Op.contract CommentForm do .. end # copies and extends contract.
       def contract(constant=nil, &block)
         return contract_class unless constant or block_given?
 
