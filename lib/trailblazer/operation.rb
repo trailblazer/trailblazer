@@ -55,10 +55,18 @@ module Trailblazer
       #   Op.contract CommentForm # copies (and subclasses) external contract.
       #   Op.contract CommentForm do .. end # copies and extends contract.
       def contract(constant=nil, &block)
-        return contract_class unless constant or block_given?
+        compose!(:contract, constant, &block)
+      end
 
-        self.contract_class=(Class.new(constant)) if constant
-        contract_class.class_eval(&block) if block_given?
+    private
+      def compose!(name, constant=nil, &block)
+        reader = "#{name}_class" # ::contract_class, ::representer_class, etc.
+        writer ="#{reader}="
+
+        return send(reader) unless constant or block_given?
+
+        send(writer, Class.new(constant)) if constant
+        send(reader).class_eval(&block) if block_given?
       end
     end
 

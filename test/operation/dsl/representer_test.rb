@@ -1,7 +1,6 @@
 require "test_helper"
 require "representable/json"
 require "trailblazer/operation/representer"
-require "trailblazer/operation/responder"
 
 class DslRepresenterTest < MiniTest::Spec
   module SongProcess
@@ -112,6 +111,7 @@ class DslRepresenterTest < MiniTest::Spec
     end
 
     it { OpWithContract.("songTitle"=>"Monsterparty", "genre"=>"Punk").to_json.must_equal %{{"songTitle":"Monsterparty"}} }
+    # this representer block extends the inferred from contract.
     it { OpWithContract2.("songTitle"=>"Monsterparty", "genre"=>"Punk").to_json.must_equal %{{"songTitle":"Monsterparty","genre":"Punk"}} }
   end
 
