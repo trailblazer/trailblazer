@@ -76,4 +76,33 @@ class DslCallbackTest < MiniTest::Spec
 
     it { OpWithExternalCallback.("title"=>"Thunder Rising")._invocations.must_equal([:after_save!]) }
   end
+
+  describe "Op.callback :after_save, AfterSaveCallback do .. end" do
+    class DefaultCallback < Disposable::Callback::Group
+      on_change :default!
+    end
+
+    class OpUsingCallback < Trailblazer::Operation
+      include Dispatch
+      include SongProcess
+      callback :default, DefaultCallback
+      def default!(*);       _invocations << :default!; end
+    end
+
+    class OpExtendingCallback < Trailblazer::Operation
+      include Dispatch
+      include SongProcess
+      callback :default, DefaultCallback do
+        on_change :after_save!
+      end
+
+      def default!(*);       _invocations << :default!; end
+      def after_save!(*);    _invocations << :after_save!; end
+    end
+
+    # this operation copies DefaultCallback and shouldn't run #after_save!.
+    it { OpUsingCallback.(title: "Thunder Rising")._invocations.must_equal([:default!]) }
+    # this operation copies DefaultCallback, extends it and runs #after_save!.
+    it { OpExtendingCallback.(title: "Thunder Rising")._invocations.must_equal([:default!, :after_save!]) }
+  end
 end

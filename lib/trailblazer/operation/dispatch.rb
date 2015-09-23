@@ -22,8 +22,7 @@ module Trailblazer::Operation::Dispatch
     def callback(name=:default, constant=nil, &block)
       return callbacks[name] unless constant or block_given?
 
-
-      callbacks[name] ||= constant || Class.new(Disposable::Callback::Group).extend(Representable::Cloneable)
+      callbacks[name] ||= Class.new(constant || Disposable::Callback::Group).extend(Representable::Cloneable) # FIXME: why Representable?
       callbacks[name].class_eval(&block) if block_given?
     end
   end
