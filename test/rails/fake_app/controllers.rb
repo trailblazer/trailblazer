@@ -62,7 +62,8 @@ class BandsController < ApplicationController
     @klass    = op.model.class
     @locality = params[:band][:locality] unless params[:format] == "json"
 
-    render json: op.to_json if params[:format] == "json"
+    return render json: op.to_json if params[:format] == "json"
+    render text: "bands/show: #{[@klass, @model.class, @form.is_a?(Reform::Form), @operation.class, @locality, @form.locality.inspect].join(',')}"
   end
 
   def new

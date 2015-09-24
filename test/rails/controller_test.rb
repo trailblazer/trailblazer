@@ -78,7 +78,7 @@ class ControllerPresentTest < ActionController::TestCase
 
     get :show, id: band.id
 
-    assert_equal "bands/show.html: Band,Band,true,Band::Update,Essen\n", response.body
+    assert_equal "bands/show: Band,Band,true,Band::Update,Essen,nil", response.body
   end
 
   # TODO: this implicitely tests builds. maybe have separate test for that?
@@ -115,7 +115,7 @@ class ControllerFormTest < ActionController::TestCase
   test "#form" do
     get :new
     assert_select "form input#band_name"
-    assert response.body =~ /<a>9<\/a>/ # prepopulate!
+    assert response.body =~ /<a>Sydney<\/a>/ # prepopulate!
     assert_select "b", "Band,true,Band::Create,Band::Create,Essen"
   end
 
