@@ -68,22 +68,14 @@ class BandsController < ApplicationController
   def new
     form Band::Create
 
+    @locality = params[:band][:locality]
+
     render inline: <<-ERB
 <%= form_for @form do |f| %>
   <%= f.text_field :name %>
 <% end %>
 
-<b><%= [@klass, @model.class, @form.is_a?(Reform::Form), @operation.class].join(",") %></b>
-ERB
-  end
-
-  def new_with_block
-    op = form Band::Create
-    @klass = op.model.class
-    @locality = params[:band][:locality]
-
-    render inline: <<-ERB
-<b><%= [@klass, @model.class, @form.is_a?(Reform::Form), @operation.class, @locality].join(",") %></b>
+<b><%= [@model.class, @form.is_a?(Reform::Form), @operation.class, @locality].join(",") %></b>
 ERB
   end
 

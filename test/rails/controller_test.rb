@@ -116,19 +116,13 @@ class ControllerFormTest < ActionController::TestCase
     get :new
 
     assert_select "form input#band_name"
-    assert_select "b", ",Band,true,Band::Create"
-  end
-
-  test "#form with block" do
-    get :new_with_block
-
-    assert_select "b", "Band,Band,true,Band::Create,Essen"
+    assert_select "b", "Band,true,Band::Create,Essen"
   end
 
   test "#form with builder" do
     get :new, admin: true
 
-    assert_select "b", ",Band,true,Band::Create::Admin"
+    assert_select "b", "Band,true,Band::Create::Admin,Essen"
   end
 end
 
