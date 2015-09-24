@@ -58,12 +58,11 @@ class BandsController < ApplicationController
   end
 
   def show
-    present Band::Update do |op|
-      @klass    = op.model.class
-      @locality = params[:band][:locality] unless params[:format] == "json"
+    op = present Band::Update
+    @klass    = op.model.class
+    @locality = params[:band][:locality] unless params[:format] == "json"
 
-      render json: op.to_json if params[:format] == "json"
-    end # render :show
+    render json: op.to_json if params[:format] == "json"
   end
 
   def new
@@ -79,10 +78,9 @@ ERB
   end
 
   def new_with_block
-    form Band::Create do |op|
-      @klass = op.model.class
-      @locality = params[:band][:locality]
-    end
+    op = form Band::Create
+    @klass = op.model.class
+    @locality = params[:band][:locality]
 
     render inline: <<-ERB
 <b><%= [@klass, @model.class, @form.is_a?(Reform::Form), @operation.class, @locality].join(",") %></b>

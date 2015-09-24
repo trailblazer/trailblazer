@@ -2,45 +2,25 @@ require "trailblazer/endpoint"
 
 module Trailblazer::Operation::Controller
 private
-  def form(operation_class, params=self.params) # consider private.
-    process_params!(params)
-
-    @operation = operation_class.present(params)
-    @form      = @operation.contract
-    @model     = @operation.model
-
-    yield @operation if block_given?
+  def form(*args)
+    present(*args).tap do |op|
+      op.contract.prepopulate! # equals to @form.prepopulate!
+    end
   end
 
-  # Doesn't run #process.
+  # Provides the operation instance, model and contract without running #process.
+  # Returns the operation.
   def present(operation_class, params=self.params)
     res, op = operation!(operation_class, params) { [true, operation_class.present(params)] }
-
-    yield op if block_given?
+    op
   end
 
-  def collection(operation_class, params=self.params)
-    # TODO: merge with #present.
-    res, op = operation!(operation_class, params) { [true, operation_class.present(params)] }
-    @collection = @model
-
-    yield op if block_given?
-  end
-
-  # Note: this is not documented on purpose as this concept is experimental. I don't like it too much and prefer
-  # returns in the valid block.
-  class Else
-    def initialize(op, run)
-      @op  = op
-      @run = run
-    end
-
-    def else
-      yield @op if @run
+  def collection(*args)
+    present(*args).tap do |op|
+      @collection = op.model
     end
   end
 
-  # Endpoint::Invocation
   def run(operation_class, params=self.params, &block)
     res, op = operation!(operation_class, params) { operation_class.run(params) }
 
@@ -58,6 +38,8 @@ private
     respond_with *namespace, op, options, &Proc.new { |formats| block.call(op, formats) } if block_given?
   end
 
+private
+
   def process_params!(params)
   end
 
@@ -66,12 +48,30 @@ private
     # Per default, only treat :html as non-document.
     options[:is_document] ||= request.format == :html ? false : true
 
-    Trailblazer::Endpoint.new(self, operation_class, params, request, options).(&block)
+    process_params!(params)
+    res, op = Trailblazer::Endpoint.new(self, operation_class, params, request, options).(&block)
+    setup_operation_instance_variables!(op)
+
+    [res, op]
   end
 
   def setup_operation_instance_variables!(operation)
     @operation = operation
     @form      = operation.contract
     @model     = operation.model
+  end
+
+
+  # Note: this is not documented on purpose as this concept is experimental. I don't like it too much and prefer
+  # returns in the valid block.
+  class Else
+    def initialize(op, run)
+      @op  = op
+      @run = run
+    end
+
+    def else
+      yield @op if @run
+    end
   end
 end

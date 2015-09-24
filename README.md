@@ -305,26 +305,6 @@ class CommentsController < ApplicationController
   include Trailblazer::Operation::Controller
 ```
 
-### Rendering the form object
-
-Operations can populate and present their form object so it can be used with `simple_form` and other form helpers.
-
-```ruby
-
-def new
-  form Comment::Create
-end
-```
-
-This will run the operation but _not_ its `validate` code. It then sets the `@form` instance variable in the controller so it can be rendered.
-
-```haml
-= form_for @form do |f|
-  = f.input f.body
-```
-
-`#form` is meant for HTML actions like `#new` and `#edit`, only.
-
 ### Running an operation
 
 If you do not intend to maintain different request formats, the easiest is to use `#run` to process incoming data using an operation.

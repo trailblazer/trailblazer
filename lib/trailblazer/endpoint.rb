@@ -10,14 +10,8 @@ module Trailblazer
     end
 
     def call
-      @controller.send(:process_params!, params) # FIXME.
-
       document_body! if document_request?
-
-      res, operation = yield # Create.run(params)
-      @controller.send(:setup_operation_instance_variables!, operation)
-
-      [res, operation] # DISCUSS: do we need result here? or can we just go pick op.valid?
+      yield # Create.run(params)
     end
 
   private
