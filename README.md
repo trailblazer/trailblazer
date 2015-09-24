@@ -317,107 +317,11 @@ end
 
 This will simply run `Comment::Create[params]`.
 
-You can pass your own params, too.
-
-```ruby
-def create
-  run Comment::Create, params.merge({current_user: current_user})
-end
-```
-
-An additional block will be executed _only if_ the operation result is valid.
-
-```ruby
-def create
-  run Comment::Create do |op|
-    return redirect_to(comments_path, notice: op.message)
-  end
-end
-```
-
-Note that the operation instance is yielded to the block.
-
-The case of an invalid response can be handled after the block.
-
-```ruby
-def create
-  run Comment::Create do |op|
-    # valid code..
-    return
-  end
-
-  render action: :new
-end
-```
-
-Don't forget to `return` from the valid block, otherwise both the valid block _and_ the invalid calls after it will be invoked.
-
-### Responding
-
-Alternatively, you can use Rails' excellent `#respond_with` to let a responder take care of what to render. Operations can be passed into `respond_with`. This happens automatically in `#respond`, the third way to let Trailblazer invoke an operation.
-
-```ruby
-def create
-  respond Comment::Create
-end
-```
-
-This will simply run the operation and chuck the instance into the responder letting the latter sort out what to render or where to redirect. The operation delegates respective calls to its internal `model`.
-
-`#respond` will accept options to be passed on to `respond_with`, too
-
-```ruby
-respond Comment::Create, params, location: brandnew_comments_path
-```
-
-You can also handle different formats in that block. It is totally fine to do that in the controller as this is _endpoint_ logic that is HTTP-specific and not business.
-
-```ruby
-def create
-  respond Comment::Create do |op, formats|
-    formats.html { redirect_to(op.model, :notice => op.valid? ? "All good!" : "Fail!") }
-    formats.json { render nothing: true }
-  end
-end
-```
-
-The block passed to `#respond` is _always_ executed, regardless of the operation's validity result. Goal is to let the responder handle the validity of the operation.
-
-The `formats` object is simply passed on to `#respond_with`.
-
-### Presenting
-
-For `#show` actions that simply present the model using a HTML page or a JSON or XML document the `#present` method comes in handy.
-
-```ruby
-def show
-  present Comment::Update
-end
-```
-
-Again, this will only run the operation's setup and provide the model in `@model`. You can then use a cell or controller view for HTML to present the model.
-
-For document-based APIs and request types that are not HTTP the operation will be advised to render the JSON or XML document using the operation's representer.
-
-Note that `#present` will leave rendering up to you - `respond_to` is _not_ called.
 
 
-In all three cases the following instance variables are assigned: `@operation`, `@form`, `@model`.
-
-Named instance variables can be included, too. This is documented [here](#named-controller-instance-variables).
 
 
-### Different Request Formats
-
-In case you have document-API operations that use representers to deserialize the incoming JSON or XML: You can configure the controller to pass the original request body into the operation via `params["comment"]` - instead of the pre-parsed hash from Rails.
-
-You need to configure this in the controller.
-
-```ruby
-class CommentsController < ApplicationController
-  operation document_formats: :json
-```
-
+----
 
 It's up to the operation's builder to decide which class to instantiate.
 
