@@ -49,7 +49,7 @@ private
     options[:is_document] ||= request.format == :html ? false : true
 
     process_params!(params)
-    res, op = Trailblazer::Endpoint.new(self, operation_class, params, request, options).(&block)
+    res, op = Trailblazer::Endpoint.new(operation_class, params, request, options).(&block)
     setup_operation_instance_variables!(op)
 
     [res, op]

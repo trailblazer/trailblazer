@@ -1,8 +1,7 @@
 module Trailblazer
   # To be used in Lotus, Roda, Rails, etc.
   class Endpoint
-    def initialize(controller, operation_class, params, request, options)
-      @controller = controller
+    def initialize(operation_class, params, request, options)
       @operation_class = operation_class
       @params  = params
       @request = request
@@ -15,7 +14,7 @@ module Trailblazer
     end
 
   private
-    attr_reader :params, :operation_class, :request, :controller
+    attr_reader :params, :operation_class, :request
 
     def document_request?
       @is_document
