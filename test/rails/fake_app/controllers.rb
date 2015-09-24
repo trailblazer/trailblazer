@@ -66,16 +66,17 @@ class BandsController < ApplicationController
   end
 
   def new
-    form Band::Create
+    @op = form Band::Create
 
     @locality = params[:band][:locality]
 
     render inline: <<-ERB
 <%= form_for @form do |f| %>
   <%= f.text_field :name %>
+  <a><%= @form.locality %></a>
 <% end %>
 
-<b><%= [@model.class, @form.is_a?(Reform::Form), @operation.class, @locality].join(",") %></b>
+<b><%= [@model.class, @form.is_a?(Reform::Form), @operation.class, @op.class, @locality].join(",") %></b>
 ERB
   end
 

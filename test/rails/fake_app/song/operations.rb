@@ -47,7 +47,7 @@ class Band < ActiveRecord::Base
       model Band
 
       property :name, validates: {presence: true}
-      property :locality
+      property :locality, prepopulator: ->(*) { self.locality = 9 }
 
       # class: Song #=> always create new song
       # instance: { Song.find(params[:id]) or Song.new } # same as find_or_create ?

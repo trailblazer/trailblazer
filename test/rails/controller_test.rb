@@ -114,15 +114,15 @@ class ControllerFormTest < ActionController::TestCase
 
   test "#form" do
     get :new
-
     assert_select "form input#band_name"
-    assert_select "b", "Band,true,Band::Create,Essen"
+    assert response.body =~ /<a>9<\/a>/ # prepopulate!
+    assert_select "b", "Band,true,Band::Create,Band::Create,Essen"
   end
 
   test "#form with builder" do
     get :new, admin: true
 
-    assert_select "b", "Band,true,Band::Create::Admin,Essen"
+    assert_select "b", "Band,true,Band::Create::Admin,Band::Create::Admin,Essen"
   end
 end
 
