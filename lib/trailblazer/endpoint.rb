@@ -1,4 +1,6 @@
 module Trailblazer
+  # Encapsulates HTTP-specific logic needed before running an operation.
+  # Right now, all this does is #document_body!
   # To be used in Lotus, Roda, Rails, etc.
   class Endpoint
     def initialize(operation_class, params, request, options)
