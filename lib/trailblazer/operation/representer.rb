@@ -13,7 +13,10 @@ module Trailblazer::Operation::Representer
 
   module ClassMethods
     def representer(constant=nil, &block)
-      compose!(:representer, constant, &block) # Operation::compose!.
+      return representer_class unless constant or block_given?
+
+      self.representer_class= Class.new(constant) if constant
+      representer_class.class_eval(&block) if block_given?
     end
 
     def representer_class
