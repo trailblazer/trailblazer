@@ -118,19 +118,29 @@ class OperationRunTest < MiniTest::Spec
 
   # # Operation#contract returns @contract
   it { Operation.("yes, true").contract.class.to_s.must_equal "OperationRunTest::Operation::Contract" }
+
+
+
+
+  describe "::present" do
+    class NoContractOp < Trailblazer::Operation
+      self.contract_class = nil
+
+      def model!(*)
+        Object
+      end
+    end
+
+    # the operation and model are available, but no contract.
+    it { NoContractOp.present({}).model.must_equal Object }
+    # no contract is built.
+    it { assert_raises(NoMethodError) { NoContractOp.present({}).contract } }
+    it { assert_raises(NoMethodError) { NoContractOp.run({}) } }
+  end
 end
 
 
 class OperationTest < MiniTest::Spec
-  class Operation < Trailblazer::Operation
-    def process(params)
-      validate(Object, params)
-    end
-  end
-
-  # contract is retrieved from ::contract_class.
-  it { assert_raises(NoMethodError) { Operation.run({}) } } # TODO: if you call #validate without defining a contract, the error is quite cryptic.
-
   # test #invalid!
   class OperationWithoutValidateCall < Trailblazer::Operation
     def process(params)
@@ -198,17 +208,6 @@ class OperationTest < MiniTest::Spec
   it { OperationWithValidateAndIf.(true).secret_contract.must_equal OperationWithValidateAndIf::Contract }
 
 
-
-
-  # unlimited arguments for ::run and friends.
-  # class OperationReceivingLottaArguments < Trailblazer::Operation
-  #   def process(model, params)
-  #     @model = [model, params]
-  #   end
-  #   include Inspect
-  # end
-
-  # it { OperationReceivingLottaArguments.run(Object, {}).to_s.must_equal %{[true, <OperationReceivingLottaArguments @model=[Object, {}]>]} }
 
   # ::present only runs #setup! which runs #model!.
   class ContractOnlyOperation < Trailblazer::Operation

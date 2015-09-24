@@ -46,7 +46,7 @@ module Trailblazer
 
       # Runs #setup! and returns the form object.
       def present(params)
-        build_operation(params).present
+        build_operation(params)
       end
 
       # This is a DSL method. Use ::contract_class and ::contract_class= for the explicit version.
@@ -76,11 +76,6 @@ module Trailblazer
       process(@params)
 
       [valid?, self]
-    end
-
-    def present
-      contract!
-      self
     end
 
     attr_reader :model
