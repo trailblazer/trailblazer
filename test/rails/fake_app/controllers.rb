@@ -63,7 +63,7 @@ class BandsController < ApplicationController
     @locality = params[:band][:locality] unless params[:format] == "json"
 
     return render json: op.to_json if params[:format] == "json"
-    render text: "bands/show: #{[@klass, @model.class, @form.is_a?(Reform::Form), @operation.class, @locality, @form.locality.inspect].join(',')}"
+    render text: "bands/show: #{[@klass, @model.class, @operation.class, @locality, @form.inspect].join(',')}"
   end
 
   def new
@@ -122,7 +122,7 @@ class ActiveRecordBandsController < ApplicationController
   def show
     present Band::Update
 
-    render text: "active_record_bands/show.html: #{@model.class}, #{@band.class}, #{@form.is_a?(Reform::Form)}, #{@operation.class}"
+    render text: "active_record_bands/show.html: #{@model.class}, #{@band.class}, #{@form.inspect}, #{@operation.class}"
   end
 end
 

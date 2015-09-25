@@ -44,7 +44,7 @@ module Trailblazer
         call(*args)
       end
 
-      # Runs #setup! and returns the form object.
+      # Runs #setup! but doesn't process the operation.
       def present(params)
         build_operation(params)
       end

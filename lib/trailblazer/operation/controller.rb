@@ -3,7 +3,7 @@ require "trailblazer/endpoint"
 module Trailblazer::Operation::Controller
 private
   def form(*args)
-    present(*args).tap do |op|
+    operation!(*args).tap do |op|
       op.contract.prepopulate! # equals to @form.prepopulate!
     end
   end
@@ -11,18 +11,17 @@ private
   # Provides the operation instance, model and contract without running #process.
   # Returns the operation.
   def present(operation_class, params=self.params)
-    res, op = operation!(operation_class, params) { [true, operation_class.present(params)] }
-    op
+    operation!(operation_class, params, skip_form: true)
   end
 
   def collection(*args)
-    present(*args).tap do |op|
+    operation!(*args).tap do |op|
       @collection = op.model
     end
   end
 
   def run(operation_class, params=self.params, &block)
-    res, op = operation!(operation_class, params) { operation_class.run(params) }
+    res, op = operation_for!(operation_class, params) { operation_class.run(params) }
 
     yield op if res and block_given?
 
@@ -31,7 +30,7 @@ private
 
   # The block passed to #respond is always run, regardless of the validity result.
   def respond(operation_class, options={}, params=self.params, &block)
-    res, op   = operation!(operation_class, params, options) { operation_class.run(params) }
+    res, op   = operation_for!(operation_class, params, options) { operation_class.run(params) }
     namespace = options.delete(:namespace) || []
 
     return respond_with *namespace, op, options if not block_given?
@@ -39,26 +38,30 @@ private
   end
 
 private
+  def operation!(operation_class, params=self.params, options={}) # or #model or #setup.
+    res, op = operation_for!(operation_class, params, options) { [true, operation_class.present(params)] }
+    op
+  end
 
   def process_params!(params)
   end
 
   # Normalizes parameters and invokes the operation (including its builders).
-  def operation!(operation_class, params, options={}, &block)
+  def operation_for!(operation_class, params, options={}, &block)
     # Per default, only treat :html as non-document.
     options[:is_document] ||= request.format == :html ? false : true
 
     process_params!(params)
     res, op = Trailblazer::Endpoint.new(operation_class, params, request, options).(&block)
-    setup_operation_instance_variables!(op)
+    setup_operation_instance_variables!(op, options)
 
     [res, op]
   end
 
-  def setup_operation_instance_variables!(operation)
+  def setup_operation_instance_variables!(operation, options)
     @operation = operation
-    @form      = operation.contract
     @model     = operation.model
+    @form      = operation.contract unless options[:skip_form]
   end
 
 
