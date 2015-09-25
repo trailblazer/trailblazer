@@ -1,6 +1,5 @@
 Trailblazer::Operation.class_eval do
   autoload :Controller, "trailblazer/operation/controller"
-  autoload :Responder,  "trailblazer/operation/responder"
   autoload :Model,      "trailblazer/operation/model"
   autoload :Collection, "trailblazer/operation/collection"
   autoload :Dispatch,   "trailblazer/operation/dispatch"
