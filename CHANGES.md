@@ -1,11 +1,11 @@
 # 1.0.0
 
+* All Rails-relevant files are now in the `trailblazer-rails` gem. You have to include it should you be in a Rails environment.
 * `Operation[{..}]` is deprecated in favor of `Operation.({..})`.
-setup in initialize: when Op.run() with Worker, the policy will be run "delayed" and not with the actual permission set. this will result in many crashing sidekiq workers.
 * `Operation::CRUD` is now `Operation::Model`.
 * `Controller#form` now invokes `#prepopulate!` before rendering the view.
 * `Controller#present` does not instantiate and assign `@form` anymore.
-* All Rails-relevant files are now in the trailblazer-rails gem.
+* The internal `Operation` API has changed from `#initialize()` and `#run(params)` to `#initialize(params)` and `#run`.
 
 # 0.3.4
 
