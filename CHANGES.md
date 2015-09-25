@@ -5,6 +5,7 @@ setup in initialize: when Op.run() with Worker, the policy will be run "delayed"
 * `Operation::CRUD` is now `Operation::Model`.
 * `Controller#form` now invokes `#prepopulate!` before rendering the view.
 * `Controller#present` does not instantiate and assign `@form` anymore.
+* All Rails-relevant files are now in the trailblazer-rails gem.
 
 # 0.3.4
 

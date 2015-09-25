@@ -26,11 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "minitest"
-  spec.add_development_dependency "sidekiq", ">= 3.1.0"
-  # spec.add_development_dependency "actionpack", '>= 3.0.0' # Rails is optional.
-  # spec.add_development_dependency "rails"
   spec.add_development_dependency "sqlite3"
-  # spec.add_development_dependency "responders"
   spec.add_development_dependency "database_cleaner"
 
   spec.add_development_dependency "roar"
