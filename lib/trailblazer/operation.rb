@@ -1,18 +1,13 @@
 require "reform"
+require "trailblazer/operation/builder"
 
 module Trailblazer
   class Operation
-    require "trailblazer/operation/builder"
     extend Builder # imports ::builder_class and ::build_operation.
+
     extend Uber::InheritableAttr
     inheritable_attr :contract_class
     self.contract_class = Reform::Form.clone
-    self.contract_class.class_eval do
-      def self.name # FIXME: don't use ActiveModel::Validations in Reform, it sucks.
-        # for whatever reason, validations climb up the inheritance tree and require _every_ class to have a name (4.1).
-        "Reform::Form"
-      end
-    end
 
     class << self
       def run(params, &block) # Endpoint behaviour
