@@ -3,7 +3,8 @@
 * `Operation[{..}]` is deprecated in favor of `Operation.({..})`.
 setup in initialize: when Op.run() with Worker, the policy will be run "delayed" and not with the actual permission set. this will result in many crashing sidekiq workers.
 * `Operation::CRUD` is now `Operation::Model`.
-* `Controller#form` now invokes `#prepopulate!` before rendering the view. Use `#present` if you don't want that.
+* `Controller#form` now invokes `#prepopulate!` before rendering the view.
+* `Controller#present` does not instantiate and assign `@form` anymore.
 
 # 0.3.4
 
