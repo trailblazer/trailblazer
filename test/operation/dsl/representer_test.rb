@@ -16,7 +16,6 @@ class DslRepresenterTest < MiniTest::Spec
   describe "inheritance across operations" do
     class Operation < Trailblazer::Operation
       include Representer
-      include Responder
       include SongProcess
 
       representer do
