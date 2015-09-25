@@ -552,6 +552,16 @@ You can just add
 
 ```ruby
 require "trailblazer/autoloading"
+
+Trailblazer::Operation::CRUD.module_eval do
+  module Included
+    def included(base)
+      super
+      base.send :include, Trailblazer::Operation::CRUD::ActiveModel
+    end
+  end
+  extend Included
+end
 ```
 
 to `config/initializers/trailblazer.rb` and implementation classes like `Operation` will be automatically loaded.
