@@ -106,11 +106,9 @@ Operations don't know about HTTP or the environment. You could use an operation 
 An operation is not just a monolithic replacement for your business code. It's a simple orchestrator between the form object, models and your business code.
 
 ```ruby
-class Comment < ActiveRecord::Base
-  class Create < Trailblazer::Operation
-    def process(params)
-      # do whatever you feel like.
-    end
+class Comment::Create < Trailblazer::Operation
+  def process(params)
+    # do whatever you feel like.
   end
 end
 ```
@@ -126,19 +124,17 @@ In Trailblazer, an operation (usually) has a form object which is simply a `Refo
 The operation makes use of the form object using the `#validate` method.
 
 ```ruby
-class Comment < ActiveRecord::Base
-  class Create < Trailblazer::Operation
-    contract do
-      # this is a Reform::Form class!
-      property :body, validates: {presence: true}
-    end
+class Comment::Create < Trailblazer::Operation
+  contract do
+    # this is a Reform::Form class!
+    property :body, validates: {presence: true}
+  end
 
-    def process(params)
-      @model = Comment.new
+  def process(params)
+    @model = Comment.new
 
-      validate(params[:comment], @model) do |f|
-        f.save
-      end
+    validate(params[:comment], @model) do |f|
+      f.save
     end
   end
 end
@@ -157,7 +153,7 @@ Post-processing logic (also known as _callbacks_) is configured in operations.
 Callbacks can be defined in groups. They use the form object's state tracking to find out whether they should be run.
 
 ```ruby
-class Create < Trailblazer::Operation
+class Comment::Create < Trailblazer::Operation
   callback(:after_save) do
     on_change :markdownize_body! # this is only run when the form object has changed.
   end
@@ -166,8 +162,7 @@ class Create < Trailblazer::Operation
 Callbacks are never triggered automatically, you have to invoke them! This is called _Imperative Callback_.
 
 ```ruby
-class Create < Trailblazer::Operation
-
+class Comment::Create < Trailblazer::Operation
   def process(params)
     validate(params) do
       contract.save
@@ -192,10 +187,8 @@ Models for persistence can be implemented using any ORM you fancy, for instance 
 In Trailblazer, models are completely empty. They solely contain associations and finders. No business logic is allowed in models.
 
 ```ruby
-class Thing < ActiveRecord::Base
-  has_many :comments, -> { order(created_at: :desc) }
-  has_many :users, through: :authorships
-  has_many :authorships
+class Comment < ActiveRecord::Base
+  belongs_to :thing
 
   scope :latest, lambda { all.limit(9).order("id DESC") }
 end
@@ -208,9 +201,9 @@ Only operations and views/cells can access models directly.
 You can abort running an operation using a policy. "[Pundit](https://github.com/elabs/pundit)-style" policy classes define the rules.
 
 ```ruby
-class Thing::Policy
-  def initialize(user, thing)
-    @user, @thing = user, thing
+class Comment::Policy
+  def initialize(user, comment)
+    @user, @comment = user, comment
   end
 
   def create?
@@ -222,10 +215,10 @@ end
 The rule is enabled via the `::policy` call.
 
 ```ruby
-class Thing::Create < Trailblazer::Operation
+class Comment::Create < Trailblazer::Operation
   include Policy
 
-  policy Thing::Policy, :create?
+  policy Comment::Policy, :create?
 ```
 
 The policy is evaluated in `#setup!`, raises an exception if `false` and suppresses running `#process`.
@@ -262,8 +255,7 @@ Operations can use representers from [Roar](https://github.com/apotonick/roar) t
 Representers can be inferred automatically from your contract, then may be refined, e.g. with hypermedia or a format like `JSON-API`.
 
 ```ruby
-class Create < Trailblazer::Operation
-
+class Comment::Create < Trailblazer::Operation
   representer do
     # inherited :body
     include Roar::JSON::HAL
@@ -284,7 +276,7 @@ Operations completely replace the need for leaky factories.
 
 ```ruby
 describe Comment::Update do
-  let(:comment) { Comment::Create.(comment: {body: "Check [that](http://trailblazerb.org)!"}) }
+  let(:comment) { Comment::Create.(comment: {body: "[That](http://trailblazerb.org)!"}) }
 ```
 
 ## More
