@@ -137,7 +137,7 @@ module Trailblazer
       result
     end
 
-    # When using Op::[], an invalid contract will raise an exception.
+    # When using Op.(), an invalid contract will raise an exception.
     def raise!(contract)
       raise InvalidContract.new(contract.errors.to_s) if @options[:raise_on_invalid]
     end
