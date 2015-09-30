@@ -1,3 +1,7 @@
+Trailblazer.class_eval do
+  autoload :NotAuthorizedError, "trailblazer/operation/policy"
+end
+
 Trailblazer::Operation.class_eval do
   autoload :Controller, "trailblazer/operation/controller"
   autoload :Model,      "trailblazer/operation/model"
