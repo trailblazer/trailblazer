@@ -5,7 +5,7 @@ private
   def form(*args)
     operation!(*args).tap do |op|
       op.contract.prepopulate! # equals to @form.prepopulate!
-    end
+    end.contract
   end
 
   # Provides the operation instance, model and contract without running #process.

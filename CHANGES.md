@@ -1,3 +1,7 @@
+# 1.0.1
+
+* Treat `:js` requests as non-document, too.
+
 # 1.0.0
 
 * All Rails-relevant files are now in the `trailblazer-rails` gem. You have to include it should you be in a Rails environment.
