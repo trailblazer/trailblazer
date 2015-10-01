@@ -49,7 +49,7 @@ private
   # Normalizes parameters and invokes the operation (including its builders).
   def operation_for!(operation_class, params, options={}, &block)
     # Per default, only treat :html as non-document.
-    options[:is_document] ||= request.format == :html ? false : true
+    options[:is_document] ||= [:html, :js].reject?(request.format)
 
     process_params!(params)
     res, op = Trailblazer::Endpoint.new(operation_class, params, request, options).(&block)
