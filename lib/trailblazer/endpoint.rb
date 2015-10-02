@@ -12,7 +12,7 @@ module Trailblazer
 
     def call
       document_body! if document_request?
-      yield # Create.run(params)
+      yield @params# Create.run(params)
     end
 
   private

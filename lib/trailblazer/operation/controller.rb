@@ -10,8 +10,8 @@ private
 
   # Provides the operation instance, model and contract without running #process.
   # Returns the operation.
-  def present(operation_class, params=self.params)
-    operation!(operation_class, params, skip_form: true)
+  def present(operation_class, options={})
+    operation!(operation_class, skip_form: true)
   end
 
   def collection(*args)
@@ -20,8 +20,8 @@ private
     end
   end
 
-  def run(operation_class, params=self.params, &block)
-    res, op = operation_for!(operation_class, params) { operation_class.run(params) }
+  def run(operation_class, options={}, &block)
+    res, op = operation_for!(operation_class, options) { |params| operation_class.run(params) }
 
     yield op if res and block_given?
 
@@ -29,8 +29,9 @@ private
   end
 
   # The block passed to #respond is always run, regardless of the validity result.
-  def respond(operation_class, options={}, params=self.params, &block)
-    res, op   = operation_for!(operation_class, params, options) { operation_class.run(params) }
+  def respond(operation_class, options={}, &block)
+    options[:___dont_deprecate] = 1 # TODO: remove in 1.1.
+    res, op   = operation_for!(operation_class, options) { |params| operation_class.run(params) }
     namespace = options.delete(:namespace) || []
 
     return respond_with *namespace, op, options if not block_given?
@@ -38,8 +39,8 @@ private
   end
 
 private
-  def operation!(operation_class, params=self.params, options={}) # or #model or #setup.
-    res, op = operation_for!(operation_class, params, options) { [true, operation_class.present(params)] }
+  def operation!(operation_class, options={}) # or #model or #setup.
+    res, op = operation_for!(operation_class, options) { |params| [true, operation_class.present(params)] }
     op
   end
 
@@ -47,15 +48,32 @@ private
   end
 
   # Normalizes parameters and invokes the operation (including its builders).
-  def operation_for!(operation_class, params, options={}, &block)
+  def operation_for!(operation_class, options, &block)
+    options = deprecate_positional_params_argument!(options)
+
     # Per default, only treat :html and js as non-document.
-    options = {is_document: ![:html, :js].include?(request.format.to_sym)}.merge(options)
+    default_options = {is_document: ![:html, :js].include?(request.format.to_sym)}
+    options = default_options.merge(options)
+    params  = options.delete(:params) || self.params # TODO: test params: parameter properly in all 4 methods.
 
     process_params!(params)
     res, op = Trailblazer::Endpoint.new(operation_class, params, request, options).(&block)
     setup_operation_instance_variables!(op, options)
 
     [res, op]
+  end
+
+  def deprecate_positional_params_argument!(options) # TODO: remove in 1.1.
+    return options if options.has_key?(:skip_form)
+    return options if options.has_key?(:is_document)
+    return options if options.has_key?(:params)
+    return options if options.has_key?(:namespace)
+    return options if options.has_key?(:___dont_deprecate)
+    return options if options.size == 0
+
+    warn "[Trailblazer] The positional params argument for #run, #present, #form and #respond is deprecated and will be removed in 1.1.
+Please provide a custom params via `run Comment::Create, params: {..}` and have a nice day."
+    {params: options}
   end
 
   def setup_operation_instance_variables!(operation, options)
