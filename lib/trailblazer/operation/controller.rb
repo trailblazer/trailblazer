@@ -2,9 +2,11 @@ require "trailblazer/endpoint"
 
 module Trailblazer::Operation::Controller
 private
-  def form(*args)
-    operation!(*args).tap do |op|
-      op.contract.prepopulate! # equals to @form.prepopulate!
+  def form(operation_class, options={})
+    options[:___dont_deprecate] = 1 # TODO: remove in 1.1.
+
+    operation!(operation_class, options).tap do |op|
+      op.contract.prepopulate!(options) # equals to @form.prepopulate!
     end.contract
   end
 
@@ -31,6 +33,7 @@ private
   # The block passed to #respond is always run, regardless of the validity result.
   def respond(operation_class, options={}, &block)
     options[:___dont_deprecate] = 1 # TODO: remove in 1.1.
+
     res, op   = operation_for!(operation_class, options) { |params| operation_class.run(params) }
     namespace = options.delete(:namespace) || []
 
