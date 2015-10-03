@@ -49,11 +49,8 @@ private
 
   # Normalizes parameters and invokes the operation (including its builders).
   def operation_for!(operation_class, options, &block)
-    options = deprecate_positional_params_argument!(options)
+    options = deprecate_positional_params_argument!(options) # TODO: remove in 1.1.
 
-    # Per default, only treat :html and js as non-document.
-    default_options = {is_document: ![:html, :js].include?(request.format.to_sym)}
-    options = default_options.merge(options)
     params  = options.delete(:params) || self.params # TODO: test params: parameter properly in all 4 methods.
 
     process_params!(params)
