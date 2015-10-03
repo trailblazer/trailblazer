@@ -24,12 +24,9 @@ module Trailblazer
     # e.g. `run Comment::Create` where the builder will instantiate Create::JSON which has Representer
     # included.
     def document_request_for?(options)
-      puts "``#{options.inspect}"
       return options[:is_document] if options.has_key?(:is_document)
 
-      result= operation_class < Operation::Representer # TODO: this doesn't work with polymorphic dispatch.
-      puts "@@ss@@@ #{result.inspect}"
-      result
+      operation_class < Operation::Representer # TODO: this doesn't work with polymorphic dispatch.
     end
 
     def document_body!
