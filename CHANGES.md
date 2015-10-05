@@ -1,3 +1,7 @@
+# 1.0.3
+
+Remove unprofessional `puts`, @smathy.
+
 # 1.0.2
 
 * Treat all requests as `params` requests unless the operation has a representer mixed in. If you don't want that, you can override using `is_document: false`. This appears to be the smoothest solution for all.
