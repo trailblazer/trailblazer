@@ -36,8 +36,6 @@ module Trailblazer
     end
     include Setup
 
-
-    private
     def evaluate_policy(params)
       user = params[:current_user]
 
