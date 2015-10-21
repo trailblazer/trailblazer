@@ -117,6 +117,7 @@ module Trailblazer
     include Setup
 
     def validate(params, model=nil, contract_class=nil)
+      raise ParameterMissing if params.nil?
       contract!(model, contract_class)
 
       if @valid = validate_contract(params)
@@ -156,6 +157,8 @@ module Trailblazer
     end
 
     class InvalidContract < RuntimeError
+    end
+    class ParameterMissing < RuntimeError
     end
   end
 end
