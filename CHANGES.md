@@ -1,3 +1,7 @@
+# 1.0.4
+
+* Fix `Controller#run`, which now returns the operation instance instead of the `Else` object.
+
 # 1.0.3
 
 Remove unprofessional `puts`, @smathy.

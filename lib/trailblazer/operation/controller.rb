@@ -27,7 +27,7 @@ private
 
     yield op if res and block_given?
 
-    Else.new(op, !res)
+    op
   end
 
   # The block passed to #respond is always run, regardless of the validity result.
@@ -80,19 +80,5 @@ Please provide a custom params via `run Comment::Create, params: {..}` and have 
     @operation = operation
     @model     = operation.model
     @form      = operation.contract unless options[:skip_form]
-  end
-
-
-  # Note: this is not documented on purpose as this concept is experimental. I don't like it too much and prefer
-  # returns in the valid block.
-  class Else
-    def initialize(op, run)
-      @op  = op
-      @run = run
-    end
-
-    def else
-      yield @op if @run
-    end
   end
 end
