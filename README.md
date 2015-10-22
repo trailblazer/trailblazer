@@ -95,7 +95,7 @@ class CommentsController < ApplicationController
 
 Again, the controller only dispatchs to the operation and handles successful/invalid processing on the HTTP level. For instance by redirecting, setting flash messages, or signing in a user.
 
-[Learn more.](http://trailblazerb.org/gems/operation/controller.html)
+[Learn more.](http://trailblazer.to/gems/operation/controller.html)
 
 ## Operation
 
@@ -115,7 +115,7 @@ end
 
 Operations only need to implement `#process` which receives the params from the caller.
 
-[Learn more.](http://trailblazerb.org/gems/operation)
+[Learn more.](http://trailblazer.to/gems/operation)
 
 ## Validations
 
@@ -144,7 +144,7 @@ The contract (aka _form_) is defined in the `::contract` block. You can implemen
 
 In the `#process` method you can define your business logic.
 
-[Learn more.](http://trailblazerb.org/gems/operation/api.html)
+[Learn more.](http://trailblazer.to/gems/operation/api.html)
 
 ## Callbacks
 
@@ -178,7 +178,7 @@ end
 
 No magical triggering of unwanted logic anymore, but explicit invocations where you want it.
 
-[Learn more.](http://trailblazerb.org/gems/operation/callback.html)
+[Learn more.](http://trailblazer.to/gems/operation/callback.html)
 
 ## Models
 
@@ -223,7 +223,7 @@ class Comment::Create < Trailblazer::Operation
 
 The policy is evaluated in `#setup!`, raises an exception if `false` and suppresses running `#process`.
 
-[Learn more.](http://trailblazerb.org/gems/operation/policy.html)
+[Learn more.](http://trailblazer.to/gems/operation/policy.html)
 
 ## Views
 
@@ -266,7 +266,7 @@ class Comment::Create < Trailblazer::Operation
 
 The operation can then parse incoming JSON documents in `validate` and render a document via `to_json`.
 
-[Learn more.](http://trailblazerb.org/gems/operation/representer.html)
+[Learn more.](http://trailblazer.to/gems/operation/representer.html)
 
 ## Tests
 
@@ -276,7 +276,7 @@ Operations completely replace the need for leaky factories.
 
 ```ruby
 describe Comment::Update do
-  let(:comment) { Comment::Create.(comment: {body: "[That](http://trailblazerb.org)!"}) }
+  let(:comment) { Comment::Create.(comment: {body: "[That](http://trailblazer.to)!"}) }
 ```
 
 ## More
