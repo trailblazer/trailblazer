@@ -5,6 +5,7 @@ end
 Trailblazer::Operation.class_eval do
   autoload :Controller, "trailblazer/operation/controller"
   autoload :Model,      "trailblazer/operation/model"
+  autoload :Modelless,  "trailblazer/operation/modelless"
   autoload :Collection, "trailblazer/operation/collection"
   autoload :Dispatch,   "trailblazer/operation/dispatch"
   autoload :Module,     "trailblazer/operation/module"
