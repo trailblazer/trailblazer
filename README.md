@@ -14,7 +14,7 @@ _Trailblazer is a thin layer on top of Rails. It gently enforces encapsulation, 
   * Optional [callback](#callbacks) objects allow declaring post-processing logic.
 3. [Controllers](#controllers) instantly delegate to an operation. No business code in controllers, only HTTP-specific logic.
 4. [Models](#models) are persistence-only and solely define associations and scopes. No business code is to be found here. No validations, no callbacks.
-5. The presentation layer offers optional [view models](#cells) (Cells) and [representers](#representers) for document APIs.
+5. The presentation layer offers optional [view models](#views) (Cells) and [representers](#representers) for document APIs.
 
 Trailblazer is designed to handle different contexts like user roles by applying [inheritance](#inheritance) between and [composing](#composing) of operations, form objects, policies, representers and callbacks.
 
