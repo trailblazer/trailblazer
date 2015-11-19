@@ -28,11 +28,12 @@ module Trailblazer::Operation::Representer
     end
 
     def infer_representer_class
-      Disposable::Twin::Schema.from(contract_class,
+      Disposable::Rescheme.from(contract_class,
         include:          [Representable::JSON],
         options_from:     :deserializer, # use :instance etc. in deserializer.
         superclass:       Representable::Decorator,
-        representer_from: lambda { |inline| inline.representer_class },
+        definitions_from: lambda { |inline| inline.definitions },
+        exclude_options:  [:default, :populator] # TODO: test with populator: in an operation.
       )
     end
   end
