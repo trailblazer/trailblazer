@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
 
 
   spec.add_dependency "uber", ">= 0.0.15"
-  spec.add_dependency "reform", ">= 1.2.0"
+  spec.add_dependency "reform", ">= 2.1.0.rc1"
 
   spec.add_development_dependency "activemodel" # for Reform::AM::V
 
