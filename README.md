@@ -23,13 +23,19 @@ Wanna see some code? Jump [right here](#controllers)!
 ## Trailblazer Gem Ecosystem
 _**You are free to use any part of the system by itself, but Trailblazer really shines, when all parts work together.**_ 
 
+### Core
 * [Trailblazer](https://github.com/apotonick/trailblazer) - Service Objects layer. Orchestrates your Rails / Sinatra / Padrino / Roda / Etc. application's business logic and coordinates interaction with other gems. 
 * [Reform](https://github.com/apotonick/reform) - Form Object layer. Reform gives you a form object with validations and nested setup of models. It is completely framework-agnostic and doesn't care about your database or ORM layer. Can be used with ActiveRecord, Monogoid, etc
 * [Roar](https://github.com/apotonick/roar) - REST document representation layer.  Roar comes with built-in JSON, JSON-HAL, JSON-API and XML support. Its highly modular architecture provides features like coercion, hypermedia, HTTP transport, client caching and more.
 * [Cells](https://github.com/apotonick/cells) - ViewModels layer. View Layer OOP style. 
+
+### Extras
 * [Cells Kaminari](https://github.com/apotonick/kaminari-cells) - pagination for Cells. 
 * [Apotomo](https://github.com/apotonick/apotomo) - UX layer, based on Cells. It gives you widgets and encapsulation, bubbling events, AJAX page updates, rock-solid testing and more. Check out [http://apotomo.de](http://apotomo.de) for more information.
 * [Tyrant](https://github.com/apotonick/tyrant) - Authentication for Trailblazer, Trailblazer-style. You are free to use your favorite authentication gem instead, such as AuthLogic. 
+* [Paperdragon](https://github.com/apotonick/paperdragon) - Explicit image processing based on Dragonfly with Paperclip compatibility.
+
+### Building Blocks
 * [Disposable](https://github.com/apotonick/disposable) - Decorator on top of your ORM. This is the main building block for Reform and Trailblazer.
 * [Declarative](https://github.com/apotonick/declarative) - allows declaring nested schemas. This is a building block for other components.
 * [Hooks](https://github.com/apotonick/hooks) - Generic hooks with callbacks for Ruby. This is a building block for  Apotomo.
