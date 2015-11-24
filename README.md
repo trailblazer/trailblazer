@@ -40,6 +40,7 @@ _**You are free to use any part of the system by itself, but Trailblazer really 
 * [Paperdragon](https://github.com/apotonick/paperdragon) - Explicit image processing based on Dragonfly with Paperclip compatibility.
 
 ### Building Blocks
+* [Representable](https://github.com/apotonick/representable) - handles all the nitty-gritty details for Roar.
 * [Disposable](https://github.com/apotonick/disposable) - Decorator on top of your ORM. This is the main building block for Reform and Trailblazer.
 * [Declarative](https://github.com/apotonick/declarative) - allows declaring nested schemas. This is a building block for other components.
 * [Hooks](https://github.com/apotonick/hooks) - Generic hooks with callbacks for Ruby. This is a building block for  Apotomo.
