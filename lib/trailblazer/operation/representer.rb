@@ -27,15 +27,25 @@ module Trailblazer::Operation::Representer
       self._representer_class = constant
     end
 
+    require "disposable/version"
     def infer_representer_class
-      Disposable::Rescheme.from(contract_class,
-        include:          [Representable::JSON],
-        options_from:     :deserializer, # use :instance etc. in deserializer.
-        superclass:       Representable::Decorator,
-        definitions_from: lambda { |inline| inline.definitions },
-        exclude_options:  [:default, :populator], # TODO: test with populator: in an operation.
-        exclude_properties: [:persisted?]
-      )
+      if Disposable::VERSION =~ /^0.1/
+         Disposable::Twin::Schema.from(contract_class,
+          include:          [Representable::JSON],
+          options_from:     :deserializer, # use :instance etc. in deserializer.
+          superclass:       Representable::Decorator,
+          representer_from: lambda { |inline| inline.representer_class },
+        )
+      else
+        Disposable::Rescheme.from(contract_class,
+          include:          [Representable::JSON],
+          options_from:     :deserializer, # use :instance etc. in deserializer.
+          superclass:       Representable::Decorator,
+          definitions_from: lambda { |inline| inline.definitions },
+          exclude_options:  [:default, :populator], # TODO: test with populator: in an operation.
+          exclude_properties: [:persisted?]
+        )
+      end
     end
   end
 

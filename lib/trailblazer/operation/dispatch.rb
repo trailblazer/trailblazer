@@ -1,3 +1,4 @@
+require "declarative"
 require "disposable/callback"
 
 module Trailblazer::Operation::Dispatch
