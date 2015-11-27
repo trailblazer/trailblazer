@@ -152,4 +152,27 @@ class InternalRepresenterAPITest < MiniTest::Spec
       ShowContract.present({}).to_json.must_equal %{{"class":"#{ShowContract.contract_class}"}}
     end
   end
+
+  describe "#to_json" do
+    class OptionsShow < Trailblazer::Operation
+      include Representer
+
+      representer do
+        property :class
+        property :id
+      end
+
+      def to_json(*)
+        super(@params)
+      end
+
+      def model!(params)
+        Song.new(1)
+      end
+    end
+
+    it "allows to pass options to #to_json" do
+      OptionsShow.present(include: [:id]).to_json.must_equal '{"id":1}'
+    end
+  end
 end

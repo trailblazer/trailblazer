@@ -41,7 +41,7 @@ module Trailblazer::Operation::Representer
 
 private
   module Rendering
-    def to_json(options={}) # TODO: test me!
+    def to_json(options={})
       self.class.representer_class.new(represented).to_json(options)
     end
 
