@@ -1,11 +1,11 @@
+require "trailblazer/operation/policy/guard"
+
 module Trailblazer
   class NotAuthorizedError < RuntimeError
   end
 
   # Adds #evaluate_policy to #setup!, and ::policy.
   module Operation::Policy
-    require "trailblazer/operation/policy/guard"
-
     def self.included(includer)
       includer.extend DSL
     end
