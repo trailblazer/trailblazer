@@ -33,19 +33,20 @@ module Trailblazer::Operation::Representer
         options_from:     :deserializer, # use :instance etc. in deserializer.
         superclass:       Representable::Decorator,
         definitions_from: lambda { |inline| inline.definitions },
-        exclude_options:  [:default, :populator] # TODO: test with populator: in an operation.
+        exclude_options:  [:default, :populator], # TODO: test with populator: in an operation.
+        exclude_properties: [:persisted?]
       )
     end
   end
 
 private
   module Rendering
-    def to_json(*)
-      self.class.representer_class.new(represented).to_json
+    def to_json(options={}) # TODO: test me!
+      self.class.representer_class.new(represented).to_json(options)
     end
 
     def represented
-      contract
+      model
     end
   end
   include Rendering

@@ -124,3 +124,32 @@ class RepresenterTest < MiniTest::Spec
     op.contract.title.must_equal "Run For Cover"
   end
 end
+
+class InternalRepresenterAPITest < MiniTest::Spec
+  Song = Struct.new(:id)
+
+  describe "#represented" do
+    class Show < Trailblazer::Operation
+      include Representer, Model
+      model Song, :create
+
+      representer do
+        property :class
+      end
+    end
+
+    it "uses #model as represented, per default" do
+      Show.present({}).to_json.must_equal '{"class":"InternalRepresenterAPITest::Song"}'
+    end
+
+    class ShowContract < Show
+      def represented
+        contract
+      end
+    end
+
+    it "can be overriden to use the contract" do
+      ShowContract.present({}).to_json.must_equal %{{"class":"#{ShowContract.contract_class}"}}
+    end
+  end
+end
