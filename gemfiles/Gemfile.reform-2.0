@@ -2,6 +2,5 @@ source "http://rubygems.org"
 
 gemspec path: '../'
 
-gem "railties"
-gem "activerecord"
-gem "sqlite3"
+gem "reform", "~> 2.0.5"
+gem "multi_json"
