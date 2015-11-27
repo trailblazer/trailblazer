@@ -1,3 +1,8 @@
+# 1.1.0
+
+* `Representer#to_json` now allows passing options.
+* `Representer#represented` defaults to `model` now, not to `contract` anymore.
+
 # 1.0.4
 
 * Fix `Controller#run`, which now returns the operation instance instead of the `Else` object.

@@ -41,10 +41,16 @@ module Trailblazer::Operation::Representer
 
 private
   module Rendering
+    # Override this if you need to pass options to the rendering.
+    #
+    #   def to_json(*)
+    #     super(include: @params[:include])
+    #   end
     def to_json(options={})
       self.class.representer_class.new(represented).to_json(options)
     end
 
+    # Override this if you want to render something else, e.g. the contract.
     def represented
       model
     end
