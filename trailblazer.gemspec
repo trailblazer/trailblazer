@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["apotonick@gmail.com"]
   spec.description   = %q{A high-level, modular architecture for Rails with domain and form objects, view models, twin decorators and representers.}
   spec.summary       = %q{A new architecture for Rails.}
-  spec.homepage      = "http://www.trailblazerb.org"
+  spec.homepage      = "http://trailblazer.to"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
@@ -19,7 +19,8 @@ Gem::Specification.new do |spec|
 
 
   spec.add_dependency "uber", ">= 0.0.15"
-  spec.add_dependency "reform", ">= 2.1.0.rc1", "< 3.0.0"
+  spec.add_dependency "reform", ">= 2.0.0", "< 3.0.0"
+  spec.add_dependency "declarative"
 
   spec.add_development_dependency "activemodel" # for Reform::AM::V
 
