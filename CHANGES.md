@@ -2,6 +2,8 @@
 
 * `Representer#to_json` now allows passing options.
 * `Representer#represented` defaults to `model` now, not to `contract` anymore.
+* Add `Operation#params!` that works exactly like `#model!`: return another params hash here if you want to change the `params` structure while avoiding modifying the original one.
+
 
 # 1.0.4
 
@@ -9,7 +11,7 @@
 
 # 1.0.3
 
-Remove unprofessional `puts`, @smathy.
+* Remove unprofessional `puts`, @smathy.
 
 # 1.0.2
 
