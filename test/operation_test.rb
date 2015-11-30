@@ -24,6 +24,21 @@ class OperationSetupParamsTest < MiniTest::Spec
   it { OperationSetupParam.run({valid: true}).to_s.must_equal "[true, <OperationSetupParam @model={:valid=>true, :garrett=>\"Rocks!\"}>]" }
 end
 
+class OperationParamsTest < MiniTest::Spec
+  class Operation < Trailblazer::Operation
+    def process(params)
+      @model = "#{params} and #{@params==params}"
+    end
+
+    def params!(params)
+      { params: params }
+    end
+  end
+
+  # allows you returning new params in #params!.
+  it { Operation.({valid: true}).model.to_s.must_equal "{:params=>{:valid=>true}} and true" }
+end
+
 # Operation#model.
 class OperationModelTest < MiniTest::Spec
   class Operation < Trailblazer::Operation

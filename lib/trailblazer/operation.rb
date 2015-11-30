@@ -59,7 +59,6 @@ module Trailblazer
 
 
     def initialize(params, options={})
-      @params           = params
       @options          = options
       @valid            = true
 
@@ -90,8 +89,21 @@ module Trailblazer
   private
     module Setup
       def setup!(params)
+        params = assign_params!(params)
         setup_params!(params)
         build_model!(params)
+        params # TODO: test me.
+      end
+
+      def assign_params!(params)
+        @params = params!(params)
+      end
+
+      # Overwrite #params! if you need to change its structure, by returning a new params object
+      # from this method.
+      # This is helpful if you don't want to change the original via #setup_params!.
+      def params!(params)
+        params
       end
 
       def setup_params!(params)
