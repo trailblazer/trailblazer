@@ -60,8 +60,27 @@ class OpPolicyGuardTest < MiniTest::Spec
 
     it { Show.({}).wont_equal nil }
   end
-end
 
+
+  describe "#params!" do
+    class Index < Trailblazer::Operation
+      include Policy::Guard
+
+      # make sure the guard receives the correct params.
+      policy { |params| params[:valid] == "true" }
+
+      def params!(params)
+        { valid: params }
+      end
+
+      def process(*)
+      end
+    end
+
+    it { Index.("true").wont_equal nil }
+    it { assert_raises(Trailblazer::NotAuthorizedError) { Index.(false).wont_equal nil } }
+  end
+end
 
 class OpBuilderDenyTest < MiniTest::Spec
   Song = Struct.new(:name)
