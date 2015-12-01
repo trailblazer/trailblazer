@@ -8,7 +8,7 @@ module Trailblazer
       @operation_class = operation_class
       @params          = params
       @request         = request
-      @is_document     = document_request_for?(options)
+      @is_document     = options[:is_document]
     end
 
     def call
@@ -18,16 +18,6 @@ module Trailblazer
 
   private
     attr_reader :params, :operation_class, :request
-
-    # this is a really weak test but will make sure the document_body behavior is only enabled
-    # for people who know what they're doing. also, this won't work if you use a polymorphic dispatch,
-    # e.g. `run Comment::Create` where the builder will instantiate Create::JSON which has Representer
-    # included.
-    def document_request_for?(options)
-      return options[:is_document] if options.has_key?(:is_document)
-
-      operation_class < Operation::Representer # TODO: this doesn't work with polymorphic dispatch.
-    end
 
     def document_body!
       # this is what happens:

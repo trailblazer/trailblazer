@@ -2,6 +2,7 @@
 
 * `Representer#to_json` now allows passing options.
 * `Representer#represented` defaults to `model` now, not to `contract` anymore.
+* The only way to let Trailblazer pass a document to the operation is via `is_document: true`. There is _no guessing_ anymore based on whether or not `Representer` is mixed into the operation or not.
 * Add `Operation#params!` that works exactly like `#model!`: return another params hash here if you want to change the `params` structure while avoiding modifying the original one.
 
 
