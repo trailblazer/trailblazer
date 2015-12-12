@@ -53,12 +53,16 @@ class DslCallbackTest < MiniTest::Spec
   end
 
   describe "Op.callback" do
-    it { Operation.callback(:default).must_equal Operation.callbacks[:default] }
+    it { Operation.callback(:default).must_equal Operation.callbacks[:default][:group] }
   end
 
   describe "Op.callback :after_save, AfterSaveCallback" do
     class AfterSaveCallback < Disposable::Callback::Group
       on_change :after_save!
+
+      def after_save!(twin, options)
+        options[:operation]._invocations << :after_save!
+      end
     end
 
     class OpWithExternalCallback < Trailblazer::Operation
@@ -70,8 +74,6 @@ class DslCallbackTest < MiniTest::Spec
         contract(OpenStruct.new).validate(params)
         dispatch!(:after_save)
       end
-
-      def after_save!(*);    _invocations << :after_save!; end
     end
 
     it { OpWithExternalCallback.("title"=>"Thunder Rising")._invocations.must_equal([:after_save!]) }
@@ -80,13 +82,16 @@ class DslCallbackTest < MiniTest::Spec
   describe "Op.callback :after_save, AfterSaveCallback do .. end" do
     class DefaultCallback < Disposable::Callback::Group
       on_change :default!
+
+      def default!(twin, options)
+        options[:operation]._invocations << :default!
+      end
     end
 
     class OpUsingCallback < Trailblazer::Operation
       include Dispatch
       include SongProcess
       callback :default, DefaultCallback
-      def default!(*);       _invocations << :default!; end
     end
 
     class OpExtendingCallback < Trailblazer::Operation
@@ -94,15 +99,20 @@ class DslCallbackTest < MiniTest::Spec
       include SongProcess
       callback :default, DefaultCallback do
         on_change :after_save!
-      end
 
-      def default!(*);       _invocations << :default!; end
-      def after_save!(*);    _invocations << :after_save!; end
+        def default!(twin, options)
+          options[:operation]._invocations << :extended_default!
+        end
+
+        def after_save!(twin, options)
+          options[:operation]._invocations << :after_save!
+        end
+      end
     end
 
     # this operation copies DefaultCallback and shouldn't run #after_save!.
     it { OpUsingCallback.(title: "Thunder Rising")._invocations.must_equal([:default!]) }
     # this operation copies DefaultCallback, extends it and runs #after_save!.
-    it { OpExtendingCallback.(title: "Thunder Rising")._invocations.must_equal([:default!, :after_save!]) }
+    it { OpExtendingCallback.(title: "Thunder Rising")._invocations.must_equal([:extended_default!, :after_save!]) }
   end
 end

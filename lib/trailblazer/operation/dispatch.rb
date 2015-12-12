@@ -9,9 +9,12 @@ module Trailblazer::Operation::Dispatch
     base.extend Declarative::Heritage::DSL
   end
 
-  def dispatch!(name=:default)
-    group = self.class.callbacks[name].new(contract)
-    group.(context: self)
+  def dispatch!(name=:default, options={ operation: self, contract: contract }) # FIXME: test options.
+    config  = self.class.callbacks[name]
+    group   = config[:group].new(contract)
+
+    options[:context] ||= (config[:context] == :operation ? self : group)
+    group.(options)
 
     invocations[name] = group
   end
@@ -26,7 +29,7 @@ module Trailblazer::Operation::Dispatch
     end
 
     def callback(name=:default, constant=nil, &block)
-      return callbacks[name] unless constant or block_given?
+      return callbacks[name][:group] unless constant or block_given?
 
       add_callback(name, constant, &block)
     end
@@ -35,8 +38,12 @@ module Trailblazer::Operation::Dispatch
     def add_callback(name, constant, &block)
       heritage.record(:add_callback, name, constant, &block)
 
-      callbacks[name] ||= Class.new(constant || Disposable::Callback::Group)
-      callbacks[name].class_eval(&block) if block_given?
+      callbacks[name] ||= {
+        group:   Class.new(constant || Disposable::Callback::Group),
+        context: constant ? nil : :operation # `context: :operation` when the callback is inline. `context: group` otherwise.
+      }
+
+      callbacks[name][:group].class_eval(&block) if block_given?
     end
   end
 end
