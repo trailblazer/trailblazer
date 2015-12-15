@@ -9,7 +9,7 @@ module Trailblazer::Operation::Dispatch
     base.extend Declarative::Heritage::DSL
   end
 
-  def dispatch!(name=:default, options={ operation: self, contract: contract }) # FIXME: test options.
+  def dispatch!(name=:default, options={ operation: self, contract: contract, params: @params }) # FIXME: test options.
     config  = self.class.callbacks[name]
     group   = config[:group].new(contract)
 
