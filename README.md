@@ -154,7 +154,7 @@ Callbacks can be defined in groups. They use the form object's state tracking to
 
 ```ruby
 class Comment::Create < Trailblazer::Operation
-  include Dispatch
+  include Callback
   callback(:after_save) do
     on_change :markdownize_body! # this is only run when the form object has changed.
   end
@@ -164,11 +164,11 @@ Callbacks are never triggered automatically, you have to invoke them! This is ca
 
 ```ruby
 class Comment::Create < Trailblazer::Operation
-  include Dispatch
+  include Callback
   def process(params)
     validate(params) do
       contract.save
-      dispatch!(:after_save) # run markdownize_body!, but only if form changed.
+      callback!(:after_save) # run markdownize_body!, but only if form changed.
     end
   end
 

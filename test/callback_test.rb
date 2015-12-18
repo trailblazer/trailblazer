@@ -1,12 +1,12 @@
 require 'test_helper'
-require "trailblazer/operation/dispatch"
+require "trailblazer/operation/callback"
 
 # callbacks are tested in Disposable::Callback::Group.
 class OperationCallbackTest < MiniTest::Spec
   Song = Struct.new(:name)
 
   class Create < Trailblazer::Operation
-    include Trailblazer::Operation::Dispatch
+    include Trailblazer::Operation::Callback
 
     contract do
       property :name
@@ -23,7 +23,7 @@ class OperationCallbackTest < MiniTest::Spec
       @model = Song.new
 
       validate(params, @model) do
-        dispatch!
+        callback!
       end
     end
 
@@ -60,5 +60,45 @@ class OperationCallbackTest < MiniTest::Spec
   it "does not invoke removed callbacks" do
     op = Update.({"name"=>"Keep On Running"})
     op.dispatched.must_equal [:notify_you!]
+  end
+end
+
+# TODO: remove in 1.2.
+require "trailblazer/operation/dispatch"
+class OperationDeprecatedDispatchTest < MiniTest::Spec
+  Song = Struct.new(:name)
+
+  class Create < Trailblazer::Operation
+    include Trailblazer::Operation::Dispatch
+
+    contract do
+      property :name
+    end
+
+    callback do
+      on_change :notify_me!
+    end
+
+    def process(params)
+      @model = Song.new
+
+      validate(params, @model) do
+        dispatch!
+      end
+    end
+
+    def dispatched
+      @dispatched ||= []
+    end
+
+  private
+    def notify_me!(*)
+      dispatched << :notify_me!
+    end
+  end
+
+  it "invokes all callbacks [deprecated]" do
+    op = Create.({"name"=>"Keep On Running"})
+    op.dispatched.must_equal [:notify_me!]
   end
 end
