@@ -11,7 +11,7 @@ private
   # Provides the operation instance, model and contract without running #process.
   # Returns the operation.
   def present(operation_class, options={})
-    operation!(operation_class, skip_form: true)
+    operation!(operation_class, options.merge(skip_form: true))
   end
 
   def collection(*args)
