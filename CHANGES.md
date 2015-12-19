@@ -7,6 +7,9 @@
 * Add `Controller#params!` that works exactly like `Operation#params!` and allows returning an arbitrary params object in the controller. Thanks to @davidpelaez for inspiration.
 * Deprecate `Dispatch` in favor of `Callback`. In operations, please include `Operation::Callback`. Also, introduced `Operation#callback!` which aliases to `#dispatch!`. Goal is having to think less, and now all naming is in line.
 
+## Fixes
+
+* The `:params` key never got propagated to `prepopulate!` when using `Controller#form`. This is now fixed.
 
 # 1.0.4
 
