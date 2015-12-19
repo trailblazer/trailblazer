@@ -34,7 +34,7 @@ module Trailblazer
         build_operation(params, raise_on_invalid: true).run.last
       end
 
-      def [](*args) # TODO: remove in 1.1.
+      def [](*args) # TODO: remove in 1.2.
         warn "[Trailblazer] Operation[] is deprecated. Please use Operation.() and have a nice day."
         call(*args)
       end

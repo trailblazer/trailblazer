@@ -7,8 +7,8 @@ Gem::Specification.new do |spec|
   spec.version       = Trailblazer::VERSION
   spec.authors       = ["Nick Sutterer"]
   spec.email         = ["apotonick@gmail.com"]
-  spec.description   = %q{A high-level, modular architecture for Rails with domain and form objects, view models, twin decorators and representers.}
-  spec.summary       = %q{A new architecture for Rails.}
+  spec.description   = %q{A high-level, modular architecture for Ruby framworks with domain and form objects, view models, twin decorators and representers.}
+  spec.summary       = %q{A high-level architecture for Ruby and Rails.}
   spec.homepage      = "http://trailblazer.to"
   spec.license       = "MIT"
 
