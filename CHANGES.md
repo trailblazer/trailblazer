@@ -4,7 +4,9 @@
 * `Representer#represented` defaults to `model` now, not to `contract` anymore.
 * The only way to let Trailblazer pass a document to the operation is via `is_document: true`. There is _no guessing_ anymore based on whether or not `Representer` is mixed into the operation or not.
 * Add `Operation#params!` that works exactly like `#model!`: return another params hash here if you want to change the `params` structure while avoiding modifying the original one.
+* Add `Controller#params!` that works exactly like `Operation#params!` and allows returning an arbitrary params object in the controller. Thanks to @davidpelaez for inspiration.
 * Deprecate `Dispatch` in favor of `Callback`. In operations, please include `Operation::Callback`. Also, introduced `Operation#callback!` which aliases to `#dispatch!`. Goal is having to think less, and now all naming is in line.
+
 
 # 1.0.4
 

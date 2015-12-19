@@ -46,11 +46,17 @@ private
   def process_params!(params)
   end
 
+  # Override and return arbitrary params object.
+  def params!(params)
+    params
+  end
+
   # Normalizes parameters and invokes the operation (including its builders).
   def operation_for!(operation_class, options, &block)
-    params  = options.delete(:params) || self.params # TODO: test params: parameter properly in all 4 methods.
+    params = options.delete(:params) || self.params # TODO: test params: parameter properly in all 4 methods.
 
-    process_params!(params)
+    params = params!(params)
+    process_params!(params) # deprecate or rename to #setup_params!
     res, op = Trailblazer::Endpoint.new(operation_class, params, request, options).(&block)
     setup_operation_instance_variables!(op, options)
 
