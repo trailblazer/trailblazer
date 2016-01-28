@@ -38,7 +38,7 @@ Since Trailblazer decouples the High-Level Stack from the framework, it runs wit
 We are constantly working on documenting how to do that.
 
 * Trailblazer with Rails [Book](http://trailblazer.to/books/trailblazer.html) [Repository](https://github.com/apotonick/gemgem-trbrb)
-* Trailblazer with Sinatra [Guide](http://trailblazer.to/guides/sinatra/getting-started.html)html) [Repository](https://github.com/apotonick/gemgem-sinatra)
+* Trailblazer with Sinatra [Guide](http://trailblazer.to/guides/sinatra/getting-started.html) [Repository](https://github.com/apotonick/gemgem-sinatra)
 * Trailblazer with Lotus - coming soon!
 * Trailblazer with Roda - coming soon!
 * Trailblazer with Grape - coming _very_ soon!
