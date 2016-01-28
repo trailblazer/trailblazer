@@ -31,6 +31,18 @@ Again, you can pick which layers you want. Trailblazer doesn't impose technical 
 
 Trailblazer is no "complex web of objects and indirection". It solves many problems that have been around for years with a cleanly layered architecture. Only use what you like. And that's the bottom line.
 
+## Trailblazer Likes 'Em All
+
+Since Trailblazer decouples the High-Level Stack from the framework, it runs with virtually any Ruby framework.
+
+We are constantly working on documenting how to do that.
+
+* Trailblazer with Rails [Book](http://trailblazer.to/books/trailblazer.html) [Repository](https://github.com/apotonick/gemgem-trbrb)
+* Trailblazer with Sinatra [Guide](http://trailblazer.to/guides/sinatra/getting-started.html)html) [Repository](https://github.com/apotonick/gemgem-sinatra)
+* Trailblazer with Lotus - coming soon!
+* Trailblazer with Roda - coming soon!
+* Trailblazer with Grape - coming _very_ soon!
+
 
 ## A Concept-Driven OOP Framework
 
