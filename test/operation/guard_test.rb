@@ -80,6 +80,28 @@ class OpPolicyGuardTest < MiniTest::Spec
     it { Index.("true").wont_equal nil }
     it { assert_raises(Trailblazer::NotAuthorizedError) { Index.(false).wont_equal nil } }
   end
+
+  describe "with Callable" do
+    class Find < Trailblazer::Operation
+      include Policy::Guard
+
+      class Guardian
+        include Uber::Callable
+
+        def call(context, params)
+          params == "true"
+        end
+      end
+
+      policy Guardian.new
+
+      def process(*)
+      end
+    end
+
+    it { Find.("true").wont_equal nil }
+    it { assert_raises(Trailblazer::NotAuthorizedError) { Find.(false).wont_equal nil } }
+  end
 end
 
 class OpBuilderDenyTest < MiniTest::Spec

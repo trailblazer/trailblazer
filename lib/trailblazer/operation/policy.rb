@@ -13,7 +13,7 @@ module Trailblazer
     module DSL
       def self.extended(extender)
         extender.inheritable_attr :policy_config
-        extender.policy_config = Guard::Permission.new { true } # return true per default.
+        extender.policy_config = lambda { |*| true } # return true per default.
       end
 
       def policy(*args, &block)
