@@ -102,6 +102,20 @@ class OpPolicyGuardTest < MiniTest::Spec
     it { Find.("true").wont_equal nil }
     it { assert_raises(Trailblazer::NotAuthorizedError) { Find.(false).wont_equal nil } }
   end
+
+  describe "with Proc" do
+    class Follow < Trailblazer::Operation
+      include Policy::Guard
+
+      policy ->(params) { params == "true" } # TODO: is this really executed in op context?
+
+      def process(*)
+      end
+    end
+
+    it { Follow.("true").wont_equal nil }
+    it { assert_raises(Trailblazer::NotAuthorizedError) { Follow.(false).wont_equal nil } }
+  end
 end
 
 class OpBuilderDenyTest < MiniTest::Spec
