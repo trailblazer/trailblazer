@@ -57,9 +57,10 @@ module Trailblazer
       # Without a block, return the policy object (which is usually a Pundit-style class).
       # When block is passed evaluate the default rule and run block when false.
       def call(user, model, external_policy=nil)
-        build_policy(user, model, external_policy).tap do |policy|
-          policy.send(@action) || yield(policy, @action) if block_given?
-        end
+        policy = build_policy(user, model, external_policy)
+
+        policy.send(@action) || yield(policy, @action) if block_given?
+        policy
       end
 
     private
