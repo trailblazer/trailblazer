@@ -2,7 +2,7 @@ module Trailblazer
   # Encapsulates HTTP-specific logic needed before running an operation.
   # Right now, all this does is #document_body! which figures out whether or not to pass the request body
   # into params, so the operation can use a representer to deserialize the original document.
-  # To be used in Lotus, Roda, Rails, etc.
+  # To be used in Hanami, Roda, Rails, etc.
   class Endpoint
     def initialize(operation_class, params, request, options)
       @operation_class = operation_class
