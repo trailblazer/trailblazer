@@ -262,4 +262,8 @@ class OperationErrorsTest < MiniTest::Spec
     res, op = Operation.run({})
     op.errors.to_s.must_equal "{:title=>[\"can't be blank\"]}"
   end
+
+  it do
+    lambda { Operation.run(nil) }.must_raise Trailblazer::Operation::ParameterMissing
+  end
 end
