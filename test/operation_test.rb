@@ -10,7 +10,7 @@ end
 class OperationSetupParamsTest < MiniTest::Spec
   class OperationSetupParam < Trailblazer::Operation
     def process(params)
-      @model = params
+      self.model = params
     end
 
     def setup_params!(params)
@@ -27,7 +27,7 @@ end
 class OperationParamsTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
     def process(params)
-      @model = "#{params} and #{@params==params}"
+      self.model = "#{params} and #{@params==params}"
     end
 
     def params!(params)

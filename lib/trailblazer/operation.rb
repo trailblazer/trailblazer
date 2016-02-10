@@ -88,6 +88,8 @@ module Trailblazer
 
   private
     module Setup
+      attr_writer :model
+
       def setup!(params)
         params = assign_params!(params)
         setup_params!(params)
