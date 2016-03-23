@@ -7,11 +7,14 @@
 # TODO: so far, we only support JSON, but it's two lines to change to support any kind of format.
 module Trailblazer::Operation::Representer
   def self.included(base)
-    base.inheritable_attr :_representer_class
-    base.extend ClassMethods
+    base.extend DSL
   end
 
-  module ClassMethods
+  module DSL
+    def self.extended(extender)
+      extender.inheritable_attr :_representer_class
+    end
+
     def representer(constant=nil, &block)
       return representer_class unless constant or block_given?
 

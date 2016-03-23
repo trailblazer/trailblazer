@@ -176,3 +176,31 @@ class InternalRepresenterAPITest < MiniTest::Spec
     end
   end
 end
+
+class DifferentParseAndRenderingRepresenterTest < MiniTest::Spec
+  Album = Struct.new(:title)
+
+  class Create < Trailblazer::Operation
+    extend Representer::DSL
+    include Representer::Rendering # no Deserializer::Hash here or anything.
+
+    contract do
+      property :title
+    end
+
+    representer do
+      property :title, as: :Title
+    end
+
+    def process(params)
+      @model = Album.new
+      validate(params) do
+        contract.sync
+      end
+    end
+  end
+
+  it do
+    Create.(title: "The Kids").to_json.must_equal %{{"Title":"The Kids"}}
+  end
+end

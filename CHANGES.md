@@ -1,3 +1,8 @@
+# 1.1.1
+
+* Rename `Operation::Representer::ClassMethods` to `Operation::Representer::DSL` and allow to use `DSL` and `Rendering` without `Deserialization` so you can use two different representers.
+* `Policy::Guard::policy` now also accepts a `Callable` object.
+
 # 1.1.0
 
 * `Representer#represented` defaults to `model` now, not to `contract` anymore.
