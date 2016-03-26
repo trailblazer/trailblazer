@@ -2,6 +2,7 @@
 
 * Rename `Operation::Representer::ClassMethods` to `Operation::Representer::DSL` and allow to use `DSL` and `Rendering` without `Deserialization` so you can use two different representers.
 * `Policy::Guard::policy` now also accepts a `Callable` object.
+* Add `Operation#model=`.
 
 # 1.1.0
 

@@ -55,19 +55,14 @@ class OperationModelTest < MiniTest::Spec
 end
 
 # Operation#model=.
-class OperationModelEqualsTest < MiniTest::Spec
+class OperationModelWriterTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
     def process(params)
-      self.model = "#{params} and #{@params==params}"
-    end
-
-    def params!(params)
-      { params: params }
+      self.model = "#{params}"
     end
   end
 
-  # allows you returning new params in #params!.
-  it { Operation.("I can set @model via a private setter").model.to_s.must_equal "{:params=>\"I can set @model via a private setter\"} and true" }
+  it { Operation.("I can set @model via a private setter").model.to_s.must_equal "I can set @model via a private setter" }
 end
 
 class OperationRunTest < MiniTest::Spec
