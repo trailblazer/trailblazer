@@ -112,7 +112,7 @@ Again, the controller only dispatchs to the operation and handles successful/inv
 
 Operations encapsulate business logic and are the heart of a Trailblazer architecture.
 
-Operations don't know about HTTP or the environment. You could use an operation in Rails, Lotus, or Roda, it wouldn't know. This makes them an ideal replacement for test factories.
+Operations don't know about HTTP or the environment. You could use an operation in Rails, Hanami, or Roda, it wouldn't know. This makes them an ideal replacement for test factories.
 
 An operation is not just a monolithic replacement for your business code. It's a simple orchestrator between the form object, models and your business code.
 
