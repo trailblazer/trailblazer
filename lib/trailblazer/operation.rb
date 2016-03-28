@@ -120,7 +120,7 @@ module Trailblazer
       def model!(params)
       end
 
-      # Override to add attributes that can be infered from params.
+      # Override to add attributes that can be inferred from params.
       def setup_model!(params)
       end
     end
