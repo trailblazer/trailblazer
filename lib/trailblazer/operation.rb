@@ -82,10 +82,6 @@ module Trailblazer
       @valid
     end
 
-    def contract(*args)
-      contract!(*args)
-    end
-
   private
     module Setup
       attr_writer :model
@@ -131,7 +127,7 @@ module Trailblazer
     include Setup
 
     def validate(params, model=nil, contract_class=nil)
-      contract!(model, contract_class)
+      contract(model, contract_class)
 
       if @valid = validate_contract(params)
         yield contract if block_given?
@@ -162,10 +158,16 @@ module Trailblazer
       model          ||= self.model
       contract_class ||= self.class.contract_class
 
+      contract!(model, contract_class)
+    end
+
+    # Override to construct your own contract.
+    def contract!(model, contract_class)
       contract_class.new(model)
     end
 
-    def contract!(*args)
+    # Call like +contract(model)+ to create and memoize contract, e.g. for Composition.
+    public def contract(*args)
       @contract ||= contract_for(*args)
     end
 
