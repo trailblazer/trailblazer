@@ -154,16 +154,16 @@ module Trailblazer
 
     # Instantiate the contract, either by using the user's contract passed into #validate
     # or infer the Operation contract.
-    def contract_for(model=nil, contract_class=nil)
+    def contract_for(model=nil, contract_class=nil, options={})
       model          ||= self.model
       contract_class ||= self.class.contract_class
 
-      contract!(model, contract_class)
+      contract!(model, contract_class, options)
     end
 
     # Override to construct your own contract.
-    def contract!(model, contract_class)
-      contract_class.new(model)
+    def contract!(model, contract_class, options)
+      contract_class.new(model, options)
     end
 
     # Call like +contract(model)+ to create and memoize contract, e.g. for Composition.

@@ -237,7 +237,7 @@ class OperationTest < MiniTest::Spec
   # ::present only runs #setup! which runs #model!.
   class ContractOnlyOperation < Trailblazer::Operation
     self.contract_class = class Contract
-      def initialize(model)
+      def initialize(model, *)
         @_model = model
       end
       attr_reader :_model
