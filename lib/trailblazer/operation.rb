@@ -126,8 +126,10 @@ module Trailblazer
     end
     include Setup
 
-    def validate(params, model=nil, contract_class=nil)
-      contract(model, contract_class)
+    # Instantiates the operation's contract and validates the params with it.
+    # Signature: validate(params, model=nil, options={}, contract_class=nil)
+    def validate(params, *args)
+      contract(*args)
 
       if @valid = validate_contract(params)
         yield contract if block_given?
@@ -154,21 +156,31 @@ module Trailblazer
 
     # Instantiate the contract, either by using the user's contract passed into #validate
     # or infer the Operation contract.
-    def contract_for(model=nil, contract_class=nil, options={})
+    def contract_for(model=nil, options={}, contract_class=nil)
       model          ||= self.model
       contract_class ||= self.class.contract_class
 
-      contract!(model, contract_class, options)
+      contract!(model, options, contract_class)
     end
 
     # Override to construct your own contract.
-    def contract!(model, contract_class, options)
+    def contract!(model, options, contract_class)
       contract_class.new(model, options)
     end
 
+  public
     # Call like +contract(model)+ to create and memoize contract, e.g. for Composition.
-    public def contract(*args)
+    def contract(*args)
+      args = deprecate_contract_args(*args)
       @contract ||= contract_for(*args)
+    end
+
+    def deprecate_contract_args(*args) # TODO: remove in 1.3.
+      return args if args.size != 2
+      return args if args[1].is_a?(Hash) # the old API was contract(model, contract_class).
+
+      warn "[Trailblazer] The signature of Operation#contract has changed: contract(model, options={}, contract_class)."
+      [args[0], {}, args[1]]
     end
 
     class InvalidContract < RuntimeError
