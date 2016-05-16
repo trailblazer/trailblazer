@@ -5,7 +5,7 @@
 * Changed `Operation#validate`: the signature now is `validate(params, model=self.model, options={}, contract_class)`.
 * Changed `Operation#contract`: the signature now is `contract(model=self.model, options={}, contract_class)`.
 
-Both changes simplify injecting additional dependencies into the contract, or making use of `Composition` contracts. Read more [here](trailblazer.to/gems/operation/contract.html). Note that in 1.2, there are deprecation mechanics to handle old code.
+Both changes simplify injecting additional dependencies into the contract, or making use of `Composition` contracts. Read more [here](http://trailblazer.to/gems/operation/contract.html). Note that in 1.2, there are deprecation mechanics to handle old code.
 
 # 1.1.1
 
