@@ -77,6 +77,31 @@ class OperationContractWithTwinOptionsTest < MiniTest::Spec
       op.contract.title.must_equal "Medicine Balls"
     end
   end
+
+  describe "#validate with Composition" do
+    class CompositionValidateOperation < Trailblazer::Operation
+      contract do
+        include Reform::Form::Composition
+        property :song_id,    on: :song
+        property :album_name, on: :album
+        property :title,      virtual: true
+      end
+
+      def process(params)
+        song  = Struct.new(:song_id).new(1)
+        album = Struct.new(:album_name).new("Forever Malcom Young")
+
+        validate(params, { song: song, album: album }, title: "Medicine Balls")
+      end
+    end
+
+    it do
+      op = CompositionValidateOperation.({})
+      op.contract.song_id.must_equal 1
+      op.contract.album_name.must_equal "Forever Malcom Young"
+      op.contract.title.must_equal "Medicine Balls"
+    end
+  end
 end
 
 class OperationContractWithTwinOptionsAndContractClassTest < MiniTest::Spec
