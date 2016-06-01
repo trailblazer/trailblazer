@@ -89,6 +89,7 @@ class CommentsController < ApplicationController
   def create
     run Comment::Create # Comment::Create is an operation class.
   end
+end
 ```
 
 The `#run` method invokes the operation. It allows you to run a conditional block of logic if the operation was successful.
@@ -102,6 +103,7 @@ class CommentsController < ApplicationController
 
     render :new # invalid. re-render form.
   end
+end
 ```
 
 Again, the controller only dispatchs to the operation and handles successful/invalid processing on the HTTP level. For instance by redirecting, setting flash messages, or signing in a user.
@@ -169,6 +171,7 @@ class Comment::Create < Trailblazer::Operation
   callback(:after_save) do
     on_change :markdownize_body! # this is only run when the form object has changed.
   end
+end
 ```
 
 Callbacks are never triggered automatically, you have to invoke them! This is called _Imperative Callback_.
@@ -232,6 +235,7 @@ class Comment::Create < Trailblazer::Operation
   include Policy
 
   policy Comment::Policy, :create?
+end
 ```
 
 The policy is evaluated in `#setup!`, raises an exception if `false` and suppresses running `#process`.
@@ -251,6 +255,7 @@ class CommentsController < ApplicationController
   def new
     form Comment::Create # will assign the form object to @form.
   end
+end
 ```
 
 Since Reform objects can be passed to form builders, you can use the operation to render and process the form!
@@ -275,6 +280,7 @@ class Comment::Create < Trailblazer::Operation
 
     link(:self) { comment_path(represented.id) }
   end
+end
 ```
 
 The operation can then parse incoming JSON documents in `validate` and render a document via `to_json`.
@@ -290,6 +296,7 @@ Operations completely replace the need for leaky factories.
 ```ruby
 describe Comment::Update do
   let(:comment) { Comment::Create.(comment: {body: "[That](http://trailblazer.to)!"}) }
+end
 ```
 
 ## More
