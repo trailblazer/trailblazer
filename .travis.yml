@@ -6,5 +6,6 @@ rvm:
 gemfiles:
   - gemfiles/Gemfile.reform-2.0
   - gemfiles/Gemfile.reform-2.1
+  - gemfiles/Gemfile.reform-2.2
 before_install:
   - gem install bundler

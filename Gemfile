@@ -5,8 +5,9 @@ gemspec
 
 # gem "representable", path: "../representable"
 # gem "disposable", path: "../disposable"
-gem "virtus"
 gem "reform", github: "apotonick/reform"
+gem "reform-rails"
+
 gem "roar", github: "apotonick/roar"
 # gem "reform", "~> 2.0.0"
 # gem "reform", path: "../reform"
