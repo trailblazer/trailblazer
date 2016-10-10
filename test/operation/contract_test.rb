@@ -13,7 +13,7 @@ end
 class ContractTest < Minitest::Spec
   class Form
     def initialize(model, options={})
-      @inspect = "#{model} #{options.inspect}"
+      @inspect = "#{self.class}: #{model} #{options.inspect}"
     end
 
     def validate
@@ -33,7 +33,28 @@ class ContractTest < Minitest::Spec
   end
 
   # contract(model)
-  it { Create.(contract_class: Form).must_equal "Object {}" }
+  it { Create.(contract_class: Form).must_equal "ContractTest::Form: Object {}" }
   # contract(model, options)
-  it { Create.(contract_class: Form, params:{options: true}).must_equal "Object {:admin=>true}" } # PARAMS; SUCKS
+  it { Create.(contract_class: Form, params:{options: true}).must_equal "ContractTest::Form: Object {:admin=>true}" } # PARAMS; SUCKS
+
+  # ::contract Form
+  # contract(model).validate
+  class Update < Trailblazer::Operation
+    include Contract
+
+    self.contract_class = Form
+
+    def call(*)
+      contract.validate
+    end
+
+    def model
+      Object
+    end
+  end
+
+  # use the class contract.
+  it { Update.().must_equal "ContractTest::Form: Object {}" }
+  # injected contract overrides class.
+  it { Update.(contract_class: Injected = Class.new(Form)).must_equal "ContractTest::Injected: Object {}" }
 end

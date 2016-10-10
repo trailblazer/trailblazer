@@ -34,6 +34,7 @@ module Trailblazer::Operation::Contract
       contract_class.class_eval(&block) if block_given?
     end
   end
+  # until here, this code is totally generic and could be the same for model, contract, policy, etc.
 
 
   # Instantiate the contract, either by using the user's contract passed into #validate
