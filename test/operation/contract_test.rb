@@ -58,3 +58,34 @@ class ContractTest < Minitest::Spec
   # injected contract overrides class.
   it { Update.(contract_class: Injected = Class.new(Form)).must_equal "ContractTest::Injected: Object {}" }
 end
+
+class ValidateTest < Minitest::Spec
+  class Form
+    def initialize(*); end
+    def validate(result); result; end
+  end
+
+  class Create < Trailblazer::Operation
+    include Contract
+    contract Form
+
+    def call(params)
+      params = false if params == {} # FIXME: API with ||{} sucks.
+      if validate(params)
+        "works!"
+      else
+        "try again"
+      end
+    end
+
+    def model
+    end
+  end
+
+  # validate builds contract using #contract and returns the #validate result.
+  it { Create.(params: false).must_equal "try again" }
+  it { Create.(params: true).must_equal "works!" }
+end
+
+
+# do we want raise! with the result object?

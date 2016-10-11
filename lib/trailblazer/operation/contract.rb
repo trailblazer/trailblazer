@@ -18,6 +18,7 @@ module Trailblazer::Operation::Contract
     includer.extend Uber::InheritableAttr
     includer.inheritable_attr :contract_class
     includer.extend DSL
+    includer.include Validate
   end
   # TODO: use dry-constructor or whatever for a unified initialize interface.
 
@@ -60,6 +61,34 @@ public
 #private
   def contract_class
     @contract_class || self.class.contract_class
+  end
+
+  module Validate
+  private
+    # Instantiates the operation's contract and validates the params with it.
+    # Signature: validate(params, model=nil, options={}, contract_class=nil)
+    def validate(params, *args)
+      contract(*args)
+
+      if @valid = validate_contract(params)
+        yield contract if block_given?
+      else
+        # raise!(contract)
+      end
+
+      @valid
+    end
+
+    def validate_contract(params)
+      contract.validate(params)
+    end
+
+    # DISCUSS: this is now a test-specific optional feature, so should we really keep it here?
+    def raise!(contract)
+      # raise InvalidContract.new(contract.errors.to_s) if @options[:raise_on_invalid]
+    end
+    class InvalidContract < RuntimeError
+    end
   end
 end
 
