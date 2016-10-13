@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.version       = Trailblazer::VERSION
   spec.authors       = ["Nick Sutterer"]
   spec.email         = ["apotonick@gmail.com"]
-  spec.description   = %q{A high-level, modular architecture for Ruby framworks with domain and form objects, view models, twin decorators and representers.}
+  spec.description   = %q{A high-level architecture for web applications introducing new abstractions such as operations, form objects or policies.}
   spec.summary       = %q{A high-level architecture for Ruby and Rails.}
   spec.homepage      = "http://trailblazer.to"
   spec.license       = "MIT"
@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-
+  spec.add_dependency "trailblazer-operation"
   spec.add_dependency "uber", ">= 0.0.15"
   spec.add_dependency "reform", ">= 2.0.0", "< 3.0.0"
   spec.add_dependency "declarative"
