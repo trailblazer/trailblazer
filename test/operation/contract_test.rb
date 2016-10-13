@@ -1,15 +1,6 @@
 require "test_helper"
 require "trailblazer/operation/contract"
 
-class ContractInjectTest < Minitest::Spec
-  class Delete < Trailblazer::Operation
-    include Contract
-  end
-
-  # inject contract instance via constructor.
-  it { Delete.new({}, contract: "contract/instance").contract.must_equal "contract/instance" }
-end
-
 class ContractTest < Minitest::Spec
   class Form
     def initialize(model, options={})
@@ -19,6 +10,21 @@ class ContractTest < Minitest::Spec
     def validate
       @inspect
     end
+  end
+
+  describe "dependency injection" do
+    class Delete < Trailblazer::Operation
+      include Contract
+    end
+
+    class Follow < Trailblazer::Operation
+      include Contract
+      def model; end
+    end
+
+  # inject contract instance via constructor.
+  it { Delete.new({}, contract: "contract/instance").contract.must_equal "contract/instance" }
+  it { Follow.new({}, contract_class: Form).contract.class.must_equal Form }
   end
 
 
@@ -32,6 +38,7 @@ class ContractTest < Minitest::Spec
     end
   end
 
+  # inject class, pass in model and options when constructing.
   # contract(model)
   it { Create.({}, contract_class: Form).must_equal "ContractTest::Form: Object {}" }
   # contract(model, options)
