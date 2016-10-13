@@ -5,10 +5,10 @@
 # * allow implicit automatic setup via #contract and class.contract_class
 module Trailblazer::Operation::Contract
   module Initialize
-    def initialize(**args)
+    def initialize(params, options={})
       super
-      @contract       = args[:contract] # DISCUSS: how will this behave performance-wise in 1.2?
-      @contract_class = args[:contract_class] # DISCUSS: how will this behave performance-wise in 1.2?
+      @contract       = options[:contract] # DISCUSS: how will this behave performance-wise in 1.2?
+      @contract_class = options[:contract_class] # DISCUSS: how will this behave performance-wise in 1.2?
     end
   end
 

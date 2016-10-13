@@ -7,7 +7,7 @@ class ContractInjectTest < Minitest::Spec
   end
 
   # inject contract instance via constructor.
-  it { Delete.new(contract: "contract/instance").contract.must_equal "contract/instance" }
+  it { Delete.new({}, contract: "contract/instance").contract.must_equal "contract/instance" }
 end
 
 class ContractTest < Minitest::Spec
@@ -33,9 +33,9 @@ class ContractTest < Minitest::Spec
   end
 
   # contract(model)
-  it { Create.(contract_class: Form).must_equal "ContractTest::Form: Object {}" }
+  it { Create.({}, contract_class: Form).must_equal "ContractTest::Form: Object {}" }
   # contract(model, options)
-  it { Create.(contract_class: Form, params:{options: true}).must_equal "ContractTest::Form: Object {:admin=>true}" } # PARAMS; SUCKS
+  it { Create.({ options: true }, contract_class: Form).must_equal "ContractTest::Form: Object {:admin=>true}" }
 
   # ::contract Form
   # contract(model).validate
@@ -56,7 +56,7 @@ class ContractTest < Minitest::Spec
   # use the class contract.
   it { Update.().must_equal "ContractTest::Form: Object {}" }
   # injected contract overrides class.
-  it { Update.(contract_class: Injected = Class.new(Form)).must_equal "ContractTest::Injected: Object {}" }
+  it { Update.({}, contract_class: Injected = Class.new(Form)).must_equal "ContractTest::Injected: Object {}" }
 end
 
 class ValidateTest < Minitest::Spec
@@ -70,8 +70,7 @@ class ValidateTest < Minitest::Spec
     contract Form
 
     def call(params)
-      params = false if params == {} # FIXME: API with ||{} sucks.
-      if validate(params)
+      if validate(params[:valid])
         "works!"
       else
         "try again"
@@ -83,9 +82,13 @@ class ValidateTest < Minitest::Spec
   end
 
   # validate builds contract using #contract and returns the #validate result.
-  it { Create.(params: false).must_equal "try again" }
-  it { Create.(params: true).must_equal "works!" }
+  it { Create.(valid: false).must_equal "try again" }
+  it { Create.(valid: true).must_equal "works!" }
 end
 
 
 # do we want raise! with the result object?
+
+# Model could be a separate object instead of module
+# why are all the setup_model methods etc in Op?
+
