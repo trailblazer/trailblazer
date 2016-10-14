@@ -4,17 +4,7 @@
 # * allow contract setup and memo via #contract(model, options)
 # * allow implicit automatic setup via #contract and class.contract_class
 module Trailblazer::Operation::Contract
-  module Initialize
-    def initialize(params, options={})
-      super
-      @contract       = options[:contract] # DISCUSS: how will this behave performance-wise in 1.2?
-      @contract_class = options[:contract_class] # DISCUSS: how will this behave performance-wise in 1.2?
-    end
-  end
-
   def self.included(includer)
-    includer.send :include, Initialize
-
     includer.extend Uber::InheritableAttr
     includer.inheritable_attr :contract_class
     includer.extend DSL
@@ -55,12 +45,12 @@ module Trailblazer::Operation::Contract
 public
   # Call like +contract(model)+ to create and memoize contract, e.g. for Composition.
   def contract(*args)
-    @contract ||= contract_for(*args)
+    self[:contract] ||= contract_for(*args)
   end
 
 #private
   def contract_class
-    @contract_class || self.class.contract_class
+    self[:contract_class] || self.class.contract_class
   end
 
   module Validate
