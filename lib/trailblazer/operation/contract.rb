@@ -45,12 +45,12 @@ module Trailblazer::Operation::Contract
 public
   # Call like +contract(model)+ to create and memoize contract, e.g. for Composition.
   def contract(*args)
-    self[:contract] ||= contract_for(*args)
+    self["contract"] ||= contract_for(*args)
   end
 
 #private
   def contract_class
-    self[:contract_class] || self.class.contract_class
+    self["contract.class"] || self.class.contract_class
   end
 
   module Validate

@@ -2,6 +2,7 @@ require "test_helper"
 require "trailblazer/operation/contract"
 
 class ContractTest < Minitest::Spec
+  # generic form for testing.
   class Form
     def initialize(model, options={})
       @inspect = "#{self.class}: #{model} #{options.inspect}"
@@ -22,9 +23,9 @@ class ContractTest < Minitest::Spec
       def model; end
     end
 
-  # inject contract instance via constructor.
-  it { Delete.new({}, contract: "contract/instance").contract.must_equal "contract/instance" }
-  it { Follow.new({}, contract_class: Form).contract.class.must_equal Form }
+    # inject contract instance via constructor.
+    it { Delete.new({}, "contract" => "contract/instance").contract.must_equal "contract/instance" }
+    it { Follow.new({}, "contract.class" => Form).contract.class.must_equal Form }
   end
 
 
@@ -40,9 +41,9 @@ class ContractTest < Minitest::Spec
 
   # inject class, pass in model and options when constructing.
   # contract(model)
-  it { Create.({}, contract_class: Form).must_equal "ContractTest::Form: Object {}" }
+  it { Create.({}, "contract.class" => Form).must_equal "ContractTest::Form: Object {}" }
   # contract(model, options)
-  it { Create.({ options: true }, contract_class: Form).must_equal "ContractTest::Form: Object {:admin=>true}" }
+  it { Create.({ options: true }, "contract.class" => Form).must_equal "ContractTest::Form: Object {:admin=>true}" }
 
   # ::contract Form
   # contract(model).validate
@@ -63,7 +64,7 @@ class ContractTest < Minitest::Spec
   # use the class contract.
   it { Update.().must_equal "ContractTest::Form: Object {}" }
   # injected contract overrides class.
-  it { Update.({}, contract_class: Injected = Class.new(Form)).must_equal "ContractTest::Injected: Object {}" }
+  it { Update.({}, "contract.class" => Injected = Class.new(Form)).must_equal "ContractTest::Injected: Object {}" }
 end
 
 class ValidateTest < Minitest::Spec
