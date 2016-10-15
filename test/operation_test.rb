@@ -13,6 +13,8 @@ class OperationSetupParamsTest < MiniTest::Spec
       @model = params
     end
 
+    require "trailblazer/operation/setup"
+    include Setup
     def setup_params!(params)
       params.merge!(garrett: "Rocks!")
     end
@@ -21,27 +23,34 @@ class OperationSetupParamsTest < MiniTest::Spec
   end
 
   # allows you changing params in #setup_params!.
-  it { OperationSetupParam.run({valid: true}).to_s.must_equal "[true, <OperationSetupParam @model={:valid=>true, :garrett=>\"Rocks!\"}>]" }
+  it { OperationSetupParam.(valid: true)[:operation].to_s.must_equal "<OperationSetupParam @model={:valid=>true, :garrett=>\"Rocks!\"}>" }
 end
 
 class OperationParamsTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
+    require "trailblazer/operation/setup"
+    include Setup
+
     def process(params)
-      @model = "#{params} and #{@params==params}"
+      self.model = "#{params} and #{@params==params}"
     end
 
     def params!(params)
-      { params: params }
+      { changed_params: params }
     end
   end
 
   # allows you returning new params in #params!.
-  it { Operation.({valid: true}).model.to_s.must_equal "{:params=>{:valid=>true}} and true" }
+  it { Operation.({valid: true})[:operation].model.to_s.must_equal "{:changed_params=>{:valid=>true}} and true" }
 end
 
 # Operation#model.
 class OperationModelTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
+    require "trailblazer/operation/setup"
+    include Setup
+    include Model
+
     def process(params)
     end
 
@@ -51,24 +60,32 @@ class OperationModelTest < MiniTest::Spec
   end
 
   # #model.
-  it { Operation.(Object).model.must_equal Object }
+  it { Operation.(Object)[:operation].model.must_equal Object }
 end
 
 # Operation#model=.
 class OperationModelWriterTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
+    require "trailblazer/operation/setup"
+    include Setup
+
     def process(params)
       self.model = "#{params}"
     end
   end
 
-  it { Operation.("I can set @model via a private setter").model.to_s.must_equal "I can set @model via a private setter" }
+  it { Operation.("I can set @model via a private setter")[:operation].model.to_s.must_equal "I can set @model via a private setter" }
 end
 
 class OperationRunTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
+    require "trailblazer/operation/run"
+    extend Run
+
+    require "trailblazer/operation/contract"
+    include Contract
     # allow providing your own contract.
-    self.contract_class = class Contract
+    self.contract_class = class MyContract
       def initialize(*)
       end
       def validate(params)
@@ -103,8 +120,6 @@ class OperationRunTest < MiniTest::Spec
 
   # return operation when ::call
   it { Operation.("yes, true").to_s.must_equal %{<Operation @model=>} }
-  # #[] is alias for .()
-  it { Operation["yes, true"].to_s.must_equal %{<Operation @model=>} }
 
 
   # ::run with block returns operation.
@@ -149,6 +164,8 @@ class OperationRunTest < MiniTest::Spec
 
   describe "::present" do
     class NoContractOp < Trailblazer::Operation
+      require "trailblazer/operation/contract"
+      include Contract
       self.contract_class = nil
 
       def model!(*)
@@ -169,20 +186,22 @@ class OperationTest < MiniTest::Spec
   # test #invalid!
   class OperationWithoutValidateCall < Trailblazer::Operation
     def process(params)
-      params || invalid!(params)
+      params || invalid!
     end
 
     include Inspect
   end
 
   # ::run
-  it { OperationWithoutValidateCall.run(true).to_s.must_equal %{[true, <OperationWithoutValidateCall @model=>]} }
+  it { OperationWithoutValidateCall.(true)[:valid].must_equal true }
   # invalid.
-  it { OperationWithoutValidateCall.run(false).to_s.must_equal %{[false, <OperationWithoutValidateCall @model=>]} }
+  it { OperationWithoutValidateCall.(false)[:valid].must_equal false }
 
 
   # #validate yields contract when valid
   class OperationWithValidateBlock < Trailblazer::Operation
+    require "trailblazer/operation/contract"
+    include Contract
     self.contract_class = class Contract
       def initialize(*)
       end
@@ -202,12 +221,14 @@ class OperationTest < MiniTest::Spec
     attr_reader :secret_contract
   end
 
-  it { OperationWithValidateBlock.run(false).last.secret_contract.must_equal nil }
-  it { OperationWithValidateBlock.(true).secret_contract.must_equal OperationWithValidateBlock::Contract }
+  it { OperationWithValidateBlock.(false)[:operation].secret_contract.must_equal nil }
+  it { OperationWithValidateBlock.(true)[:operation].secret_contract.must_equal OperationWithValidateBlock::Contract }
 
 
   # test validate wit if/else
   class OperationWithValidateAndIf < Trailblazer::Operation
+    require "trailblazer/operation/contract"
+    include Contract
     self.contract_class = class Contract
       def initialize(*)
       end
@@ -229,13 +250,15 @@ class OperationTest < MiniTest::Spec
     attr_reader :secret_contract
   end
 
-  it { OperationWithValidateAndIf.run(false).last.secret_contract.must_equal "so wrong!" }
-  it { OperationWithValidateAndIf.(true).secret_contract.must_equal OperationWithValidateAndIf::Contract }
+  it { OperationWithValidateAndIf.(false)[:operation].secret_contract.must_equal "so wrong!" }
+  it { OperationWithValidateAndIf.(true)[:operation].secret_contract.must_equal OperationWithValidateAndIf::Contract }
 
 
 
   # ::present only runs #setup! which runs #model!.
   class ContractOnlyOperation < Trailblazer::Operation
+    require "trailblazer/operation/contract"
+    include Contract
     self.contract_class = class Contract
       def initialize(model, *)
         @_model = model
@@ -259,6 +282,8 @@ end
 
 class OperationErrorsTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
+    require "trailblazer/operation/contract"
+    include Contract
     contract do
       property :title, validates: {presence: true}
     end

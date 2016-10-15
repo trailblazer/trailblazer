@@ -9,9 +9,7 @@ class BuilderTest < Minitest::Spec
   end
 
   # external builder.
-  class MyBuilder
-    include Trailblazer::Builder
-
+  class MyBuilder < Trailblazer::Builder
     builds -> (params, *) do
       return ParentOperation::Sub if params[:sub]
       ParentOperation

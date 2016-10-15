@@ -3,10 +3,14 @@
 # * inject contract instance via constructor to #contract
 # * allow contract setup and memo via #contract(model, options)
 # * allow implicit automatic setup via #contract and class.contract_class
+#
+# Needs Operation#model.
 module Trailblazer::Operation::Contract
   def self.included(includer)
     includer.extend Uber::InheritableAttr
     includer.inheritable_attr :contract_class
+    includer.contract_class = Reform::Form.clone
+
     includer.extend DSL
     includer.include Validate
   end
@@ -77,9 +81,10 @@ public
     def raise!(contract)
       # raise InvalidContract.new(contract.errors.to_s) if @options[:raise_on_invalid]
     end
-    class InvalidContract < RuntimeError
-    end
   end
+end
+
+class Trailblazer::Operation::InvalidContract < RuntimeError
 end
 
 # initialize chain could be solved with pipetree.
