@@ -5,7 +5,7 @@ gemspec
 
 # gem "representable", path: "../representable"
 # gem "disposable", path: "../disposable"
-gem "reform", github: "apotonick/reform"
+# gem "reform", github: "apotonick/reform"
 gem "reform-rails"
 
 gem "roar", github: "apotonick/roar"
@@ -13,3 +13,10 @@ gem "roar", github: "apotonick/roar"
 # gem "reform", path: "../reform"
 # gem "roar", path: "../roar"
 gem "multi_json"
+
+gem "dry-auto_inject"
+
+
+gem "trailblazer-operation", path: "../operation"
+
+gem "dry-initializer"
