@@ -7,6 +7,8 @@
 
 Both changes simplify injecting additional dependencies into the contract, or making use of `Composition` contracts. Read more [here](http://trailblazer.to/gems/operation/contract.html). Note that in 1.2, there are deprecation mechanics to handle old code.
 
+* Added `Trailblazer::Builder` for a builder-and-call mechanism decoupled from the operation.
+
 # 1.1.1
 
 * Rename `Operation::Representer::ClassMethods` to `Operation::Representer::DSL` and allow to use `DSL` and `Rendering` without `Deserialization` so you can use two different representers.
