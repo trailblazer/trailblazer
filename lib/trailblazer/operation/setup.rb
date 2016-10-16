@@ -23,7 +23,10 @@ private
   def setup!(params)
     params = assign_params!(params)
     setup_params!(params)
+
     build_model!(params)
+    result[:model] = @model # this sucks and will be so much better in 2.0/trailblazer-pipetree.
+
     params # TODO: test me.
   end
 

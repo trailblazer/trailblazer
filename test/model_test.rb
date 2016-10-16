@@ -1,5 +1,4 @@
-require 'test_helper'
-require 'trailblazer/operation'
+require "test_helper"
 
 class ModelTest < MiniTest::Spec
   Song = Struct.new(:title, :id) do
@@ -14,6 +13,10 @@ class ModelTest < MiniTest::Spec
   end
 
   class CreateOperation < Trailblazer::Operation
+    require "trailblazer/operation/contract"
+    include Contract
+    require "trailblazer/operation/setup"
+    include Setup
     include Model
     model Song
     action :create
@@ -32,9 +35,9 @@ class ModelTest < MiniTest::Spec
 
 
   # creates model for you.
-  it { CreateOperation.(song: {title: "Blue Rondo a la Turk"}).model.title.must_equal "Blue Rondo a la Turk" }
+  it { CreateOperation.(song: {title: "Blue Rondo a la Turk"})[:model].title.must_equal "Blue Rondo a la Turk" }
   # exposes #model.
-  it { CreateOperation.(song: {title: "Blue Rondo a la Turk"}).model.must_be_instance_of Song }
+  it { CreateOperation.(song: {title: "Blue Rondo a la Turk"})[:model].must_be_instance_of Song }
 
   class ModifyingCreateOperation < CreateOperation
     def process(params)
@@ -47,8 +50,8 @@ class ModelTest < MiniTest::Spec
   end
 
   # lets you modify model.
-  it { ModifyingCreateOperation.(song: {title: "Blue Rondo a la Turk"}).model.title.must_equal "Blue Rondo a la Turk" }
-  it { ModifyingCreateOperation.(song: {title: "Blue Rondo a la Turk"}).model.genre.must_equal "Punkrock" }
+  it { ModifyingCreateOperation.(song: {title: "Blue Rondo a la Turk"})[:model].title.must_equal "Blue Rondo a la Turk" }
+  it { ModifyingCreateOperation.(song: {title: "Blue Rondo a la Turk"})[:model].genre.must_equal "Punkrock" }
 
   # Update
   class UpdateOperation < CreateOperation
@@ -57,10 +60,10 @@ class ModelTest < MiniTest::Spec
 
   # finds model and updates.
   it do
-    song = CreateOperation.(song: {title: "Anchor End"}).model
+    song = CreateOperation.(song: {title: "Anchor End"})[:model]
     Song.find_result = song
 
-    UpdateOperation.(id: song.id, song: {title: "The Rip"}).model.title.must_equal "The Rip"
+    UpdateOperation.(id: song.id, song: {title: "The Rip"})[:model].title.must_equal "The Rip"
     song.title.must_equal "The Rip"
   end
 
@@ -71,15 +74,19 @@ class ModelTest < MiniTest::Spec
 
   # finds model and updates.
   it do
-    song = CreateOperation.(song: {title: "Anchor End"}).model
+    song = CreateOperation.(song: {title: "Anchor End"})[:model]
     Song.find_result = song
 
-    FindOperation.(id: song.id, song: {title: "The Rip"}).model.title.must_equal "The Rip"
+    FindOperation.(id: song.id, song: {title: "The Rip"})[:model].title.must_equal "The Rip"
     song.title.must_equal "The Rip"
   end
 
 
   class DefaultCreateOperation < Trailblazer::Operation
+    require "trailblazer/operation/contract"
+    include Contract
+    require "trailblazer/operation/setup"
+    include Setup
     include Model
     model Song
 
@@ -89,7 +96,7 @@ class ModelTest < MiniTest::Spec
   end
 
   # uses :create as default if not set via ::action.
-  it { DefaultCreateOperation.({}).model.must_equal Song.new }
+  it { DefaultCreateOperation.({})[:model].must_equal Song.new }
 
   # model Song, :action
   class ModelUpdateOperation < CreateOperation
@@ -99,7 +106,7 @@ class ModelTest < MiniTest::Spec
   # allows ::model, :action.
   it do
     Song.find_result = song = Song.new
-    ModelUpdateOperation.({id: 1, song: {title: "Mercy Day For Mr. Vengeance"}}).model.must_equal song
+    ModelUpdateOperation.({id: 1, song: {title: "Mercy Day For Mr. Vengeance"}})[:model].must_equal song
   end
 
 
@@ -111,16 +118,20 @@ class ModelTest < MiniTest::Spec
     end
   end
 
-  it { SetupModelOperation.(song: {title: "Emily Kane"}).model.params.must_equal "{:song=>{:title=>\"Emily Kane\"}}" }
+  it { SetupModelOperation.(song: {title: "Emily Kane"})[:model].params.must_equal "{:song=>{:title=>\"Emily Kane\"}}" }
 
 
 
   # no call to ::model raises error.
   class NoModelOperation < Trailblazer::Operation
+    require "trailblazer/operation/contract"
+    include Contract
+    require "trailblazer/operation/setup"
+    include Setup
     include Model
 
     def process(params)
-      self
+      model
     end
   end
 
@@ -129,20 +140,22 @@ class ModelTest < MiniTest::Spec
 
   # allow passing validate(params, model, contract_class)
   class OperationWithPrivateContract < Trailblazer::Operation
+    include Setup
+    include Contract
     include Model
     model Song
 
-    class Contract < Reform::Form
+    class MyContract < Reform::Form
       property :title
     end
 
     def process(params)
-      validate(params[:song], model, Contract) do |f|
+      validate(params[:song], model, {}, MyContract) do |f|
         f.sync
       end
     end
   end
 
   # uses private Contract class.
-  it { OperationWithPrivateContract.(song: {title: "Blue Rondo a la Turk"}).model.title.must_equal "Blue Rondo a la Turk" }
+  it { OperationWithPrivateContract.(song: {title: "Blue Rondo a la Turk"})[:model].title.must_equal "Blue Rondo a la Turk" }
 end
