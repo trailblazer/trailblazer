@@ -28,6 +28,9 @@ This is mimiced in Setup ATM, but will be changed in 2.0.
 ## #call
 * Removed `Op.call().contract`, you now have to do `Op.call()[:operation].contract`.
 
+* Removed the deprecation for `validate`, signature is `(params[, model, options, contract_class])`.
+* Removed the deprecation for `contract`, signature is `([model, options, contract_class])`.
+
 # 1.1.1
 
 * Rename `Operation::Representer::ClassMethods` to `Operation::Representer::DSL` and allow to use `DSL` and `Rendering` without `Deserialization` so you can use two different representers.
