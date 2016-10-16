@@ -84,6 +84,7 @@ class OperationRunTest < MiniTest::Spec
 
     require "trailblazer/operation/contract"
     include Contract
+
     # allow providing your own contract.
     self.contract_class = class MyContract
       def initialize(*)
@@ -112,10 +113,31 @@ class OperationRunTest < MiniTest::Spec
   it { Operation.run("not true").to_s.must_equal %{[false, <Operation @model=>]} }
   it { Operation.run("yes, true").to_s.must_equal %{[true, <Operation @model=>]} }
 
-  # ::call raises exception when invalid.
-  it do
-    exception = assert_raises(Trailblazer::Operation::InvalidContract) { Operation.("not true") }
-    exception.message.must_equal "Op just calls #to_s on Errors!"
+  describe "Raise" do
+    class Follow < Trailblazer::Operation
+      require "trailblazer/operation/contract"
+      include Contract
+      include Setup
+
+      module Validate
+        def validate(is_valid)
+          is_valid
+        end
+      end
+      include Validate
+      include Contract::Raise
+
+      def process(params)
+        validate(params[:is_valid])
+      end
+    end
+    # #validate raises exception when invalid.
+    it do
+      exception = assert_raises(Trailblazer::Operation::InvalidContract) { Follow.(is_valid: false) }
+      # exception.message.must_equal "Op just calls #to_s on Errors!"
+    end
+    it { Follow.(is_valid:true)[:result].must_equal true }
+
   end
 
   # return operation when ::call

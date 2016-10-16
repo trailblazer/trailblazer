@@ -8,6 +8,19 @@
 Both changes simplify injecting additional dependencies into the contract, or making use of `Composition` contracts. Read more [here](http://trailblazer.to/gems/operation/contract.html). Note that in 1.2, there are deprecation mechanics to handle old code.
 
 * Added `Trailblazer::Builder` for a builder-and-call mechanism decoupled from the operation.
+* Finally removed `Operation::[]`.
+
+TRB 1.1
+  build_operation(params).run
+    process(@params)
+TRB 1.2
+  build_operation(params, *).call(params)
+In 1.2, the possibly modified @params is not passed to #call, which SHOULD BE the correct behavior.
+This is mimiced in Setup ATM, but will be changed in 2.0.
+
+
+* Removed `Operation::run` as it was a bad decision. Raising an exception on invalid is a very test-specific scenario and shouldn't have been handled in the core doce.
+* Removed the private option `:raise_on_invalid`. Use `Contract::Raise` instead, if you need it in tests.
 
 # 1.1.1
 

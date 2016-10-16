@@ -65,7 +65,7 @@ public
       contract(*args)
 
       @valid = validate_contract(params)
-      yield contract if block_given?
+      yield contract if block_given? && @valid
 
       @valid # DISCUSS: should this be an instance var?
     end
@@ -77,9 +77,15 @@ public
   end
 
   module Raise
+    def validate(*)
+      super.tap do |res|
+        raise!(contract) unless res
+      end
+    end
+
     # DISCUSS: this is now a test-specific optional feature, so should we really keep it here?
     def raise!(contract)
-      raise InvalidContract.new(contract.errors.to_s)
+      raise ::Trailblazer::Operation::InvalidContract.new(contract.errors.to_s)
     end
   end
 end
