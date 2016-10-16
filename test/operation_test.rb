@@ -137,7 +137,6 @@ class OperationRunTest < MiniTest::Spec
       # exception.message.must_equal "Op just calls #to_s on Errors!"
     end
     it { Follow.(is_valid:true)[:result].must_equal true }
-
   end
 
   # return operation when ::call
@@ -179,7 +178,7 @@ class OperationRunTest < MiniTest::Spec
   end
 
   # # Operation#contract returns @contract
-  it { Operation.("yes, true").contract.class.to_s.must_equal "OperationRunTest::Operation::Contract" }
+  it { Operation.("yes, true")[:operation].contract.class.to_s.must_equal "OperationRunTest::Operation::MyContract" }
 
 
 

@@ -20,7 +20,11 @@ This is mimiced in Setup ATM, but will be changed in 2.0.
 
 
 * Removed `Operation::run` as it was a bad decision. Raising an exception on invalid is a very test-specific scenario and shouldn't have been handled in the core doce.
+* Removed `Operation::present`, since you can simply call `Operation::new` (without builders) or `Operation::build_operation` (with builders).
 * Removed the private option `:raise_on_invalid`. Use `Contract::Raise` instead, if you need it in tests.
+
+## #call
+* Removed `Op.call().contract`, you now have to do `Op.call()[:operation].contract`.
 
 # 1.1.1
 
