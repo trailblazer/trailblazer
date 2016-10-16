@@ -190,6 +190,10 @@ class OperationRunTest < MiniTest::Spec
       include Contract
       self.contract_class = nil
 
+      require "trailblazer/operation/present"
+      extend Present
+      include Setup
+
       def model!(*)
         Object
       end
@@ -288,6 +292,9 @@ class OperationTest < MiniTest::Spec
       attr_reader :_model
       self
     end
+
+    include Setup
+    extend Present
 
     def model!(params)
       Object
