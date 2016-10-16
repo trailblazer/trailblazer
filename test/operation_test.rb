@@ -136,11 +136,11 @@ class OperationRunTest < MiniTest::Spec
       exception = assert_raises(Trailblazer::Operation::InvalidContract) { Follow.(is_valid: false) }
       # exception.message.must_equal "Op just calls #to_s on Errors!"
     end
-    it { Follow.(is_valid:true)[:result].must_equal true }
+    it { Follow.(is_valid:true)[:valid].must_equal true }
   end
 
   # return operation when ::call
-  it { Operation.("yes, true").to_s.must_equal %{<Operation @model=>} }
+  it { Operation.("yes, true").to_s.must_equal %{{:valid=>true, :operation=><Operation @model=>}} }
 
 
   # ::run with block returns operation.
@@ -234,6 +234,8 @@ class OperationTest < MiniTest::Spec
       def validate(params)
         params
       end
+
+      attr_reader :errors
       self
     end
 
@@ -261,6 +263,7 @@ class OperationTest < MiniTest::Spec
       def validate(params)
         params
       end
+      attr_reader :errors
       self
     end
 
@@ -322,7 +325,7 @@ class OperationErrorsTest < MiniTest::Spec
   end
 
   it do
-    res, op = Operation.run({})
-    op.errors.to_s.must_equal "{:title=>[\"can't be blank\"]}"
+    result = Operation.({})
+    result[:errors].to_s.must_equal "{:title=>[\"can't be blank\"]}"
   end
 end

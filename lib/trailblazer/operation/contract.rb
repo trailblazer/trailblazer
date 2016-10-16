@@ -64,10 +64,13 @@ public
     def validate(params, *args)
       contract(*args)
 
-      @valid = validate_contract(params)
-      yield contract if block_given? && @valid
+      if valid = validate_contract(params)
+        yield contract if block_given?
+      else
+        result[:errors] = contract.errors
+      end
 
-      @valid # DISCUSS: should this be an instance var?
+      result[:valid] = valid
     end
 
     def validate_contract(params)
