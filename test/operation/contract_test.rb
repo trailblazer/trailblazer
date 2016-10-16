@@ -71,6 +71,7 @@ class ValidateTest < Minitest::Spec
   class Form
     def initialize(*); end
     def validate(result); result; end
+    def errors; end
   end
 
   class Create < Trailblazer::Operation
