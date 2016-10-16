@@ -64,22 +64,22 @@ public
     def validate(params, *args)
       contract(*args)
 
-      if @valid = validate_contract(params)
-        yield contract if block_given?
-      else
-        # raise!(contract)
-      end
+      @valid = validate_contract(params)
+      yield contract if block_given?
 
-      @valid
+      @valid # DISCUSS: should this be an instance var?
     end
 
     def validate_contract(params)
       contract.validate(params)
     end
 
+  end
+
+  module Raise
     # DISCUSS: this is now a test-specific optional feature, so should we really keep it here?
     def raise!(contract)
-      # raise InvalidContract.new(contract.errors.to_s) if @options[:raise_on_invalid]
+      raise InvalidContract.new(contract.errors.to_s)
     end
   end
 end
