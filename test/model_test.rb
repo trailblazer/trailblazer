@@ -36,6 +36,21 @@ class ModelTest < MiniTest::Spec
   describe "dependency injection" do
     Hit = Class.new(Song)
     it { Create.({ song: {} }, "model.class" => Hit)[:model].class.must_equal Hit }
+
+    # "model" => Model.new
+    class Show < Trailblazer::Operation
+      def call(*); self["model"]; end
+    end
+    it { Show.().must_equal nil }
+    it { Show.({}, "model" => String).must_equal String }
+
+    # with Setup
+    class Index < Trailblazer::Operation
+      include Setup
+      def call(*); model; end
+    end
+    it { Index.().must_equal nil }
+    it { skip; Index.({}, "model" => String).must_equal String }
   end
 
   # creates model for you.

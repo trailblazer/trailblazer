@@ -10,9 +10,14 @@ module Trailblazer::Operation::Setup
     super(@params)
   end
 
-  attr_reader :model
+  def model
+    self["model"]
+  end
+
 private
-  attr_writer :model
+  def model=(model)
+    self["model"] = model
+  end
 
   def initialize(params, options={})
     @params = params
@@ -25,7 +30,7 @@ private
     setup_params!(params)
 
     build_model!(params)
-    result[:model] = @model # this sucks and will be so much better in 2.0/trailblazer-pipetree.
+    result[:model] = self["model"] # this sucks and will be so much better in 2.0/trailblazer-pipetree.
 
     params # TODO: test me.
   end
@@ -46,12 +51,12 @@ private
 
   # DISCUSS: move to Setup::Model?
   def build_model!(*args)
-    assign_model!(*args) # @model = ..
+    assign_model!(*args) # self["model"] = ..
     setup_model!(*args)
   end
 
   def assign_model!(*args)
-    @model = model!(*args)
+    self.model = model!(*args)
   end
 
   # Implement #model! to find/create your operation model (if required).

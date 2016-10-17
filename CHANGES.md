@@ -18,6 +18,13 @@ TRB 1.2
 In 1.2, the possibly modified @params is not passed to #call, which SHOULD BE the correct behavior.
 This is mimiced in Setup ATM, but will be changed in 2.0.
 
+## DI
+
+You can now inject the following objects via `::call`:
+
+* `"contract.class"`
+* `"contract"`: The contract instance.
+* `"model.class"`
 
 * Removed `Operation::run` as it was a bad decision. Raising an exception on invalid is a very test-specific scenario and shouldn't have been handled in the core doce.
 * Removed `Operation::present`, since you can simply call `Operation::new` (without builders) or `Operation::build_operation` (with builders).
