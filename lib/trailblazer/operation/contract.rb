@@ -7,14 +7,13 @@
 # Needs Operation#model.
 module Trailblazer::Operation::Contract
   def self.included(includer)
-    includer.extend Uber::InheritableAttr
-    includer.inheritable_attr :contract_class
-    includer.contract_class = Reform::Form.clone
-
     includer.extend DSL
+    includer.extend DSL::Deprecations # TODO: test this properly, and make it optional.
     includer.include Validate
+
+    require "trailblazer/operation/competences"
+    includer.include Trailblazer::Operation::Competences
   end
-  # TODO: use dry-constructor or whatever for a unified initialize interface.
 
   module DSL
     # This is a DSL method. Use ::contract_class and ::contract_class= for the explicit version.
@@ -23,20 +22,29 @@ module Trailblazer::Operation::Contract
     #   Op.contract CommentForm # copies (and subclasses) external contract.
     #   Op.contract CommentForm do .. end # copies and extends contract.
     def contract(constant=nil, &block)
-      return contract_class unless constant or block_given?
+      self["contract.class"] = Class.new(constant) if constant
+      self["contract.class"].class_eval(&block) if block_given?
+    end
 
-      self.contract_class= Class.new(constant) if constant
-      contract_class.class_eval(&block) if block_given?
+    module Deprecations # from 1.1.
+      def contract_class=(constant)
+        warn %{[Trailblazer] Operation::contract_class= is deprecated, please use Operation::["contract.class"]=}
+        self["contract.class"] = constant
+      end
+
+      def contract_class
+        warn %{[Trailblazer] Operation::contract_class is deprecated, please use Operation::["contract.class"]}
+        self["contract.class"]
+      end
     end
   end
   # until here, this code is totally generic and could be the same for model, contract, policy, etc.
-
 
   # Instantiate the contract, either by using the user's contract passed into #validate
   # or infer the Operation contract.
   def contract_for(model=nil, options={}, contract_class=nil)
     model          ||= self.model
-    contract_class ||= self.contract_class
+    contract_class ||= self["contract.class"]
 
     contract!(model, options, contract_class)
   end
@@ -50,11 +58,6 @@ public
   # Call like +contract(model)+ to create and memoize contract, e.g. for Composition.
   def contract(*args)
     self["contract"] ||= contract_for(*args)
-  end
-
-#private
-  def contract_class
-    self["contract.class"] || self.class.contract_class
   end
 
   module Validate
@@ -76,7 +79,6 @@ public
     def validate_contract(params)
       contract.validate(params)
     end
-
   end
 
   module Raise

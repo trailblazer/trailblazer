@@ -8,7 +8,7 @@
 Both changes simplify injecting additional dependencies into the contract, or making use of `Composition` contracts. Read more [here](http://trailblazer.to/gems/operation/contract.html). Note that in 1.2, there are deprecation mechanics to handle old code.
 
 * Added `Trailblazer::Builder` for a builder-and-call mechanism decoupled from the operation.
-* Finally removed `Operation::[]`.
+* Finally removed `Operation::[]`. Be careful, this is now replaced and will return the specified competence.
 
 TRB 1.1
   build_operation(params).run
@@ -24,6 +24,9 @@ This is mimiced in Setup ATM, but will be changed in 2.0.
 * Removed `Operation::valid?`. This is in the result object via `result[:valid]`.
 * Removed `Operation#errors`. This is in the result object via `result[:errors]` if the operation was invalid.
 * Removed the private option `:raise_on_invalid`. Use `Contract::Raise` instead, if you need it in tests.
+* Removed `Operation::contract` (without args). Please use `Operation::["contract.class"]`.
+* Removed `Operation::contract_class`. Please use `Operation::["contract.class"]`.
+* Removed `Operation::contract_class=`. Please use `Operation::["contract.class"]=`.
 
 ## #call
 * Removed `Op.call().contract`, you now have to do `Op.call()[:operation].contract`.
