@@ -50,7 +50,7 @@ class ContractTest < Minitest::Spec
   class Update < Trailblazer::Operation
     include Contract
 
-    self.contract_class = Form
+    self["contract.class"] = Form
 
     def call(*)
       contract.validate
