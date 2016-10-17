@@ -1,12 +1,14 @@
 require 'test_helper'
 require "trailblazer/operation/callback"
+require "trailblazer/operation/contract"
 
 # callbacks are tested in Disposable::Callback::Group.
 class OperationCallbackTest < MiniTest::Spec
   Song = Struct.new(:name)
 
   class Create < Trailblazer::Operation
-    include Trailblazer::Operation::Callback
+    include Callback
+    include Contract
 
     contract do
       property :name
@@ -53,12 +55,12 @@ class OperationCallbackTest < MiniTest::Spec
 
 
   it "invokes all callbacks" do
-    op = Create.({"name"=>"Keep On Running"})
+    op = Create.({"name"=>"Keep On Running"})[:operation]
     op.dispatched.must_equal [:notify_me!, :notify_you!]
   end
 
   it "does not invoke removed callbacks" do
-    op = Update.({"name"=>"Keep On Running"})
+    op = Update.({"name"=>"Keep On Running"})[:operation]
     op.dispatched.must_equal [:notify_you!]
   end
 end
@@ -69,7 +71,8 @@ class OperationDeprecatedDispatchTest < MiniTest::Spec
   Song = Struct.new(:name)
 
   class Create < Trailblazer::Operation
-    include Trailblazer::Operation::Dispatch
+    include Dispatch
+    include Contract
 
     contract do
       property :name
@@ -98,7 +101,7 @@ class OperationDeprecatedDispatchTest < MiniTest::Spec
   end
 
   it "invokes all callbacks [deprecated]" do
-    op = Create.({"name"=>"Keep On Running"})
+    op = Create.({"name"=>"Keep On Running"})[:operation]
     op.dispatched.must_equal [:notify_me!]
   end
 end
