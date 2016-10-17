@@ -55,10 +55,6 @@ class DslCallbackTest < MiniTest::Spec
     it { Operation::Admin.({"title"=> "Love-less"})[:_invocations].must_equal([:default!, :admin_default!, :after_save!]) }
   end
 
-  describe "Op.callback" do
-    it { Operation.callback(:default).must_equal Operation.callbacks[:default][:group] }
-  end
-
   describe "Op.callback :after_save, AfterSaveCallback" do
     class AfterSaveCallback < Disposable::Callback::Group
       on_change :after_save!
@@ -74,13 +70,14 @@ class DslCallbackTest < MiniTest::Spec
       include SongProcess
       callback :after_save, AfterSaveCallback
 
-      def process(params)
+      def call(params)
         contract(OpenStruct.new).validate(params)
         dispatch!(:after_save)
+        _invocations
       end
     end
 
-    it { OpWithExternalCallback.("title"=>"Thunder Rising")[:_invocations].must_equal([:after_save!]) }
+    it { OpWithExternalCallback.("title"=>"Thunder Rising").must_equal([:after_save!]) }
   end
 
   describe "Op.callback :after_save, AfterSaveCallback do .. end" do

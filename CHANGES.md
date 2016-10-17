@@ -36,12 +36,16 @@ You can now inject the following objects via `::call`:
 * Removed `Operation::valid?`. This is in the result object via `result[:valid]`.
 * Removed `Operation#errors`. This is in the result object via `result[:errors]` if the operation was invalid.
 * Removed the private option `:raise_on_invalid`. Use `Contract::Raise` instead, if you need it in tests.
+
 * Removed `Operation::contract` (without args). Please use `Operation::["contract.class"]`.
+* Removed `Operation::callbacks` (without args). Please use `Operation::["callback.<name>.class"]`.
 * Removed `Operation::contract_class`. Please use `Operation::["contract.class"]`.
 * Removed `Operation::contract_class=`. Please use `Operation::["contract.class"]=`.
 
 ## #call
+* You can return whatever you want now by overriding `Op::call`.
 * Removed `Op.call().contract`, you now have to do `Op.call()[:operation].contract`.
+
 
 * Removed the deprecation for `validate`, signature is `(params[, model, options, contract_class])`.
 * Removed the deprecation for `contract`, signature is `([model, options, contract_class])`.

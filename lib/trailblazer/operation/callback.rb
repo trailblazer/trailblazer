@@ -3,14 +3,14 @@ require "disposable/callback"
 
 module Trailblazer::Operation::Callback
   def self.included(base)
-    base.extend ClassMethods
+    base.extend DSL
 
     base.extend Declarative::Heritage::Inherited
     base.extend Declarative::Heritage::DSL
   end
 
   def callback!(name=:default, options={ operation: self, contract: contract, params: @params }) # FIXME: test options.
-    config  = self.class.callbacks.fetch(name) # TODO: test exception
+    config  = self["callback.#{name}.class"] || raise #.fetch(name) # TODO: test exception
     group   = config[:group].new(contract)
 
     options[:context] ||= (config[:context] == :operation ? self : group)
@@ -27,27 +27,17 @@ module Trailblazer::Operation::Callback
     @invocations ||= {}
   end
 
-  module ClassMethods
-    def callbacks
-      @callbacks ||= {}
-    end
-
+  module DSL
     def callback(name=:default, constant=nil, &block)
-      return callbacks[name][:group] unless constant or block_given?
+      heritage.record(:callback, name, constant, &block)
 
-      add_callback(name, constant, &block)
-    end
+      # FIXME: make this nicer. we want to extend same-named callback groups.
+      # TODO: allow the same with contract, or better, test it!
+      extended = self["callback.#{name}.class"] && self["callback.#{name}.class"][:group]
 
-  private
-    def add_callback(name, constant, &block)
-      heritage.record(:add_callback, name, constant, &block)
+      path, group_class = Trailblazer::Competences::Build.new.({ prefix: :callback, class: extended||Disposable::Callback::Group }, name, constant, &block)
 
-      callbacks[name] ||= {
-        group:   Class.new(constant || Disposable::Callback::Group),
-        context: constant ? nil : :operation # `context: :operation` when the callback is inline. `context: group` otherwise.
-      }
-
-      callbacks[name][:group].class_eval(&block) if block_given?
+      self[path] = { group: group_class, context: constant ? nil : :operation }
     end
   end
 end
