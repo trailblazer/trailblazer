@@ -5,8 +5,14 @@ module Trailblazer
     # The Model module will automatically create/find models for the configured +action+.
     # It adds a public  +Operation#model+ reader to access the model (after performing).
     module Model
-      def self.included(base)
-        base.extend DSL
+      def self.included(includer)
+        includer.extend DSL
+
+        includer.extend Declarative::Heritage::Inherited
+        includer.extend Declarative::Heritage::DSL
+
+        require "trailblazer/operation/competences"
+        includer.include Trailblazer::Operation::Competences
       end
 
       # Methods to create the model according to class configuration and params.
