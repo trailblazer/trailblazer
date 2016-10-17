@@ -2,6 +2,9 @@
 
 ## API change:
 
+`Contract`, Setup, Model
+expose via `result[:_invocations] = _invocations`
+
 * Changed `Operation#validate`: the signature now is `validate(params, model=self.model, options={}, contract_class)`.
 * Changed `Operation#contract`: the signature now is `contract(model=self.model, options={}, contract_class)`.
 
