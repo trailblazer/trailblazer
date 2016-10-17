@@ -12,7 +12,7 @@ class ModelTest < MiniTest::Spec
     end
   end
 
-  class CreateOperation < Trailblazer::Operation
+  class Create < Trailblazer::Operation
     require "trailblazer/operation/contract"
     include Contract
     require "trailblazer/operation/setup"
@@ -33,13 +33,17 @@ class ModelTest < MiniTest::Spec
     end
   end
 
+  describe "dependency injection" do
+    Hit = Class.new(Song)
+    it { Create.({ song: {} }, "model.class" => Hit)[:model].class.must_equal Hit }
+  end
 
   # creates model for you.
-  it { CreateOperation.(song: {title: "Blue Rondo a la Turk"})[:model].title.must_equal "Blue Rondo a la Turk" }
+  it { Create.(song: {title: "Blue Rondo a la Turk"})[:model].title.must_equal "Blue Rondo a la Turk" }
   # exposes #model.
-  it { CreateOperation.(song: {title: "Blue Rondo a la Turk"})[:model].must_be_instance_of Song }
+  it { Create.(song: {title: "Blue Rondo a la Turk"})[:model].must_be_instance_of Song }
 
-  class ModifyingCreateOperation < CreateOperation
+  class ModifyingCreate < Create
     def process(params)
       model.instance_eval { def genre; "Punkrock"; end }
 
@@ -50,17 +54,17 @@ class ModelTest < MiniTest::Spec
   end
 
   # lets you modify model.
-  it { ModifyingCreateOperation.(song: {title: "Blue Rondo a la Turk"})[:model].title.must_equal "Blue Rondo a la Turk" }
-  it { ModifyingCreateOperation.(song: {title: "Blue Rondo a la Turk"})[:model].genre.must_equal "Punkrock" }
+  it { ModifyingCreate.(song: {title: "Blue Rondo a la Turk"})[:model].title.must_equal "Blue Rondo a la Turk" }
+  it { ModifyingCreate.(song: {title: "Blue Rondo a la Turk"})[:model].genre.must_equal "Punkrock" }
 
   # Update
-  class UpdateOperation < CreateOperation
+  class UpdateOperation < Create
     action :update
   end
 
   # finds model and updates.
   it do
-    song = CreateOperation.(song: {title: "Anchor End"})[:model]
+    song = Create.(song: {title: "Anchor End"})[:model]
     Song.find_result = song
 
     UpdateOperation.(id: song.id, song: {title: "The Rip"})[:model].title.must_equal "The Rip"
@@ -68,13 +72,13 @@ class ModelTest < MiniTest::Spec
   end
 
   # Find == Update
-  class FindOperation < CreateOperation
+  class FindOperation < Create
     action :find
   end
 
   # finds model and updates.
   it do
-    song = CreateOperation.(song: {title: "Anchor End"})[:model]
+    song = Create.(song: {title: "Anchor End"})[:model]
     Song.find_result = song
 
     FindOperation.(id: song.id, song: {title: "The Rip"})[:model].title.must_equal "The Rip"
@@ -82,7 +86,7 @@ class ModelTest < MiniTest::Spec
   end
 
 
-  class DefaultCreateOperation < Trailblazer::Operation
+  class DefaultCreate < Trailblazer::Operation
     require "trailblazer/operation/contract"
     include Contract
     require "trailblazer/operation/setup"
@@ -96,10 +100,10 @@ class ModelTest < MiniTest::Spec
   end
 
   # uses :create as default if not set via ::action.
-  it { DefaultCreateOperation.({})[:model].must_equal Song.new }
+  it { DefaultCreate.({})[:model].must_equal Song.new }
 
   # model Song, :action
-  class ModelUpdateOperation < CreateOperation
+  class ModelUpdateOperation < Create
     model Song, :update
   end
 
@@ -112,7 +116,7 @@ class ModelTest < MiniTest::Spec
 
 
   # Op#setup_model!
-  class SetupModelOperation < CreateOperation
+  class SetupModelOperation < Create
     def setup_model!(params)
       model.instance_eval { @params = params; def params; @params.to_s; end }
     end

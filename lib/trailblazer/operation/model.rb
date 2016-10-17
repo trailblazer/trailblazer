@@ -44,11 +44,11 @@ module Trailblazer
       include BuildModel
 
       def model_class
-        self.class["model.class"] or raise "[Trailblazer] You didn't call Operation::model."
+        self["model.class"] or raise "[Trailblazer] You didn't call Operation::model."
       end
 
       def action_name
-        self.class["model.action"] or :create
+        self["model.action"] or :create
       end
 
       module DSL
