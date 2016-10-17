@@ -44,10 +44,11 @@ module Trailblazer
       include BuildModel
 
       def model_class
-        self.class.model_class
+        self.class["model.class"] or raise "[Trailblazer] You didn't call Operation::model."
       end
+
       def action_name
-        self.class.action_name
+        self.class["model.action"] or :create
       end
 
       module DSL
@@ -62,14 +63,6 @@ module Trailblazer
           heritage.record(:action, name)
 
           self["model.action"] = name
-        end
-
-        def action_name # considered private.
-          self["model.action"] or :create
-        end
-
-        def model_class # considered private.
-          self["model.class"] or raise "[Trailblazer] You didn't call Operation::model."
         end
       end
     end
