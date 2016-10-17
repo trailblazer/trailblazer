@@ -117,6 +117,8 @@ class OperationRunTest < MiniTest::Spec
     class Follow < Trailblazer::Operation
       require "trailblazer/operation/contract"
       include Contract
+      contract do
+      end
       include Setup
 
       module Validate

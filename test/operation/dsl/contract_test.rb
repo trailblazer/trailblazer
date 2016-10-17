@@ -41,10 +41,14 @@ class DslContractTest < MiniTest::Spec
           property :band, virtual: true
         end
       end
+
+      class XML < self
+      end
     end
 
     # inherits subclassed Contract.
     it { Operation["contract.class"].wont_equal Operation::JSON["contract.class"] }
+    it { Operation::XML["contract.class"].superclass.must_equal Reform::Form }
 
     it do
       form = Operation["contract.class"].new(OpenStruct.new)
