@@ -22,9 +22,11 @@ module Trailblazer::Operation::Contract
     #   Op.contract CommentForm # copies (and subclasses) external contract.
     #   Op.contract CommentForm do .. end # copies and extends contract.
     def contract(constant=nil, &block)
+      constant = Reform::Form if constant.nil? && block_given?
+
       self["contract.class"] = Class.new(constant) if constant
       self["contract.class"].class_eval(&block) if block_given?
-    end
+    end # TODO: use Competences::Builder
 
     module Deprecations # from 1.1.
       def contract_class=(constant)

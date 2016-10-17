@@ -13,6 +13,23 @@ class ContractTest < Minitest::Spec
     end
   end
 
+  describe "contract do .. end" do
+    class Index < Trailblazer::Operation
+      include Contract
+      contract do
+        property :title
+      end
+
+      def model; Struct.new(:title).new; end
+
+      def call(params)
+        validate(params) { |f| return f.to_nested_hash }
+      end
+    end
+
+    it { Index.(title: "Falling Down").must_equal({"title"=>"Falling Down"}) }
+  end
+
   describe "dependency injection" do
     class Delete < Trailblazer::Operation
       include Contract
