@@ -1,5 +1,5 @@
 require "test_helper"
-require "trailblazer/operation/dispatch"
+require "trailblazer/operation/callback"
 require "trailblazer/operation/contract"
 
 
@@ -25,7 +25,7 @@ class DslCallbackTest < MiniTest::Spec
   describe "inheritance across operations" do
     class Operation < Trailblazer::Operation
       include Contract
-      include Dispatch
+      include Callback
       include SongProcess
 
       callback do
@@ -66,7 +66,7 @@ class DslCallbackTest < MiniTest::Spec
 
     class OpWithExternalCallback < Trailblazer::Operation
       include Contract
-      include Dispatch
+      include Callback
       include SongProcess
       callback :after_save, AfterSaveCallback
 
@@ -91,14 +91,14 @@ class DslCallbackTest < MiniTest::Spec
 
     class OpUsingCallback < Trailblazer::Operation
       include Contract
-      include Dispatch
+      include Callback
       include SongProcess
       callback :default, DefaultCallback
     end
 
     class OpExtendingCallback < Trailblazer::Operation
       include Contract
-      include Dispatch
+      include Callback
       include SongProcess
       callback :default, DefaultCallback do
         on_change :after_save!
