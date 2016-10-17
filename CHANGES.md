@@ -42,6 +42,8 @@ You can now inject the following objects via `::call`:
 * Removed `Operation::contract_class`. Please use `Operation::["contract.class"]`.
 * Removed `Operation::contract_class=`. Please use `Operation::["contract.class"]=`.
 
+* Removed `Operation::Dispatch`, it's called `Operation::Callback`.
+
 ## #call
 * You can return whatever you want now by overriding `Op::call`.
 * Removed `Op.call().contract`, you now have to do `Op.call()[:operation].contract`.
