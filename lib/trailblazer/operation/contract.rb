@@ -1,3 +1,5 @@
+require "trailblazer/competences" # Competence::Builder
+
 # Best practices for using contract.
 #
 # * inject contract instance via constructor to #contract
@@ -27,18 +29,9 @@ module Trailblazer::Operation::Contract
     def contract(name=nil, constant=nil, &block)
       heritage.record(:contract, name, constant, &block)
 
-      if name.is_a?(Class)
-        constant = name
-        name = nil
-      end
-
-      constant = Reform::Form if constant.nil? && block_given?
-
-      path = ["contract", name, "class"].compact.join(".") # "contract.class" for default, otherwise "contract.params.class" etc.
-
-      self[path] = Class.new(constant) if constant
-      self[path].class_eval(&block) if block_given?
-    end # TODO: use Competences::Builder
+      path, form_class = Trailblazer::Competences::Build.new.({ prefix: :contract, class: Reform::Form }, name, constant, &block)
+      self[path] = form_class
+    end
 
     module Deprecations # from 1.1.
       def contract_class=(constant)
