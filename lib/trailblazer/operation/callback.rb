@@ -2,11 +2,11 @@ require "declarative"
 require "disposable/callback"
 
 module Trailblazer::Operation::Callback
-  def self.included(base)
-    base.extend DSL
+  def self.included(includer)
+    includer.extend DSL
 
-    base.extend Declarative::Heritage::Inherited
-    base.extend Declarative::Heritage::DSL
+    includer.extend Declarative::Heritage::Inherited
+    includer.extend Declarative::Heritage::DSL
   end
 
   def callback!(name=:default, options={ operation: self, contract: contract, params: @params }) # FIXME: test options.
