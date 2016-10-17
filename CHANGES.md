@@ -2,6 +2,8 @@
 
 ## API change:
 
+* You can now have any number of contracts, `contract [:name], constant/block`.
+
 `Contract`, Setup, Model
 expose via `result[:_invocations] = _invocations`
 

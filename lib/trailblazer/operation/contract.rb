@@ -24,13 +24,20 @@ module Trailblazer::Operation::Contract
     #   Op.contract do .. end # defines contract
     #   Op.contract CommentForm # copies (and subclasses) external contract.
     #   Op.contract CommentForm do .. end # copies and extends contract.
-    def contract(constant=nil, &block)
-      heritage.record(:contract, constant, &block)
+    def contract(name=nil, constant=nil, &block)
+      heritage.record(:contract, name, constant, &block)
+
+      if name.is_a?(Class)
+        constant = name
+        name = nil
+      end
 
       constant = Reform::Form if constant.nil? && block_given?
 
-      self["contract.class"] = Class.new(constant) if constant
-      self["contract.class"].class_eval(&block) if block_given?
+      path = ["contract", name, "class"].compact.join(".") # "contract.class" for default, otherwise "contract.params.class" etc.
+
+      self[path] = Class.new(constant) if constant
+      self[path].class_eval(&block) if block_given?
     end # TODO: use Competences::Builder
 
     module Deprecations # from 1.1.

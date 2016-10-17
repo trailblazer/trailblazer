@@ -123,4 +123,26 @@ class DslContractTest < MiniTest::Spec
       assert_raises(NoMethodError) { DifferentSongForm.new(OpenStruct.new).genre }
     end
   end
+
+  describe "Op.contract :name, Form" do
+    class Follow < Trailblazer::Operation
+      ParamsForm = Class.new
+
+      include Contract
+      contract :params, ParamsForm
+    end
+
+    it { Follow["contract.params.class"].superclass.must_equal Follow::ParamsForm }
+  end
+
+  describe "Op.contract :name do..end" do
+    class Unfollow < Trailblazer::Operation
+      include Contract
+      contract :params do
+        property :title
+      end
+    end
+
+    it { Unfollow["contract.params.class"].superclass.must_equal Reform::Form }
+  end
 end
