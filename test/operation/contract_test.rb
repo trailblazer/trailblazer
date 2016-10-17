@@ -13,6 +13,7 @@ class ContractTest < Minitest::Spec
     end
   end
 
+  # contract do..end (without constant)
   describe "contract do .. end" do
     class Index < Trailblazer::Operation
       include Contract
@@ -27,6 +28,7 @@ class ContractTest < Minitest::Spec
       end
     end
 
+    # will create a Reform::Form for us.
     it { Index.(title: "Falling Down").must_equal({"title"=>"Falling Down"}) }
   end
 

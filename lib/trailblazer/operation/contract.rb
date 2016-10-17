@@ -11,6 +11,9 @@ module Trailblazer::Operation::Contract
     includer.extend DSL::Deprecations # TODO: test this properly, and make it optional.
     includer.include Validate
 
+    includer.extend Declarative::Heritage::Inherited
+    includer.extend Declarative::Heritage::DSL
+
     require "trailblazer/operation/competences"
     includer.include Trailblazer::Operation::Competences
   end
@@ -22,6 +25,8 @@ module Trailblazer::Operation::Contract
     #   Op.contract CommentForm # copies (and subclasses) external contract.
     #   Op.contract CommentForm do .. end # copies and extends contract.
     def contract(constant=nil, &block)
+      heritage.record(:contract, constant, &block)
+
       constant = Reform::Form if constant.nil? && block_given?
 
       self["contract.class"] = Class.new(constant) if constant
