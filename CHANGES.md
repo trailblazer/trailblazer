@@ -1,6 +1,6 @@
 # 1.2.0
 
-## API change:
+## Operation API change:
 
 * You can now have any number of contracts, `contract [:name], constant/block`.
 
@@ -22,6 +22,8 @@ TRB 1.2
   build_operation(params, *).call(params)
 In 1.2, the possibly modified @params is not passed to #call, which SHOULD BE the correct behavior.
 This is mimiced in Setup ATM, but will be changed in 2.0.
+
+* Removed `Operation::reject`. This is available in `trailblazer-compat`.
 
 ## DI
 
