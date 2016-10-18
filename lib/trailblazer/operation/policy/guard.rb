@@ -1,3 +1,5 @@
+require "trailblazer/operation/setup"
+
 module Trailblazer
   # Policy::Guard is a very simple policy implementation.
   # It adds #evaluate_policy to Operation#setup! and calls whatever
@@ -7,14 +9,23 @@ module Trailblazer
   module Operation::Policy
     module Guard
       def self.included(includer)
+        includer.include Operation::Setup
+        includer.include Setup # Policy::Setup, let's wait for pipetree to have this nice.
         includer.extend(DSL) # Provides ::policy(CallableObject)
         includer.extend(ClassMethods)
-        includer.send(:include, Setup)
+
+        require "trailblazer/operation/competences"
+        includer.include Trailblazer::Operation::Competences
+
+        includer.extend Declarative::Heritage::Inherited
+        includer.extend Declarative::Heritage::DSL
       end
 
       module ClassMethods
         def policy(callable=nil, &block)
-          self.policy_config = Uber::Options::Value.new(callable || block)
+          heritage.record(:policy, callable, &block)
+
+          self["policy.evaluator"] = Uber::Options::Value.new(callable || block)
         end
       end
 
@@ -24,7 +35,8 @@ module Trailblazer
 
       # Override if you want your own policy invocation, e.g. with more args.
       def call_policy(params)
-        self.class.policy_config.(self, params)
+        return true unless self["policy.evaluator"] # WE NEED THE KEANU REAVES OPERATIOOOOOOOR!
+        self["policy.evaluator"].(self, params)
       end
 
       def policy_exception

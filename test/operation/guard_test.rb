@@ -53,9 +53,6 @@ class OpPolicyGuardTest < MiniTest::Spec
   describe "no policy defined, but included" do
     class Show < Trailblazer::Operation
       include Policy::Guard
-
-      def process(*)
-      end
     end
 
     it { Show.({}).wont_equal nil }
@@ -71,9 +68,6 @@ class OpPolicyGuardTest < MiniTest::Spec
 
       def params!(params)
         { valid: params }
-      end
-
-      def process(*)
       end
     end
 
@@ -123,6 +117,7 @@ class OpBuilderDenyTest < MiniTest::Spec
 
   class Create < Trailblazer::Operation
     include Deny
+    extend Builder
 
     builds do |params|
       deny! unless params[:valid]
@@ -133,6 +128,8 @@ class OpBuilderDenyTest < MiniTest::Spec
   end
 
   class Update < Create
+    extend Builder
+
     builds -> (params) do
       deny! unless params[:valid]
     end
