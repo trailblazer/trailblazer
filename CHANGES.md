@@ -42,6 +42,16 @@ You can now inject the following objects via `::call`:
 * Removed `Operation::contract_class`. Please use `Operation::["contract.class"]`.
 * Removed `Operation::contract_class=`. Please use `Operation::["contract.class"]=`.
 
+## Representer
+
+* Removed `Operation::representer_class`. Please use `Operation::["representer.class"]`.
+* Removed `Operation::representer_class=`. Please use `Operation::["representer.class"]=`.
+* You can now have any number of named representers: `Operation.representer :parser, ParsingRepresenter`.
+* Automatic infering of the representer from a `contract` is not so automatic anymore. This feature was barely used and is now available via `include Representer::InferFromContract`.
+* Reform 2.0 is not supported in `Representer` anymore, meaning you can't automatically infer representers from 2.0 contracts. Reform 2.0 works with all remaining components.
+
+## Callback
+
 * Removed `Operation::Dispatch`, it's called `Operation::Callback`.
 
 ## #call
@@ -51,6 +61,7 @@ You can now inject the following objects via `::call`:
 
 * Removed the deprecation for `validate`, signature is `(params[, model, options, contract_class])`.
 * Removed the deprecation for `contract`, signature is `([model, options, contract_class])`.
+
 
 # 1.1.1
 

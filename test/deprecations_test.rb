@@ -10,5 +10,8 @@ class DeprecationsTest < Minitest::Spec
     include Contract
     self.contract_class
     self.contract_class = Object
+    contract # TODO: MUST THROW ERROR! please use Delete["contract.class"]
   end
 end
+
+
