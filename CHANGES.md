@@ -64,6 +64,10 @@ You can now inject the following objects via `::call`:
 * Removed the deprecation for `validate`, signature is `(params[, model, options, contract_class])`.
 * Removed the deprecation for `contract`, signature is `([model, options, contract_class])`.
 
+## Collection
+
+* Removed `Operation::Collection`. Please use `Operation::new`.
+
 
 # 1.1.1
 
