@@ -28,12 +28,15 @@ class ControllerTest < Minitest::Spec
   Comment = Struct.new(:body)
 
   class Comment::Update < Trailblazer::Operation
+    include Setup
+    include Contract
+
     def model!(params)
       Comment.new(params[:body])
     end
 
     def inspect
-      super.sub(/:0x\w+/, "")
+      "<Update: #{@params.inspect} #{self["model"].inspect}>"
     end
   end
 
@@ -46,7 +49,7 @@ class ControllerTest < Minitest::Spec
     end
 
     it do
-      controller.show.inspect.must_equal "#<ControllerTest::Comment::Update @options={}, @valid=true, @params={:current_user=>#<struct ControllerTest::User role=:admin>}, @model=#<struct ControllerTest::Comment body=nil>>"
+      controller.show.inspect.must_equal "<Update: {:current_user=>#<struct ControllerTest::User role=:admin>} #<struct ControllerTest::Comment body=nil>>"
     end
   end
 
@@ -61,15 +64,17 @@ class ControllerTest < Minitest::Spec
       end
     end
 
-    it { controller.show.inspect.must_equal "#<ControllerTest::Comment::Update @options={}, @valid=true, @params={:body=>\"Cool!\"}, @model=#<struct ControllerTest::Comment body=\"Cool!\">>" }
+    it { controller.show.inspect.must_equal "<Update: {:body=>\"Cool!\"} #<struct ControllerTest::Comment body=\"Cool!\">>" }
   end
 
   describe "#form" do
     class Comment::Create < Trailblazer::Operation
+      include Setup
       def model!(params)
         Comment.new
       end
 
+      include Contract
       contract do
         def prepopulate!(options)
           @options = options

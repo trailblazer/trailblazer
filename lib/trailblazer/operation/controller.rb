@@ -3,17 +3,17 @@ require "trailblazer/endpoint"
 module Trailblazer::Operation::Controller
 private
   def form(operation_class, options={})
-    res, op, options = operation!(operation_class, options)
-    op.contract.prepopulate!(options) # equals to @form.prepopulate!
+    res, options = operation_for!(operation_class, options) { |params| { operation: operation_class.build_operation(params) } }
+    res[:operation].contract.prepopulate!(options) # equals to @form.prepopulate!
 
-    op.contract
+    res[:operation].contract
   end
 
   # Provides the operation instance, model and contract without running #process.
   # Returns the operation.
   def present(operation_class, options={})
-    res, op = operation!(operation_class, options.merge(skip_form: true))
-    op
+    res, options = operation_for!(operation_class, options.merge(skip_form: true)) { |params| { operation: operation_class.build_operation(params) } }
+    res[:operation] # FIXME.
   end
 
   def collection(*args)
@@ -23,11 +23,11 @@ private
   end
 
   def run(operation_class, options={}, &block)
-    res, op = operation_for!(operation_class, options) { |params| operation_class.run(params) }
+    res = operation_for!(operation_class, options) { |params| operation_class.(params) }
 
-    yield op if res and block_given?
+    yield res[:operation] if res[:valid] and block_given?
 
-    op
+    res[:operation] # FIXME.
   end
 
   # The block passed to #respond is always run, regardless of the validity result.
@@ -40,10 +40,6 @@ private
   end
 
 private
-  def operation!(operation_class, options={}) # or #model or #setup.
-    operation_for!(operation_class, options) { |params| [true, operation_class.present(params)] }
-  end
-
   def process_params!(params)
   end
 
@@ -58,15 +54,15 @@ private
     params = params!(params)
     process_params!(params) # deprecate or rename to #setup_params!
 
-    res, op = Trailblazer::Endpoint.new(operation_class, params, request, options).(&block)
-    setup_operation_instance_variables!(op, options)
+    res = Trailblazer::Endpoint.new(operation_class, params, request, options).(&block)
+    setup_operation_instance_variables!(res, options)
 
-    [res, op, options.merge(params: params)]
+    [res, options.merge(params: params)]
   end
 
-  def setup_operation_instance_variables!(operation, options)
-    @operation = operation
-    @model     = operation.model
-    @form      = operation.contract unless options[:skip_form]
+  def setup_operation_instance_variables!(result, options)
+    @operation = result[:operation] # FIXME: remove!
+    @model     = result[:model]
+    @form      = result[:contract] unless options[:skip_form]
   end
 end
