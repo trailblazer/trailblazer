@@ -10,7 +10,6 @@ require "trailblazer/competences" # Competence::Builder
 module Trailblazer::Operation::Contract
   def self.included(includer)
     includer.extend DSL
-    includer.extend DSL::Deprecations # TODO: test this properly, and make it optional.
     includer.include Validate
 
     includer.extend Declarative::Heritage::Inherited
@@ -32,18 +31,6 @@ module Trailblazer::Operation::Contract
       path, form_class = Trailblazer::Competences::Build.new.({ prefix: :contract, class: Reform::Form }, name, constant, &block)
       self[path] = form_class
     end
-
-    module Deprecations # from 1.1.
-      def contract_class=(constant)
-        warn %{[Trailblazer] Operation::contract_class= is deprecated, please use Operation::["contract.class"]=}
-        self["contract.class"] = constant
-      end
-
-      def contract_class
-        warn %{[Trailblazer] Operation::contract_class is deprecated, please use Operation::["contract.class"]}
-        self["contract.class"]
-      end
-    end
   end
   # until here, this code is totally generic and could be the same for model, contract, policy, etc.
 
@@ -64,7 +51,7 @@ module Trailblazer::Operation::Contract
 public
   # Call like +contract(model)+ to create and memoize contract, e.g. for Composition.
   def contract(*args)
-    self["contract"] ||= contract_for(*args)
+    self["contract"] ||= result[:contract] = contract_for(*args)
   end
 
   module Validate
