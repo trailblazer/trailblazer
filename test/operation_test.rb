@@ -86,7 +86,7 @@ class OperationRunTest < MiniTest::Spec
     include Contract
 
     # allow providing your own contract.
-    self.contract_class = class MyContract
+    self["contract.class"] = class MyContract
       def initialize(*)
       end
       def validate(params)
@@ -142,7 +142,10 @@ class OperationRunTest < MiniTest::Spec
   end
 
   # return operation when ::call
-  it { Operation.("yes, true").to_s.must_equal %{{:valid=>true, :operation=><Operation @model=>}} }
+  it do
+    Operation.("yes, true")[:operation].to_s.must_equal %{<Operation @model=>}
+    Operation.("yes, true")[:valid].must_equal true
+  end
 
 
   # ::run with block returns operation.
@@ -189,7 +192,6 @@ class OperationRunTest < MiniTest::Spec
     class NoContractOp < Trailblazer::Operation
       require "trailblazer/operation/contract"
       include Contract
-      self.contract_class = nil
 
       require "trailblazer/operation/present"
       extend Present
@@ -229,7 +231,7 @@ class OperationTest < MiniTest::Spec
   class OperationWithValidateBlock < Trailblazer::Operation
     require "trailblazer/operation/contract"
     include Contract
-    self.contract_class = class Contract
+    self["contract.class"] = class Contract
       def initialize(*)
       end
 
@@ -258,7 +260,7 @@ class OperationTest < MiniTest::Spec
   class OperationWithValidateAndIf < Trailblazer::Operation
     require "trailblazer/operation/contract"
     include Contract
-    self.contract_class = class Contract
+    self["contract.class"] = class Contract
       def initialize(*)
       end
 
@@ -289,7 +291,7 @@ class OperationTest < MiniTest::Spec
   class ContractOnlyOperation < Trailblazer::Operation
     require "trailblazer/operation/contract"
     include Contract
-    self.contract_class = class Contract
+    self["contract.class"] = class Contract
       def initialize(model, *)
         @_model = model
       end

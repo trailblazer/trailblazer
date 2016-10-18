@@ -15,6 +15,14 @@ module Trailblazer
 
       # Methods to create the model according to class configuration and params.
       module BuildModel
+        def model_class
+          self["model.class"] or raise "[Trailblazer] You didn't call Operation::model."
+        end
+
+        def action_name
+          self["model.action"] or :create
+        end
+
         def model!(params)
           instantiate_model(params)
         end
@@ -34,7 +42,6 @@ module Trailblazer
         alias_method :find_model, :update_model
       end
 
-
       # #validate no longer accepts a model since this module instantiates it for you.
       def validate(params, model=self.model, *args)
         super(params, model, *args)
@@ -43,13 +50,6 @@ module Trailblazer
     private
       include BuildModel
 
-      def model_class
-        self["model.class"] or raise "[Trailblazer] You didn't call Operation::model."
-      end
-
-      def action_name
-        self["model.action"] or :create
-      end
 
       module DSL
         def model(name, action=nil)

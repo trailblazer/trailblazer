@@ -13,9 +13,7 @@ class ModelTest < MiniTest::Spec
   end
 
   class Create < Trailblazer::Operation
-    require "trailblazer/operation/contract"
     include Contract
-    require "trailblazer/operation/setup"
     include Setup
     include Model
     model Song
