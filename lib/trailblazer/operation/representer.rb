@@ -25,9 +25,9 @@ module Trailblazer::Operation::Representer
       # TODO: allow the same with contract, or better, test it!
       extended = self["representer.#{name}.class"]
       extended = self["representer.class"] if name.nil?
-      puts "@@@@@ #{extended.inspect}"
 
       path, representer_class = Trailblazer::Competences::Build.new.({ prefix: :representer, class: (extended||representer_base_class) }, name, constant, &block)
+
       self[path] = representer_class
     end
 
@@ -48,7 +48,23 @@ module Trailblazer::Operation::Representer
     end
   end
 
+  # Infer a representer from a contract.
+  # This is not recommended and will probably extracted to a separate gem in TRB 2.0.
   module InferFromContract
+    def self.included(includer)
+      includer.extend Representer
+    end
+
+    module Representer
+      def representer(name=nil, constant=nil, &block)
+        unless name.is_a?(Class) || constant.is_a?(Class) # only invoke when NO constant is passed.
+          return super(name, infer_representer_class, &block)
+        end
+
+        super
+      end
+    end
+
     def to_json(*)
       # TODO: optimize on class-level.
       self["representer.class"] ||= self.class.infer_representer_class
