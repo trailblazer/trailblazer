@@ -40,7 +40,7 @@ You can now inject the following objects via `::call`:
 * Removed `Operation::contract` (without args). Please use `Operation::["contract.class"]`.
 * Removed `Operation::callbacks` (without args). Please use `Operation::["callback.<name>.class"]`.
 * Removed `Operation::contract_class`. Please use `Operation::["contract.class"]`.
-* Removed `Operation::contract_class=`. Please use `Operation::["contract.class"]=`.
+* Removed `Operation::contract_class=`. Please use `Operation::["contract.class"]=`. Doesn't inherit.
 
 ## Representer
 
@@ -49,6 +49,8 @@ You can now inject the following objects via `::call`:
 * You can now have any number of named representers: `Operation.representer :parser, ParsingRepresenter`.
 * Automatic infering of the representer from a `contract` is not so automatic anymore. This feature was barely used and is now available via `include Representer::InferFromContract`.
 * Reform 2.0 is not supported in `Representer` anymore, meaning you can't automatically infer representers from 2.0 contracts. Reform 2.0 works with all remaining components.
+* Removed `Operation::contract_class`. Please use `Operation::["contract.class"]`.
+* Removed `Operation::contract_class=`. Please use `Operation::["contract.class"]=`. Doesn't inherit.
 
 ## Callback
 

@@ -1,5 +1,4 @@
 require "test_helper"
-
 require "representable/json"
 
 class RepresenterTest < MiniTest::Spec
@@ -7,8 +6,10 @@ class RepresenterTest < MiniTest::Spec
   Artist = Struct.new(:name)
 
   class Create < Trailblazer::Operation
-    require "trailblazer/operation/representer"
+    include Contract
     include Representer
+    include Representer::InferFromContract
+    attr_reader :model # FIXME: all we want is #model.
 
     contract do
       property :title
@@ -19,18 +20,19 @@ class RepresenterTest < MiniTest::Spec
       end
     end
 
-    def process(params)
+    def call(params)
       @model = Album.new # NO artist!!!
       validate(params[:album], @model)
+      self
     end
   end
 
 
   # Infers representer from contract, no customization.
   class Show < Create
-    def process(params)
+    def call(params)
       @model = Album.new("After The War", Artist.new("Gary Moore"))
-      @contract = @model
+      self
     end
   end
 
@@ -46,36 +48,32 @@ class RepresenterTest < MiniTest::Spec
   end
 
   class HypermediaShow < HypermediaCreate
-    def process(params)
+    def call(params)
       @model = Album.new("After The War", Artist.new("Gary Moore"))
-      @contract = @model
+      self
     end
   end
 
 
   # rendering
   # generic contract -> representer
-  it do
-    res, op = Show.run({})
-    op.to_json.must_equal %{{"title":"After The War","artist":{"name":"Gary Moore"}}}
-  end
+  it { Show.().to_json.must_equal %{{"title":"After The War","artist":{"name":"Gary Moore"}}} }
 
   # contract -> representer with hypermedia
   it do
-    res, op = HypermediaShow.run({})
-    op.to_json.must_equal %{{"title":"After The War","artist":{"name":"Gary Moore"},"_links":{"self":{"href":"//album/After The War"}}}}
+    HypermediaShow.().to_json.must_equal %{{"title":"After The War","artist":{"name":"Gary Moore"},"_links":{"self":{"href":"//album/After The War"}}}}
   end
 
 
   # parsing
   it do
-    res, op = Create.run(album: %{{"title":"Run For Cover","artist":{"name":"Gary Moore"}}})
+    op = Create.(album: %{{"title":"Run For Cover","artist":{"name":"Gary Moore"}}})
     op.contract.title.must_equal "Run For Cover"
     op.contract.artist.name.must_equal "Gary Moore"
   end
 
   it do
-    res, op = HypermediaCreate.run(album: %{{"title":"After The War","artist":{"name":"Gary Moore"},"_links":{"self":{"href":"//album/After The War"}}}})
+    op = HypermediaCreate.(album: %{{"title":"After The War","artist":{"name":"Gary Moore"},"_links":{"self":{"href":"//album/After The War"}}}})
     op.contract.title.must_equal "After The War"
     op.contract.artist.name.must_equal "Gary Moore"
   end
@@ -87,7 +85,9 @@ class RepresenterTest < MiniTest::Spec
   # explicit representer set with ::representer_class=.
   require "roar/decorator"
   class JsonApiCreate < Trailblazer::Operation
+    include Contract
     include Representer
+    attr_reader :model
 
     contract do # we still need contract as the representer writes to the contract twin.
       property :title
@@ -97,31 +97,33 @@ class RepresenterTest < MiniTest::Spec
       include Roar::JSON
       property :title
     end
-    self.representer_class = AlbumRepresenter
 
-    def process(params)
+    # FIXME: this won't inherit, of course.
+    # self["representer.class"] = AlbumRepresenter
+    representer AlbumRepresenter
+
+    def call(params)
       @model = Album.new # NO artist!!!
       validate(params[:album], @model)
+      self
     end
   end
 
   class JsonApiShow < JsonApiCreate
-    def process(params)
+    def call(params)
       @model = Album.new("After The War", Artist.new("Gary Moore"))
-      @contract = @model
+      self
     end
   end
 
   # render.
   it do
-    res, op = JsonApiShow.run({})
-    op.to_json.must_equal %{{"title":"After The War"}}
+    JsonApiShow.().to_json.must_equal %{{"title":"After The War"}}
   end
 
   # parse.
   it do
-    res, op = JsonApiCreate.run(album: %{{"title":"Run For Cover"}})
-    op.contract.title.must_equal "Run For Cover"
+    JsonApiCreate.(album: %{{"title":"Run For Cover"}}).contract.title.must_equal "Run For Cover"
   end
 end
 
@@ -130,26 +132,32 @@ class InternalRepresenterAPITest < MiniTest::Spec
 
   describe "#represented" do
     class Show < Trailblazer::Operation
+      include Setup
+      include Contract
       include Representer, Model
       model Song, :create
 
       representer do
         property :class
       end
+
+      def call(*)
+        self
+      end
     end
 
     it "uses #model as represented, per default" do
-      Show.present({}).to_json.must_equal '{"class":"InternalRepresenterAPITest::Song"}'
+      Show.new({}).to_json.must_equal '{"class":"InternalRepresenterAPITest::Song"}'
     end
 
     class ShowContract < Show
       def represented
-        contract
+        "Object"
       end
     end
 
     it "can be overriden to use the contract" do
-      ShowContract.present({}).to_json.must_equal %{{"class":"#{ShowContract.contract_class}"}}
+      ShowContract.({}).to_json.must_equal %{{"class":"String"}}
     end
   end
 
@@ -166,13 +174,14 @@ class InternalRepresenterAPITest < MiniTest::Spec
         super(@params)
       end
 
+      include Setup
       def model!(params)
         Song.new(1)
       end
     end
 
     it "allows to pass options to #to_json" do
-      OptionsShow.present(include: [:id]).to_json.must_equal '{"id":1}'
+      OptionsShow.new(include: [:id]).to_json.must_equal '{"id":1}'
     end
   end
 end
@@ -182,8 +191,10 @@ class DifferentParseAndRenderingRepresenterTest < MiniTest::Spec
 
   # rendering
   class Create < Trailblazer::Operation
+    include Contract
     extend Representer::DSL
     include Representer::Rendering # no Deserializer::Hash here or anything.
+    attr_reader :model
 
     contract do
       property :title
@@ -193,11 +204,12 @@ class DifferentParseAndRenderingRepresenterTest < MiniTest::Spec
       property :title, as: :Title
     end
 
-    def process(params)
+    def call(params)
       @model = Album.new
       validate(params) do
         contract.sync
       end
+      self
     end
   end
 
@@ -207,6 +219,7 @@ class DifferentParseAndRenderingRepresenterTest < MiniTest::Spec
 
   # parsing
   class Update < Trailblazer::Operation
+    include Contract
     extend Representer::DSL
     include Representer::Deserializer::Hash # no Rendering.
 
@@ -218,13 +231,16 @@ class DifferentParseAndRenderingRepresenterTest < MiniTest::Spec
       property :title
     end
 
+    attr_reader :model
 
-    def process(params)
+    def call(params)
       @model = Album.new
 
       validate(params) do
         contract.sync
       end
+
+      self
     end
 
     def to_json(*)

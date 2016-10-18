@@ -6,6 +6,8 @@ require "trailblazer/competences"
 # deserializer into Form#validate.
 #
 # TODO: so far, we only support JSON, but it's two lines to change to support any kind of format.
+#
+# Needs Operation#model.
 module Trailblazer::Operation::Representer
   def self.included(includer)
     includer.extend DSL
@@ -70,6 +72,12 @@ module Trailblazer::Operation::Representer
       self["representer.class"] ||= self.class.infer_representer_class
       super
     end
+
+    def validate_contract(*)
+      # TODO: optimize on class-level.
+      self["representer.class"] ||= self.class.infer_representer_class
+      super
+    end
   end
 
 private
@@ -96,7 +104,7 @@ private
       def validate_contract(params)
         # use the inferred representer from the contract for deserialization in #validate.
         contract.validate(params) do |document|
-          self.class.representer_class.new(contract).from_hash(document)
+          self["representer.class"].new(contract).from_hash(document)
         end
       end
     end
@@ -107,7 +115,7 @@ private
     module JSON
       def validate_contract(params)
         contract.validate(params) do |document|
-          self.class.representer_class.new(contract).from_json(document)
+          self["representer.class"].new(contract).from_json(document)
         end
       end
     end
