@@ -29,7 +29,8 @@ class OpPunditPolicyTest < MiniTest::Spec
       Song.new
     end
 
-    def process(*)
+    def call(*)
+      self
     end
   end
 
@@ -54,8 +55,11 @@ class OpPunditPolicyTest < MiniTest::Spec
     include Policy
     # no policy.
 
-    def process(*)
+    attr_reader :model
+
+    def call(*)
       @model = Song.new
+      self
     end
 
     class Delete < self
