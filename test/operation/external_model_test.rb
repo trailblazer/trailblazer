@@ -22,7 +22,8 @@ class ExternalModelTest < MiniTest::Spec
     include Model::External
     model Song, :update
 
-    def process(params)
+    def call(params)
+      self
     end
   end
 
@@ -40,17 +41,20 @@ class ExternalModelTest < MiniTest::Spec
 
   # call style.
   it do
-    Bla.(id: 2).model.must_equal song
+    Bla.(id: 2)[:model].must_equal song
     song.id.must_equal 2
   end
 
-  # #present.
+  # ::build_operation.
   it do
-    Bla.present({}).model.must_equal song
+    Bla.build_operation({})["model"].must_equal song
   end
 
 
   class OpWithBuilder < Bla
+    # require "trailblazer/operation/builder"
+    # extend Builder
+
     class A < self
     end
 
