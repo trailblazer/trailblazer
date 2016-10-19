@@ -145,4 +145,20 @@ class DslContractTest < MiniTest::Spec
 
     it { Unfollow["contract.params.class"].superclass.must_equal Reform::Form }
   end
+
+  # multiple ::contract calls.
+  describe "multiple ::contract calls" do
+    class Star < Trailblazer::Operation
+      include Contract
+      contract do
+        property :title
+      end
+
+      contract do
+        property :id
+      end
+    end
+
+    it { Star["contract.class"].definitions.keys.must_equal ["title", "id"]  }
+  end
 end

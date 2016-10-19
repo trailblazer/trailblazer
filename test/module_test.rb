@@ -1,13 +1,15 @@
 require 'test_helper'
 require "trailblazer/operation/module"
-require "trailblazer/operation/dispatch"
+require "trailblazer/operation/callback"
+require "trailblazer/operation/contract"
 
 class OperationModuleTest < MiniTest::Spec
   Song = Struct.new(:name, :artist)
   Artist = Struct.new(:id, :full_name)
 
   class Create < Trailblazer::Operation
-    include Trailblazer::Operation::Dispatch
+    include Trailblazer::Operation::Callback
+    include Contract
 
     contract do
       property :name
@@ -20,7 +22,8 @@ class OperationModuleTest < MiniTest::Spec
       on_change :notify_me!
     end
 
-    def process(params)
+    attr_reader :model
+    def call(params)
       @model = Song.new
 
       validate(params, @model) do
@@ -28,6 +31,8 @@ class OperationModuleTest < MiniTest::Spec
 
         dispatch!
       end
+
+      self
     end
 
     def dispatched
@@ -47,6 +52,8 @@ class OperationModuleTest < MiniTest::Spec
     contract do
       property :artist, inherit: true do
         property :full_name
+
+        puts definitions.inspect
       end
     end
 
