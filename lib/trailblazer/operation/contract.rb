@@ -25,13 +25,12 @@ module Trailblazer::Operation::Contract
     #   Op.contract do .. end # defines contract
     #   Op.contract CommentForm # copies (and subclasses) external contract.
     #   Op.contract CommentForm do .. end # copies and extends contract.
-    def contract(name=nil, constant=nil, &block)
+    def contract(name=:default, constant=nil, &block)
       heritage.record(:contract, name, constant, &block)
 
       # FIXME: make this nicer. we want to extend same-named callback groups.
       # TODO: allow the same with contract, or better, test it!
       extended = self["contract.#{name}.class"]
-      extended = self["contract.class"] if name.nil?
       # FIXME: should this only happen for blocks?
 
       path, form_class = Trailblazer::Competences::Build.new.({ prefix: :contract, class: (extended||Reform::Form) }, name, constant, &block)
@@ -44,7 +43,7 @@ module Trailblazer::Operation::Contract
   # or infer the Operation contract.
   def contract_for(model=nil, options={}, contract_class=nil)
     model          ||= self.model
-    contract_class ||= self["contract.class"]
+    contract_class ||= self["contract.default.class"]
 
     contract!(model, options, contract_class)
   end

@@ -44,7 +44,7 @@ class ContractTest < Minitest::Spec
 
     # inject contract instance via constructor.
     it { Delete.new({}, "contract" => "contract/instance").contract.must_equal "contract/instance" }
-    it { Follow.new({}, "contract.class" => Form).contract.class.must_equal Form }
+    it { Follow.new({}, "contract.default.class" => Form).contract.class.must_equal Form }
   end
 
 
@@ -60,16 +60,16 @@ class ContractTest < Minitest::Spec
 
   # inject class, pass in model and options when constructing.
   # contract(model)
-  it { Create.({}, "contract.class" => Form).must_equal "ContractTest::Form: Object {}" }
+  it { Create.({}, "contract.default.class" => Form).must_equal "ContractTest::Form: Object {}" }
   # contract(model, options)
-  it { Create.({ options: true }, "contract.class" => Form).must_equal "ContractTest::Form: Object {:admin=>true}" }
+  it { Create.({ options: true }, "contract.default.class" => Form).must_equal "ContractTest::Form: Object {:admin=>true}" }
 
   # ::contract Form
   # contract(model).validate
   class Update < Trailblazer::Operation
     include Contract
 
-    self["contract.class"] = Form
+    self["contract.default.class"] = Form
 
     def call(*)
       contract.validate
@@ -83,7 +83,7 @@ class ContractTest < Minitest::Spec
   # use the class contract.
   it { Update.().must_equal "ContractTest::Form: Object {}" }
   # injected contract overrides class.
-  it { Update.({}, "contract.class" => Injected = Class.new(Form)).must_equal "ContractTest::Injected: Object {}" }
+  it { Update.({}, "contract.default.class" => Injected = Class.new(Form)).must_equal "ContractTest::Injected: Object {}" }
 end
 
 class ValidateTest < Minitest::Spec

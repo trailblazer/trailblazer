@@ -29,7 +29,7 @@ This is mimiced in Setup ATM, but will be changed in 2.0.
 
 You can now inject the following objects via `::call`:
 
-* `"contract.class"`
+* `"contract.default.class"`
 * `"contract"`: The contract instance.
 * `"model.class"`
 
@@ -39,10 +39,10 @@ You can now inject the following objects via `::call`:
 * Removed `Operation#errors`. This is in the result object via `result[:errors]` if the operation was invalid.
 * Removed the private option `:raise_on_invalid`. Use `Contract::Raise` instead, if you need it in tests.
 
-* Removed `Operation::contract` (without args). Please use `Operation::["contract.class"]`.
+* Removed `Operation::contract` (without args). Please use `Operation::["contract.default.class"]`.
 * Removed `Operation::callbacks` (without args). Please use `Operation::["callback.<name>.class"]`.
-* Removed `Operation::contract_class`. Please use `Operation::["contract.class"]`.
-* Removed `Operation::contract_class=`. Please use `Operation::["contract.class"]=`. Doesn't inherit.
+* Removed `Operation::contract_class`. Please use `Operation::["contract.default.class"]`.
+* Removed `Operation::contract_class=`. Please use `Operation::["contract.default.class"]=`. Doesn't inherit.
 
 ## Representer
 
@@ -51,8 +51,8 @@ You can now inject the following objects via `::call`:
 * You can now have any number of named representers: `Operation.representer :parser, ParsingRepresenter`.
 * Automatic infering of the representer from a `contract` is not so automatic anymore. This feature was barely used and is now available via `include Representer::InferFromContract`.
 * Reform 2.0 is not supported in `Representer` anymore, meaning you can't automatically infer representers from 2.0 contracts. Reform 2.0 works with all remaining components.
-* Removed `Operation::contract_class`. Please use `Operation::["contract.class"]`.
-* Removed `Operation::contract_class=`. Please use `Operation::["contract.class"]=`. Doesn't inherit.
+* Removed `Operation::contract_class`. Please use `Operation::["contract.default.class"]`.
+* Removed `Operation::contract_class=`. Please use `Operation::["contract.default.class"]=`. Doesn't inherit.
 
 ## Callback
 

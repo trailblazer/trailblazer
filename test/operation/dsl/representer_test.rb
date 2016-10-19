@@ -69,9 +69,9 @@ class DslRepresenterTest < MiniTest::Spec
       def call(*); self; end
     end
 
-    it { Op2["representer.class"].superclass.must_equal String }
-    it { Op2.({})["representer.class"].superclass.must_equal String }
-    it { Op2.({}, "representer.class" => Integer)["representer.class"].must_equal Integer }
+    it { Op2["representer.default.class"].superclass.must_equal String }
+    it { Op2.({})["representer.default.class"].superclass.must_equal String }
+    it { Op2.({}, "representer.default.class" => Integer)["representer.default.class"].must_equal Integer }
   end
 
 
@@ -129,8 +129,7 @@ class DslRepresenterTest < MiniTest::Spec
       include SongProcess
       include Contract
       include Representer::InferFromContract
-
-      contract ContractOperation["contract.class"]
+      contract ContractOperation["contract.default.class"]
 
       representer do
         property :genre
@@ -151,13 +150,13 @@ class DslRepresenterTest < MiniTest::Spec
     class OpSettingRepresenter < Trailblazer::Operation
       include Representer
       include SongProcess
-      self["representer.class"] = PlayRepresenter
+      self["representer.default.class"] = PlayRepresenter
     end
 
     class OpExtendRepresenter < Trailblazer::Operation
       include Representer
       include SongProcess
-      self["representer.class"] = PlayRepresenter
+      self["representer.default.class"] = PlayRepresenter
       representer do
         property :genre
       end

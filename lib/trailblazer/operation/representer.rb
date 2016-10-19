@@ -20,13 +20,13 @@ module Trailblazer::Operation::Representer
   end
 
   module DSL
-    def representer(name=nil, constant=nil, &block)
+    def representer(name=:default, constant=nil, &block)
       heritage.record(:representer, name, constant, &block)
 
       # FIXME: make this nicer. we want to extend same-named callback groups.
       # TODO: allow the same with contract, or better, test it!
+
       extended = self["representer.#{name}.class"]
-      extended = self["representer.class"] if name.nil?
 
       path, representer_class = Trailblazer::Competences::Build.new.({ prefix: :representer, class: (extended||representer_base_class) }, name, constant, &block)
 
@@ -39,7 +39,7 @@ module Trailblazer::Operation::Representer
     end
 
     def infer_representer_class
-      Disposable::Rescheme.from(self["contract.class"],
+      Disposable::Rescheme.from(self["contract.default.class"],
         include:          [Representable::JSON],
         options_from:     :deserializer, # use :instance etc. in deserializer.
         superclass:       Representable::Decorator,
@@ -58,7 +58,7 @@ module Trailblazer::Operation::Representer
     end
 
     module Representer
-      def representer(name=nil, constant=nil, &block)
+      def representer(name=:default, constant=nil, &block)
         unless name.is_a?(Class) || constant.is_a?(Class) # only invoke when NO constant is passed.
           return super(name, infer_representer_class, &block)
         end
@@ -69,13 +69,13 @@ module Trailblazer::Operation::Representer
 
     def to_json(*)
       # TODO: optimize on class-level.
-      self["representer.class"] ||= self.class.infer_representer_class
+      self["representer.default.class"] ||= self.class.infer_representer_class
       super
     end
 
     def validate_contract(*)
       # TODO: optimize on class-level.
-      self["representer.class"] ||= self.class.infer_representer_class
+      self["representer.default.class"] ||= self.class.infer_representer_class
       super
     end
   end
@@ -88,7 +88,7 @@ private
     #     super(include: @params[:include])
     #   end
     def to_json(options={})
-      self["representer.class"].new(represented).to_json(options)
+      self["representer.default.class"].new(represented).to_json(options)
     end
 
     # Override this if you want to render something else, e.g. the contract.
@@ -104,7 +104,7 @@ private
       def validate_contract(params)
         # use the inferred representer from the contract for deserialization in #validate.
         contract.validate(params) do |document|
-          self["representer.class"].new(contract).from_hash(document)
+          self["representer.default.class"].new(contract).from_hash(document)
         end
       end
     end
@@ -115,7 +115,7 @@ private
     module JSON
       def validate_contract(params)
         contract.validate(params) do |document|
-          self["representer.class"].new(contract).from_json(document)
+          self["representer.default.class"].new(contract).from_json(document)
         end
       end
     end
