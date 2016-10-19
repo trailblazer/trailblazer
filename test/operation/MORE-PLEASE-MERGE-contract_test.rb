@@ -111,6 +111,8 @@ end
 
 class OperationContractWithTwinOptionsAndContractClassTest < Minitest::Spec
   class Operation < Trailblazer::Operation
+    include Contract
+
     class Contract < Reform::Form
       property :title, virtual: true
     end

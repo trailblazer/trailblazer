@@ -25,6 +25,7 @@ class ResolverTest < MiniTest::Spec
   end
 
   class Create < Trailblazer::Operation
+    extend Builder
     include Resolver
     model Song, :create
     policy MyKitchenRules, :create?
@@ -39,7 +40,8 @@ class ResolverTest < MiniTest::Spec
       Song.new(params[:title])
     end
 
-    def process(*)
+    def call(*)
+      self
     end
 
     class Admin < self
@@ -63,6 +65,7 @@ class ResolverTest < MiniTest::Spec
 
   describe "passes policy into operation" do
     class Update < Trailblazer::Operation
+      extend Builder
       include Resolver
       model Song, :create
       policy MyKitchenRules, :true?
@@ -72,7 +75,8 @@ class ResolverTest < MiniTest::Spec
         nil
       end
 
-      def process(*)
+      def call(*)
+        self
       end
     end
 

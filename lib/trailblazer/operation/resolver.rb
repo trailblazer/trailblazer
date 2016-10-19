@@ -16,7 +16,7 @@ class Trailblazer::Operation
     module BuildOperation
       def build_operation(params, options={})
         model  = model!(params)
-        policy = policy_config.call(params[:current_user], model)
+        policy = self["policy.evaluator"].call(params[:current_user], model)
         build_operation_class(model, policy, params).
           new(params, options.merge(model: model, policy: policy))
       end
