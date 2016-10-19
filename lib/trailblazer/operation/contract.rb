@@ -32,7 +32,7 @@ module Trailblazer::Operation::Contract
       # TODO: allow the same with contract, or better, test it!
       extended = self["contract.#{name}.class"]
       extended = self["contract.class"] if name.nil?
-
+      # FIXME: should this only happen for blocks?
 
       path, form_class = Trailblazer::Competences::Build.new.({ prefix: :contract, class: (extended||Reform::Form) }, name, constant, &block)
       self[path] = form_class

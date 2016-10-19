@@ -30,7 +30,7 @@ private
     setup_params!(params)
 
     build_model!(params)
-    result[:model] = self["model"] # this sucks and will be so much better in 2.0/trailblazer-pipetree.
+    result[:model] = self["model"] # This will be so much better in 2.0/trailblazer-pipetree.
 
     params # TODO: test me.
   end
@@ -56,7 +56,7 @@ private
   end
 
   def assign_model!(*args)
-    self.model = model!(*args)
+    self["model"] = model!(*args)
   end
 
   # Implement #model! to find/create your operation model (if required).

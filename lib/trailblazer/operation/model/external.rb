@@ -11,6 +11,10 @@ class Trailblazer::Operation
     # happens automatically when coming from a builder.
     module External
       def self.included(includer)
+        includer.send :include, Setup
+        includer.send :include, AssignModel
+
+
         includer.extend Declarative::Heritage::Inherited
         includer.extend Declarative::Heritage::DSL
         require "trailblazer/operation/competences"
@@ -23,8 +27,9 @@ class Trailblazer::Operation
         includer.extend ClassMethods
       end
 
-      def assign_model!(*) # i don't like to "disable" the `@model =` like this but it's the simplest for now.
-        #self["model"] = @options[:model]
+      module AssignModel
+        def assign_model!(*) # i don't like to "disable" the `self["model"]=` like this but it's the simplest for now.
+        end
       end
 
 
@@ -32,7 +37,7 @@ class Trailblazer::Operation
         def build_operation(params, competences={}) # TODO: merge with Resolver::build_operation.
           model = model!(params)
           build_operation_class(model, params). # calls builds->(model, params).
-            new(params, competences.merge(model: model))
+            new(params, competences.merge("model" => model))
         end
       end
     end

@@ -41,7 +41,7 @@ class ExternalModelTest < MiniTest::Spec
 
   # call style.
   it do
-    Bla.(id: 2)[:model].must_equal song
+    Bla.(id: 2)["model"].must_equal song
     song.id.must_equal 2
   end
 

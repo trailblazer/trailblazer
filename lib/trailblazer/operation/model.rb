@@ -1,9 +1,14 @@
+require "trailblazer/operation/setup"
+
 module Trailblazer
   class Operation
     # The Model module will automatically create/find models for the configured +action+.
     # It adds a public  +Operation#model+ reader to access the model (after performing).
+    #
+    # NOTE: this is deprecated with the emerge of trailblazer-pipetree.
     module Model
       def self.included(includer)
+        includer.send :include, Setup # import #model! and friends.
         includer.extend DSL
 
         includer.extend Declarative::Heritage::Inherited
