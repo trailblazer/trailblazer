@@ -62,6 +62,7 @@ class DslContractTest < MiniTest::Spec
   it { Upgrade.(id: 1, title: "Coaster").inspect.must_equal %{#<OpenStruct id=1>} }
 
   # ::contract B overrides old A contract.
+  # this makes sure when calling contract(Constant), the old class gets wiped and is replaced with the new constant.
   class Upsert < Update
     class TitleContract < Reform::Form
       property :title
@@ -76,6 +77,7 @@ class DslContractTest < MiniTest::Spec
   it { Upsert.(id: 1, title: "Coaster").inspect.must_equal %{#<OpenStruct title="Coaster">} }
 
   # ::contract B do ..end overrides and extends new.
+  # using a constant will wipe out the existing class.
   class Upside < Update
     contract Upsert::TitleContract do
       property :id
@@ -89,6 +91,33 @@ class DslContractTest < MiniTest::Spec
 
 
 
+  #---
+  # contract do .. end
+  # (with block)
+  class Delete < Trailblazer::Operation
+    include Contract, Call
+    contract do
+      property :title
+    end
+  end
+
+  # IT: knows `title`.
+  it { Delete.(id: 1, title: "Coaster").inspect.must_equal %{#<OpenStruct title=\"Coaster\">} }
+
+  # subsequent calls merge.
+  class Remove < Trailblazer::Operation
+    include Contract, Call
+    contract do
+      property :title
+    end
+
+    contract do
+      property :id
+    end
+  end
+
+  # IT: knows `title` and `id`, since contracts get merged.
+  it { Remove.(id: 1, title: "Coaster").inspect.must_equal %{#<OpenStruct title=\"Coaster\", id=1>} }
 
 
 

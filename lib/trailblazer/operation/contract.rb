@@ -28,12 +28,8 @@ module Trailblazer::Operation::Contract
     def contract(name=:default, constant=nil, &block)
       heritage.record(:contract, name, constant, &block)
 
-      # FIXME: make this nicer. we want to extend same-named callback groups.
-      # TODO: allow the same with contract, or better, test it!
-      extended = self["contract.#{name}.class"]
-      # FIXME: should this only happen for blocks?
+      path, form_class = Trailblazer::Competences::Build.new.({ prefix: :contract, class: Reform::Form, container: self }, name, constant, block)
 
-      path, form_class = Trailblazer::Competences::Build.new.({ prefix: :contract, class: (extended||Reform::Form) }, name, constant, &block)
       self[path] = form_class
     end
   end
