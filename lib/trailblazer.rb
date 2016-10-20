@@ -1,4 +1,5 @@
 require "trailblazer/operation"
+require "trailblazer/dsl"
 require "trailblazer/version"
 require "uber/inheritable_attr"
 

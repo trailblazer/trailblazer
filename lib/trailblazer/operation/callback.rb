@@ -35,7 +35,7 @@ module Trailblazer::Operation::Callback
       # TODO: allow the same with contract, or better, test it!
       extended = self["callback.#{name}.class"] && self["callback.#{name}.class"]
 
-      path, group_class = Trailblazer::Competences::Build.new.({ prefix: :callback, class: Disposable::Callback::Group, container: self }, name, constant, block) { |extended| extended[:group] }
+      path, group_class = Trailblazer::DSL::Build.new.({ prefix: :callback, class: Disposable::Callback::Group, container: self }, name, constant, block) { |extended| extended[:group] }
 
       self[path] = { group: group_class, context: constant ? nil : :operation }
     end

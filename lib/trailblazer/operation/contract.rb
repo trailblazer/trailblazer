@@ -28,7 +28,7 @@ module Trailblazer::Operation::Contract
     def contract(name=:default, constant=nil, &block)
       heritage.record(:contract, name, constant, &block)
 
-      path, form_class = Trailblazer::Competences::Build.new.({ prefix: :contract, class: Reform::Form, container: self }, name, constant, block)
+      path, form_class = Trailblazer::DSL::Build.new.({ prefix: :contract, class: Reform::Form, container: self }, name, constant, block)
 
       self[path] = form_class
     end
