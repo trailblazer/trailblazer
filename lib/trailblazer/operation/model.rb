@@ -6,6 +6,7 @@ module Trailblazer
     # It adds a public  +Operation#model+ reader to access the model (after performing).
     #
     # NOTE: this is deprecated with the emerge of trailblazer-pipetree.
+    # Needs #[], #[]= skill dependency.
     module Model
       def self.included(includer)
         includer.send :include, Setup # import #model! and friends.
@@ -13,9 +14,6 @@ module Trailblazer
 
         includer.extend Declarative::Heritage::Inherited
         includer.extend Declarative::Heritage::DSL
-
-        require "trailblazer/operation/competences"
-        includer.include Trailblazer::Operation::Competences
       end
 
       # Methods to create the model according to class configuration and params.

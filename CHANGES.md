@@ -24,6 +24,14 @@ In 1.2, the possibly modified @params is not passed to #call, which SHOULD BE th
 This is mimiced in Setup ATM, but will be changed in 2.0.
 
 * Removed `Operation::reject`. This is available in `trailblazer-compat`.
+* `Operation#invalid!` is now an optional module `Trailblazer::Operation::Invalid`.
+
+
+# CHANGES:
+# * Removed `Operation::[]` in favor of `Operation::()`.
+# * `Operation#invalid!` doesn't accept a result anymore.
+# * Removed `Operation#valid?` in favor of the result object.
+
 
 ## DI
 

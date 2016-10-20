@@ -9,6 +9,8 @@ class Trailblazer::Operation
     #
     # The initializer will now expect you to pass the model in via options[:model]. This
     # happens automatically when coming from a builder.
+    #
+    # Needs #[], #[]= skill dependency.
     module External
       def self.included(includer)
         includer.send :include, Setup
@@ -17,8 +19,6 @@ class Trailblazer::Operation
 
         includer.extend Declarative::Heritage::Inherited
         includer.extend Declarative::Heritage::DSL
-        require "trailblazer/operation/competences"
-        includer.include Trailblazer::Operation::Competences
 
         includer.extend Model::DSL
         includer.extend Model::BuildModel

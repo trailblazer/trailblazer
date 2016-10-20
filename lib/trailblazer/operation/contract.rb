@@ -1,5 +1,3 @@
-require "trailblazer/competences" # Competence::Builder
-
 # Best practices for using contract.
 #
 # * inject contract instance via constructor to #contract
@@ -7,6 +5,7 @@ require "trailblazer/competences" # Competence::Builder
 # * allow implicit automatic setup via #contract and class.contract_class
 #
 # Needs Operation#model.
+# Needs #[], #[]= skill dependency.
 module Trailblazer::Operation::Contract
   def self.included(includer)
     includer.extend DSL
@@ -14,9 +13,6 @@ module Trailblazer::Operation::Contract
 
     includer.extend Declarative::Heritage::Inherited
     includer.extend Declarative::Heritage::DSL
-
-    require "trailblazer/operation/competences"
-    includer.include Trailblazer::Operation::Competences
   end
 
   module DSL

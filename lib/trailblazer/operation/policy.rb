@@ -5,14 +5,13 @@ module Trailblazer
   end
 
   # Adds #evaluate_policy to #setup!, and ::policy.
+  #
+  # Needs #[], #[]= skill dependency.
   module Operation::Policy
     def self.included(includer)
       includer.include Operation::Setup
       includer.include Setup
       includer.extend DSL
-
-      require "trailblazer/operation/competences"
-    includer.include Trailblazer::Operation::Competences
 
               includer.extend Declarative::Heritage::Inherited
         includer.extend Declarative::Heritage::DSL

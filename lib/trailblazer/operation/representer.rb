@@ -1,4 +1,3 @@
-require "trailblazer/competences"
 # Including this will change the way deserialization in #validate works.
 #
 # Instead of treating params as a hash and letting the form object deserialize it,
@@ -7,16 +6,14 @@ require "trailblazer/competences"
 #
 # TODO: so far, we only support JSON, but it's two lines to change to support any kind of format.
 #
-# Needs Operation#model.
+# Needs #model.
+# Needs #[], #[]= skill dependency.
 module Trailblazer::Operation::Representer
   def self.included(includer)
     includer.extend DSL
 
     includer.extend Declarative::Heritage::Inherited
     includer.extend Declarative::Heritage::DSL
-
-    require "trailblazer/operation/competences"
-    includer.include Trailblazer::Operation::Competences
   end
 
   module DSL

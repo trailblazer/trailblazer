@@ -7,15 +7,13 @@ module Trailblazer
   #
   # http://trailblazer.to/gems/operation/policy.html#guard
   module Operation::Policy
+    # Needs #[], #[]= skill dependency.
     module Guard
       def self.included(includer)
         includer.include Operation::Setup
         includer.include Setup # Policy::Setup, let's wait for pipetree to have this nice.
         includer.extend(DSL) # Provides ::policy(CallableObject)
         includer.extend(ClassMethods)
-
-        require "trailblazer/operation/competences"
-        includer.include Trailblazer::Operation::Competences
 
         includer.extend Declarative::Heritage::Inherited
         includer.extend Declarative::Heritage::DSL

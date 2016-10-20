@@ -1,6 +1,7 @@
 require "declarative"
 require "disposable/callback"
 
+# Needs #[], #[]= skill dependency.
 module Trailblazer::Operation::Callback
   def self.included(includer)
     includer.extend DSL

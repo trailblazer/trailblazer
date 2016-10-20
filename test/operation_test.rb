@@ -214,6 +214,9 @@ end
 class OperationTest < MiniTest::Spec
   # test #invalid!
   class OperationWithoutValidateCall < Trailblazer::Operation
+    require "trailblazer/operation/invalid"
+    include Invalid
+
     def process(params)
       params || invalid!
     end
