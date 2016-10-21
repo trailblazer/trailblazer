@@ -20,6 +20,7 @@ module Trailblazer
     module DSL
       def policy(*args, &block)
         heritage.record(:policy, *args, &block)
+
         self["policy.evaluator"] = permission_class.new(*args, &block)
       end
 
