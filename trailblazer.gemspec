@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.description   = %q{A high-level architecture for web applications introducing new abstractions such as operations, form objects or policies.}
   spec.summary       = %q{A high-level architecture for Ruby and Rails.}
   spec.homepage      = "http://trailblazer.to"
-  spec.license       = "MIT"
+  spec.license       = "LGPL-3.0"
 
   spec.files         = `git ls-files`.split($/)
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
