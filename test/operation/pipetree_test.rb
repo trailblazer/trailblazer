@@ -1,7 +1,7 @@
 require "test_helper"
 require "pipetree"
 
-BuildOperation = ->(params, options) { options[:operation] = options[:class].build_operation(params, options[:write]); params }
+BuildOperation = ->(params, options) { options[:operation] = options[:class].build_operation(params, options[:skills]); params }
 Call           = ->(params, options) { options[:operation].call(params) }
 
 module Trailblazer::Operation::Pipetree
@@ -12,14 +12,31 @@ module Trailblazer::Operation::Pipetree
 
 
     result = {}
+    skills = Trailblazer::Skill.new(options, self.skills) # FIXME: redundant from Op::Skill.
 
-    outcome = pipe.(params, { read: self, write: options=options.dup, result: result, class: self })
+    outcome = pipe.(params, { skills: skills, result: result, class: self })
 
     outcome == ::Pipetree::Stop ? result : outcome # THIS SUCKS a bit.
   end
 end
 
 class PipetreeTest < Minitest::Spec
+
+  #--- injected option is available in class-level function.
+  it do
+    Class.new(Trailblazer::Operation) do
+      extend Trailblazer::Operation::Pipetree
+      self["pipetree"] = ::Pipetree[
+        ->(input, options) { options[:skills]["user.current"] }
+      ]
+    end.
+      ({}, "user.current" => Object).must_equal Object
+  end
+
+
+
+
+
   module Setup
     # Params ->(result, options) { snippet }
     # Model ->(result, options) { snippet }
@@ -29,18 +46,14 @@ class PipetreeTest < Minitest::Spec
 # the idea is, leave the configuration in the operation. the implementation can be done on the op, or in a dedicated object that *reads* config from the op.
 
   class Auth
-    def initialize(*args)
-      @user, @model = *args
-    end
-
-    def create?
-      @user == Module
-    end
+    def initialize(*args); @user, @model = *args end
+    def create?; @user == Module end
+    def inspect; "<Auth: user:#{@user.inspect}, model:#{@model.inspect}>" end
   end
 
 
   class Create < Trailblazer::Operation
-    include Model
+    include Model#::DSL
     model Song, :create
 
     require "trailblazer/operation/policy"
@@ -50,8 +63,7 @@ class PipetreeTest < Minitest::Spec
     extend Pipetree
 
     def call(params)
-    #   super
-      self["model"]
+      self
     end
 
     def process(params)
@@ -65,7 +77,7 @@ class PipetreeTest < Minitest::Spec
 
 
 
-    ModelBuilderBuilder = ->(input, options) { options[:model] = ModelBuilder.new(options[:read]).(input); input }
+    ModelBuilderBuilder = ->(input, options) { options[:model] = ModelBuilder.new(options[:skills]).(input); input }
     # this is to be able to use BuildModel. i really don't know if we actually need to do that.
     # what if people want to override #model! for example?
     class ModelBuilder
@@ -83,14 +95,14 @@ class PipetreeTest < Minitest::Spec
       end
     end
 
-    AssignModel = ->(input, options) { options[:write]["model"]   = options[:model] }
-    AssignPolicy = ->(input, options) { options[:write]["policy"] = options[:policy] }
+    AssignModel = ->(input, options) { options[:skills]["model"]   = options[:model] }
+    AssignPolicy = ->(input, options) { options[:skills]["policy"] = options[:policy] }
 
 
     # "current_user" is now a skill dependency, not a params option anymore.
     PolicyEvaluate = ->(input, options) {
-      # TODO: assign policy
-      options[:policy] = options[:read]["policy.evaluator"].(options[:write]["user.current"], options[:model]) { # DISCUSS: where do we get the model from? [:write]["model"] or [:model]
+      # raise options[:skills]["model"].inspect
+      options[:policy] = options[:skills]["policy.evaluator"].(options[:skills]["user.current"], options[:skills]["model"]) { # DISCUSS: where do we get the model from? [:write]["model"] or [:model]
         options[:result][:valid] = false
         options[:result]["policy.message"] = "Not allowed"
 
@@ -102,20 +114,33 @@ class PipetreeTest < Minitest::Spec
       SetupParams,
       ModelBuilderBuilder, AssignModel,
       PolicyEvaluate,
+      AssignPolicy,
       Call,
     ]
-
-
   end
 
-  it { Create.({song: { title: "311" }}, "user.current" => Module).class.must_equal Song }
+  #--- Operation#call overridden
+  # successful policy
+  it do
+    res = Create.({song: { title: "311" }}, "user.current" => Module)
+    res["model"].to_s.must_equal %{#<struct PipetreeTest::Song title=nil>}
+    res["policy"].inspect.must_equal %{<Auth: user:Module, model:#<struct PipetreeTest::Song title=nil>>}
+    # injection via initializer works.
+    res["user.current"].must_equal Module
+  end
+  # policy breach
+  it do
+    res = Create.({song: { title: "311" }}, "user.current" => nil)
+    res.must_equal({:valid=>false, "policy.message"=>"Not allowed"})
+  end
 
   #---
   # External and Resolver, done right.
-
-
   class Update < Trailblazer::Operation
-    include Model
+    extend Declarative::Heritage::Inherited
+        extend Declarative::Heritage::DSL
+
+    extend Model::DSL
     extend Policy::DSL
 
     model Song
@@ -141,8 +166,9 @@ class PipetreeTest < Minitest::Spec
   it {#<struct PipetreeTest::Song title=nil>
     op = Update.({}, "user.current" => Module)
 
+
     # make sure policy class is correct, and user and model are set.
-    op["policy"].inspect.must_match /Auth:.+? @user=Module, @model=#<struct PipetreeTest::Song title=nil>/
+    op["policy"].inspect.must_equal %{<Auth: user:Module, model:#<struct PipetreeTest::Song title=nil>>}
     op["model"].class.must_equal Song
   }
 
