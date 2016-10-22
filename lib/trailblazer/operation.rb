@@ -189,8 +189,18 @@ module Trailblazer
 
       def initialize(errors)
         super(errors.to_s)
-        @errors = errors.messages
+        @errors = nest(errors.messages)
       end
+
+      private
+
+        def nest(hash)
+          hash.each_with_object({}) do |(key,value), all|
+            key_parts = key.to_s.split('.').map!(&:to_sym)
+            leaf = key_parts[0...-1].inject(all) { |h, k| h[k] ||= {} }
+            leaf[key_parts.last] = value
+          end
+        end
 
     end
   end
