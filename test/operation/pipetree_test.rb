@@ -11,8 +11,8 @@ class PipetreeTest < Minitest::Spec
 # the idea is, leave the configuration in the operation. the implementation can be done on the op, or in a dedicated object that *reads* config from the op.
 
   class Auth
-    def initialize(*)
-
+    def initialize(*args)
+      @user, @model = *args
     end
 
     def create?
@@ -78,8 +78,13 @@ class PipetreeTest < Minitest::Spec
 
     # "current_user" is now a skill dependency, not a params option anymore.
     PolicyEvaluate = ->(input, options) {
+
       # TODO: assign policy
-      options[:policy] = options[:read]["policy.evaluator"].(options["current_user"], options[:read]["model"]) { return Pipetree::Stop }; input
+      options[:policy] = options[:read]["policy.evaluator"].(options[:write]["user.current"], options[:model]) { # DISCUSS: where do we get the model from? [:write]["model"] or [:model]
+        options[:result][:valid] = false
+        options[:result]["policy.message"] = "Not allowed"
+
+        return Pipetree::Stop }; input
     }
 
     InitPipetree = Pipetree[
@@ -91,9 +96,12 @@ class PipetreeTest < Minitest::Spec
 
   it { Create.({song: { title: "311" }}).class.must_equal Song }
 
-
   #---
   # External and Resolver, done right.
+
+  BuildOperation = ->(params, options) { options[:operation] = options[:class].build_operation(params, options[:write]); params }
+  Call           = ->(params, options) { options[:operation].call(params) }
+
   class Update < Trailblazer::Operation
     include Model
     extend Policy::DSL
@@ -101,7 +109,7 @@ class PipetreeTest < Minitest::Spec
     model Song
     policy Auth, :create?
 
-    def self.build_operation(params, *args)
+    def self.call(params={}, options={})
       # FIXME: other skills from other containers are not available here.
 
       pipe = Pipetree[
@@ -109,12 +117,17 @@ class PipetreeTest < Minitest::Spec
         Create::ModelBuilderBuilder, Create::AssignModel,
         Create::PolicyEvaluate,
         Create::AssignPolicy,
+        BuildOperation,
+        Call,
       ]
 
+      result = {}
 
-      pipe.(params, { read: self, write: options={} })
+      pipe.(params, { read: self, write: options=options.dup, result: result, class: self })
 
-      new(params, options)
+      # puts "@@@@-->@ #{result.inspect}"
+      # new(params, options)
+      # result
     end
 
     def call(*)
@@ -122,10 +135,11 @@ class PipetreeTest < Minitest::Spec
     end
   end
 
-  it {
-    op = Update.({})
+  it {#<struct PipetreeTest::Song title=nil>
+    op = Update.({}, "user.current" => Module)
 
-    op["policy"].inspect.must_match /Auth/
+    # make sure policy class is correct, and user and model are set.
+    op["policy"].inspect.must_match /Auth:.+? @user=Module, @model=#<struct PipetreeTest::Song title=nil>/
     op["model"].class.must_equal Song
 
   }
