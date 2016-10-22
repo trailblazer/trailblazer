@@ -151,7 +151,7 @@ module Trailblazer
 
     # When using Op.(), an invalid contract will raise an exception.
     def raise!(contract)
-      raise InvalidContract.new(contract.errors.to_s) if @options[:raise_on_invalid]
+      raise InvalidContract.new(contract.errors) if @options[:raise_on_invalid]
     end
 
     # Instantiate the contract, either by using the user's contract passed into #validate
@@ -184,6 +184,24 @@ module Trailblazer
     end
 
     class InvalidContract < RuntimeError
+
+      attr_reader :errors
+
+      def initialize(errors)
+        super(errors.to_s)
+        @errors = nest(errors.messages)
+      end
+
+      private
+
+        def nest(hash)
+          hash.each_with_object({}) do |(key,value), all|
+            key_parts = key.to_s.split('.').map!(&:to_sym)
+            leaf = key_parts[0...-1].inject(all) { |h, k| h[k] ||= {} }
+            leaf[key_parts.last] = value
+          end
+        end
+
     end
   end
 end
