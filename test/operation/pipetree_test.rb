@@ -53,7 +53,9 @@ class PipetreeTest < Minitest::Spec
 
 
   class Create < Trailblazer::Operation
-    include Model#::DSL
+    extend Declarative::Heritage::Inherited
+        extend Declarative::Heritage::DSL
+    extend Model::DSL
     model Song, :create
 
     require "trailblazer/operation/policy"
