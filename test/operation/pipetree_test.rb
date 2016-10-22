@@ -16,8 +16,10 @@ class PipetreeTest < Minitest::Spec
     end
 
     def create?
+      true
     end
   end
+
 
   class Create < Trailblazer::Operation
     include Model
@@ -31,12 +33,7 @@ class PipetreeTest < Minitest::Spec
       super
 
       # was setup!
-      result = Pipetree[
-        SetupParams,
-        ModelBuilder.new(self), AssignModel,
-        PolicyEvaluate,
-      ].
-        (params, self)
+      result = InitPipetree.(params, read: self, write: self)
 
       puts "@@@@@ #{result.inspect}"
     end
@@ -57,9 +54,12 @@ class PipetreeTest < Minitest::Spec
 
 
 
+    ModelBuilderBuilder = ->(input, options) { options[:model] = ModelBuilder.new(options[:read]).(input); input }
+    # this is to be able to use BuildModel. i really don't know if we actually need to do that.
+    # what if people want to override #model! for example?
     class ModelBuilder
-      def initialize(options)
-        @delegator = options
+      def initialize(skills)
+        @delegator = skills
       end
 
       extend Uber::Delegates
@@ -67,20 +67,67 @@ class PipetreeTest < Minitest::Spec
 
       include Trailblazer::Operation::Model::BuildModel # #instantiate_model and so on.
 
-      def call(params, options)
+      def call(params)
         model!(params)
       end
     end
 
-    AssignModel = ->(input, options) { options["model"] = input }
+    AssignModel = ->(input, options) { options[:write]["model"]   = options[:model] }
+    AssignPolicy = ->(input, options) { options[:write]["policy"] = options[:policy] }
 
 
     # "current_user" is now a skill dependency, not a params option anymore.
     PolicyEvaluate = ->(input, options) {
       # TODO: assign policy
-      options["policy.evaluator"].(options["current_user"], options["model"]) { return Pipetree::Stop }; input
+      options[:policy] = options[:read]["policy.evaluator"].(options["current_user"], options[:read]["model"]) { return Pipetree::Stop }; input
     }
+
+    InitPipetree = Pipetree[
+      SetupParams,
+      ModelBuilderBuilder, AssignModel,
+      PolicyEvaluate,
+    ]
   end
 
   it { Create.({song: { title: "311" }}).class.must_equal Song }
+
+
+  #---
+  # External and Resolver, done right.
+  class Update < Trailblazer::Operation
+    include Model
+    extend Policy::DSL
+
+    model Song
+    policy Auth, :create?
+
+    def self.build_operation(params, *args)
+      # FIXME: other skills from other containers are not available here.
+
+      pipe = Pipetree[
+        Create::SetupParams,
+        Create::ModelBuilderBuilder, Create::AssignModel,
+        Create::PolicyEvaluate,
+        Create::AssignPolicy,
+      ]
+
+
+      pipe.(params, { read: self, write: options={} })
+
+      new(params, options)
+    end
+
+    def call(*)
+      self
+    end
+  end
+
+  it {
+    op = Update.({})
+
+    op["policy"].inspect.must_match /Auth/
+    op["model"].class.must_equal Song
+
+  }
+
 end
