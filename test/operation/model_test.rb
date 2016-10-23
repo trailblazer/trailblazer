@@ -43,4 +43,6 @@ class ModelTest < Minitest::Spec
   end
 
   it { Show.({id: 1})["model"].inspect.must_equal %{#<struct ModelTest::Song id=1>} }
+
+  # TODO: with builder!
 end

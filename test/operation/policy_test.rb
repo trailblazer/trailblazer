@@ -2,7 +2,9 @@ require "test_helper"
 require "trailblazer/operation/policy"
 
 class PolicyTest < Minitest::Spec
-  Song = Struct.new(:title)
+  Song = Struct.new(:id) do
+    def self.find(id); new(id) end
+  end
 
   class Auth
     def initialize(*args); @user, @model = *args end
@@ -73,15 +75,55 @@ class PolicyTest < Minitest::Spec
   it do
     result = Show.({}, "user.current" => Module)
     result["process"].must_equal nil
-    result["model"].inspect.must_equal %{#<struct PolicyTest::Song title=nil>}
-    # result["policy"].inspect.must_equal %{#<struct PolicyTest::Song title=nil>}
+    result["model"].inspect.must_equal %{#<struct PolicyTest::Song id=nil>}
+    # result["policy"].inspect.must_equal %{#<struct PolicyTest::Song id=nil>}
   end
 
   # valid because new policy.
   it do
     result = Show.({}, "user.current" => Module, "policy.evaluator" => Trailblazer::Operation::Policy::Permission.new(Auth, :user_and_model?))
     result["process"].must_equal true
-    result["model"].inspect.must_equal %{#<struct PolicyTest::Song title=nil>}
-    result["policy"].inspect.must_equal %{<Auth: user:Module, model:#<struct PolicyTest::Song title=nil>>}
+    result["model"].inspect.must_equal %{#<struct PolicyTest::Song id=nil>}
+    result["policy"].inspect.must_equal %{<Auth: user:Module, model:#<struct PolicyTest::Song id=nil>>}
+  end
+
+  ##--
+  # Policy and Model before Build ("External" or almost Resolver)
+  class Edit < Trailblazer::Operation
+    include Pipetree
+    include Model, Policy
+    model Song, :update
+    policy Auth, :user_and_model?
+
+    def process(*); self["process"] = true end
+
+    self["pipetree"] = ::Pipetree[
+      Trailblazer::Operation::Model::Build,
+      Trailblazer::Operation::Model::Assign,
+      # SetupParams,
+      Trailblazer::Operation::Policy::Evaluate,
+      Trailblazer::Operation::Policy::Assign,
+
+      Trailblazer::Operation::Build,
+      Call,
+    ]
+  end
+
+  # successful.
+  it do
+    result = Edit.({ id: 1 }, "user.current" => Module)
+    result["process"].must_equal true
+    result["model"].inspect.must_equal %{#<struct PolicyTest::Song id=1>}
+    result["policy.message"].must_equal nil
+    # result[:valid].must_equal nil
+    result["policy"].inspect.must_equal %{<Auth: user:Module, model:#<struct PolicyTest::Song id=1>>}
+  end
+
+  # breach.
+  it do
+    result = Edit.({ id: 4 }, "user.current" => nil)
+    result["model"].inspect.must_equal %{#<struct PolicyTest::Song id=4>}
+    result["process"].must_equal nil
+    result["policy.message"].must_equal "Not allowed"
   end
 end
