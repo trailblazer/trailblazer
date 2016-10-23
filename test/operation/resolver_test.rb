@@ -1,90 +1,48 @@
 require "test_helper"
 require "trailblazer/operation/resolver"
 
-class ResolverTest < MiniTest::Spec
-  Song = Struct.new(:title)
-  User = Struct.new(:name)
-
-  class MyKitchenRules
-    def initialize(user, song)
-      @user = user
-      @song = song
-    end
-
-    def create?
-      @user.is_a?(User) and @song.is_a?(Song)
-    end
-
-    def admin?
-      @user && @user.name == "admin" && @song.is_a?(Song)
-    end
-
-    def true?
-      true
-    end
+class BuilderTest < Minitest::Spec
+  Song = Struct.new(:id) do
+    def self.find(id); new(id) end
   end
 
-  class Create < Trailblazer::Operation
+  class Auth
+    def initialize(*args); @user, @model = *args end
+    def only_user?; @user == Module && @model.nil? end
+    def user_object?; @user == Object end
+    def user_and_model?; @user == Module && @model.class == Song end
+    def inspect; "<Auth: user:#{@user.inspect}, model:#{@model.inspect}>" end
+  end
+
+  class A < Trailblazer::Operation
+    include Pipetree
     extend Builder
+
+    builds ->(options) {
+      return P if options[:params] == { some: "params", id:1 }
+      return B if options[:policy].inspect == %{<Auth: user:Module, model:#<struct BuilderTest::Song id=3>>} # both user and model:id are set!
+      return M if options[:model].inspect == %{#<struct BuilderTest::Song id=9>}
+    }
+
     include Resolver
-    model Song, :create
-    policy MyKitchenRules, :create?
+    model Song, :update
+    policy Auth, :user_and_model?
 
-    builds-> (model, policy, params) do
-      return ForGaryMoore if model.title == "Friday On My Mind"
-      return Admin if policy.admin?
-      return SignedIn if params[:current_user] && params[:current_user].name
-    end
+    self["pipetree"] = ::Pipetree[
+      Trailblazer::Operation::Model::Build, Trailblazer::Operation::Model::Assign,
+      Trailblazer::Operation::Policy::Evaluate, Trailblazer::Operation::Policy::Assign,
 
-    def self.model!(params)
-      Song.new(params[:title])
-    end
+      Trailblazer::Operation::Build,
+      # SetupParams,
+      # Call,
+    ]
 
-    def call(*)
-      self
-    end
-
-    class Admin < self
-    end
-    class SignedIn < self
-    end
+    class P < self; end
+    class B < self; end
+    class M < self; end
   end
 
-   # valid.
-  it { Create.({current_user: User.new}).must_be_instance_of Create }
-  it { Create.({current_user: User.new("admin")}).must_be_instance_of Create::Admin }
-  it { Create.({current_user: User.new("kenneth")}).must_be_instance_of Create::SignedIn }
-
-  # invalid.
-  it do
-    assert_raises Trailblazer::NotAuthorizedError do
-      Create.({})
-    end
-  end
-
-
-  describe "passes policy into operation" do
-    class Update < Trailblazer::Operation
-      extend Builder
-      include Resolver
-      model Song, :create
-      policy MyKitchenRules, :true?
-
-      builds-> (model, policy, params) do
-        puts "@@@@@ #{policy.object_id.inspect}"
-        policy.instance_eval { def whoami; "me!" end }
-        nil
-      end
-
-      def call(*)
-        self
-      end
-    end
-
-    it do
-      ers=Update.({})
-        puts "@@@@@ #{ers.policy.object_id.inspect}"
-      ers.policy.whoami.must_equal "me!"
-    end
-  end
+  it { A.({ some: "params", id: 1 }, { "user.current" => Module }).must_equal A::P }
+  it { A.({                 id: 3 }, { "user.current" => Module }).must_equal A::B }
+  it { A.({                 id: 9 }, { "user.current" => Module }).must_equal A::M }
 end

@@ -13,7 +13,7 @@ class ModelTest < Minitest::Spec
     model Song, :create
 
     self["pipetree"] = ::Pipetree[
-      Trailblazer::Operation::Build,
+      Trailblazer::Operation::New,
       # SetupParams,
       Trailblazer::Operation::Model::Build,
       Trailblazer::Operation::Model::Assign,
@@ -38,7 +38,7 @@ class ModelTest < Minitest::Spec
     self["pipetree"] = ::Pipetree[
       Trailblazer::Operation::Model::Build,
       Trailblazer::Operation::Model::Assign,
-      Trailblazer::Operation::Build,
+      Trailblazer::Operation::New,
     ]
   end
 

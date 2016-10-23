@@ -52,6 +52,10 @@ You can now inject the following objects via `::call`:
 * Removed `Operation::contract_class`. Please use `Operation::["contract.default.class"]`.
 * Removed `Operation::contract_class=`. Please use `Operation::["contract.default.class"]=`. Doesn't inherit.
 
+## Policy
+
+* No exception anymore, but `Operation#["policy.message"]`.
+
 ## Representer
 
 * Removed `Operation::representer_class`. Please use `Operation::["representer.class"]`.

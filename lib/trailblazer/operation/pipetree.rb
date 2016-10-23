@@ -1,6 +1,6 @@
 class Trailblazer::Operation
-  Build = ->(klass, options) { klass.build_operation(options[:params], options[:skills]) } # returns operation instance.
-  Call  = ->(operation, options) { operation.call(options[:params]) }                      # returns #call result.
+  New = ->(klass, options) { klass.new(options[:params], options[:skills]) } # returns operation instance.
+  Call = ->(operation, options) { operation.call(options[:params]) }         # returns #call result.
 
   module Pipetree
     def self.included(includer)

@@ -26,7 +26,7 @@ class PolicyTest < Minitest::Spec
     end
 
     self["pipetree"] = ::Pipetree[
-      Trailblazer::Operation::Build,
+      Trailblazer::Operation::New,
       # SetupParams,
       # ModelBuilderBuilder, AssignModel,
       Trailblazer::Operation::Policy::Evaluate,
@@ -57,7 +57,7 @@ class PolicyTest < Minitest::Spec
   # inheritance, adding Model
   class Show < Create
     self["pipetree"] = ::Pipetree[
-      Trailblazer::Operation::Build,
+      Trailblazer::Operation::New,
 
       Trailblazer::Operation::Model::Build,
       Trailblazer::Operation::Model::Assign,
@@ -104,7 +104,7 @@ class PolicyTest < Minitest::Spec
       Trailblazer::Operation::Policy::Evaluate,
       Trailblazer::Operation::Policy::Assign,
 
-      Trailblazer::Operation::Build,
+      Trailblazer::Operation::New,
       Call,
     ]
   end

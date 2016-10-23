@@ -1,15 +1,14 @@
-require "trailblazer/operation/model/external"
 require "trailblazer/operation/policy"
+require "trailblazer/operation/builder"
 
 class Trailblazer::Operation
   # Provides builds-> (model, policy, params).
   module Resolver
     def self.included(includer)
       includer.class_eval do
-        include Policy # ::build_policy
-        include Model::External # ::build_operation_class
-
-        extend BuildOperation # ::build_operation
+        # include the DSL methods.
+        include Policy # ::policy
+        include Model  # ::model
       end
     end
 
@@ -25,11 +24,6 @@ class Trailblazer::Operation
         build_operation_class(model, policy, params).
           new(params, options)
       end
-    end
-
-    def initialize(params, options={})
-      super
-      self["policy"] = options["policy"]
     end
   end
 end
