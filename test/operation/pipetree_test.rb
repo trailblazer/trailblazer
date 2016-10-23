@@ -1,24 +1,8 @@
 require "test_helper"
-require "pipetree"
+require "trailblazer/operation/pipetree"
 
 BuildOperation = ->(klass, options) { klass.build_operation(options[:params], options[:skills]) } # returns operation instance.
 Call           = ->(operation, options) { operation.call(options[:params]) }                      # returns #call result.
-
-module Trailblazer::Operation::Pipetree
-  def call(params={}, options={})
-    pipe = self["pipetree"] # TODO: injectable? WTF? how cool is that?
-
-
-    result = {}
-    skills = Trailblazer::Skill.new(result, options, self.skills) # FIXME: redundant from Op::Skill.
-
-    outcome = pipe.(self, { skills: skills, params: params }) # (class, { skills: , params: })
-
-    outcome == ::Pipetree::Stop ? result : outcome # THIS SUCKS a bit.
-
-    # FIXME: simply return op?
-  end
-end
 
 class PipetreeTest < Minitest::Spec
 
@@ -51,6 +35,9 @@ class PipetreeTest < Minitest::Spec
     def inspect; "<Auth: user:#{@user.inspect}, model:#{@model.inspect}>" end
   end
 
+
+  #---
+  # Policy test
 
   class Create < Trailblazer::Operation
     extend Declarative::Heritage::Inherited
@@ -98,18 +85,6 @@ class PipetreeTest < Minitest::Spec
     end
 
     AssignModel = ->(input, options) { options[:skills]["model"]   = options[:model]; input }
-    AssignPolicy = ->(input, options) { options[:skills]["policy"] = options[:policy]; input }
-
-
-    # "current_user" is now a skill dependency, not a params option anymore.
-    PolicyEvaluate = ->(input, options) {
-      # raise options[:skills]["model"].inspect
-      options[:policy] = options[:skills]["policy.evaluator"].(options[:skills]["user.current"], options[:skills]["model"]) { # DISCUSS: where do we get the model from? [:write]["model"] or [:model]
-        options[:skills][:valid] = false
-        options[:skills]["policy.message"] = "Not allowed"
-
-        return ::Pipetree::Stop }; input
-    }
 
     self["pipetree"] = ::Pipetree[
       BuildOperation,

@@ -19,6 +19,5 @@ gem "dry-auto_inject"
 
 gem "trailblazer-operation", path: "../operation"
 
-gem "dry-initializer"
 gem "minitest-line"
 gem "pipetree", path: "../pipetree"
