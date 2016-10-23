@@ -23,7 +23,7 @@ class OperationContractMERGEMETest < Minitest::Spec
 
   # allow using #contract before #validate.
   it do
-    contract = Operation.(title: "Beethoven")[:contract]
+    contract = Operation.(title: "Beethoven")["contract"]
     contract.id.must_equal 1
     contract.title.must_equal "Beethoven"
     contract.length.must_equal 3
@@ -49,7 +49,7 @@ class OperationContractWithTwinOptionsTest < Minitest::Spec
 
   # allow using #contract to inject model and arguments.
   it do
-    op = Operation.(id: 1)[:operation]
+    op = Operation.(id: 1)
     op.contract.id.must_equal 1
     op.contract.title.must_equal "Bad Feeling"
   end
@@ -75,7 +75,7 @@ class OperationContractWithTwinOptionsTest < Minitest::Spec
     end
 
     it do
-      contract = CompositionOperation.({})[:contract]
+      contract = CompositionOperation.({})["contract"]
       contract.song_id.must_equal 1
       contract.album_name.must_equal "Forever Malcom Young"
       contract.title.must_equal "Medicine Balls"
@@ -101,7 +101,7 @@ class OperationContractWithTwinOptionsTest < Minitest::Spec
     end
 
     it do
-      contract = CompositionValidateOperation.({})[:contract]
+      contract = CompositionValidateOperation.({})["contract"]
       contract.song_id.must_equal 1
       contract.album_name.must_equal "Forever Malcom Young"
       contract.title.must_equal "Medicine Balls"
@@ -126,7 +126,7 @@ class OperationContractWithTwinOptionsAndContractClassTest < Minitest::Spec
 
   # allow using #contract to inject model, options and class.
   it do
-    contract = Operation.(id: 1)[:contract]
+    contract = Operation.(id: 1)["contract"]
     contract.title.must_equal "Bad Feeling"
     contract.must_be_instance_of Operation::Contract
   end

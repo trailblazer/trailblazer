@@ -6,7 +6,7 @@ require "trailblazer/operation/contract"
 class DslCallbackTest < MiniTest::Spec
   module SongProcess
     def process(params)
-      result[:_invocations] = _invocations
+      self[:_invocations] = _invocations
       contract(OpenStruct.new).validate(params)
       dispatch!
     end

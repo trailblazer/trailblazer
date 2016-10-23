@@ -36,8 +36,10 @@ class Trailblazer::Operation
       module ClassMethods
         def build_operation(params, competences={}) # TODO: merge with Resolver::build_operation.
           model = model!(params)
+          competences["model"] = model
+
           build_operation_class(model, params). # calls builds->(model, params).
-            new(params, competences.merge("model" => model))
+            new(params, competences)
         end
       end
     end

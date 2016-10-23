@@ -23,7 +23,7 @@ class OperationSetupParamsTest < MiniTest::Spec
   end
 
   # allows you changing params in #setup_params!.
-  it { OperationSetupParam.(valid: true)[:operation].to_s.must_equal "<OperationSetupParam @model={:valid=>true, :garrett=>\"Rocks!\"}>" }
+  it { OperationSetupParam.(valid: true).to_s.must_equal "<OperationSetupParam @model={:valid=>true, :garrett=>\"Rocks!\"}>" }
 end
 
 class OperationParamsTest < MiniTest::Spec
@@ -41,7 +41,7 @@ class OperationParamsTest < MiniTest::Spec
   end
 
   # allows you returning new params in #params!.
-  it { Operation.({valid: true})[:operation].model.to_s.must_equal "{:changed_params=>{:valid=>true}} and true" }
+  it { Operation.({valid: true}).model.to_s.must_equal "{:changed_params=>{:valid=>true}} and true" }
 end
 
 # Operation#model.
@@ -60,7 +60,7 @@ class OperationModelTest < MiniTest::Spec
   end
 
   # #model.
-  it { Operation.(Object)[:operation].model.must_equal Object }
+  it { Operation.(Object).model.must_equal Object }
 end
 
 # Operation#model=.
@@ -74,7 +74,7 @@ class OperationModelWriterTest < MiniTest::Spec
     end
   end
 
-  it { Operation.("I can set @model via a private setter")[:operation].model.to_s.must_equal "I can set @model via a private setter" }
+  it { Operation.("I can set @model via a private setter").model.to_s.must_equal "I can set @model via a private setter" }
 end
 
 class OperationRunTest < MiniTest::Spec
@@ -143,7 +143,7 @@ class OperationRunTest < MiniTest::Spec
 
   # return operation when ::call
   it do
-    Operation.("yes, true")[:operation].to_s.must_equal %{<Operation @model=>}
+    Operation.("yes, true").to_s.must_equal %{<Operation @model=>}
     Operation.("yes, true")[:valid].must_equal true
   end
 
@@ -183,7 +183,7 @@ class OperationRunTest < MiniTest::Spec
   end
 
   # # Operation#contract returns @contract
-  it { Operation.("yes, true")[:operation].contract.class.to_s.must_equal "OperationRunTest::Operation::MyContract" }
+  it { Operation.("yes, true").contract.class.to_s.must_equal "OperationRunTest::Operation::MyContract" }
 
 
 
@@ -255,8 +255,8 @@ class OperationTest < MiniTest::Spec
     attr_reader :secret_contract
   end
 
-  it { OperationWithValidateBlock.(false)[:operation].secret_contract.must_equal nil }
-  it { OperationWithValidateBlock.(true)[:operation].secret_contract.must_equal OperationWithValidateBlock::Contract }
+  it { OperationWithValidateBlock.(false).secret_contract.must_equal nil }
+  it { OperationWithValidateBlock.(true).secret_contract.must_equal OperationWithValidateBlock::Contract }
 
 
   # test validate wit if/else
@@ -285,8 +285,8 @@ class OperationTest < MiniTest::Spec
     attr_reader :secret_contract
   end
 
-  it { OperationWithValidateAndIf.(false)[:operation].secret_contract.must_equal "so wrong!" }
-  it { OperationWithValidateAndIf.(true)[:operation].secret_contract.must_equal OperationWithValidateAndIf::Contract }
+  it { OperationWithValidateAndIf.(false).secret_contract.must_equal "so wrong!" }
+  it { OperationWithValidateAndIf.(true).secret_contract.must_equal OperationWithValidateAndIf::Contract }
 
 
 

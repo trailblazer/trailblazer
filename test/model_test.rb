@@ -33,7 +33,7 @@ class ModelTest < MiniTest::Spec
 
   describe "dependency injection" do
     Hit = Class.new(Song)
-    it { Create.({ song: {} }, "model.class" => Hit)[:model].class.must_equal Hit }
+    it { Create.({ song: {} }, "model.class" => Hit)["model"].class.must_equal Hit }
 
     # "model" => Model.new
     class Show < Trailblazer::Operation
@@ -52,9 +52,9 @@ class ModelTest < MiniTest::Spec
   end
 
   # creates model for you.
-  it { Create.(song: {title: "Blue Rondo a la Turk"})[:model].title.must_equal "Blue Rondo a la Turk" }
+  it { Create.(song: {title: "Blue Rondo a la Turk"})["model"].title.must_equal "Blue Rondo a la Turk" }
   # exposes #model.
-  it { Create.(song: {title: "Blue Rondo a la Turk"})[:model].must_be_instance_of Song }
+  it { Create.(song: {title: "Blue Rondo a la Turk"})["model"].must_be_instance_of Song }
 
   class ModifyingCreate < Create
     def process(params)
@@ -67,8 +67,8 @@ class ModelTest < MiniTest::Spec
   end
 
   # lets you modify model.
-  it { ModifyingCreate.(song: {title: "Blue Rondo a la Turk"})[:model].title.must_equal "Blue Rondo a la Turk" }
-  it { ModifyingCreate.(song: {title: "Blue Rondo a la Turk"})[:model].genre.must_equal "Punkrock" }
+  it { ModifyingCreate.(song: {title: "Blue Rondo a la Turk"})["model"].title.must_equal "Blue Rondo a la Turk" }
+  it { ModifyingCreate.(song: {title: "Blue Rondo a la Turk"})["model"].genre.must_equal "Punkrock" }
 
   # Update
   class UpdateOperation < Create
@@ -77,10 +77,10 @@ class ModelTest < MiniTest::Spec
 
   # finds model and updates.
   it do
-    song = Create.(song: {title: "Anchor End"})[:model]
+    song = Create.(song: {title: "Anchor End"})["model"]
     Song.find_result = song
 
-    UpdateOperation.(id: song.id, song: {title: "The Rip"})[:model].title.must_equal "The Rip"
+    UpdateOperation.(id: song.id, song: {title: "The Rip"})["model"].title.must_equal "The Rip"
     song.title.must_equal "The Rip"
   end
 
@@ -91,10 +91,10 @@ class ModelTest < MiniTest::Spec
 
   # finds model and updates.
   it do
-    song = Create.(song: {title: "Anchor End"})[:model]
+    song = Create.(song: {title: "Anchor End"})["model"]
     Song.find_result = song
 
-    FindOperation.(id: song.id, song: {title: "The Rip"})[:model].title.must_equal "The Rip"
+    FindOperation.(id: song.id, song: {title: "The Rip"})["model"].title.must_equal "The Rip"
     song.title.must_equal "The Rip"
   end
 
@@ -113,17 +113,17 @@ class ModelTest < MiniTest::Spec
   end
 
   # uses :create as default if not set via ::action.
-  it { DefaultCreate.({})[:model].must_equal Song.new }
+  it { DefaultCreate.({})["model"].must_equal Song.new }
 
   # model Song, :action
   class ModelUpdateOperation < Create
     model Song, :update
   end
 
-  # allows ::model, :action.
+  # allows :"model", :action.
   it do
     Song.find_result = song = Song.new
-    ModelUpdateOperation.({id: 1, song: {title: "Mercy Day For Mr. Vengeance"}})[:model].must_equal song
+    ModelUpdateOperation.({id: 1, song: {title: "Mercy Day For Mr. Vengeance"}})["model"].must_equal song
   end
 
 
@@ -135,11 +135,11 @@ class ModelTest < MiniTest::Spec
     end
   end
 
-  it { SetupModelOperation.(song: {title: "Emily Kane"})[:model].params.must_equal "{:song=>{:title=>\"Emily Kane\"}}" }
+  it { SetupModelOperation.(song: {title: "Emily Kane"})["model"].params.must_equal "{:song=>{:title=>\"Emily Kane\"}}" }
 
 
 
-  # no call to ::model raises error.
+  # no call to :"model" raises error.
   class NoModelOperation < Trailblazer::Operation
     require "trailblazer/operation/contract"
     include Contract
@@ -174,5 +174,5 @@ class ModelTest < MiniTest::Spec
   end
 
   # uses private Contract class.
-  it { OperationWithPrivateContract.(song: {title: "Blue Rondo a la Turk"})[:model].title.must_equal "Blue Rondo a la Turk" }
+  it { OperationWithPrivateContract.(song: {title: "Blue Rondo a la Turk"})["model"].title.must_equal "Blue Rondo a la Turk" }
 end

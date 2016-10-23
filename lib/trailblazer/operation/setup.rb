@@ -30,7 +30,6 @@ private
     setup_params!(params)
 
     build_model!(params)
-    result[:model] = self["model"] # This will be so much better in 2.0/trailblazer-pipetree.
 
     params # TODO: test me.
   end

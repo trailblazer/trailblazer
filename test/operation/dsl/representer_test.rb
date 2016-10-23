@@ -30,9 +30,9 @@ class DslRepresenterTest < MiniTest::Spec
       end
     end
 
-    it { Operation.(title: "Nothing To Lose", band: "Gary Moore")[:operation].to_json.must_equal %{{"title":"Nothing To Lose"}} }
+    it { Operation.(title: "Nothing To Lose", band: "Gary Moore").to_json.must_equal %{{"title":"Nothing To Lose"}} }
     # only the subclass must have the `band` field, even though it's set in the original operation.
-    it { Operation::JSON.(title: "Nothing To Lose", band: "Gary Moore")[:operation].to_json.must_equal %{{"title":"Nothing To Lose","band":"Gary Moore"}} }
+    it { Operation::JSON.(title: "Nothing To Lose", band: "Gary Moore").to_json.must_equal %{{"title":"Nothing To Lose","band":"Gary Moore"}} }
   end
 
   describe "Op.representer CommentRepresenter" do
@@ -47,7 +47,7 @@ class DslRepresenterTest < MiniTest::Spec
       representer SongRepresenter
     end
 
-    it { OpWithExternalRepresenter.("songTitle"=>"Listen To Your Heartbeat")[:operation].to_json.must_equal %{{"songTitle":"Listen To Your Heartbeat"}} }
+    it { OpWithExternalRepresenter.("songTitle"=>"Listen To Your Heartbeat").to_json.must_equal %{{"songTitle":"Listen To Your Heartbeat"}} }
   end
 
   # name for representer
@@ -98,12 +98,12 @@ class DslRepresenterTest < MiniTest::Spec
 
     # this operation copies HitRepresenter and shouldn't have `genre`.
     it do
-      OpNotExtendingRepresenter.("title"=>"Monsterparty", "genre"=>"Punk")[:operation].to_json.must_equal %{{"title":"Monsterparty"}}
+      OpNotExtendingRepresenter.("title"=>"Monsterparty", "genre"=>"Punk").to_json.must_equal %{{"title":"Monsterparty"}}
     end
 
     # # this operation copies HitRepresenter and extends it with the property `genre`.
     it do
-      OpExtendingRepresenter.("title"=>"Monsterparty", "genre"=>"Punk")[:operation].to_json.must_equal %{{"title":"Monsterparty","genre":"Punk"}}
+      OpExtendingRepresenter.("title"=>"Monsterparty", "genre"=>"Punk").to_json.must_equal %{{"title":"Monsterparty","genre":"Punk"}}
     end
 
     # # of course, the original representer wasn't modified, either.
@@ -136,9 +136,9 @@ class DslRepresenterTest < MiniTest::Spec
       end
     end
 
-    it { ContractOperation.("songTitle"=>"Monsterparty", "genre"=>"Punk")[:operation].to_json.must_equal %{{"songTitle":"Monsterparty"}} }
+    it { ContractOperation.("songTitle"=>"Monsterparty", "genre"=>"Punk").to_json.must_equal %{{"songTitle":"Monsterparty"}} }
     # this representer block extends the inferred from contract.
-    it { ContractOperation2.("songTitle"=>"Monsterparty", "genre"=>"Punk")[:operation].to_json.must_equal %{{"songTitle":"Monsterparty","genre":"Punk"}} }
+    it { ContractOperation2.("songTitle"=>"Monsterparty", "genre"=>"Punk").to_json.must_equal %{{"songTitle":"Monsterparty","genre":"Punk"}} }
   end
 
   describe "Op.representer_class" do
@@ -163,7 +163,7 @@ class DslRepresenterTest < MiniTest::Spec
     end
 
     # both operations produce the same as the representer is shared, not copied.
-    it { skip; OpSettingRepresenter.("title"=>"Monsterparty", "genre"=>"Punk")[:operation].to_json.must_equal %{{"title":"Monsterparty","genre":"Punk"}} }
-    it { OpExtendRepresenter.("title"=>"Monsterparty", "genre"=>"Punk")[:operation].to_json.must_equal %{{"title":"Monsterparty","genre":"Punk"}} }
+    it { skip; OpSettingRepresenter.("title"=>"Monsterparty", "genre"=>"Punk").to_json.must_equal %{{"title":"Monsterparty","genre":"Punk"}} }
+    it { OpExtendRepresenter.("title"=>"Monsterparty", "genre"=>"Punk").to_json.must_equal %{{"title":"Monsterparty","genre":"Punk"}} }
   end
 end

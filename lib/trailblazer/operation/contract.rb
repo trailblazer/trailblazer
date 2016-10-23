@@ -48,7 +48,7 @@ module Trailblazer::Operation::Contract
 public
   # Call like +contract(model)+ to create and memoize contract, e.g. for Composition.
   def contract(*args)
-    self["contract"] ||= result[:contract] = contract_for(*args)
+    self["contract"] ||= contract_for(*args)
   end
 
   module Validate
@@ -61,10 +61,10 @@ public
       if valid = validate_contract(params)
         yield contract if block_given?
       else
-        result[:errors] = contract.errors
+        self[:errors] = contract.errors
       end
 
-      result[:valid] = valid
+      self[:valid] = valid
     end
 
     def validate_contract(params)

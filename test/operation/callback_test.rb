@@ -55,12 +55,12 @@ class OperationCallbackTest < MiniTest::Spec
 
 
   it "invokes all callbacks" do
-    op = Create.({"name"=>"Keep On Running"})[:operation]
+    op = Create.({"name"=>"Keep On Running"})
     op.dispatched.must_equal [:notify_me!, :notify_you!]
   end
 
   it "does not invoke removed callbacks" do
-    op = Update.({"name"=>"Keep On Running"})[:operation]
+    op = Update.({"name"=>"Keep On Running"})
     op.dispatched.must_equal [:notify_you!]
   end
 end

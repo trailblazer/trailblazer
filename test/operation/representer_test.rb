@@ -147,7 +147,7 @@ class InternalRepresenterAPITest < MiniTest::Spec
     end
 
     it "uses #model as represented, per default" do
-      Show.new({}).to_json.must_equal '{"class":"InternalRepresenterAPITest::Song"}'
+      Show.({}).to_json.must_equal '{"class":"InternalRepresenterAPITest::Song"}'
     end
 
     class ShowContract < Show
@@ -181,7 +181,7 @@ class InternalRepresenterAPITest < MiniTest::Spec
     end
 
     it "allows to pass options to #to_json" do
-      OptionsShow.new(include: [:id]).to_json.must_equal '{"id":1}'
+      OptionsShow.(include: [:id]).to_json.must_equal '{"id":1}'
     end
   end
 end

@@ -1,22 +1,22 @@
 require "test_helper"
 require "pipetree"
 
-BuildOperation = ->(params, options) { options[:operation] = options[:class].build_operation(params, options[:skills]); params }
-Call           = ->(params, options) { options[:operation].call(params) }
+BuildOperation = ->(klass, options) { klass.build_operation(options[:params], options[:skills]) } # returns operation instance.
+Call           = ->(operation, options) { operation.call(options[:params]) }                      # returns #call result.
 
 module Trailblazer::Operation::Pipetree
   def call(params={}, options={})
-    # FIXME: other skills from other containers are not available here.
-
     pipe = self["pipetree"] # TODO: injectable? WTF? how cool is that?
 
 
     result = {}
-    skills = Trailblazer::Skill.new(options, self.skills) # FIXME: redundant from Op::Skill.
+    skills = Trailblazer::Skill.new(result, options, self.skills) # FIXME: redundant from Op::Skill.
 
-    outcome = pipe.(params, { skills: skills, result: result, class: self })
+    outcome = pipe.(self, { skills: skills, params: params }) # (class, { skills: , params: })
 
     outcome == ::Pipetree::Stop ? result : outcome # THIS SUCKS a bit.
+
+    # FIXME: simply return op?
   end
 end
 
@@ -27,7 +27,7 @@ class PipetreeTest < Minitest::Spec
     Class.new(Trailblazer::Operation) do
       extend Trailblazer::Operation::Pipetree
       self["pipetree"] = ::Pipetree[
-        ->(input, options) { options[:skills]["user.current"] }
+        ->(input, options) { options[:skills]["user.current"] } # read user.current which we're injecting into ::call.
       ]
     end.
       ({}, "user.current" => Object).must_equal Object
@@ -75,11 +75,11 @@ class PipetreeTest < Minitest::Spec
     end
 
     # unwrap params.
-    SetupParams = ->(input, options) { input[:song] }
+    SetupParams = ->(input, options) { options[:params][:song]; input }
 
+    # the only problem here is, that people accidentially might write to `input` on a class level.
 
-
-    ModelBuilderBuilder = ->(input, options) { options[:model] = ModelBuilder.new(options[:skills]).(input); input }
+    ModelBuilderBuilder = ->(input, options) { options[:model] = ModelBuilder.new(options[:skills]).(options[:params]); input }
     # this is to be able to use BuildModel. i really don't know if we actually need to do that.
     # what if people want to override #model! for example?
     class ModelBuilder
@@ -97,16 +97,16 @@ class PipetreeTest < Minitest::Spec
       end
     end
 
-    AssignModel = ->(input, options) { options[:skills]["model"]   = options[:model] }
-    AssignPolicy = ->(input, options) { options[:skills]["policy"] = options[:policy] }
+    AssignModel = ->(input, options) { options[:skills]["model"]   = options[:model]; input }
+    AssignPolicy = ->(input, options) { options[:skills]["policy"] = options[:policy]; input }
 
 
     # "current_user" is now a skill dependency, not a params option anymore.
     PolicyEvaluate = ->(input, options) {
       # raise options[:skills]["model"].inspect
       options[:policy] = options[:skills]["policy.evaluator"].(options[:skills]["user.current"], options[:skills]["model"]) { # DISCUSS: where do we get the model from? [:write]["model"] or [:model]
-        options[:result][:valid] = false
-        options[:result]["policy.message"] = "Not allowed"
+        options[:skills][:valid] = false
+        options[:skills]["policy.message"] = "Not allowed"
 
         return ::Pipetree::Stop }; input
     }
@@ -133,7 +133,7 @@ class PipetreeTest < Minitest::Spec
   # policy breach
   it do
     res = Create.({song: { title: "311" }}, "user.current" => nil)
-    res.must_equal({:valid=>false, "policy.message"=>"Not allowed"})
+    res.inspect.must_equal %{{"model"=>#<struct PipetreeTest::Song title=nil>, :valid=>false, "policy.message"=>"Not allowed"}}
   end
 
   #---
@@ -178,7 +178,7 @@ class PipetreeTest < Minitest::Spec
   it do
     res = Update.({}, "user.current" => Class)
 
-    res.inspect.must_equal %{{:valid=>false, "policy.message"=>"Not allowed"}}
+    res.inspect.must_equal %{{"model"=>#<struct PipetreeTest::Song title=nil>, :valid=>false, "policy.message"=>"Not allowed"}}
 
     # make sure policy class is correct, and user and model are set.
     # res["policy"].inspect.must_match /Auth:.+? @user=Module, @model=#<struct PipetreeTest::Song title=nil>/

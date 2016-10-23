@@ -17,7 +17,7 @@ class BuilderTest < Minitest::Spec
     end
   end
 
-  it { MyBuilder.({})[:operation].class.must_equal ParentOperation }
-  it { MyBuilder.({ sub: false })[:operation].class.must_equal ParentOperation }
-  it { MyBuilder.({ sub: true })[:operation].class.must_equal ParentOperation::Sub }
+  it { MyBuilder.({}).class.must_equal ParentOperation }
+  it { MyBuilder.({ sub: false }).class.must_equal ParentOperation }
+  it { MyBuilder.({ sub: true }).class.must_equal ParentOperation::Sub }
 end

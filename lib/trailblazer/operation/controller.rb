@@ -4,16 +4,16 @@ module Trailblazer::Operation::Controller
 private
   def form(operation_class, options={})
     res, options = operation_for!(operation_class, options) { |params| { operation: operation_class.build_operation(params) } }
-    res[:operation].contract.prepopulate!(options) # equals to @form.prepopulate!
+    res.contract.prepopulate!(options) # equals to @form.prepopulate!
 
-    res[:operation].contract
+    res.contract
   end
 
   # Provides the operation instance, model and contract without running #process.
   # Returns the operation.
   def present(operation_class, options={})
     res, options = operation_for!(operation_class, options.merge(skip_form: true)) { |params| { operation: operation_class.build_operation(params) } }
-    res[:operation] # FIXME.
+    res # FIXME.
   end
 
   def collection(*args)
@@ -25,9 +25,9 @@ private
   def run(operation_class, options={}, &block)
     res = operation_for!(operation_class, options) { |params| operation_class.(params) }
 
-    yield res[:operation] if res[:valid] and block_given?
+    yield res if res[:valid] and block_given?
 
-    res[:operation] # FIXME.
+    res # FIXME.
   end
 
   # The block passed to #respond is always run, regardless of the validity result.
@@ -61,7 +61,7 @@ private
   end
 
   def setup_operation_instance_variables!(result, options)
-    @operation = result[:operation] # FIXME: remove!
+    @operation = result # FIXME: remove!
     @model     = result[:model]
     @form      = result[:contract] unless options[:skip_form]
   end

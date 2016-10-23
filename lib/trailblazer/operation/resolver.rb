@@ -17,14 +17,19 @@ class Trailblazer::Operation
       def build_operation(params, options={})
         model  = model!(params)
         policy = self["policy.evaluator"].call(params[:current_user], model)
+
+        options["model"] = model
+        options["policy"] = policy
+
+
         build_operation_class(model, policy, params).
-          new(params, options.merge(model: model, policy: policy))
+          new(params, options)
       end
     end
 
-    def initialize(params, options)
-      @policy = options[:policy]
+    def initialize(params, options={})
       super
+      self["policy"] = options["policy"]
     end
   end
 end

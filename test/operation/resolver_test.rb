@@ -71,6 +71,7 @@ class ResolverTest < MiniTest::Spec
       policy MyKitchenRules, :true?
 
       builds-> (model, policy, params) do
+        puts "@@@@@ #{policy.object_id.inspect}"
         policy.instance_eval { def whoami; "me!" end }
         nil
       end
@@ -81,7 +82,9 @@ class ResolverTest < MiniTest::Spec
     end
 
     it do
-      Update.({}).policy.whoami.must_equal "me!"
+      ers=Update.({})
+        puts "@@@@@ #{ers.policy.object_id.inspect}"
+      ers.policy.whoami.must_equal "me!"
     end
   end
 end

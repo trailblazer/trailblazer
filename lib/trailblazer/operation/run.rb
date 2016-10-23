@@ -5,11 +5,11 @@ module Trailblazer
       result = call(*args)
 
       if block_given?
-        yield result[:operation] if result[:valid]
-        return result[:operation]
+        yield result if result[:valid]
+        return result
       end
 
-      [result[:valid], result[:operation]]
+      [result[:valid], result]
     end
   end
 end
