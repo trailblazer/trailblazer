@@ -8,6 +8,7 @@ class PolicyTest < Minitest::Spec
     def initialize(*args); @user, @model = *args end
     def only_user?; @user == Module && @model.nil? end
     def user_object?; @user == Object end
+    def user_and_model?; @user == Module && @model.class == Song end
     def inspect; "<Auth: user:#{@user.inspect}, model:#{@model.inspect}>" end
   end
 
@@ -38,6 +39,7 @@ class PolicyTest < Minitest::Spec
     result["process"].must_equal true
     result["policy.message"].must_equal nil
     # result[:valid].must_equal nil
+    result["policy"].inspect.must_equal %{<Auth: user:Module, model:nil>}
   end
   # breach.
   it do
@@ -62,5 +64,24 @@ class PolicyTest < Minitest::Spec
       Trailblazer::Operation::Policy::Assign,
       Call,
     ]
+
+    include Model
+    model Song, :create
+  end
+
+  # invalid because user AND model.
+  it do
+    result = Show.({}, "user.current" => Module)
+    result["process"].must_equal nil
+    result["model"].inspect.must_equal %{#<struct PolicyTest::Song title=nil>}
+    # result["policy"].inspect.must_equal %{#<struct PolicyTest::Song title=nil>}
+  end
+
+  # valid because new policy.
+  it do
+    result = Show.({}, "user.current" => Module, "policy.evaluator" => Trailblazer::Operation::Policy::Permission.new(Auth, :user_and_model?))
+    result["process"].must_equal true
+    result["model"].inspect.must_equal %{#<struct PolicyTest::Song title=nil>}
+    result["policy"].inspect.must_equal %{<Auth: user:Module, model:#<struct PolicyTest::Song title=nil>>}
   end
 end
