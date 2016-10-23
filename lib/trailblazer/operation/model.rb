@@ -59,13 +59,9 @@ module Trailblazer::Operation::Model
     end
 
     extend Uber::Delegates
-    delegates :@delegator, :[]=, :[]
+    delegates :@delegator, :[]
 
     include BuildMethods # #instantiate_model and so on.
-
-    def call(params)
-      model!(params)
-    end
+    alias_method :call, :model!
   end
-
 end
