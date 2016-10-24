@@ -2,7 +2,7 @@ class Trailblazer::Operation
   module Model
     def self.included(includer)
       includer.extend DSL
-      includer.| Build, before: Trailblazer::Operation::Call
+      includer.| Build, after: Trailblazer::Operation::New
       includer.| Assign, after: Build
     end
 
