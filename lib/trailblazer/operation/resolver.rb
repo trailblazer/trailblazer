@@ -6,10 +6,14 @@ class Trailblazer::Operation
   module Resolver
     def self.included(includer)
       includer.class_eval do
-        # include the DSL methods.
-        include Policy # ::policy
-        include Model  # ::model
+        extend Model::DSL  # ::model
+        extend Policy::DSL # ::policy
       end
+
+      includer.| Model::Build, after: Skill::Build
+      includer.| Model::Assign, after: Model::Build
+      includer.| Policy::Evaluate, after: Model::Assign
+      includer.| Policy::Assign, after: Policy::Evaluate
     end
   end
 end

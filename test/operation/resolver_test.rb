@@ -15,34 +15,24 @@ class BuilderTest < Minitest::Spec
   end
 
   class A < Trailblazer::Operation
-    include Pipetree
-    extend Builder
+    include Builder
 
     builds ->(options) {
       return P if options[:params] == { some: "params", id:1 }
-      return B if options[:policy].inspect == %{<Auth: user:Module, model:#<struct BuilderTest::Song id=3>>} # both user and model:id are set!
-      return M if options[:model].inspect == %{#<struct BuilderTest::Song id=9>}
+      return B if options["policy"].inspect == %{<Auth: user:Module, model:#<struct BuilderTest::Song id=3>>} # both user and model:id are set!
+      return M if options["model"].inspect == %{#<struct BuilderTest::Song id=9>}
     }
 
     include Resolver
     model Song, :update
     policy Auth, :user_and_model?
 
-    self["pipetree"] = ::Pipetree[
-      Trailblazer::Operation::Model::Build, Trailblazer::Operation::Model::Assign,
-      Trailblazer::Operation::Policy::Evaluate, Trailblazer::Operation::Policy::Assign,
-
-      Trailblazer::Operation::Build,
-      # SetupParams,
-      # Call,
-    ]
-
     class P < self; end
     class B < self; end
     class M < self; end
   end
 
-  it { A.({ some: "params", id: 1 }, { "user.current" => Module }).must_equal A::P }
-  it { A.({                 id: 3 }, { "user.current" => Module }).must_equal A::B }
-  it { A.({                 id: 9 }, { "user.current" => Module }).must_equal A::M }
+  it { A.({ some: "params", id: 1 }, { "user.current" => Module }).class.must_equal A::P }
+  it { A.({                 id: 3 }, { "user.current" => Module }).class.must_equal A::B }
+  it { A.({                 id: 9 }, { "user.current" => Module }).class.must_equal A::M }
 end
