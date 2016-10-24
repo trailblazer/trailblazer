@@ -1,10 +1,14 @@
 class Trailblazer::Operation
-  New = ->(klass, options) { klass.new(options[:params], options[:skills]) } # returns operation instance.
-  Call = ->(operation, options) { operation.call(options[:params]) }         # returns #call result.
+  New  = ->(klass, options) { klass.new(options[:params], options[:skills]) } # returns operation instance.
+  Call = ->(operation, options) { operation.call(options[:params]) }          # returns #call result.
 
   module Pipetree
     def self.included(includer)
       includer.extend ClassMethods
+      includer.extend Pipe
+
+      includer.| New
+      includer.| Call
     end
 
     module ClassMethods
@@ -20,6 +24,15 @@ class Trailblazer::Operation
         outcome == ::Pipetree::Stop ? result : outcome # THIS SUCKS a bit.
 
         # FIXME: simply return op?
+      end
+    end
+
+    module Pipe
+      def |(func, options=nil)
+        self["pipetree"] ||= ::Pipetree[]
+        options ||= { append: true } # per default, append.
+
+        self["pipetree"].insert!(func, options)#.class.inspect
       end
     end
   end

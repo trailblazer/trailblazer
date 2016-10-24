@@ -11,19 +11,5 @@ class Trailblazer::Operation
         include Model  # ::model
       end
     end
-
-    module BuildOperation
-      def build_operation(params, options={})
-        model  = model!(params)
-        policy = self["policy.evaluator"].call(params[:current_user], model)
-
-        options["model"] = model
-        options["policy"] = policy
-
-
-        build_operation_class(model, policy, params).
-          new(params, options)
-      end
-    end
   end
 end

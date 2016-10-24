@@ -1,24 +1,46 @@
 require "test_helper"
-require "trailblazer/operation/resolver"
+require "trailblazer/operation/builder"
 
-class BuilderTest < Minitest::Spec
-  class A < Trailblazer::Operation
+class BuilderTest < MiniTest::Spec
+  class ParentOperation < Trailblazer::Operation
     include Pipetree
-    extend Builder
+    include Builder
 
-    builds ->(options) {
-      return P if options[:params] == { id:1 } && options[:skills]["user.current"] == Module
-    }
+    class Sub < self
+    end
 
-    self["pipetree"] = ::Pipetree[
-      Trailblazer::Operation::Build,
-      # SetupParams,
-      # Call,
-    ]
-
-    class P < self; end
+    builds -> (options) do
+      return Sub if options[:params][:sub]
+    end
   end
 
-  it { A.({ id: 1 }, { "user.current" => Module }).must_equal A::P }
-  it { A.({ id: 1 }).must_equal A }
+  it { ParentOperation.({}).class.must_equal ParentOperation }
+  it { ParentOperation.({ sub: true }).class.must_equal ParentOperation::Sub }
+end
+
+class OperationBuilderClassTest < MiniTest::Spec
+  class SuperOperation < Trailblazer::Operation
+    include Pipetree
+    include Builder
+
+    builds do |options|
+      self::Sub if options[:params][:sub] # Sub is defined in ParentOperation.
+    end
+  end
+
+  class ParentOperation < Trailblazer::Operation
+    def process(params)
+    end
+
+    class Sub < self
+    end
+
+    include Pipetree
+    include Builder
+    # self["builder_class"] = SuperOperation["builder_class"]
+    self.builder_class = SuperOperation.builder_class
+  end
+
+  it { ParentOperation.({}).class.must_equal ParentOperation }
+  it { ParentOperation.({ sub: true }).class.must_equal ParentOperation::Sub }
 end

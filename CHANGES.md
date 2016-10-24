@@ -52,6 +52,11 @@ You can now inject the following objects via `::call`:
 * Removed `Operation::contract_class`. Please use `Operation::["contract.default.class"]`.
 * Removed `Operation::contract_class=`. Please use `Operation::["contract.default.class"]=`. Doesn't inherit.
 
+## Builder
+
+* It's `include Builder` now, not `extend Builder`.
+* `builds` now receives one options hash.
+
 ## Policy
 
 * No exception anymore, but `Operation#["policy.message"]`.
