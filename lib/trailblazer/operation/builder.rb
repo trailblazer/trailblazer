@@ -2,7 +2,7 @@ require "uber/builder"
 
 # Allows to add builders via ::builds.
 class Trailblazer::Operation
-  Build = ->(klass, options) { klass.class_builder(klass).(options) }
+  Build = ->(klass, options) { klass.class_builder(klass).(options[:skills]) }
 
   module Builder
     # TODO: move to compat.

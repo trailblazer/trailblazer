@@ -3,13 +3,15 @@ require "trailblazer/operation/builder"
 
 class BuilderTest < MiniTest::Spec
   class ParentOperation < Trailblazer::Operation
-    include Pipetree
     include Builder
+
+    puts "@@@@@dsf #{self["pipetree"].inspect}"
 
     class Sub < self
     end
 
     builds -> (options) do
+      puts "@@@@@ #{options.inspect}"
       return Sub if options[:params][:sub]
     end
   end
@@ -20,7 +22,6 @@ end
 
 class OperationBuilderClassTest < MiniTest::Spec
   class SuperOperation < Trailblazer::Operation
-    include Pipetree
     include Builder
 
     builds do |options|
@@ -35,7 +36,6 @@ class OperationBuilderClassTest < MiniTest::Spec
     class Sub < self
     end
 
-    include Pipetree
     include Builder
     # self["builder_class"] = SuperOperation["builder_class"]
     self.builder_class = SuperOperation.builder_class

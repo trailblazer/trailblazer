@@ -7,22 +7,19 @@ class ModelTest < Minitest::Spec
   end
 
   class Create < Trailblazer::Operation
-    include Pipetree
-
     include Model
     model Song, :create
-
-    self["pipetree"] = ::Pipetree[
-      Trailblazer::Operation::New,
-      # SetupParams,
-      Trailblazer::Operation::Model::Build,
-      Trailblazer::Operation::Model::Assign,
-      Trailblazer::Operation::Call,
-    ]
   end
 
   # :create new.
   it { Create.({})["model"].inspect.must_equal %{#<struct ModelTest::Song id=nil>} }
+
+  class Update < Create
+    action :find
+  end
+
+  # :find it
+  it { Update.({ id: 1 })["model"].inspect.must_equal %{#<struct ModelTest::Song id=1>} }
 
   # TODO: add all the other tests from compat/model_test.rb.
 
@@ -31,15 +28,19 @@ class ModelTest < Minitest::Spec
   #---
   # creating the model before operation instantiation (ex Model::External)
   class Show < Create
-    include Pipetree
-    include Model
+    extend Model::DSL
     model Song, :update
 
-    self["pipetree"] = ::Pipetree[
-      Trailblazer::Operation::Model::Build,
-      Trailblazer::Operation::Model::Assign,
-      Trailblazer::Operation::New,
-    ]
+    self.| Model::Build, before: New
+    self.| Model::Assign, after: Model::Build
+
+
+    # self["pipetree"] = ::Pipetree[
+    #   Call,
+    #   Trailblazer::Operation::Model::Build,
+    #   Trailblazer::Operation::Model::Assign,
+    #   Trailblazer::Operation::New,
+    # ]
   end
 
   it { Show.({id: 1})["model"].inspect.must_equal %{#<struct ModelTest::Song id=1>} }
