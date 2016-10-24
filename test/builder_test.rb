@@ -3,7 +3,7 @@ require "test_helper"
 require "trailblazer/builder"
 
 # Tests agnostic TRB::Builder.
-class BuilderTest < Minitest::Spec
+class MyBuilderTest < Minitest::Spec
   class ParentOperation < Trailblazer::Operation
     class Sub < Trailblazer::Operation
     end

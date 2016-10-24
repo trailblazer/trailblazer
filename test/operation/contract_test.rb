@@ -43,8 +43,8 @@ class ContractTest < Minitest::Spec
     end
 
     # inject contract instance via constructor.
-    it { Delete.new({}, "contract" => "contract/instance").contract.must_equal "contract/instance" }
-    it { Follow.new({}, "contract.default.class" => Form).contract.class.must_equal Form }
+    it { Delete.({}, "contract" => "contract/instance").contract.must_equal "contract/instance" }
+    it { Follow.({}, "contract.default.class" => Form).contract.class.must_equal Form }
   end
 
 

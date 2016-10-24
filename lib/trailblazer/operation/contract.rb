@@ -10,9 +10,6 @@ module Trailblazer::Operation::Contract
   def self.included(includer)
     includer.extend DSL
     includer.include Validate
-
-    includer.extend Declarative::Heritage::Inherited
-    includer.extend Declarative::Heritage::DSL
   end
 
   module DSL
