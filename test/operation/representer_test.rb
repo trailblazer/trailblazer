@@ -132,7 +132,6 @@ class InternalRepresenterAPITest < MiniTest::Spec
 
   describe "#represented" do
     class Show < Trailblazer::Operation
-      include Setup
       include Contract
       include Representer, Model
       model Song, :create
@@ -143,6 +142,10 @@ class InternalRepresenterAPITest < MiniTest::Spec
 
       def call(*)
         self
+      end
+
+      def model # FIXME.
+        self["model"]
       end
     end
 
@@ -171,17 +174,16 @@ class InternalRepresenterAPITest < MiniTest::Spec
       end
 
       def to_json(*)
-        super(@params)
+        super(self[:params])
       end
 
-      include Setup
-      def model!(params)
+      def model # FIXME.
         Song.new(1)
       end
     end
 
     it "allows to pass options to #to_json" do
-      OptionsShow.(include: [:id]).to_json.must_equal '{"id":1}'
+      OptionsShow.(include: [:id]).to_json.must_equal %{{"id":1}}
     end
   end
 end

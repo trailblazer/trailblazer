@@ -24,7 +24,6 @@ module Trailblazer::Operation::Representer
       # TODO: allow the same with contract, or better, test it!
       path, representer_class = Trailblazer::DSL::Build.new.({ prefix: :representer, class: representer_base_class, container: self }, name, constant, block)
 
-puts path.inspect
       self[path] = representer_class
     end
 
