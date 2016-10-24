@@ -114,9 +114,83 @@ class ValidateTest < Minitest::Spec
   it { Create.(valid: true).must_equal "works!" }
 end
 
+#---
+# allow using #contract to inject model and arguments.
+class OperationContractWithOptionsTest < Minitest::Spec
+  # contract(model, title: "Bad Feeling")
+  class Operation < Trailblazer::Operation
+    include Contract
+    contract do
+      property :id
+      property :title, virtual: true
+    end
 
-# do we want raise! with the result object?
+    def process(params)
+      model = Struct.new(:id).new
 
-# Model could be a separate object instead of module
-# why are all the setup_model methods etc in Op?
+      contract(model, title: "Bad Feeling")
 
+      validate(params)
+    end
+  end
+
+  it do
+    op = Operation.(id: 1)
+    op.contract.id.must_equal 1
+    op.contract.title.must_equal "Bad Feeling"
+  end
+
+  # contract({ song: song, album: album }, title: "Medicine Balls")
+  class CompositionOperation < Trailblazer::Operation
+    include Contract
+    contract do
+      include Reform::Form::Composition
+      property :song_id,    on: :song
+      property :album_name, on: :album
+      property :title,      virtual: true
+    end
+
+    def process(params)
+      song  = Struct.new(:song_id).new(1)
+      album = Struct.new(:album_name).new("Forever Malcom Young")
+
+      contract({ song: song, album: album }, title: "Medicine Balls")
+
+      validate(params)
+    end
+  end
+
+  it do
+    contract = CompositionOperation.({})["contract"]
+    contract.song_id.must_equal 1
+    contract.album_name.must_equal "Forever Malcom Young"
+    contract.title.must_equal "Medicine Balls"
+  end
+
+  # validate(params, { song: song, album: album }, title: "Medicine Balls")
+  class CompositionValidateOperation < Trailblazer::Operation
+    include Contract
+    contract do
+      include Reform::Form::Composition
+      property :song_id,    on: :song
+      property :album_name, on: :album
+      property :title,      virtual: true
+    end
+
+    def process(params)
+      song  = Struct.new(:song_id).new(1)
+      album = Struct.new(:album_name).new("Forever Malcom Young")
+
+      validate(params, { song: song, album: album }, title: "Medicine Balls")
+    end
+  end
+
+  it do
+    contract = CompositionValidateOperation.({})["contract"]
+    contract.song_id.must_equal 1
+    contract.album_name.must_equal "Forever Malcom Young"
+    contract.title.must_equal "Medicine Balls"
+  end
+end
+
+# TODO: full stack test with validate, process, save, etc.

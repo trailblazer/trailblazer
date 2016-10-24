@@ -26,7 +26,6 @@ module Trailblazer::Operation::Contract
       self[path] = form_class
     end
   end
-  # until here, this code is totally generic and could be the same for model, contract, policy, etc.
 
   # Instantiate the contract, either by using the user's contract passed into #validate
   # or infer the Operation contract.
