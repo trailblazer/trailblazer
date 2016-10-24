@@ -17,22 +17,12 @@ class PolicyTest < Minitest::Spec
   #---
   # Instance-level: Only policy, no model
   class Create < Trailblazer::Operation
-    include Pipetree
     include Policy
     policy Auth, :only_user?
 
     def process(*)
       self["process"] = true
     end
-
-    self["pipetree"] = ::Pipetree[
-      Trailblazer::Operation::New,
-      # SetupParams,
-      # ModelBuilderBuilder, AssignModel,
-      Trailblazer::Operation::Policy::Evaluate,
-      Trailblazer::Operation::Policy::Assign,
-      Call,
-    ]
   end
 
   # successful.
@@ -56,17 +46,6 @@ class PolicyTest < Minitest::Spec
   #---
   # inheritance, adding Model
   class Show < Create
-    self["pipetree"] = ::Pipetree[
-      Trailblazer::Operation::New,
-
-      Trailblazer::Operation::Model::Build,
-      Trailblazer::Operation::Model::Assign,
-      # SetupParams,
-      Trailblazer::Operation::Policy::Evaluate,
-      Trailblazer::Operation::Policy::Assign,
-      Call,
-    ]
-
     include Model
     model Song, :create
   end
@@ -90,23 +69,13 @@ class PolicyTest < Minitest::Spec
   ##--
   # Policy and Model before Build ("External" or almost Resolver)
   class Edit < Trailblazer::Operation
-    include Pipetree
-    include Model, Policy
+    include Model
+    include Policy
     model Song, :update
     policy Auth, :user_and_model?
 
+
     def process(*); self["process"] = true end
-
-    self["pipetree"] = ::Pipetree[
-      Trailblazer::Operation::Model::Build,
-      Trailblazer::Operation::Model::Assign,
-      # SetupParams,
-      Trailblazer::Operation::Policy::Evaluate,
-      Trailblazer::Operation::Policy::Assign,
-
-      Trailblazer::Operation::New,
-      Call,
-    ]
   end
 
   # successful.
