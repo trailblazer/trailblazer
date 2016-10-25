@@ -64,5 +64,5 @@ class Trailblazer::Operation
     end
   end
 
-  Model::Build  = ->(input, options) { options[:skills]["model"] = Model::Builder.new(options[:skills]).(options[:skills][:params]); input }
+  Model::Build  = ->(input, options) { options[:skills]["model"] = Model::Builder.new(options[:skills]).(options[:skills]["params"]); input }
 end

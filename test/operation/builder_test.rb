@@ -12,7 +12,7 @@ class BuilderTest < MiniTest::Spec
 
     builds -> (options) do
       puts "@@@@@ #{options.inspect}"
-      return Sub if options[:params][:sub]
+      return Sub if options["params"][:sub]
     end
   end
 
@@ -25,7 +25,7 @@ class OperationBuilderClassTest < MiniTest::Spec
     include Builder
 
     builds do |options|
-      self::Sub if options[:params][:sub] # Sub is defined in ParentOperation.
+      self::Sub if options["params"][:sub] # Sub is defined in ParentOperation.
     end
   end
 

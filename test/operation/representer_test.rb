@@ -174,7 +174,7 @@ class InternalRepresenterAPITest < MiniTest::Spec
       end
 
       def to_json(*)
-        super(self[:params])
+        super(self["params"])
       end
 
       def model # FIXME.

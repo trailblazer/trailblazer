@@ -7,23 +7,6 @@ module Inspect
   alias_method :to_s, :inspect
 end
 
-class OperationSetupParamsTest < MiniTest::Spec
-  class OperationSetupParam < Trailblazer::Operation
-    def process(params)
-      @model = params
-    end
-
-    def setup_params!(params)
-      params.merge!(garrett: "Rocks!")
-    end
-
-    include Inspect
-  end
-
-  # allows you changing params in #setup_params!.
-  it { OperationSetupParam.(valid: true).to_s.must_equal "<OperationSetupParam @model={:valid=>true, :garrett=>\"Rocks!\"}>" }
-end
-
 class OperationParamsTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
     def process(params)

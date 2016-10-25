@@ -18,7 +18,7 @@ class BuilderTest < Minitest::Spec
     include Builder
 
     builds ->(options) {
-      return P if options[:params] == { some: "params", id:1 }
+      return P if options["params"] == { some: "params", id:1 }
       return B if options["policy"].inspect == %{<Auth: user:Module, model:#<struct BuilderTest::Song id=3>>} # both user and model:id are set!
       return M if options["model"].inspect == %{#<struct BuilderTest::Song id=9>}
     }
