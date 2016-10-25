@@ -2,8 +2,7 @@ class Trailblazer::Operation
   module Model
     def self.included(includer)
       includer.extend DSL
-      includer.| Build, after: Trailblazer::Operation::New
-      includer.| Assign, after: Build
+      includer.| Build, after: New
     end
 
     module DSL
@@ -65,6 +64,6 @@ class Trailblazer::Operation
     end
   end
 
-  Model::Build  = ->(input, options) { options[:model] = Model::Builder.new(options[:skills]).(options[:skills][:params]); input }
-  Model::Assign = ->(input, options) { options[:skills]["model"] = options[:model]; input }
+  Model::Build  = ->(input, options) { options[:skills]["model"] = Model::Builder.new(options[:skills]).(options[:skills][:params]); input }
+  # Model::Assign = ->(input, options) { options[:skills]["model"] = options[:model]; input }
 end

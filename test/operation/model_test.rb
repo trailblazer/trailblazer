@@ -32,7 +32,6 @@ class ModelTest < Minitest::Spec
     model Song, :update
 
     self.| Model::Build, before: New
-    self.| Model::Assign, after: Model::Build
 
 
     # self["pipetree"] = ::Pipetree[
