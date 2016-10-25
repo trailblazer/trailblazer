@@ -12,3 +12,12 @@ require "trailblazer/operation/builder"
 require "trailblazer/operation/model"
 require "trailblazer/operation/contract"
 require "trailblazer/operation/representer"
+
+module Kernel
+  alias __original_raise raise
+
+  def raise(string, *args)
+    __original_raise(string.inspect) if args == []
+    __original_raise(string, *args)
+  end
+end

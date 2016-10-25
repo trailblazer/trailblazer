@@ -29,7 +29,7 @@ class PolicyTest < Minitest::Spec
   it do
     result = Create.({}, "user.current" => Module)
     result["process"].must_equal true
-    result["policy.message"].must_equal nil
+    result["policy.result"]["message"].must_equal nil
     # result[:valid].must_equal nil
     result["policy"].inspect.must_equal %{<Auth: user:Module, model:nil>}
   end
@@ -37,7 +37,7 @@ class PolicyTest < Minitest::Spec
   it do
     result = Create.({}, "user.current" => nil)
     result["process"].must_equal nil
-    result["policy.message"].must_equal "Not allowed"
+    result["policy.result"]["message"].must_equal "Breach"
   end
   # inject different policy.
   it { Create.({}, "user.current" => Object, "policy.evaluator" => Trailblazer::Operation::Policy::Permission.new(Auth, :user_object?))["process"].must_equal true }
@@ -83,7 +83,7 @@ class PolicyTest < Minitest::Spec
     result = Edit.({ id: 1 }, "user.current" => Module)
     result["process"].must_equal true
     result["model"].inspect.must_equal %{#<struct PolicyTest::Song id=1>}
-    result["policy.message"].must_equal nil
+    result["policy.result"]["message"].must_equal nil
     # result[:valid].must_equal nil
     result["policy"].inspect.must_equal %{<Auth: user:Module, model:#<struct PolicyTest::Song id=1>>}
   end
@@ -93,6 +93,6 @@ class PolicyTest < Minitest::Spec
     result = Edit.({ id: 4 }, "user.current" => nil)
     result["model"].inspect.must_equal %{#<struct PolicyTest::Song id=4>}
     result["process"].must_equal nil
-    result["policy.message"].must_equal "Not allowed"
+    result["policy.result"]["message"].must_equal "Breach"
   end
 end

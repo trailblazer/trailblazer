@@ -59,7 +59,8 @@ You can now inject the following objects via `::call`:
 
 ## Policy
 
-* No exception anymore, but `Operation#["policy.message"]`.
+* No exception anymore, but `Operation#["policy.result"]`.
+* Access the current user via `self["user.current"]` now.
 
 ## Representer
 

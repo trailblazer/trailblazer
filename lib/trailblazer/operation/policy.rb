@@ -9,43 +9,47 @@ class Trailblazer::Operation
       def policy(*args, &block)
         heritage.record(:policy, *args, &block)
 
-        self["policy.evaluator"] = permission_class.new(*args, &block)
+        self["policy.evaluator"] = build_permission(*args, &block)
       end
 
-      def permission_class
-        Permission
+      # To be overridden by your policy strategy.
+      def build_permission(*args, &block)
+        Permission.new(*args, &block)
       end
     end
 
+    # This can be subclassed for other policy strategies, e.g. non-pundit Authsome.
     class Permission
       def initialize(policy_class, action)
         @policy_class, @action = policy_class, action
       end
 
-      # Without a block, return the policy object (which is usually a Pundit-style class).
-      # When block is passed evaluate the default rule and run block when false.
-      def call(user, model)
-        policy = build_policy(user, model)
+      def call(skills, params)
+        policy = build_policy(skills, params) # here, this translates to Pundit interface.
 
-        policy.send(@action) || yield(policy, @action) if block_given?
-
-        policy
+        if policy.send(@action)
+          return { "policy" => policy, valid: true }
+        else
+          return { "policy" => policy, valid: false, "message" => "Breach" }
+        end
       end
 
     private
-      def build_policy(user, model)
-        @policy_class.new(user, model)
+      def build_policy(skills, params)
+        @policy_class.new(skills["user.current"], skills["model"])
       end
     end
   end
 
-  # "current_user" is now a skill dependency, not a params option anymore.
+  # This is a generic evaluate function for all kinds of policies.
+  # All the call'able evaluator has to do is returning a hash result.
   Policy::Evaluate = ->(input, options) {
-      # raise options[:skills]["model"].inspect
-      options[:skills]["policy"] = options[:skills]["policy.evaluator"].(options[:skills]["user.current"], options[:skills]["model"]) {
-        options[:skills][:valid] = false
-        options[:skills]["policy.message"] = "Not allowed"
-        return ::Pipetree::Stop }
-      input
-    }
+    result                     = options[:skills]["policy.evaluator"].(input, options[:skills]["params"]) # DISCUSS: do we actually have to pass params?
+    options[:skills]["policy"] = result["policy"] # assign the policy as a skill.
+    options[:skills]["policy.result"] = result
+
+    # flow control
+    return ::Pipetree::Stop unless result[:valid]
+    input
+  }
 end

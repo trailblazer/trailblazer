@@ -7,21 +7,6 @@ module Inspect
   alias_method :to_s, :inspect
 end
 
-class OperationParamsTest < MiniTest::Spec
-  class Operation < Trailblazer::Operation
-    def process(params)
-      self.model = "#{params} and #{@params==params}"
-    end
-
-    def params!(params)
-      { changed_params: params }
-    end
-  end
-
-  # allows you returning new params in #params!.
-  it { Operation.({valid: true}).model.to_s.must_equal "{:changed_params=>{:valid=>true}} and true" }
-end
-
 # Operation#model.
 class OperationModelTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
@@ -182,24 +167,6 @@ end
 
 
 class OperationTest < MiniTest::Spec
-  # test #invalid!
-  class OperationWithoutValidateCall < Trailblazer::Operation
-    require "trailblazer/operation/invalid"
-    include Invalid
-
-    def process(params)
-      params || invalid!
-    end
-
-    include Inspect
-  end
-
-  # ::run
-  it { OperationWithoutValidateCall.(true)[:valid].must_equal true }
-  # invalid.
-  it { OperationWithoutValidateCall.(false)[:valid].must_equal false }
-
-
   # #validate yields contract when valid
   class OperationWithValidateBlock < Trailblazer::Operation
     require "trailblazer/operation/contract"
