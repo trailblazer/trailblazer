@@ -12,7 +12,6 @@ class Trailblazer::Operation
 
       includer.| Model::Build, after: Skill::Build
       includer.| Policy::Evaluate, after: Model::Build
-      includer.| Policy::Assign, after: Policy::Evaluate
     end
   end
 end

@@ -3,7 +3,6 @@ class Trailblazer::Operation
     def self.included(includer)
       includer.extend DSL
       includer.| Evaluate, before: Call
-      includer.| Assign, after: Evaluate
     end
 
     module DSL
@@ -40,13 +39,10 @@ class Trailblazer::Operation
     end
   end
 
-  # TODO: make generic, or even unnecessary.
-  Policy::Assign = ->(input, options) { options[:skills]["policy"] = options[:policy]; input }
-
   # "current_user" is now a skill dependency, not a params option anymore.
   Policy::Evaluate = ->(input, options) {
       # raise options[:skills]["model"].inspect
-      options[:policy] = options[:skills]["policy.evaluator"].(options[:skills]["user.current"], options[:skills]["model"]) {
+      options[:skills]["policy"] = options[:skills]["policy.evaluator"].(options[:skills]["user.current"], options[:skills]["model"]) {
         options[:skills][:valid] = false
         options[:skills]["policy.message"] = "Not allowed"
         return ::Pipetree::Stop }
