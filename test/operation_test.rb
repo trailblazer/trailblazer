@@ -13,8 +13,6 @@ class OperationSetupParamsTest < MiniTest::Spec
       @model = params
     end
 
-    require "trailblazer/operation/setup"
-    include Setup
     def setup_params!(params)
       params.merge!(garrett: "Rocks!")
     end
@@ -28,9 +26,6 @@ end
 
 class OperationParamsTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
-    require "trailblazer/operation/setup"
-    include Setup
-
     def process(params)
       self.model = "#{params} and #{@params==params}"
     end
@@ -47,9 +42,6 @@ end
 # Operation#model.
 class OperationModelTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
-    require "trailblazer/operation/setup"
-    include Setup
-    include Model
 
     def process(params)
     end
@@ -66,9 +58,6 @@ end
 # Operation#model=.
 class OperationModelWriterTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
-    require "trailblazer/operation/setup"
-    include Setup
-
     def process(params)
       self.model = "#{params}"
     end
@@ -119,7 +108,6 @@ class OperationRunTest < MiniTest::Spec
       include Contract
       contract do
       end
-      include Setup
 
       module Validate
         def validate(is_valid)
@@ -195,7 +183,6 @@ class OperationRunTest < MiniTest::Spec
 
       require "trailblazer/operation/present"
       extend Present
-      include Setup
 
       def model!(*)
         Object
@@ -302,7 +289,6 @@ class OperationTest < MiniTest::Spec
       self
     end
 
-    include Setup
     extend Present
 
     def model!(params)

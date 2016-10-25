@@ -28,7 +28,6 @@ class ControllerTest < Minitest::Spec
   Comment = Struct.new(:body)
 
   class Comment::Update < Trailblazer::Operation
-    include Setup
     include Contract
 
     def model!(params)
@@ -69,7 +68,6 @@ class ControllerTest < Minitest::Spec
 
   describe "#form" do
     class Comment::Create < Trailblazer::Operation
-      include Setup
       def model!(params)
         Comment.new
       end
