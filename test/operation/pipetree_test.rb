@@ -13,5 +13,5 @@ class PipetreeTest < Minitest::Spec
     include Pipetree
   end
 
-  it { Create["pipetree"].inspect("#").must_equal %{ 0) New# 1) Call} }
+  it { Create["pipetree"].inspect.must_equal %{[Skill::Build|>New|>Call]} }
 end
