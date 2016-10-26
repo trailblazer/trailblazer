@@ -16,7 +16,6 @@ class BuilderTest < Minitest::Spec
 
   class A < Trailblazer::Operation
     include Builder
-
     builds ->(options) {
       return P if options["params"] == { some: "params", id:1 }
       return B if options["policy"].inspect == %{<Auth: user:Module, model:#<struct BuilderTest::Song id=3>>} # both user and model:id are set!
@@ -32,6 +31,10 @@ class BuilderTest < Minitest::Spec
     class M < self; end
   end
 
+  it { r=A.({ some: "params", id: 1 }, { "user.current" => Module })
+    puts r.inspect
+
+     }
   it { A.({ some: "params", id: 1 }, { "user.current" => Module }).class.must_equal A::P }
   it { A.({                 id: 3 }, { "user.current" => Module }).class.must_equal A::B }
   it { A.({                 id: 9 }, { "user.current" => Module }).class.must_equal A::M }

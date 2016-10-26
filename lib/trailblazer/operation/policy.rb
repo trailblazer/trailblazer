@@ -24,8 +24,8 @@ class Trailblazer::Operation
         @policy_class, @action = policy_class, action
       end
 
-      def call(skills, params)
-        policy = build_policy(skills, params) # here, this translates to Pundit interface.
+      def call(skills)
+        policy = build_policy(skills) # here, this translates to Pundit interface.
 
         if policy.send(@action)
           return { "policy" => policy, valid: true }
@@ -35,16 +35,18 @@ class Trailblazer::Operation
       end
 
     private
-      def build_policy(skills, params)
+      def build_policy(skills)
         @policy_class.new(skills["user.current"], skills["model"])
       end
     end
   end
 
   # This is a generic evaluate function for all kinds of policies.
-  # All the call'able evaluator has to do is returning a hash result.
+  # Arguments to the Callable: (skills)
+  #
+  # All the Callable evaluator has to do is returning a hash result.
   Policy::Evaluate = ->(input, options) {
-    result                     = options[:skills]["policy.evaluator"].(input, options[:skills]["params"]) # DISCUSS: do we actually have to pass params?
+    result                     = options[:skills]["policy.evaluator"].(options[:skills])
     options[:skills]["policy"] = result["policy"] # assign the policy as a skill.
     options[:skills]["policy.result"] = result
 

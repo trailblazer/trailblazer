@@ -13,7 +13,7 @@ module Trailblazer::Operation::Policy
       def build_permission(callable, &block)
         value = Uber::Options::Value.new(callable || block)
         # call'ing the Uber value will run either proc or block.
-        ->(*args) { { valid: value.(*args) } }
+        ->(skills) { { valid: value.(skills, skills["params"]) } }
       end
     end
   end

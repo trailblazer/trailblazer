@@ -7,7 +7,7 @@ class PolicyTest < Minitest::Spec
   end
 
   class Auth
-    def initialize(*args); @user, @model = *args end
+    def initialize(user, model); @user, @model = user, model end
     def only_user?; @user == Module && @model.nil? end
     def user_object?; @user == Object end
     def user_and_model?; @user == Module && @model.class == Song end
