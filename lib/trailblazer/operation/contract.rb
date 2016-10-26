@@ -67,22 +67,4 @@ public
       contract.validate(params)
     end
   end
-
-  module Raise
-    def validate(*)
-      super.tap do |res|
-        raise!(contract) unless res
-      end
-    end
-
-    # DISCUSS: this is now a test-specific optional feature, so should we really keep it here?
-    def raise!(contract)
-      raise ::Trailblazer::Operation::InvalidContract.new(contract.errors.to_s)
-    end
-  end
 end
-
-class Trailblazer::Operation::InvalidContract < RuntimeError
-end
-
-# initialize chain could be solved with pipetree.

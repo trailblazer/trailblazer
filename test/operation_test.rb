@@ -45,6 +45,7 @@ class OperationRunTest < MiniTest::Spec
 
   describe "Raise" do
     class Follow < Trailblazer::Operation
+      require "trailblazer/operation/raise"
       require "trailblazer/operation/contract"
       include Contract
       contract do
