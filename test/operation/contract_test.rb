@@ -21,7 +21,8 @@ class ContractTest < Minitest::Spec
         property :title
       end
 
-      def model; Struct.new(:title).new; end
+      include Model::Builder
+      def model!(*); Struct.new(:title).new; end
 
       def call(params)
         validate(params) { |f| return f.to_nested_hash }
@@ -75,7 +76,8 @@ class ContractTest < Minitest::Spec
       contract.validate
     end
 
-    def model
+    include Model::Builder
+    def model!(*)
       Object
     end
   end
@@ -118,9 +120,8 @@ class ContractTest < Minitest::Spec
       property :length
     end
 
-    attr_reader :model # FIXME: this sucks!
     def process(params)
-      @model = Struct.new(:id, :title, :length).new
+      self["model"] = Struct.new(:id, :title, :length).new
       contract.id = 1
       validate(params) { contract.length = 3 }
     end
