@@ -20,6 +20,7 @@ class Trailblazer::Operation
 
     # This can be subclassed for other policy strategies, e.g. non-pundit Authsome.
     # NOTE: using a class here is faster than a simple proc: https://twitter.com/apotonick/status/791162989692891136
+    #
     class Permission
       def initialize(policy_class, action)
         @policy_class, @action = policy_class, action
@@ -36,6 +37,8 @@ class Trailblazer::Operation
         @policy_class.new(skills["user.current"], skills["model"])
       end
 
+      # Note that in Trailblazer 2.1 we might have functions that "interpret" the result,
+      # that are easier to hook in.
       def result!(result, policy)
         if result
           return { "policy" => policy, "valid" => true }
