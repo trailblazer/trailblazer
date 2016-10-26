@@ -21,3 +21,5 @@ gem "trailblazer-operation", path: "../operation"
 gem "pipetree", path: "../pipetree"
 
 gem "minitest-line"
+
+gem "raise"
