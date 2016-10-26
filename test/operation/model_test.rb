@@ -23,7 +23,12 @@ class ModelTest < Minitest::Spec
   # :find it
   it { Update.({ id: 1 })["model"].inspect.must_equal %{#<struct ModelTest::Song id=1>} }
 
-  # TODO: add all the other tests from compat/model_test.rb.
+  # override #model with Model included.
+  class Upsert < Create
+    def model!(params); params.to_s end
+  end
+
+  it { Upsert.(id: 9)["model"].must_equal %{{:id=>9}} }
 
 
   #---
