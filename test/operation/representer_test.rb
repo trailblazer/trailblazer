@@ -21,8 +21,8 @@ class RepresenterTest < MiniTest::Spec
     end
 
     def call(params)
-      @model = Album.new # NO artist!!!
-      validate(params[:album], @model)
+      self["model"] = Album.new # NO artist!!!
+      validate(params[:album], self["model"])
       self
     end
   end
@@ -31,7 +31,7 @@ class RepresenterTest < MiniTest::Spec
   # Infers representer from contract, no customization.
   class Show < Create
     def call(params)
-      @model = Album.new("After The War", Artist.new("Gary Moore"))
+      self["model"] = Album.new("After The War", Artist.new("Gary Moore"))
       self
     end
   end
@@ -49,7 +49,7 @@ class RepresenterTest < MiniTest::Spec
 
   class HypermediaShow < HypermediaCreate
     def call(params)
-      @model = Album.new("After The War", Artist.new("Gary Moore"))
+      self["model"] = Album.new("After The War", Artist.new("Gary Moore"))
       self
     end
   end
@@ -103,15 +103,15 @@ class RepresenterTest < MiniTest::Spec
     representer AlbumRepresenter
 
     def call(params)
-      @model = Album.new # NO artist!!!
-      validate(params[:album], @model)
+      self["model"] = Album.new # NO artist!!!
+      validate(params[:album], self["model"])
       self
     end
   end
 
   class JsonApiShow < JsonApiCreate
     def call(params)
-      @model = Album.new("After The War", Artist.new("Gary Moore"))
+      self["model"] = Album.new("After The War", Artist.new("Gary Moore"))
       self
     end
   end
@@ -177,7 +177,8 @@ class InternalRepresenterAPITest < MiniTest::Spec
         super(self["params"])
       end
 
-      def model # FIXME.
+      include Model::Builder
+      def model!(*)
         Song.new(1)
       end
     end
@@ -196,7 +197,6 @@ class DifferentParseAndRenderingRepresenterTest < MiniTest::Spec
     include Contract
     extend Representer::DSL
     include Representer::Rendering # no Deserializer::Hash here or anything.
-    attr_reader :model
 
     contract do
       property :title
@@ -207,7 +207,7 @@ class DifferentParseAndRenderingRepresenterTest < MiniTest::Spec
     end
 
     def call(params)
-      @model = Album.new
+      self["model"] = Album.new
       validate(params) do
         contract.sync
       end
@@ -233,10 +233,8 @@ class DifferentParseAndRenderingRepresenterTest < MiniTest::Spec
       property :title
     end
 
-    attr_reader :model
-
     def call(params)
-      @model = Album.new
+      self["model"] = Album.new
 
       validate(params) do
         contract.sync
@@ -246,7 +244,7 @@ class DifferentParseAndRenderingRepresenterTest < MiniTest::Spec
     end
 
     def to_json(*)
-      %{{"title": "#{model.title}"}}
+      %{{"title": "#{self["model"].title}"}}
     end
   end
 

@@ -6,7 +6,7 @@
 #
 # TODO: so far, we only support JSON, but it's two lines to change to support any kind of format.
 #
-# Needs #model.
+# Needs self["model"].
 # Needs #[], #[]= skill dependency.
 module Trailblazer::Operation::Representer
   def self.included(includer)
@@ -87,7 +87,7 @@ private
 
     # Override this if you want to render something else, e.g. the contract.
     def represented
-      model
+      self["model"]
     end
   end
   include Rendering
