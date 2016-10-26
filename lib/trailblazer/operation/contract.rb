@@ -60,7 +60,7 @@ public
         self[:errors] = contract.errors
       end
 
-      self[:valid] = valid
+      self["valid"] = valid
     end
 
     def validate_contract(params)
