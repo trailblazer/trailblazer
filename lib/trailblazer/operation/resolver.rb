@@ -7,6 +7,7 @@ class Trailblazer::Operation
     def self.included(includer)
       includer.class_eval do
         extend Model::DSL  # ::model
+        extend Model::BuildMethods  # ::model!
         extend Policy::DSL # ::policy
       end
 

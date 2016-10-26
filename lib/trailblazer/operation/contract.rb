@@ -30,7 +30,7 @@ module Trailblazer::Operation::Contract
   # Instantiate the contract, either by using the user's contract passed into #validate
   # or infer the Operation contract.
   def contract_for(model=nil, options={}, contract_class=nil)
-    model          ||= self.model
+    model          ||= self["model"]
     contract_class ||= self["contract.default.class"]
 
     contract!(model, options, contract_class)

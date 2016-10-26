@@ -1,7 +1,8 @@
 class Trailblazer::Operation
   module Model
     def self.included(includer)
-      includer.extend DSL
+      includer.extend DSL # ::model
+      includer.include BuildMethods # model! and friends.
       includer.| Build, after: New
     end
 
@@ -17,6 +18,14 @@ class Trailblazer::Operation
         heritage.record(:action, name)
 
         self["model.action"] = name
+      end
+    end
+
+    # Include this if you only want to override #model! and provide your own model
+    # building logic. It will be run after New.
+    module Builder
+      def self.included(includer)
+        includer.| Model::Build, after: New
       end
     end
 
@@ -48,21 +57,8 @@ class Trailblazer::Operation
 
       alias_method :find_model, :update_model
     end
-
-    # this is to be able to use BuildModel. i really don't know if we actually need to do that.
-    # what if people want to override #model! for example?
-    class Builder
-      def initialize(skills)
-        @delegator = skills
-      end
-
-      extend Uber::Delegates
-      delegates :@delegator, :[]
-
-      include BuildMethods # #instantiate_model and so on.
-      alias_method :call, :model!
-    end
   end
 
-  Model::Build  = ->(input, options) { options[:skills]["model"] = Model::Builder.new(options[:skills]).(options[:skills]["params"]); input }
+  # calls operation.model!(params).
+  Model::Build  = ->(input, options) { options[:skills]["model"] = input.model!(options[:skills]["params"]); input }
 end

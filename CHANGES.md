@@ -32,6 +32,9 @@ This is mimiced in Setup ATM, but will be changed in 2.0.
 # * `Operation#invalid!` doesn't accept a result anymore.
 # * Removed `Operation#valid?` in favor of the result object.
 
+## Model
+
+* The `model` method doesn't exist anymore, use `self["model"]` or write your own.
 
 ## DI
 

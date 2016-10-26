@@ -7,33 +7,6 @@ module Inspect
   alias_method :to_s, :inspect
 end
 
-# Operation#model.
-class OperationModelTest < MiniTest::Spec
-  class Operation < Trailblazer::Operation
-
-    def process(params)
-    end
-
-    def model!(params)
-      params
-    end
-  end
-
-  # #model.
-  it { Operation.(Object).model.must_equal Object }
-end
-
-# Operation#model=.
-class OperationModelWriterTest < MiniTest::Spec
-  class Operation < Trailblazer::Operation
-    def process(params)
-      self.model = "#{params}"
-    end
-  end
-
-  it { Operation.("I can set @model via a private setter").model.to_s.must_equal "I can set @model via a private setter" }
-end
-
 class OperationRunTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
     require "trailblazer/operation/run"
