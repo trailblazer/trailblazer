@@ -58,7 +58,7 @@ class DslRepresenterTest < MiniTest::Spec
     end
 
     it { Op1["representer.parse.class"].superclass.must_equal String }
-    it { Op1.new({})["representer.parse.class"].superclass.must_equal String }
+    it { Op1.({})["representer.parse.class"].superclass.must_equal String }
   end
 
   # name for default representer
