@@ -29,6 +29,7 @@ class ControllerTest < Minitest::Spec
 
   class Comment::Update < Trailblazer::Operation
     include Contract
+    include Present
 
     def model!(params)
       Comment.new(params[:body])

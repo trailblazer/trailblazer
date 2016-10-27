@@ -88,7 +88,11 @@ You can now inject the following objects via `::call`:
 
 ## Collection
 
-* Removed `Operation::Collection`. Please use `Operation::new`.
+* Removed `Operation::Collection`. Please use `Operation::present`.
+
+## Controller
+
+* Removed `Controller#params!`, no one was using it.
 
 
 # 1.1.1
