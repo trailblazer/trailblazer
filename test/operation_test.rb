@@ -70,26 +70,6 @@ class OperationRunTest < MiniTest::Spec
     Operation.("yes, true").to_s.must_equal %{<Operation @model=>}
     Operation.("yes, true")[:valid].must_equal true
   end
-
-  describe "::present" do
-    class NoContractOp < Trailblazer::Operation
-      require "trailblazer/operation/contract"
-      include Contract::Explicit
-
-      require "trailblazer/operation/present"
-      extend Present
-
-      def model!(*)
-        Object
-      end
-    end
-
-    # the operation and model are available, but no contract.
-    it { NoContractOp.present({}).model.must_equal Object }
-    # no contract is built.
-    it { assert_raises(NoMethodError) { NoContractOp.present({}).contract } }
-    it { assert_raises(NoMethodError) { NoContractOp.run({}) } }
-  end
 end
 
 
@@ -151,33 +131,6 @@ class OperationTest < MiniTest::Spec
 
   it { OperationWithValidateAndIf.(false).secret_contract.must_equal "so wrong!" }
   it { OperationWithValidateAndIf.(true).secret_contract.must_equal OperationWithValidateAndIf::Contract }
-
-
-
-  # ::present only runs #setup! which runs #model!.
-  class ContractOnlyOperation < Trailblazer::Operation
-    require "trailblazer/operation/contract"
-    include Contract::Explicit
-    self["contract.default.class"] = class Contract
-      def initialize(model, *)
-        @_model = model
-      end
-      attr_reader :_model
-      self
-    end
-
-    extend Present
-
-    def model!(params)
-      Object
-    end
-
-    def process(params)
-      raise "This is not run!"
-    end
-  end
-
-  it { ContractOnlyOperation.present({}).contract._model.must_equal Object }
 end
 
 
