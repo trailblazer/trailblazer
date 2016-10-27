@@ -23,12 +23,13 @@ TRB 1.2
 
 * Removed `Operation::reject`. This is available in `trailblazer-compat`.
 * `Operation#invalid!` is now an optional module `Trailblazer::Operation::Invalid`.
-
+* `Operation::present` is now optional. Include `Present`.
 
 # CHANGES:
 # * Removed `Operation::[]` in favor of `Operation::()`.
 # * `Operation#invalid!` doesn't accept a result anymore.
 # * Removed `Operation#valid?` in favor of the result object.
+#
 
 ## Model
 
