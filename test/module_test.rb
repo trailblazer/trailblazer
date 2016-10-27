@@ -9,7 +9,7 @@ class OperationModuleTest < MiniTest::Spec
 
   class Create < Trailblazer::Operation
     include Trailblazer::Operation::Callback
-    include Contract
+    include Contract::Explicit
 
     contract do
       property :name
@@ -26,7 +26,7 @@ class OperationModuleTest < MiniTest::Spec
     def call(params)
       @model = Song.new
 
-      validate(params, @model) do
+      validate(params, model: @model) do
         contract.sync
 
         dispatch!

@@ -16,7 +16,7 @@ class ContractTest < Minitest::Spec
   # contract do..end (without constant)
   describe "contract do .. end" do
     class Index < Trailblazer::Operation
-      include Contract
+      include Contract::Step
       contract do
         property :title
       end
@@ -33,29 +33,30 @@ class ContractTest < Minitest::Spec
     it { Index.(title: "Falling Down").must_equal({"title"=>"Falling Down"}) }
   end
 
+  # TODO: in all step tests.
   describe "dependency injection" do
     class Delete < Trailblazer::Operation
-      include Contract
+      include Contract::Step
     end
 
     class Follow < Trailblazer::Operation
-      include Contract
-      def model; end
+      include Contract::Step
     end
 
     # inject contract instance via constructor.
-    it { Delete.({}, "contract" => "contract/instance").contract.must_equal "contract/instance" }
-    it { Follow.({}, "contract.default.class" => Form).contract.class.must_equal Form }
+    it { Delete.({}, "contract" => "contract/instance")["contract"].must_equal "contract/instance" }
+    # inject contract class.
+    it { Follow.({}, "contract.default.class" => Form)["contract"].class.must_equal Form }
   end
 
 
   # contract(model, [admin: true]).validate
   class Create < Trailblazer::Operation
-    include Contract
+    include Contract::Explicit
 
     def call(options:false)
-      return contract(Object, admin: true).validate if options
-      contract(Object).validate
+      return contract(model: Object, options: { admin: true }).validate if options
+      contract(model: Object).validate
     end
   end
 
@@ -68,7 +69,7 @@ class ContractTest < Minitest::Spec
   # ::contract Form
   # contract(model).validate
   class Update < Trailblazer::Operation
-    include Contract
+    include Contract::Explicit
 
     self["contract.default.class"] = Form
 
@@ -90,14 +91,14 @@ class ContractTest < Minitest::Spec
   # passing Constant into #contract
   # contract(Object.new, { title: "Bad Feeling" }, Contract)
   class Operation < Trailblazer::Operation
-    include Contract
+    include Contract::Explicit
 
     class Contract < Reform::Form
       property :title, virtual: true
     end
 
     def process(params)
-      contract(Object.new, { title: "Bad Feeling" }, Contract)
+      contract(model: Object.new, options: { title: "Bad Feeling" }, contract_class: Contract)
 
       validate(params)
     end
@@ -112,7 +113,7 @@ class ContractTest < Minitest::Spec
 
   # allow using #contract before #validate.
   class Upsert < Trailblazer::Operation
-    include Contract
+    include Contract::Explicit
 
     contract do
       property :id
@@ -143,7 +144,7 @@ class ValidateTest < Minitest::Spec
   end
 
   class Create < Trailblazer::Operation
-    include Contract
+    include Contract::Explicit
     contract Form
 
     def call(params)
@@ -168,7 +169,7 @@ end
 class OperationContractWithOptionsTest < Minitest::Spec
   # contract(model, title: "Bad Feeling")
   class Operation < Trailblazer::Operation
-    include Contract
+    include Contract::Explicit
     contract do
       property :id
       property :title, virtual: true
@@ -177,7 +178,7 @@ class OperationContractWithOptionsTest < Minitest::Spec
     def process(params)
       model = Struct.new(:id).new
 
-      contract(model, title: "Bad Feeling")
+      contract(model: model, options: { title: "Bad Feeling" })
 
       validate(params)
     end
@@ -191,7 +192,7 @@ class OperationContractWithOptionsTest < Minitest::Spec
 
   # contract({ song: song, album: album }, title: "Medicine Balls")
   class CompositionOperation < Trailblazer::Operation
-    include Contract
+    include Contract::Explicit
     contract do
       include Reform::Form::Composition
       property :song_id,    on: :song
@@ -203,7 +204,7 @@ class OperationContractWithOptionsTest < Minitest::Spec
       song  = Struct.new(:song_id).new(1)
       album = Struct.new(:album_name).new("Forever Malcom Young")
 
-      contract({ song: song, album: album }, title: "Medicine Balls")
+      contract(model: { song: song, album: album }, options: { title: "Medicine Balls" })
 
       validate(params)
     end
@@ -218,7 +219,7 @@ class OperationContractWithOptionsTest < Minitest::Spec
 
   # validate(params, { song: song, album: album }, title: "Medicine Balls")
   class CompositionValidateOperation < Trailblazer::Operation
-    include Contract
+    include Contract::Explicit
     contract do
       include Reform::Form::Composition
       property :song_id,    on: :song
@@ -230,7 +231,7 @@ class OperationContractWithOptionsTest < Minitest::Spec
       song  = Struct.new(:song_id).new(1)
       album = Struct.new(:album_name).new("Forever Malcom Young")
 
-      validate(params, { song: song, album: album }, title: "Medicine Balls")
+      validate(params, model: { song: song, album: album }, options: { title: "Medicine Balls" })
     end
   end
 
@@ -243,3 +244,4 @@ class OperationContractWithOptionsTest < Minitest::Spec
 end
 
 # TODO: full stack test with validate, process, save, etc.
+          # with model!

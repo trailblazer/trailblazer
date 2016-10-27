@@ -8,7 +8,7 @@ class OperationCallbackTest < MiniTest::Spec
 
   class Create < Trailblazer::Operation
     include Callback
-    include Contract
+    include Contract::Explicit
 
     contract do
       property :name
@@ -24,7 +24,7 @@ class OperationCallbackTest < MiniTest::Spec
     def process(params)
       @model = Song.new
 
-      validate(params, @model) do
+      validate(params, model: @model) do
         callback!
       end
     end

@@ -117,7 +117,7 @@ class DslRepresenterTest < MiniTest::Spec
       include Representer
       include Representer::InferFromContract
       include SongProcess
-      include Contract
+      include Contract::Explicit
 
       contract do
         property :songTitle
@@ -127,7 +127,7 @@ class DslRepresenterTest < MiniTest::Spec
     class ContractOperation2 < Trailblazer::Operation
       include Representer
       include SongProcess
-      include Contract
+      include Contract::Explicit
       include Representer::InferFromContract
       contract ContractOperation["contract.default.class"]
 

@@ -9,7 +9,7 @@ require "trailblazer/operation/contract"
 class DslContractTest < MiniTest::Spec
   module Call
     def call(params)
-      validate(params, model = OpenStruct.new) { contract.sync }
+      validate(params, model: model=OpenStruct.new) { contract.sync }
       model
     end
   end
@@ -39,7 +39,7 @@ class DslContractTest < MiniTest::Spec
       property :id
     end
 
-    include Contract
+    include Contract::Explicit
     contract IdContract
 
     include Call
@@ -95,7 +95,7 @@ class DslContractTest < MiniTest::Spec
   # contract do .. end
   # (with block)
   class Delete < Trailblazer::Operation
-    include Contract, Call
+    include Contract::Explicit, Call
     contract do
       property :title
     end
@@ -106,7 +106,7 @@ class DslContractTest < MiniTest::Spec
 
   # subsequent calls merge.
   class Remove < Trailblazer::Operation
-    include Contract, Call
+    include Contract::Explicit, Call
     contract do
       property :title
     end
@@ -125,7 +125,7 @@ class DslContractTest < MiniTest::Spec
 
   module SongProcess
     def process(params)
-      validate(params, @model = OpenStruct.new)
+      validate(params, model: @model = OpenStruct.new)
     end
   end
 
@@ -134,7 +134,7 @@ class DslContractTest < MiniTest::Spec
   describe %{Operation::["contract.default.class"]} do
 
     class Update2 < Trailblazer::Operation
-      include Contract
+      include Contract::Step
       self["contract.default.class"] = String
     end
 
@@ -192,7 +192,7 @@ class DslContractTest < MiniTest::Spec
     end
 
     class OpWithExternalContract < Trailblazer::Operation
-      include Contract
+      include Contract::Explicit
       contract SongForm
       include SongProcess
     end
@@ -206,13 +206,13 @@ class DslContractTest < MiniTest::Spec
     end
 
     class OpNotExtendingContract < Trailblazer::Operation
-      include Contract
+      include Contract::Explicit
       contract DifferentSongForm
       include SongProcess
     end
 
     class OpExtendingContract < Trailblazer::Operation
-      include Contract
+      include Contract::Explicit
       contract DifferentSongForm do
         property :genre
       end

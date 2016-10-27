@@ -95,7 +95,7 @@ private
 
   module Deserializer
     module Hash
-      def validate_contract(params)
+      def validate_contract(contract, params)
         # use the inferred representer from the contract for deserialization in #validate.
         contract.validate(params) do |document|
           self["representer.default.class"].new(contract).from_hash(document)
@@ -107,7 +107,7 @@ private
     # our own representer for deserialization. After the object graph is set up, Reform will
     # run its validation without even knowing this came from JSON.
     module JSON
-      def validate_contract(params)
+      def validate_contract(contract, params)
         contract.validate(params) do |document|
           self["representer.default.class"].new(contract).from_json(document)
         end

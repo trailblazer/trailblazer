@@ -6,7 +6,7 @@ class RepresenterTest < MiniTest::Spec
   Artist = Struct.new(:name)
 
   class Create < Trailblazer::Operation
-    include Contract
+    include Contract::Explicit
     include Representer
     include Representer::InferFromContract
     attr_reader :model # FIXME: all we want is #model.
@@ -22,7 +22,7 @@ class RepresenterTest < MiniTest::Spec
 
     def call(params)
       self["model"] = Album.new # NO artist!!!
-      validate(params[:album], self["model"])
+      validate(params[:album], model: self["model"])
       self
     end
   end
@@ -85,7 +85,7 @@ class RepresenterTest < MiniTest::Spec
   # explicit representer set with ::representer_class=.
   require "roar/decorator"
   class JsonApiCreate < Trailblazer::Operation
-    include Contract
+    include Contract::Explicit
     include Representer
     attr_reader :model
 
@@ -104,7 +104,7 @@ class RepresenterTest < MiniTest::Spec
 
     def call(params)
       self["model"] = Album.new # NO artist!!!
-      validate(params[:album], self["model"])
+      validate(params[:album], model: self["model"])
       self
     end
   end
@@ -132,7 +132,7 @@ class InternalRepresenterAPITest < MiniTest::Spec
 
   describe "#represented" do
     class Show < Trailblazer::Operation
-      include Contract
+      include Contract::Explicit
       include Representer, Model
       model Song, :create
 
@@ -194,7 +194,7 @@ class DifferentParseAndRenderingRepresenterTest < MiniTest::Spec
 
   # rendering
   class Create < Trailblazer::Operation
-    include Contract
+    include Contract::Explicit
     extend Representer::DSL
     include Representer::Rendering # no Deserializer::Hash here or anything.
 
@@ -221,7 +221,7 @@ class DifferentParseAndRenderingRepresenterTest < MiniTest::Spec
 
   # parsing
   class Update < Trailblazer::Operation
-    include Contract
+    include Contract::Explicit
     extend Representer::DSL
     include Representer::Deserializer::Hash # no Rendering.
 

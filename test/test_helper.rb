@@ -13,4 +13,4 @@ require "trailblazer/operation/model"
 require "trailblazer/operation/contract"
 require "trailblazer/operation/representer"
 
-require "raise"
+# require "raise"

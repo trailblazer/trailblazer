@@ -9,11 +9,9 @@ end
 
 class OperationRunTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
-    require "trailblazer/operation/run"
-    extend Run
 
     require "trailblazer/operation/contract"
-    include Contract
+    include Contract::Explicit
 
     # allow providing your own contract.
     self["contract.default.class"] = class MyContract
@@ -32,22 +30,18 @@ class OperationRunTest < MiniTest::Spec
 
     def process(params)
       model = Object
-      validate(params, model)
+      validate(params, model: model)
     end
 
     include Inspect
   end
 
-  # contract is inferred from self::contract_class.
-  # ::run returns result set when run without block.
-  it { Operation.run("not true").to_s.must_equal %{[false, <Operation @model=>]} }
-  it { Operation.run("yes, true").to_s.must_equal %{[true, <Operation @model=>]} }
 
   describe "Raise" do
     class Follow < Trailblazer::Operation
       require "trailblazer/operation/raise"
       require "trailblazer/operation/contract"
-      include Contract
+      include Contract::Explicit
       contract do
       end
 
@@ -77,51 +71,10 @@ class OperationRunTest < MiniTest::Spec
     Operation.("yes, true")[:valid].must_equal true
   end
 
-
-  # ::run with block returns operation.
-  # valid executes block.
-  it "block" do
-    outcome = nil
-    res = Operation.run("yes, true") do
-      outcome = "true"
-    end
-
-    outcome.must_equal "true" # block was executed.
-    res.to_s.must_equal %{<Operation @model=>}
-  end
-
-  # invalid doesn't execute block.
-  it "block, invalid" do
-    outcome = nil
-    res = Operation.run("no, not true, false") do
-      outcome = "true"
-    end
-
-    outcome.must_equal nil # block was _not_ executed.
-    res.to_s.must_equal %{<Operation @model=>}
-  end
-
-  # block yields operation
-  it do
-    outcome = nil
-    res = Operation.run("yes, true") do |op|
-      outcome = op
-    end
-
-    outcome.to_s.must_equal %{<Operation @model=>} # block was executed.
-    res.to_s.must_equal %{<Operation @model=>}
-  end
-
-  # # Operation#contract returns @contract
-  it { Operation.("yes, true").contract.class.to_s.must_equal "OperationRunTest::Operation::MyContract" }
-
-
-
-
   describe "::present" do
     class NoContractOp < Trailblazer::Operation
       require "trailblazer/operation/contract"
-      include Contract
+      include Contract::Explicit
 
       require "trailblazer/operation/present"
       extend Present
@@ -144,7 +97,7 @@ class OperationTest < MiniTest::Spec
   # #validate yields contract when valid
   class OperationWithValidateBlock < Trailblazer::Operation
     require "trailblazer/operation/contract"
-    include Contract
+    include Contract::Explicit
     self["contract.default.class"] = class Contract
       def initialize(*)
       end
@@ -158,7 +111,7 @@ class OperationTest < MiniTest::Spec
     end
 
     def process(params)
-      validate(params, Object.new) do |c|
+      validate(params, model: Object.new) do |c|
         @secret_contract = c.class
       end
     end
@@ -173,7 +126,7 @@ class OperationTest < MiniTest::Spec
   # test validate wit if/else
   class OperationWithValidateAndIf < Trailblazer::Operation
     require "trailblazer/operation/contract"
-    include Contract
+    include Contract::Explicit
     self["contract.default.class"] = class Contract
       def initialize(*)
       end
@@ -186,7 +139,7 @@ class OperationTest < MiniTest::Spec
     end
 
     def process(params)
-      if validate(params, Object.new)
+      if validate(params, model: Object.new)
         @secret_contract = contract.class
       else
         @secret_contract = "so wrong!"
@@ -204,7 +157,7 @@ class OperationTest < MiniTest::Spec
   # ::present only runs #setup! which runs #model!.
   class ContractOnlyOperation < Trailblazer::Operation
     require "trailblazer/operation/contract"
-    include Contract
+    include Contract::Explicit
     self["contract.default.class"] = class Contract
       def initialize(model, *)
         @_model = model
@@ -231,13 +184,13 @@ end
 class OperationErrorsTest < MiniTest::Spec
   class Operation < Trailblazer::Operation
     require "trailblazer/operation/contract"
-    include Contract
+    include Contract::Explicit
     contract do
       property :title, validates: {presence: true}
     end
 
     def process(params)
-      validate(params, OpenStruct.new) {}
+      validate(params, model: OpenStruct.new) {}
     end
   end
 

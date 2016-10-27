@@ -7,7 +7,7 @@ class DslCallbackTest < MiniTest::Spec
   module SongProcess
     def process(params)
       self[:_invocations] = _invocations
-      contract(OpenStruct.new).validate(params)
+      contract(model: OpenStruct.new).validate(params)
       dispatch!
     end
 
@@ -24,7 +24,7 @@ class DslCallbackTest < MiniTest::Spec
 
   describe "inheritance across operations" do
     class Operation < Trailblazer::Operation
-      include Contract
+      include Contract::Explicit
       include Callback
       include SongProcess
 
@@ -65,13 +65,13 @@ class DslCallbackTest < MiniTest::Spec
     end
 
     class OpWithExternalCallback < Trailblazer::Operation
-      include Contract
+      include Contract::Explicit
       include Callback
       include SongProcess
       callback :after_save, AfterSaveCallback
 
       def call(params)
-        contract(OpenStruct.new).validate(params)
+        contract(model: OpenStruct.new).validate(params)
         dispatch!(:after_save)
         _invocations
       end
@@ -90,14 +90,14 @@ class DslCallbackTest < MiniTest::Spec
     end
 
     class OpUsingCallback < Trailblazer::Operation
-      include Contract
+      include Contract::Explicit
       include Callback
       include SongProcess
       callback :default, DefaultCallback
     end
 
     class OpExtendingCallback < Trailblazer::Operation
-      include Contract
+      include Contract::Explicit
       include Callback
       include SongProcess
       callback :default, DefaultCallback do
