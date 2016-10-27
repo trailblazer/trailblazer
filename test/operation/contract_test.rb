@@ -1,6 +1,59 @@
 require "test_helper"
 require "trailblazer/operation/contract"
 
+      require "dry/validation"
+
+class DryValidationTest < Minitest::Spec
+  class Create < Trailblazer::Operation
+    extend Contract::DSL
+
+    # Schema = (Dry::Validation.Schema do
+    #       required(:id).filled
+    #     end)
+
+    # Class.new(Schema)
+
+    # contract "params", Schema # superclass must be a Class (#<Class:0x92dba64> given) (TypeError)
+    self["contract.params"] = Dry::Validation.Schema do
+      required(:id).filled
+    end
+
+    # m= Module.new do
+    #         def call
+    #     raise :ficken
+    #   end
+
+    # end
+
+    # self["contract.params"].extend m
+
+    def process(params)
+      validate(params, name: "params") { |f| puts f.inspect }
+    end
+
+    # for now, let's assume the contract is already built. we can do the ad-hoc build later.
+    def validate(params, name:"default") # :params
+      path     = "contract.#{name}"
+      contract = self[path] # "contract.params"
+
+      result = contract.(params) # run validation.  # FIXME: must be overridable.
+
+      # if valid = result.to_bool
+      if valid = result.success? # FIXME: to_bool or success?
+        yield result if block_given?
+      else
+        self["errors.#{path}"] = result.errors
+      end
+
+      self["valid"] = valid # how this flag gets interpreted is up to you. # FIXME: test that bool is returned from this method.
+    end
+
+    # ->(*) { validate(params, "contract.params") { |f| self["params"] } }
+  end
+
+  it { Create.(id: 1) }
+end
+
 class ContractTest < Minitest::Spec
   # generic form for testing.
   class Form
