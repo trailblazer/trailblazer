@@ -23,3 +23,4 @@ gem "pipetree", path: "../pipetree"
 gem "minitest-line"
 
 gem "raise"
+gem "dry-validation"

@@ -1,5 +1,3 @@
-require "trailblazer/endpoint"
-
 module Trailblazer::Operation::Controller
 private
   def form(operation_class, options={})

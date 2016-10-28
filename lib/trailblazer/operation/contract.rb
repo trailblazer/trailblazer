@@ -1,3 +1,15 @@
+Reform::Form.class_eval do # THIS IS OF COURSE PROTOTYPING!
+  def call(params)
+    bool = validate(params)
+    Result.new(self)
+  end
+
+  class Result < SimpleDelegator
+    def success?
+      valid?
+    end
+  end
+end
 # Best practices for using contract.
 #
 # * inject contract instance via constructor to #contract
@@ -64,15 +76,29 @@ class Trailblazer::Operation
     end
 
     module Validate
-      def validate(params, contract:nil, **)
-        if valid = validate_contract(contract, params)
-          yield contract if block_given?
+      # for now, let's assume the contract is already built. we can do the ad-hoc build later.
+      def validate(params, contract:nil, path:"contract") # :params
+        # DISCUSS: should we only have path here and then look up contract ourselves?
+        result = contract.(params) # run validation.  # FIXME: must be overridable.
+
+        if valid = result.success? # FIXME: to_bool or success?
+          yield result if block_given?
         else
-          self[:errors] = contract.errors # FIXME: "contract.errors"
+          self["errors.#{path}"] = result.errors
         end
 
-        self["valid"] = valid
+        self["valid"] = valid # how this flag gets interpreted is up to you. # FIXME: test that bool is returned from this method.
       end
+
+      # def validate(params, contract:nil, **)
+      #   if valid = validate_contract(contract, params)
+      #     yield contract if block_given?
+      #   else
+      #     self[:errors] = contract.errors # FIXME: "contract.errors"
+      #   end
+
+      #   self["valid"] = valid
+      # end
 
       def validate_contract(contract, params)
         contract.validate(params)

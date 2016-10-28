@@ -7,48 +7,17 @@ class DryValidationTest < Minitest::Spec
   class Create < Trailblazer::Operation
     extend Contract::DSL
 
-    # Schema = (Dry::Validation.Schema do
-    #       required(:id).filled
-    #     end)
-
-    # Class.new(Schema)
-
-    # contract "params", Schema # superclass must be a Class (#<Class:0x92dba64> given) (TypeError)
-    self["contract.params"] = Dry::Validation.Schema do
+    contract "params", (Dry::Validation.Schema do
       required(:id).filled
-    end
-
-    # m= Module.new do
-    #         def call
-    #     raise :ficken
-    #   end
-
+    end)
+    # self["contract.params"] = Dry::Validation.Schema do
+    #   required(:id).filled
     # end
 
-    # self["contract.params"].extend m
-
+    include Contract::Validate
     def process(params)
-      validate(params, name: "params") { |f| puts f.inspect }
+      validate(params, contract: self["contract.params"], path: "contract.params") { |f| puts f.inspect }
     end
-
-    # for now, let's assume the contract is already built. we can do the ad-hoc build later.
-    def validate(params, name:"default") # :params
-      path     = "contract.#{name}"
-      contract = self[path] # "contract.params"
-
-      result = contract.(params) # run validation.  # FIXME: must be overridable.
-
-      # if valid = result.to_bool
-      if valid = result.success? # FIXME: to_bool or success?
-        yield result if block_given?
-      else
-        self["errors.#{path}"] = result.errors
-      end
-
-      self["valid"] = valid # how this flag gets interpreted is up to you. # FIXME: test that bool is returned from this method.
-    end
-
-    # ->(*) { validate(params, "contract.params") { |f| self["params"] } }
   end
 
   it { Create.(id: 1) }
@@ -191,9 +160,14 @@ end
 
 class ValidateTest < Minitest::Spec
   class Form
+    class Result
+      def initialize(bool); @bool = bool end
+      def success?; @bool end
+      def errors; ["404"] end
+    end
     def initialize(*); end
-    def validate(result); result; end
-    def errors; end
+    # def validate(result); result; end
+    def call(params); Result.new(params); end
   end
 
   class Create < Trailblazer::Operation
