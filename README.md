@@ -42,25 +42,37 @@ Since Trailblazer decouples the High-Level Stack from the framework, it runs wit
 * Trailblazer with Grape - coming _very_ soon!
 
 
-## A Concept-Driven OOP Framework
+## Concepts over Technology
 
-Trailblazer offers you a new, more intuitive file layout in Rails apps where you structure files by *concepts*.
+Trailblazer offers you a new, more intuitive file layout in applications.
 
 ```
 app
 ├── concepts
 │   ├── comment
-│   │   ├── cell.rb
-│   │   ├── views
+│   │   ├── operation
+│   │   │   ├── create.rb
+│   │   │   ├── update.rb
+│   │   ├── contract
+│   │   │   ├── create.rb
+│   │   │   ├── update.rb
+│   │   ├── cell
+│   │   │   ├── show.rb
+│   │   │   ├── index.rb
+│   │   ├── view
 │   │   │   ├── show.haml
-│   │   │   ├── list.haml
-│   │   ├── assets
+│   │   │   ├── index.rb
 │   │   │   ├── comment.css.sass
-│   │   ├── operation.rb
-│   │   ├── twin.rb
 ```
 
-Files, classes and views that logically belong to one _concept_ are kept in one place. You are free to use additional namespaces within a concept. Trailblazer tries to keep it as simple as possible, though.
+Instead of grouping by technology, classes and views are structured by *concept*, and then by technology. A concept can relate to a model, or can be a completely abstract concern such as `invoicing`.
+
+Within a concept, you can have any level of nesting. For example, `invoicing/pdf/` could be one.
+
+The file structure is implemented by the [`trailblazer-loader` gem](https://github.com/trailblazer/trailblazer-loader).
+
+[Learn more.](http://trailblazer.to/gems/trailblazer/loader.html)
+
 
 ## Architecture
 
