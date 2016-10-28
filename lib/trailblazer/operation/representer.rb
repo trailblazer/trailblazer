@@ -93,11 +93,12 @@ private
   include Rendering
 
 
+  # FIXME: works only for Reform (that's ok) and only for default contract (that's not ok).
   module Deserializer
     module Hash
       def validate_contract(contract, params)
         # use the inferred representer from the contract for deserialization in #validate.
-        contract.validate(params) do |document|
+        contract.(params) do |document|
           self["representer.default.class"].new(contract).from_hash(document)
         end
       end
@@ -108,7 +109,7 @@ private
     # run its validation without even knowing this came from JSON.
     module JSON
       def validate_contract(contract, params)
-        contract.validate(params) do |document|
+        contract.(params) do |document|
           self["representer.default.class"].new(contract).from_json(document)
         end
       end

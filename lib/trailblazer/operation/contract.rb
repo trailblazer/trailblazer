@@ -1,6 +1,6 @@
 Reform::Form.class_eval do # THIS IS OF COURSE PROTOTYPING!
-  def call(params)
-    bool = validate(params)
+  def call(params, &block)
+    bool = validate(params, &block)
     Result.new(self)
   end
 
@@ -79,7 +79,7 @@ class Trailblazer::Operation
       # for now, let's assume the contract is already built. we can do the ad-hoc build later.
       def validate(params, contract:nil, path:"contract") # :params
         # DISCUSS: should we only have path here and then look up contract ourselves?
-        result = contract.(params) # run validation.  # FIXME: must be overridable.
+        result = validate_contract(contract, params) # run validation.  # FIXME: must be overridable.
 
         if valid = result.success? # FIXME: to_bool or success?
           yield result if block_given?
@@ -101,7 +101,7 @@ class Trailblazer::Operation
       # end
 
       def validate_contract(contract, params)
-        contract.validate(params)
+        contract.(params)
       end
     end
 
