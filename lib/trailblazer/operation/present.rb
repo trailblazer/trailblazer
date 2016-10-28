@@ -13,7 +13,7 @@ class Trailblazer::Operation
   end
 
   # Stops the pipeline if "present.stop?" is set, which usually happens in Operation::present.
-  Present::Stop = ->(input, options) { options[:skills]["present.stop?"] ? ::Pipetree::Stop : input }
+  Present::Stop = ->(input, options) { options["present.stop?"] ? ::Pipetree::Stop : input }
 end
 
 # TODO: another stop for present without the contract!

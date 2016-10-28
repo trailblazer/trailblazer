@@ -163,7 +163,7 @@ class ValidateTest < Minitest::Spec
     class Result
       def initialize(bool); @bool = bool end
       def success?; @bool end
-      def errors; ["404"] end
+      def errors; ["hihi"] end
     end
     def initialize(*); end
     # def validate(result); result; end
@@ -174,11 +174,11 @@ class ValidateTest < Minitest::Spec
     include Contract::Explicit
     contract Form
 
-    def call(params)
+    def process(params)
       if validate(params[:valid])
-        "works!"
+        self["x"] = "works!"
       else
-        "try again"
+        self["x"] = "try again"
       end
     end
 
@@ -187,7 +187,10 @@ class ValidateTest < Minitest::Spec
   end
 
   # validate returns the #validate result by building contract using #contract.
-  it { Create.(valid: false).must_equal "try again" }
+  it do
+    Create.(valid: false).must_equal "try again"
+    # TODO: test errors
+  end
   it { Create.(valid: true).must_equal "works!" }
 end
 

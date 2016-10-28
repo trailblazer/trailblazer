@@ -7,8 +7,8 @@ class Trailblazer::Operation
 
   # Returned object will replace "params". Original is saved in "params.original".
   Params::Replace = ->(input, options) {
-    options[:skills]["params.original"] = original = options[:skills]["params"]
-     options[:skills]["params"] = input.params!(original)
+    options["params.original"] = original = options["params"]
+     options["params"] = input.params!(original)
      input
    }
 end

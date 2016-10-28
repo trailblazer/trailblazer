@@ -54,9 +54,9 @@ class Trailblazer::Operation
   #
   # All the Callable evaluator has to do is returning a hash result.
   Policy::Evaluate = ->(input, options) {
-    result                     = options[:skills]["policy.evaluator"].(options[:skills])
-    options[:skills]["policy"] = result["policy"] # assign the policy as a skill.
-    options[:skills]["policy.result"] = result
+    result                     = options["policy.evaluator"].(options)
+    options["policy"] = result["policy"] # assign the policy as a skill.
+    options["policy.result"] = result
 
     # flow control
     return ::Pipetree::Stop unless result["valid"]

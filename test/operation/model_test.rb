@@ -73,7 +73,7 @@ class ModelTest < Minitest::Spec
       delegates :@delegator, :[]
     end
 
-    self.| ->(input, options) { options[:skills]["model"] = ModelBuilder.new(options[:skills]).(options[:skills]["params"]); input }, after: New
+    self.| ->(input, options) { options["model"] = ModelBuilder.new(options).(options["params"]); input }, after: New
   end
 
   it { Index.(id: 1)["model"].inspect.must_equal %{#<struct ModelTest::Song id=1>} }
