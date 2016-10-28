@@ -101,8 +101,17 @@ class DslContractTest < MiniTest::Spec
     end
   end
 
+  # UT: contract path is "contract.default.class"
+  it { Delete["contract.default.class"].definitions.keys.must_equal ["title"] }
   # IT: knows `title`.
   it { Delete.(id: 1, title: "Coaster").inspect.must_equal %{#<OpenStruct title=\"Coaster\">} }
+
+  class Wipe < Trailblazer::Operation
+    include Contract::Explicit
+    self["x"] = contract do end
+  end
+  # UT: ::contract returns form class
+  it { Wipe["x"].superclass.must_equal Reform::Form }
 
   # subsequent calls merge.
   class Remove < Trailblazer::Operation
