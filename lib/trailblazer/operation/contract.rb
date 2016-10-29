@@ -90,16 +90,6 @@ class Trailblazer::Operation
         self["valid"] = valid # how this flag gets interpreted is up to you. # FIXME: test that bool is returned from this method.
       end
 
-      # def validate(params, contract:nil, **)
-      #   if valid = validate_contract(contract, params)
-      #     yield contract if block_given?
-      #   else
-      #     self[:errors] = contract.errors # FIXME: "contract.errors"
-      #   end
-
-      #   self["valid"] = valid
-      # end
-
       def validate_contract(contract, params)
         contract.(params)
       end

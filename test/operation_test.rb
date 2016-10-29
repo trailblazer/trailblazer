@@ -17,9 +17,8 @@ class OperationRunTest < MiniTest::Spec
     self["contract.default.class"] = class MyContract
       def initialize(*)
       end
-      def validate(params)
-        return true if params == "yes, true"
-        false
+      def call(params)
+        Mock::Result.new(params)
       end
 
       def errors
@@ -62,13 +61,13 @@ class OperationRunTest < MiniTest::Spec
       exception = assert_raises(Trailblazer::Operation::InvalidContract) { Follow.(is_valid: false) }
       # exception.message.must_equal "Op just calls #to_s on Errors!"
     end
-    it { Follow.(is_valid:true)[:valid].must_equal true }
+    it { Follow.(is_valid:true)["valid"].must_equal true }
   end
 
   # return operation when ::call
   it do
     Operation.("yes, true").to_s.must_equal %{<Operation @model=>}
-    Operation.("yes, true")[:valid].must_equal true
+    Operation.("yes, true")["valid"].must_equal "yes, true"
   end
 end
 
@@ -82,8 +81,8 @@ class OperationTest < MiniTest::Spec
       def initialize(*)
       end
 
-      def validate(params)
-        params
+      def call(params)
+        Mock::Result.new(params)
       end
 
       attr_reader :errors
@@ -100,7 +99,7 @@ class OperationTest < MiniTest::Spec
   end
 
   it { OperationWithValidateBlock.(false).secret_contract.must_equal nil }
-  it { OperationWithValidateBlock.(true).secret_contract.must_equal OperationWithValidateBlock::Contract }
+  it { OperationWithValidateBlock.(true).secret_contract.to_s.must_equal "Mock::Result" }
 
 
   # test validate wit if/else
@@ -111,8 +110,8 @@ class OperationTest < MiniTest::Spec
       def initialize(*)
       end
 
-      def validate(params)
-        params
+      def call(params)
+        Mock::Result.new(params)
       end
       attr_reader :errors
       self

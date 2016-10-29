@@ -15,3 +15,11 @@ require "trailblazer/operation/representer"
 require "trailblazer/operation/present"
 
 # require "raise"
+
+module Mock
+  class Result
+    def initialize(bool); @bool = bool end
+    def success?; @bool end
+    def errors; ["hihi"] end
+  end
+end

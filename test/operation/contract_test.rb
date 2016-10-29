@@ -160,14 +160,8 @@ end
 
 class ValidateTest < Minitest::Spec
   class Form
-    class Result
-      def initialize(bool); @bool = bool end
-      def success?; @bool end
-      def errors; ["hihi"] end
-    end
     def initialize(*); end
-    # def validate(result); result; end
-    def call(params); Result.new(params); end
+    def call(params); Mock::Result.new(params); end
   end
 
   class Create < Trailblazer::Operation
@@ -188,10 +182,10 @@ class ValidateTest < Minitest::Spec
 
   # validate returns the #validate result by building contract using #contract.
   it do
-    Create.(valid: false).must_equal "try again"
+    Create.(valid: false)["x"].must_equal "try again"
     # TODO: test errors
   end
-  it { Create.(valid: true).must_equal "works!" }
+  it { Create.(valid: true)["x"].must_equal "works!" }
 end
 
 #---
