@@ -127,7 +127,7 @@ Again, the controller only dispatchs to the operation and handles successful/inv
 
 Operations encapsulate business logic and are the heart of a Trailblazer architecture.
 
-The bare bones operation without any Trailblazery is implemented in (the `trailblazer-operation` gem)[https://github.com/trailblazer/trailblazer-operation] and can be used without our stack.
+The bare bones operation without any Trailblazery is implemented in [the `trailblazer-operation` gem[(https://github.com/trailblazer/trailblazer-operation) and can be used without our stack.
 
 Operations don't know about HTTP or the environment. You could use an operation in Rails, Hanami, or Roda, it wouldn't know.
 
@@ -142,6 +142,14 @@ end
 ```
 
 Operations only need to implement `#process` which receives the arguments from the caller.
+
+You cannot instantiate them per design. The only way to invoke them is `call`.
+
+```ruby
+Comment::Create.call(whatever: "goes", in: "here")
+# same as
+Comment::Create.(whatever: "goes", in: "here")
+```
 
 Their high degree of encapsulation makes them a [replacement for test factories](#test), too.
 
