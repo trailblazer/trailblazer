@@ -6,11 +6,12 @@ _Trailblazer is a thin layer on top of Rails. It gently enforces encapsulation, 
 [![TRB Newsletter](https://img.shields.io/badge/TRB-newsletter-lightgrey.svg)](http://trailblazer.to/newsletter/)
 [![Gem Version](https://badge.fury.io/rb/trailblazer.svg)](http://badge.fury.io/rb/trailblazer)
 
+**This document discusses Trailblazer 2.0. The [1.x documentation is here](http://trailblazer.to/gems/operation/1.1/).**
 
 ## Trailblazer In A Nutshell
 
 1. All business logic is encapsulated in [operations](#operation) (service objects).
-  * An optional Reform [form](#validations) object in the operation deserializes and validates input. The form object can also be used for rendering.
+  * Optional [validation objects](#validation) (Reform and/or Dry-validation) in the operation deserialize and validate input. The form object can also be used for rendering.
   * An optional [policy](#policies) object blocks unauthorized users from running the operation.
   * Optional [callback](#callbacks) objects allow declaring post-processing logic.
 3. [Controllers](#controllers) instantly delegate to an operation. No business code in controllers, only HTTP-specific logic.
@@ -19,7 +20,7 @@ _Trailblazer is a thin layer on top of Rails. It gently enforces encapsulation, 
 
 Trailblazer is designed to handle different contexts like user roles by applying [inheritance](#inheritance) between and [composing](#composing) of operations, form objects, policies, representers and callbacks.
 
-Wanna see some code? Jump [right here](#controllers)!
+Want code? Jump [right here](#controllers)!
 
 ## Mission
 
@@ -128,9 +129,9 @@ Operations encapsulate business logic and are the heart of a Trailblazer archite
 
 The bare bones operation without any Trailblazery is implemented in (the `trailblazer-operation` gem)[https://github.com/trailblazer/trailblazer-operation] and can be used without our stack.
 
-Operations don't know about HTTP or the environment. You could use an operation in Rails, Hanami, or Roda, it wouldn't know. This makes them an ideal replacement for test factories.
+Operations don't know about HTTP or the environment. You could use an operation in Rails, Hanami, or Roda, it wouldn't know.
 
-An operation is not just a monolithic replacement for your business code. It's a simple orchestrator between the form object, models and your business code.
+An operation is not just a monolithic replacement for your business code. It's a simple orchestrator between the form objects, models, your business code and all other layers needed to get the job done.
 
 ```ruby
 class Comment::Create < Trailblazer::Operation
@@ -140,13 +141,17 @@ class Comment::Create < Trailblazer::Operation
 end
 ```
 
-Operations only need to implement `#process` which receives the params from the caller.
+Operations only need to implement `#process` which receives the arguments from the caller.
+
+Their high degree of encapsulation makes them a [replacement for test factories](#test), too.
 
 [Learn more.](http://trailblazer.to/gems/operation)
 
-## Validations
+## Validation
 
 In Trailblazer, an operation (usually) has a form object which is simply a `Reform::Form` class. All the [API documented in Reform](https://github.com/apotonick/reform) can be applied and used.
+
+Validations can also be implemented in pure Dry-validation.
 
 The operation makes use of the form object using the `#validate` method.
 
