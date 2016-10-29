@@ -6,7 +6,7 @@ Reform::Form.class_eval do # THIS IS OF COURSE PROTOTYPING!
 
   class Result < SimpleDelegator
     def success?
-      valid?
+      errors.empty?
     end
   end
 end
@@ -27,7 +27,7 @@ class Trailblazer::Operation
     end
 
     module DSL
-      # This is a DSL method. Use ::contract_class and ::contract_class= for the explicit version.
+      # This is the class level DSL method.
       #   Op.contract #=> returns contract class
       #   Op.contract do .. end # defines contract
       #   Op.contract CommentForm # copies (and subclasses) external contract.

@@ -139,7 +139,7 @@ class OperationErrorsTest < MiniTest::Spec
     require "trailblazer/operation/contract"
     include Contract::Explicit
     contract do
-      property :title, validates: {presence: true}
+      property :title, validates: { presence: true }
     end
 
     def process(params)
@@ -149,6 +149,6 @@ class OperationErrorsTest < MiniTest::Spec
 
   it do
     result = Operation.({})
-    result[:errors].to_s.must_equal "{:title=>[\"can't be blank\"]}"
+    result["errors.contract"].to_s.must_equal "{:title=>[\"can't be blank\"]}"
   end
 end

@@ -45,7 +45,7 @@ module Trailblazer::Operation::Representer
   end
 
   # Infer a representer from a contract.
-  # This is not recommended and will probably extracted to a separate gem in TRB 2.0.
+  # This is not recommended and will probably extracted to a separate gem in TRB 2.1.
   module InferFromContract
     def self.included(includer)
       includer.extend Representer

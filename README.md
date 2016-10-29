@@ -256,6 +256,12 @@ The policy is evaluated in `#setup!`, raises an exception if `false` and suppres
 
 [Learn more.](http://trailblazer.to/gems/operation/policy.html)
 
+## Pipetree
+
+The operation code is not supposed to be procedural, but in form of a function pipeline. You can still write procedural code with stacked methods calls where ever you want, e.g. in `process`.
+
+However, a much smarter way to chain logic is to use the *pipetree*.
+
 ## Views
 
 View rendering can happen using the controller as known from Rails. This is absolutely fine for simple views.
