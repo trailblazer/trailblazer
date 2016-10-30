@@ -15,7 +15,7 @@ class Trailblazer::Operation
       includer.send(:extend, BuilderClass) # ::builder_class.
       includer.send(:include, Uber::Builder) # ::builds.
 
-      includer.| Build, before: New
+      includer.>> Build, before: New
     end
 
     # FIXME: use self[] and fix that in Uber::Builder (still relies on Class@builders).

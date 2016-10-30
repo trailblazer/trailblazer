@@ -60,6 +60,7 @@ class PolicyTest < Minitest::Spec
 
   # valid because new policy.
   it do
+    # puts Show["pipetree"].inspect
     result = Show.({}, "user.current" => Module, "policy.evaluator" => Trailblazer::Operation::Policy::Permission.new(Auth, :user_and_model?))
     result["process"].must_equal true
     result["model"].inspect.must_equal %{#<struct PolicyTest::Song id=nil>}

@@ -3,7 +3,7 @@ class Trailblazer::Operation
     def self.included(includer)
       includer.extend DSL # ::model
       includer.include BuildMethods # model! and friends.
-      includer.| Build, after: New
+      includer.> Build, after: New
     end
 
     module DSL
@@ -25,7 +25,7 @@ class Trailblazer::Operation
     # building logic. It will be run after New.
     module Builder
       def self.included(includer)
-        includer.| Model::Build, after: New
+        includer.> Model::Build, after: New
       end
     end
 
@@ -60,5 +60,5 @@ class Trailblazer::Operation
   end
 
   # calls operation.model!(params).
-  Model::Build  = ->(input, options) { options["model"] = input.model!(options["params"]); input }
+  Model::Build  = ->(input, options) { options["model"] = input.model!(options["params"]) }
 end

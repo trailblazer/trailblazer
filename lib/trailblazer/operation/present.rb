@@ -2,7 +2,7 @@ class Trailblazer::Operation
   module Present
     def self.included(includer)
       includer.extend Method
-      includer.| Stop, before: Call
+      includer.& Stop, before: Call
     end
 
     module Method
@@ -13,7 +13,7 @@ class Trailblazer::Operation
   end
 
   # Stops the pipeline if "present.stop?" is set, which usually happens in Operation::present.
-  Present::Stop = ->(input, options) { options["present.stop?"] ? ::Pipetree::Stop : input }
+  Present::Stop = ->(input, options) { ! options["present.stop?"] } # false returns Left.
 end
 
 # TODO: another stop for present without the contract!

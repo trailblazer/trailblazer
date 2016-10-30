@@ -64,7 +64,7 @@ class Trailblazer::Operation
         includer.include Builder # #contract!
         includer.include Validate
         includer.include V # FIXME.
-        includer.| Build, before: Call
+        includer.> Build, before: Call
       end
 
       module V
@@ -118,5 +118,5 @@ class Trailblazer::Operation
     end
   end
 
-  Contract::Build = ->(operation, options) { operation["contract"] ||= operation.contract_for; operation }
+  Contract::Build = ->(operation, options) { operation["contract"] ||= operation.contract_for }
 end

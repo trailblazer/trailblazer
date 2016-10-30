@@ -11,8 +11,8 @@ class Trailblazer::Operation
         extend Policy::DSL # ::policy
       end
 
-      includer.| Model::Build, prepend: true
-      includer.| Policy::Evaluate, after: Model::Build
+      includer.> Model::Build, prepend: true
+      includer.& Policy::Evaluate, after: Model::Build
     end
   end
 end

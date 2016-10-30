@@ -1,7 +1,7 @@
 class Trailblazer::Operation
   module Params
     def self.included(includer)
-      includer.| Replace, after: New
+      includer.> Replace, after: New
     end
   end
 
@@ -9,6 +9,5 @@ class Trailblazer::Operation
   Params::Replace = ->(input, options) {
     options["params.original"] = original = options["params"]
      options["params"] = input.params!(original)
-     input
    }
 end

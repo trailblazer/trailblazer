@@ -2,7 +2,7 @@ class Trailblazer::Operation
   module Policy
     def self.included(includer)
       includer.extend DSL
-      includer.| Evaluate, before: Call
+      includer.& Evaluate, before: Call
     end
 
     module DSL
@@ -54,13 +54,12 @@ class Trailblazer::Operation
   #
   # All the Callable evaluator has to do is returning a hash result.
   Policy::Evaluate = ->(input, options) {
-    result                     = options["policy.evaluator"].(options)
+    result            = options["policy.evaluator"].(options)
     options["policy"] = result["policy"] # assign the policy as a skill.
     options["policy.result"] = result
 
     # flow control
-    return ::Pipetree::Stop unless result["valid"]
-    input
+    result["valid"] # since we & this, it's only executed OnRight and the return boolean decides the direction, input is passed straight through.
   }
 end
 

@@ -5,7 +5,7 @@ module Trailblazer::Operation::Policy
     def self.included(includer)
       includer.extend DSL # ::policy
       includer.extend BuildPermission
-      includer.| Evaluate, before: Trailblazer::Operation::Call
+      includer.& Evaluate, before: Trailblazer::Operation::Call
     end
 
     module BuildPermission
