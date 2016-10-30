@@ -6,7 +6,7 @@ class GuardTest < Minitest::Spec
   # with proc, evaluated in operation context.
   class Create < Trailblazer::Operation
     include Policy::Guard
-    policy ->(params) { params[:pass] == self["params"][:pass] && params[:pass] }
+    policy ->(options) { options["params"][:pass] == self["params"][:pass] && options["params"][:pass] }
     def process(*); self[:x] = true; end
   end
 
@@ -17,7 +17,7 @@ class GuardTest < Minitest::Spec
   class Update < Create
     class MyGuard
       include Uber::Callable
-      def call(operation, params); params[:pass] == operation["params"][:pass] && params[:pass] end
+      def call(operation, options); options["params"][:pass] == operation["params"][:pass] && options["params"][:pass] end
     end
     policy MyGuard.new
   end
