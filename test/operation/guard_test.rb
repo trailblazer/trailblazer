@@ -8,10 +8,14 @@ class GuardTest < Minitest::Spec
     include Policy::Guard
     policy ->(options) { options["params"][:pass] == self["params"][:pass] && options["params"][:pass] }
     def process(*); self[:x] = true; end
+    puts self["pipetree"].inspect(style: :rows)
   end
 
   it { Create.(pass: false)[:x].must_equal nil }
   it { Create.(pass: true)[:x].must_equal true }
+  # policy.result
+  it { Create.(pass: true)["policy.result"].must_equal({"valid"=>true}) }
+  it { Create.(pass: false)["policy.result"].must_equal({"valid"=>false}) }
 
   # with Callable, operation passed in.
   class Update < Create
