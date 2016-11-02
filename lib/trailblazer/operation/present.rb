@@ -1,11 +1,11 @@
 class Trailblazer::Operation
   module Present
     def self.included(includer)
-      includer.extend Method
+      includer.extend PresentMethod
       includer.& Stop, before: Call
     end
 
-    module Method
+    module PresentMethod
       def present(params={}, options={}, *args)
         call(params, options.merge("present.stop?" => true), *args)
       end

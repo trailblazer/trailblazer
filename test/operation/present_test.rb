@@ -4,6 +4,7 @@ require "trailblazer/operation/present"
 
 class PresentTest < Minitest::Spec
   class Create < Trailblazer::Operation
+    include Test::ReturnCall
     include Present
 
     include Model::Builder
