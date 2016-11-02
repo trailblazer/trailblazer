@@ -47,7 +47,7 @@ class PipetreeTest < Minitest::Spec
 
   puts Edit["pipetree"].inspect(style: :rows)
 
-  it { Edit["pipetree"].inspect.must_equal %{[>>Build,>>New,>Model::Build,&Policy::Evaluate,<LogBreach,>>Call,Result::Build]} }
+  it { Edit["pipetree"].inspect.must_equal %{[>>Build,>>New,&Model::Build,&Policy::Evaluate,<LogBreach,>>Call,Result::Build]} }
   # valid case.
   it {
     result = Edit.({}, "user.current" => true)
