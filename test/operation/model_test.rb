@@ -42,11 +42,14 @@ class ModelTest < Minitest::Spec
 
   # can't find model.
   it do
-    Find.(id: nil).slice("model.result.success?", "x").must_equal [false, nil]
+    Find.(id: nil).slice("model.result.failure?", "x").must_equal [true, nil]
     Find.(id: nil).failure?.must_equal true
   end
 
-  it { Find.(id: 9)["model"].inspect.must_equal %{#<struct ModelTest::Song id=9>} }
+  it do
+    Find.(id: 9)["model"].inspect.must_equal %{#<struct ModelTest::Song id=9>}
+    Find.(id: 9)["model.result.failure?"].must_equal nil
+  end
 
   #---
   # override #model!, without any Model inclusions.
