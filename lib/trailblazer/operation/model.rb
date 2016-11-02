@@ -57,10 +57,11 @@ class Trailblazer::Operation
 
       alias_method :find_model, :update_model
 
+      # Doesn't throw an exception and will return false to divert to Left.
       def find_by_model(params)
         model = model_class.find_by(id: params[:id]) and return model
-
-        self["model.result.success?"] = false
+        self["model.result.failure?"] = true
+        false
       end
     end
   end
