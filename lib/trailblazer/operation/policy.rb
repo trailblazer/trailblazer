@@ -41,9 +41,9 @@ class Trailblazer::Operation
       # that are easier to hook in.
       def result!(result, policy)
         if result
-          return { "policy" => policy, "valid" => true }
+          return { "policy" => policy, "success?" => true }
         else
-          return { "policy" => policy, "valid" => false, "message" => "Breach" }
+          return { "policy" => policy, "success?" => false, "message" => "Breach" }
         end
       end
     end
@@ -59,9 +59,11 @@ class Trailblazer::Operation
     options["policy.result"] = result
 
     # flow control
-    result["valid"] # since we & this, it's only executed OnRight and the return boolean decides the direction, input is passed straight through.
+    result["success?"] # since we & this, it's only executed OnRight and the return boolean decides the direction, input is passed straight through.
   }
 end
 
-# TODO: how could we add something like "log breach"?
 # how to have more than one policy, and then also replace its interpreter with another ? self.| MyInterpreter, replace: "Policy::Evaluator.after_validate"
+
+
+# TODO: test the policy.result shit.

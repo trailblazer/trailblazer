@@ -13,6 +13,8 @@ require "trailblazer/operation/model"
 require "trailblazer/operation/contract"
 require "trailblazer/operation/representer"
 require "trailblazer/operation/present"
+require "trailblazer/operation/policy"
+require "trailblazer/operation/guard"
 
 # require "raise"
 
