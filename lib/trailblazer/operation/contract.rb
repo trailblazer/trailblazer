@@ -65,6 +65,7 @@ class Trailblazer::Operation
         includer.include Validate
         includer.include V # FIXME.
         includer.> Build, before: Call
+        includer.& ValidLegacySwitch, after: Call
       end
 
       module V
@@ -87,7 +88,7 @@ class Trailblazer::Operation
           self["errors.#{path}"] = result.errors
         end
 
-        self["valid"] = valid # how this flag gets interpreted is up to you. # FIXME: test that bool is returned from this method.
+        self["__valid"] = valid # how this flag gets interpreted is up to you. # FIXME: test that bool is returned from this method.
       end
 
       def validate_contract(contract, params)
@@ -103,6 +104,7 @@ class Trailblazer::Operation
         includer.include Builder # #contract!
         includer.include Validate
         includer.include V # FIXME.
+        includer.& ValidLegacySwitch, after: Call
       end
 
       module V
@@ -119,4 +121,5 @@ class Trailblazer::Operation
   end
 
   Contract::Build = ->(operation, options) { operation["contract"] ||= operation.contract_for }
+  Contract::ValidLegacySwitch = ->(operation, options) { options["__valid"] } # deviate to Left when the legacy validation failed.
 end

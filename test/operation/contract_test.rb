@@ -187,9 +187,11 @@ class ValidateTest < Minitest::Spec
   # validate returns the #validate result by building contract using #contract.
   it do
     Create.(valid: false)["x"].must_equal "try again"
+    Create.(valid: false).success?.must_equal false
     # TODO: test errors
   end
   it { Create.(valid: true)["x"].must_equal "works!" }
+  it { Create.(valid: true).success?.must_equal true }
 end
 
 #---
