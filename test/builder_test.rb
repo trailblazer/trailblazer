@@ -5,7 +5,10 @@ require "trailblazer/builder"
 # Tests agnostic TRB::Builder.
 class MyBuilderTest < Minitest::Spec
   class ParentOperation < Trailblazer::Operation
+    def process(*); self["x"] = ParentOperation; end
+
     class Sub < Trailblazer::Operation
+      def process(*); self["x"] = ParentOperation::Sub; end
     end
   end
 
@@ -17,7 +20,7 @@ class MyBuilderTest < Minitest::Spec
     end
   end
 
-  it { MyBuilder.({}).class.must_equal ParentOperation }
-  it { MyBuilder.({ sub: false }).class.must_equal ParentOperation }
-  it { MyBuilder.({ sub: true }).class.must_equal ParentOperation::Sub }
+  it { MyBuilder.({})["x"].must_equal ParentOperation }
+  it { MyBuilder.({ sub: false })["x"].must_equal ParentOperation }
+  it { MyBuilder.({ sub: true })["x"].must_equal ParentOperation::Sub }
 end

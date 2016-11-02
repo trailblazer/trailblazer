@@ -61,13 +61,7 @@ class OperationRunTest < MiniTest::Spec
       exception = assert_raises(Trailblazer::Operation::InvalidContract) { Follow.(is_valid: false) }
       # exception.message.must_equal "Op just calls #to_s on Errors!"
     end
-    it { Follow.(is_valid:true)["valid"].must_equal true }
-  end
-
-  # return operation when ::call
-  it do
-    Operation.("yes, true").to_s.must_equal %{<Operation @model=>}
-    Operation.("yes, true")["valid"].must_equal "yes, true"
+    it { Follow.(is_valid:true).success?.must_equal true }
   end
 end
 
@@ -91,15 +85,13 @@ class OperationTest < MiniTest::Spec
 
     def process(params)
       validate(params, model: Object.new) do |c|
-        @secret_contract = c.class
+        self["secret_contract"] = c.class
       end
     end
-
-    attr_reader :secret_contract
   end
 
-  it { OperationWithValidateBlock.(false).secret_contract.must_equal nil }
-  it { OperationWithValidateBlock.(true).secret_contract.to_s.must_equal "Mock::Result" }
+  it { OperationWithValidateBlock.(false)["secret_contract"].must_equal nil }
+  it { OperationWithValidateBlock.(true)["secret_contract"].to_s.must_equal "Mock::Result" }
 
 
   # test validate wit if/else
@@ -119,17 +111,15 @@ class OperationTest < MiniTest::Spec
 
     def process(params)
       if validate(params, model: Object.new)
-        @secret_contract = contract.class
+        self["secret_contract"] = contract.class
       else
-        @secret_contract = "so wrong!"
+        self["secret_contract"] = "so wrong!"
       end
     end
-
-    attr_reader :secret_contract
   end
 
-  it { OperationWithValidateAndIf.(false).secret_contract.must_equal "so wrong!" }
-  it { OperationWithValidateAndIf.(true).secret_contract.must_equal OperationWithValidateAndIf::Contract }
+  it { OperationWithValidateAndIf.(false)["secret_contract"].must_equal "so wrong!" }
+  it { OperationWithValidateAndIf.(true)["secret_contract"].must_equal OperationWithValidateAndIf::Contract }
 end
 
 

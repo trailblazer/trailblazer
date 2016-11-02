@@ -23,3 +23,12 @@ module Mock
     def errors; ["hihi"] end
   end
 end
+
+module Test
+  module ReturnCall
+    def self.included(includer)
+      includer._insert :_insert, ReturnResult, {replace: Trailblazer::Operation::Result::Build}, ReturnResult, ""
+    end
+  end
+  ReturnResult = ->(last, input, options) { input }
+end

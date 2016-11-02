@@ -24,9 +24,9 @@ class OperationModuleTest < MiniTest::Spec
 
     attr_reader :model
     def call(params)
-      @model = Song.new
+      self["model"] = Song.new
 
-      validate(params, model: @model) do
+      validate(params, model: self["model"]) do
         contract.sync
 
         dispatch!
@@ -36,7 +36,7 @@ class OperationModuleTest < MiniTest::Spec
     end
 
     def dispatched
-      @dispatched ||= []
+      self["dispatched"] ||= []
     end
 
   private
@@ -83,18 +83,18 @@ class OperationModuleTest < MiniTest::Spec
   it do
     op = Create.({name: "Feelings", artist: {id: 1, full_name: "The Offspring"}})
 
-    op.dispatched.must_equal [:notify_me!]
-    op.model.name.must_equal "Feelings"
-    op.model.artist.id.must_equal 1
-    op.model.artist.full_name.must_equal nil # property not declared.
+    op["dispatched"].must_equal [:notify_me!]
+    op["model"].name.must_equal "Feelings"
+    op["model"].artist.id.must_equal 1
+    op["model"].artist.full_name.must_equal nil # property not declared.
   end
 
   it do
     op = Update.({name: "Feelings", artist: {id: 1, full_name: "The Offspring"}})
 
-    op.dispatched.must_equal [:notify_me!, :notify_them!, :notify_you!]
-    op.model.name.must_equal "Feelings"
-    op.model.artist.id.must_equal 1
-    op.model.artist.full_name.must_equal "The Offspring" # property declared via Module.
+    op["dispatched"].must_equal [:notify_me!, :notify_them!, :notify_you!]
+    op["model"].name.must_equal "Feelings"
+    op["model"].artist.id.must_equal 1
+    op["model"].artist.full_name.must_equal "The Offspring" # property declared via Module.
   end
 end

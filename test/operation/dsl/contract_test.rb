@@ -206,7 +206,7 @@ class DslContractTest < MiniTest::Spec
       include SongProcess
     end
 
-    it { OpWithExternalContract.("songTitle"=> "Monsterparty").contract.songTitle.must_equal "Monsterparty" }
+    it { OpWithExternalContract.("songTitle"=> "Monsterparty")["contract"].songTitle.must_equal "Monsterparty" }
   end
 
   describe "Op.contract CommentForm do .. end" do
@@ -230,14 +230,14 @@ class DslContractTest < MiniTest::Spec
 
     # this operation copies DifferentSongForm and shouldn't have `genre`.
     it do
-      contract = OpNotExtendingContract.("songTitle"=>"Monsterparty", "genre"=>"Punk").contract
+      contract = OpNotExtendingContract.("songTitle"=>"Monsterparty", "genre"=>"Punk")["contract"]
       contract.songTitle.must_equal "Monsterparty"
       assert_raises(NoMethodError) { contract.genre }
     end
 
     # this operation copies DifferentSongForm and extends it with the property `genre`.
     it do
-      contract = OpExtendingContract.("songTitle"=>"Monsterparty", "genre"=>"Punk").contract
+      contract = OpExtendingContract.("songTitle"=>"Monsterparty", "genre"=>"Punk")["contract"]
       contract.songTitle.must_equal "Monsterparty"
       contract.genre.must_equal "Punk"
     end

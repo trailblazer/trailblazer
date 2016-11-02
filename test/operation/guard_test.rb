@@ -29,3 +29,6 @@ class GuardTest < Minitest::Spec
   it { Update.(pass: false)[:x].must_equal nil }
   it { Update.(pass: true)[:x].must_equal true }
 end
+
+
+# FIXME: what about block passed to ::policy?

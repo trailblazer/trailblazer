@@ -5,19 +5,18 @@ class BuilderTest < MiniTest::Spec
   class ParentOperation < Trailblazer::Operation
     include Builder
 
-    puts "@@@@@dsf #{self["pipetree"].inspect}"
-
     class Sub < self
     end
 
     builds -> (options) do
-      puts "@@@@@ #{options.inspect}"
       return Sub if options["params"][:sub]
     end
+
+    def process(*); self["x"] = self.class end
   end
 
-  it { ParentOperation.({}).class.must_equal ParentOperation }
-  it { ParentOperation.({ sub: true }).class.must_equal ParentOperation::Sub }
+  it { ParentOperation.({})["x"].must_equal ParentOperation }
+  it { ParentOperation.({ sub: true })["x"].must_equal ParentOperation::Sub }
 end
 
 class OperationBuilderClassTest < MiniTest::Spec
@@ -39,8 +38,10 @@ class OperationBuilderClassTest < MiniTest::Spec
     include Builder
     # self["builder_class"] = SuperOperation["builder_class"]
     self.builder_class = SuperOperation.builder_class
+
+    def process(*); self["x"] = self.class end
   end
 
-  it { ParentOperation.({}).class.must_equal ParentOperation }
-  it { ParentOperation.({ sub: true }).class.must_equal ParentOperation::Sub }
+  it { ParentOperation.({})["x"].must_equal ParentOperation }
+  it { ParentOperation.({ sub: true })["x"].must_equal ParentOperation::Sub }
 end

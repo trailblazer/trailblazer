@@ -8,6 +8,7 @@ class OperationParamsTest < MiniTest::Spec
     def process(params); self["eql?"] = self["params"].object_id==params.object_id end
   end
   class Seek < Trailblazer::Operation
+    include Test::ReturnCall
     def call(params); self["eql?"] = self["params"].object_id==params.object_id end
   end
 

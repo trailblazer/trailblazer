@@ -16,7 +16,7 @@ class PipetreeTest < Minitest::Spec
     include Pipetree # this will add the functions, again, unfortunately. definitely an error source.
   end
 
-  it { Create["pipetree"].inspect.must_equal %{[>>Build,>>New,>>Call,>>New,>>Call]} }
+  it { Create["pipetree"].inspect.must_equal %{[>>Build,>>New,>>Call,Result::Build,>>New,>>Call,Result::Build]} }
 
   #---
   # playground
@@ -47,7 +47,7 @@ class PipetreeTest < Minitest::Spec
 
   puts Edit["pipetree"].inspect(style: :rows)
 
-  it { Edit["pipetree"].inspect.must_equal %{[>>Build,>>New,>Model::Build,&Policy::Evaluate,<LogBreach,>>Call]} }
+  it { Edit["pipetree"].inspect.must_equal %{[>>Build,>>New,>Model::Build,&Policy::Evaluate,<LogBreach,>>Call,Result::Build]} }
   # valid case.
   it {
     result = Edit.({}, "user.current" => true)

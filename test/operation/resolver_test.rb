@@ -29,13 +29,15 @@ class BuilderTest < Minitest::Spec
     class P < self; end
     class B < self; end
     class M < self; end
+
+    def process(*); self["x"] = self.class end
   end
 
   it { r=A.({ some: "params", id: 1 }, { "user.current" => Module })
     puts r.inspect
 
      }
-  it { A.({ some: "params", id: 1 }, { "user.current" => Module }).class.must_equal A::P }
-  it { A.({                 id: 3 }, { "user.current" => Module }).class.must_equal A::B }
-  it { A.({                 id: 9 }, { "user.current" => Module }).class.must_equal A::M }
+  it { A.({ some: "params", id: 1 }, { "user.current" => Module })["x"].must_equal A::P }
+  it { A.({                 id: 3 }, { "user.current" => Module })["x"].must_equal A::B }
+  it { A.({                 id: 9 }, { "user.current" => Module })["x"].must_equal A::M }
 end

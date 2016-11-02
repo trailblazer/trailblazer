@@ -39,6 +39,8 @@ class ContractTest < Minitest::Spec
   describe "contract do .. end" do
     class Index < Trailblazer::Operation
       include Contract::Step
+      include Test::ReturnCall
+
       contract do
         property :title
       end
@@ -74,6 +76,7 @@ class ContractTest < Minitest::Spec
 
   # contract(model, [admin: true]).validate
   class Create < Trailblazer::Operation
+    include Test::ReturnCall
     include Contract::Explicit
 
     def call(options:false)
@@ -91,6 +94,7 @@ class ContractTest < Minitest::Spec
   # ::contract Form
   # contract(model).validate
   class Update < Trailblazer::Operation
+    include Test::ReturnCall
     include Contract::Explicit
 
     self["contract.default.class"] = Form
@@ -210,8 +214,8 @@ class OperationContractWithOptionsTest < Minitest::Spec
 
   it do
     op = Operation.(id: 1)
-    op.contract.id.must_equal 1
-    op.contract.title.must_equal "Bad Feeling"
+    op["contract"].id.must_equal 1
+    op["contract"].title.must_equal "Bad Feeling"
   end
 
   # contract({ song: song, album: album }, title: "Medicine Balls")

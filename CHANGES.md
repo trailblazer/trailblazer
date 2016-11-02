@@ -94,6 +94,9 @@ You can now inject the following objects via `::call`:
 
 * Removed `Controller#params!`, no one was using it.
 
+## Contract
+
+* You can't call `Create.().contract` anymore. The contract instance(s) are available through the `Result` object.
 
 # 1.1.1
 

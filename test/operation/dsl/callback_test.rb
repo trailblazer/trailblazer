@@ -65,6 +65,7 @@ class DslCallbackTest < MiniTest::Spec
     end
 
     class OpWithExternalCallback < Trailblazer::Operation
+      include Test::ReturnCall
       include Contract::Explicit
       include Callback
       include SongProcess
