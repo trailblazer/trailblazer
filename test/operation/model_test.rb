@@ -4,6 +4,7 @@ require "trailblazer/operation/model"
 class ModelTest < Minitest::Spec
   Song = Struct.new(:id) do
     def self.find(id); new(id) end
+    def self.find_by(id:nil); id.nil? ? nil : new(id) end
   end
 
   #---
@@ -30,6 +31,22 @@ class ModelTest < Minitest::Spec
 
   it { Upsert.(id: 9)["model"].must_equal %{{:id=>9}} }
 
+  #---
+  # :find_by, exceptionless.
+  class Find < Trailblazer::Operation
+    include Model
+    model Song, :find_by
+
+    def process(*); self["x"] = true end
+  end
+
+  # can't find model.
+  it do
+    Find.(id: nil).slice("model.result.success?", "x").must_equal [false, nil]
+    Find.(id: nil).failure?.must_equal true
+  end
+
+  it { Find.(id: 9)["model"].inspect.must_equal %{#<struct ModelTest::Song id=9>} }
 
   #---
   # override #model!, without any Model inclusions.

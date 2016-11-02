@@ -3,7 +3,7 @@ class Trailblazer::Operation
     def self.included(includer)
       includer.extend DSL # ::model
       includer.include BuildMethods # model! and friends.
-      includer.> Build, after: New
+      includer.& Build, after: New
     end
 
     module DSL
@@ -56,6 +56,12 @@ class Trailblazer::Operation
       end
 
       alias_method :find_model, :update_model
+
+      def find_by_model(params)
+        model = model_class.find_by(id: params[:id]) and return model
+
+        self["model.result.success?"] = false
+      end
     end
   end
 
