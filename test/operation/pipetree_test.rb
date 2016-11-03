@@ -8,6 +8,13 @@ require "test_helper"
 #       Trailblazer::Operation::Call,
 #     ]
 
+
+
+# def deserialize(*)
+#     super
+#     self.datetime = DateTime.parse("#{date} #{time}")
+#   end
+
 class PipetreeTest < Minitest::Spec
   Song = Struct.new(:title)
 

@@ -37,33 +37,26 @@ class Trailblazer::Operation
         @policy_class.new(skills["user.current"], skills["model"])
       end
 
-      # Note that in Trailblazer 2.1 we might have functions that "interpret" the result,
-      # that are easier to hook in.
-      def result!(result, policy)
-        if result
-          return { "policy" => policy, "success?" => true }
-        else
-          return { "policy" => policy, "success?" => false, "message" => "Breach" }
-        end
+      def result!(success, policy)
+        data = { "policy" => policy }
+        data["message"] = "Breach" if !success # TODO: how to allow messages here?
+
+        Result.new(success, data)
       end
     end
+
+    # This is a generic evaluate function for all kinds of policies.
+    # Arguments to the Callable: (skills)
+    Evaluate = ->(input, options) {
+      result = options["policy.evaluator"].(options)
+
+      options["policy"]        = result["policy"] # assign the policy as a skill.
+      options["result.policy"] = result
+
+      # flow control
+      result.success? # since we & this, it's only executed OnRight and the return boolean decides the direction, input is passed straight through.
+    }
   end
-
-  # This is a generic evaluate function for all kinds of policies.
-  # Arguments to the Callable: (skills)
-  #
-  # All the Callable evaluator has to do is returning a hash result.
-  Policy::Evaluate = ->(input, options) {
-    result            = options["policy.evaluator"].(options)
-    options["policy"] = result["policy"] # assign the policy as a skill.
-    options["policy.result"] = result
-
-    # flow control
-    result["success?"] # since we & this, it's only executed OnRight and the return boolean decides the direction, input is passed straight through.
-  }
 end
 
 # how to have more than one policy, and then also replace its interpreter with another ? self.| MyInterpreter, replace: "Policy::Evaluator.after_validate"
-
-
-# TODO: test the policy.result shit.

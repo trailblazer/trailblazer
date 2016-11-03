@@ -20,6 +20,7 @@ class DryValidationTest < Minitest::Spec
     end
   end
 
+  #- result object, contract
   # success
   it { Create.(id: 1)["result.contract.params"].success?.must_equal true }
   it { Create.(id: 1)["result.contract.params"].errors.must_equal({}) }
@@ -215,6 +216,7 @@ end
 
 #---
 # result object from validation.
+#- result object, contract
 class ValidateResultTest < Minitest::Spec
   class Create < Trailblazer::Operation
     include Contract::Explicit
