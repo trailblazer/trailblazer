@@ -8,7 +8,7 @@ class GuardTest < Minitest::Spec
     include Policy::Guard
     policy ->(options) { options["params"][:pass] == self["params"][:pass] && options["params"][:pass] }
     def process(*); self[:x] = true; end
-    puts self["pipetree"].inspect(style: :rows)
+    # puts self["pipetree"].inspect(style: :rows)
   end
 
   it { Create.(pass: false)[:x].must_equal nil }
