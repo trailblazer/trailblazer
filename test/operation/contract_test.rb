@@ -20,7 +20,12 @@ class DryValidationTest < Minitest::Spec
     end
   end
 
-  it { Create.(id: 1) }
+  # success
+  it { Create.(id: 1)["result.contract.params"].success?.must_equal true }
+  it { Create.(id: 1)["result.contract.params"].errors.must_equal({}) }
+  # failure
+  it { Create.(id: nil)["result.contract.params"].success?.must_equal false }
+  it { Create.(id: nil)["result.contract.params"].errors.must_equal({:id=>["must be filled"]}) }
 end
 
 class ContractTest < Minitest::Spec
@@ -206,6 +211,25 @@ class ValidateTest < Minitest::Spec
 
   it { Update.(false)["x"].must_equal false}
   it { Update.(true)["x"]. must_equal true}
+end
+
+#---
+# result object from validation.
+class ValidateResultTest < Minitest::Spec
+  class Create < Trailblazer::Operation
+    include Contract::Explicit
+    contract do
+      property :id
+      validates :id, presence: true
+    end
+
+    def process(params); validate(params, model: OpenStruct.new) end
+  end
+
+  it { Create.(id: 1)["result.contract"].success?.must_equal true }
+  it { Create.(id: 1)["result.contract"].errors.messages.must_equal({}) } # FIXME: change API with Fran.
+  it { Create.(id: nil)["result.contract"].success?.must_equal false }
+  it { Create.(id: nil)["result.contract"].errors.messages.must_equal({:id=>["can't be blank"]}) } # FIXME: change API with Fran.
 end
 
 #---

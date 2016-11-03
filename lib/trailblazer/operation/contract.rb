@@ -70,22 +70,26 @@ class Trailblazer::Operation
 
       module V
         # validate relies on a pre-computed contract from the pipeline.
-        def validate(params, contract:self["contract"])
+        def validate(params, contract:self["contract"], **)
           super
         end
       end
     end
 
+    # result.contract = {..}
+    # result.contract.errors = {..}
     module Validate
       # for now, let's assume the contract is already built. we can do the ad-hoc build later.
       def validate(params, contract:nil, path:"contract") # :params
         # DISCUSS: should we only have path here and then look up contract ourselves?
         result = validate_contract(contract, params) # run validation.  # FIXME: must be overridable.
 
+        self["result.#{path}"] = result
+
         if valid = result.success? # FIXME: to_bool or success?
           yield result if block_given?
         else
-          self["errors.#{path}"] = result.errors
+          # self["errors.#{path}"] = result.errors # TODO: remove me
         end
 
         self["__valid"] = valid # how this flag gets interpreted is up to you. # FIXME: test that bool is returned from this method.
