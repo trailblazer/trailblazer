@@ -26,7 +26,7 @@ class EndpointTest < Minitest::Spec
 
   class Create < Trailblazer::Operation
     include Policy::Guard
-    policy ->(*) { self["user.current"] == Module }
+    policy ->(*) { self["user.current"] == ::Module }
 
     extend Representer::DSL
     representer :serializer, Serializer
@@ -89,7 +89,7 @@ class EndpointTest < Minitest::Spec
   # created
   # length is ignored as it's not defined in the deserializer.
   it do
-    result = Create.( '{"id": 9, "title": "Encores", "length": 999 }', "user.current" => Module )
+    result = Create.( '{"id": 9, "title": "Encores", "length": 999 }', "user.current" => ::Module )
     # puts "@@@@@ #{result.inspect}"
 
     matcher(result)
@@ -101,7 +101,7 @@ class EndpointTest < Minitest::Spec
   end
   # 404
   it do
-    result = Update.( id: nil, song: '{"id": 9, "title": "Encores", "length": 999 }', "user.current" => Module )
+    result = Update.( id: nil, song: '{"id": 9, "title": "Encores", "length": 999 }', "user.current" => ::Module )
 
     matcher(result)
     controller.inspect.must_equal '[:head, [404]]'
@@ -111,7 +111,7 @@ class EndpointTest < Minitest::Spec
   # validation failure 422
   # success
   it do
-    result = Create.('{ "title": "" }', "user.current" => Module)
+    result = Create.('{ "title": "" }', "user.current" => ::Module)
     puts "@@@@@ #{result.inspect}"
     matcher(result)
     controller.inspect.must_equal '[:head, [422, "{\"messages\":{\"title\":[\"can\'t be blank\"]}}"]]'
