@@ -48,7 +48,7 @@ class DslContractTest < MiniTest::Spec
   # UT: subclasses contract.
   it { Update["contract.default.class"].superclass.must_equal Update::IdContract }
   # IT: only knows `id`.
-  it { Update.(id: 1, title: "Coaster").inspect.must_equal %{#<OpenStruct id=1>} }
+  it { Update.(id: 1, title: "Coaster").inspect.must_equal %{<Result:true #<OpenStruct id=1> >} }
 
   # Op::contract with inheritance
   # no ::contract call.
@@ -59,7 +59,7 @@ class DslContractTest < MiniTest::Spec
   it { Upgrade["contract.default.class"].superclass.must_equal Update::IdContract }
   it { Upgrade["contract.default.class"].wont_equal Update["contract.default.class"] }
   # IT: only knows `id`.
-  it { Upgrade.(id: 1, title: "Coaster").inspect.must_equal %{#<OpenStruct id=1>} }
+  it { Upgrade.(id: 1, title: "Coaster").inspect.must_equal %{<Result:true #<OpenStruct id=1> >} }
 
   # ::contract B overrides old A contract.
   # this makes sure when calling contract(Constant), the old class gets wiped and is replaced with the new constant.
@@ -74,7 +74,7 @@ class DslContractTest < MiniTest::Spec
   # UT: subclasses contract.
   it { Upsert["contract.default.class"].superclass.must_equal Upsert::TitleContract }
   # IT: only knows `title`.
-  it { Upsert.(id: 1, title: "Coaster").inspect.must_equal %{#<OpenStruct title="Coaster">} }
+  it { Upsert.(id: 1, title: "Coaster").inspect.must_equal %{<Result:true #<OpenStruct title="Coaster"> >} }
 
   # ::contract B do ..end overrides and extends new.
   # using a constant will wipe out the existing class.
@@ -87,7 +87,7 @@ class DslContractTest < MiniTest::Spec
   # UT: subclasses contract.
   it { Upside["contract.default.class"].superclass.must_equal Upsert::TitleContract }
   # IT: only knows `title`.
-  it { Upside.(id: 1, title: "Coaster").inspect.must_equal %{#<OpenStruct title="Coaster", id=1>} }
+  it { Upside.(id: 1, title: "Coaster").inspect.must_equal %{<Result:true #<OpenStruct title="Coaster", id=1> >} }
 
 
 
@@ -104,7 +104,7 @@ class DslContractTest < MiniTest::Spec
   # UT: contract path is "contract.default.class"
   it { Delete["contract.default.class"].definitions.keys.must_equal ["title"] }
   # IT: knows `title`.
-  it { Delete.(id: 1, title: "Coaster").inspect.must_equal %{#<OpenStruct title=\"Coaster\">} }
+  it { Delete.(id: 1, title: "Coaster").inspect.must_equal %{<Result:true #<OpenStruct title=\"Coaster\"> >} }
 
   class Wipe < Trailblazer::Operation
     include Contract::Explicit
@@ -126,7 +126,7 @@ class DslContractTest < MiniTest::Spec
   end
 
   # IT: knows `title` and `id`, since contracts get merged.
-  it { Remove.(id: 1, title: "Coaster").inspect.must_equal %{#<OpenStruct title=\"Coaster\", id=1>} }
+  it { Remove.(id: 1, title: "Coaster").inspect.must_equal %{<Result:true #<OpenStruct title=\"Coaster\", id=1> >} }
 
 
 
