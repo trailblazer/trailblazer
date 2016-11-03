@@ -3,7 +3,7 @@ class Trailblazer::Operation
     def self.included(includer)
       includer.extend DSL # ::model
       includer.include BuildMethods # model! and friends.
-      includer.& Build, after: New
+      includer.& Build, after: "operation.new", name: "model.build"
     end
 
     module DSL
@@ -22,10 +22,10 @@ class Trailblazer::Operation
     end
 
     # Include this if you only want to override #model! and provide your own model
-    # building logic. It will be run after New.
+    # building logic. It will be run after "operation.new".
     module Builder
       def self.included(includer)
-        includer.> Model::Build, after: New
+        includer.> Model::Build, after: "operation.new", name: "model.build"
       end
     end
 

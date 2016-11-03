@@ -26,7 +26,25 @@ class PipetreeTest < Minitest::Spec
   class Edit < Trailblazer::Operation
     include Builder
     include Policy::Guard
-    include Contract
+    include Contract::Step
+    contract do
+      property :title
+      validates :title, presence: true
+    end
+
+
+    MyValidate = ->(input, options) { res= input.validate(options["params"]) { |f| f.sync } }
+    # we can have a separate persist step and wrap in transaction. where do we pass contract, though?
+    self.& MyValidate, before: Call #replace: Contract::ValidLegacySwitch
+    #
+    MyAfterSave = ->(input, options) { input["after_save"] = true }
+    self.> MyAfterSave, after: MyValidate
+
+    ValidateFailureLogger = ->(input, options) { input["validate fail"] = true }
+    self.< ValidateFailureLogger, after: MyValidate
+
+    self.> ->(input, options) { input.process(options["params"]) }, replace: Call
+
     include Model
 
     LogBreach = ->(input, options) { input.log_breach! }
@@ -43,21 +61,37 @@ class PipetreeTest < Minitest::Spec
     def process(params)
       self["my.valid"] = true
     end
+
+    self["pipetree"]._insert(Contract::ValidLegacySwitch, {delete: true}, nil, nil)
   end
 
   puts Edit["pipetree"].inspect(style: :rows)
 
-  it { Edit["pipetree"].inspect.must_equal %{[>>Build,>>New,&Model::Build,&Policy::Evaluate,<LogBreach,>>Call,Result::Build]} }
+  it { Edit["pipetree"].inspect.must_equal %{[>>Build,>>New,&Model::Build,&Policy::Evaluate,<LogBreach,>Contract::Build,>>Call,&self,Result::Build]} }
+
   # valid case.
   it {
-    result = Edit.({}, "user.current" => true)
+    # puts "valid"
+  # puts Edit["pipetree"].inspect(style: :rows)
+    result = Edit.({ title: "Stupid 7" }, "user.current" => true)
+    # puts "success! #{result.inspect}"
     result["my.valid"].must_equal true
     result["breach"].must_equal nil
+    result["after_save"].must_equal true
+    result["validate fail"].must_equal nil
   }
   # beach! i mean breach!
   it {
+    # puts "beach"
+  # puts Edit["pipetree"].inspect(style: :rows)
     result = Edit.({})
+    # puts "@@@@@ #{result.inspect}"
     result["my.valid"].must_equal nil
     result["breach"].must_equal true
+    result["validate fail"].must_equal true
+    result["after_save"].must_equal nil
   }
 end
+
+# TODO: show the execution path in pipetree
+# unified result.contract, result.policy interface

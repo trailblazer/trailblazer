@@ -132,6 +132,7 @@ Matcher = Dry::Matcher.new(
     not_found: Dry::Matcher::Case.new(
       match:   ->(result) { result.failure? && result["model.result.failure?"] }, # DISCUSS: do we want that?
       resolve: ->(result) { result }),
+    # TODO: we could add unauthorized here.
     unauthenticated: Dry::Matcher::Case.new(
       match:   ->(result) { result.failure? && result["policy.result"]["success?"]==false }, # FIXME: we might need a &. here ;)
       resolve: ->(result) { result }),
@@ -143,3 +144,6 @@ Matcher = Dry::Matcher.new(
 
     # result = Matcher.(res) do |m|
     #   m.success { |v| asserted = "valid is true" }
+
+
+# TODO: generic interface for results "policy.result.success?", .messages, etc.

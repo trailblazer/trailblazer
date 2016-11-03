@@ -2,7 +2,7 @@ class Trailblazer::Operation
   module Policy
     def self.included(includer)
       includer.extend DSL
-      includer.& Evaluate, before: Call
+      includer.& Evaluate, before: "operation.call", name: "policy.evaluate"
     end
 
     module DSL

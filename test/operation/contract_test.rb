@@ -173,7 +173,7 @@ class ValidateTest < Minitest::Spec
     contract Form
 
     def process(params)
-      if validate(params[:valid])
+      if validate(params)
         self["x"] = "works!"
       else
         self["x"] = "try again"
@@ -186,12 +186,26 @@ class ValidateTest < Minitest::Spec
 
   # validate returns the #validate result by building contract using #contract.
   it do
-    Create.(valid: false)["x"].must_equal "try again"
-    Create.(valid: false).success?.must_equal false
+    Create.(false)["x"].must_equal "try again"
+    Create.(false).success?.must_equal false
     # TODO: test errors
   end
-  it { Create.(valid: true)["x"].must_equal "works!" }
-  it { Create.(valid: true).success?.must_equal true }
+  it { Create.(true)["x"].must_equal "works!" }
+  it { Create.(true).success?.must_equal true }
+
+  #---
+  # validate with block returns result.
+  class Update < Trailblazer::Operation
+    include Contract::Explicit
+    contract Form
+
+    def process(params)
+      self["x"] = validate(params) { }
+    end
+  end
+
+  it { Update.(false)["x"].must_equal false}
+  it { Update.(true)["x"]. must_equal true}
 end
 
 #---

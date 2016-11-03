@@ -64,8 +64,8 @@ class Trailblazer::Operation
         includer.include Builder # #contract!
         includer.include Validate
         includer.include V # FIXME.
-        includer.> Build, before: Call
-        includer.& ValidLegacySwitch, after: Call
+        includer.> Build, before: "operation.call", name: "contract.build"
+        includer.& ValidLegacySwitch, after: "operation.call"
       end
 
       module V

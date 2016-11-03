@@ -34,6 +34,7 @@ TRB 1.2
 ## Model
 
 * The `model` method doesn't exist anymore, use `self["model"]` or write your own.
+* `find_by` diverts to left track.
 
 ## DI
 
