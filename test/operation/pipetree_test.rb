@@ -43,7 +43,7 @@ class PipetreeTest < Minitest::Spec
     ValidateFailureLogger = ->(input, options) { input["validate fail"] = true }
     self.< ValidateFailureLogger, after: MyValidate
 
-    self.> ->(input, options) { input.process(options["params"]) }, replace: Call
+    self.> ->(input, options) { input.process(options["params"]) }, replace: Call, name: "my.params"
 
     include Model
 
@@ -67,7 +67,7 @@ class PipetreeTest < Minitest::Spec
 
   puts Edit["pipetree"].inspect(style: :rows)
 
-  it { Edit["pipetree"].inspect.must_equal %{[>>Build,>>New,&Model::Build,&Policy::Evaluate,<LogBreach,>Contract::Build,>>Call,&self,Result::Build]} }
+  it { Edit["pipetree"].inspect.must_equal %{[>>operation.build,>>operation.new,&model.build,&policy.guard.evaluate,<LogBreach,>contract.build,&MyValidate,<ValidateFailureLogger,>MyAfterSave,>my.params,operation.result]} }
 
   # valid case.
   it {
