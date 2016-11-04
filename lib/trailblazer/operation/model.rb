@@ -59,9 +59,10 @@ class Trailblazer::Operation
 
       # Doesn't throw an exception and will return false to divert to Left.
       def find_by_model(params)
-        model = model_class.find_by(id: params[:id]) and return model
-        self["model.result.failure?"] = true
-        false
+        model = model_class.find_by(id: params[:id])
+
+        self["result.model"] = Result.new(!model.nil?, {})
+        model
       end
     end
   end

@@ -41,14 +41,18 @@ class ModelTest < Minitest::Spec
   end
 
   # can't find model.
+  #- result object, model
   it do
-    Find.(id: nil).slice("model.result.failure?", "x").must_equal [true, nil]
+    Find.(id: nil)["result.model"].failure?.must_equal true
+    Find.(id: nil)["x"].must_equal nil
     Find.(id: nil).failure?.must_equal true
   end
 
+  #- result object, model
   it do
+    Find.(id: 9)["result.model"].success?.must_equal true
+    Find.(id: 9)["x"].must_equal true
     Find.(id: 9)["model"].inspect.must_equal %{#<struct ModelTest::Song id=9>}
-    Find.(id: 9)["model.result.failure?"].must_equal nil
   end
 
   #---
