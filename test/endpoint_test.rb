@@ -73,7 +73,7 @@ class EndpointTest < Minitest::Spec
       m.unauthenticated { |result| controller.head 401 }
       m.created         { |result| controller.head 201, "Location: /song/#{result["model"].id}", result["representer.serializer.class"].new(result["model"]).to_json }
       m.success         { |result| controller.head 200 }
-      m.invalid         { |result| controller.head 422, result["representer.errors.class"].new(result['errors.contract']).to_json }
+      m.invalid         { |result| controller.head 422, result["representer.errors.class"].new(result['result.contract'].errors).to_json }
     end
   end
 
@@ -134,10 +134,10 @@ Matcher = Dry::Matcher.new(
       resolve: ->(result) { result }),
     # TODO: we could add unauthorized here.
     unauthenticated: Dry::Matcher::Case.new(
-      match:   ->(result) { result.failure? && result["policy.result"]["success?"]==false }, # FIXME: we might need a &. here ;)
+      match:   ->(result) { result.failure? && result["result.policy"].failure? }, # FIXME: we might need a &. here ;)
       resolve: ->(result) { result }),
     invalid: Dry::Matcher::Case.new(
-      match:   ->(result) { result.failure? && result["errors.contract"].any? },
+      match:   ->(result) { result.failure? && result["result.contract"] },
       resolve: ->(result) { result })
 )
 
