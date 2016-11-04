@@ -23,14 +23,13 @@ module Trailblazer
         resolve: ->(result) { result })
     )
 
-    def self.call(handlers, operation_class, *args, &block)
+    def self.call(operation_class, *args, &block)
       result = operation_class.(*args)
-      new.(handlers, result, &block)
+      new.(result, &block)
     end
 
     def call(handlers, result, &block)
-      matcher.(result, &block) and return if block_given? # evaluate user blocks first.
-      matcher.(result, &handlers)     # then, generic Rails handlers in controller context.
+      matcher.(result, &block)
     end
 
     def matcher
@@ -65,7 +64,7 @@ module Trailblazer
       # end
       def endpoint(operation_class, *args, &block)
         handlers = Handlers::Rails.new(self).()
-        Endpoint.(handlers, operation_class, *args, &block)
+        Endpoint.(operation_class, *args, &block || &handlers)
       end
     end
   end
