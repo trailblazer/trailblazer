@@ -1,4 +1,5 @@
 require "test_helper"
+require "trailblazer/endpoint"
 
 class EndpointTest < Minitest::Spec
   Song = Struct.new(:id, :title, :length) do
@@ -56,34 +57,23 @@ class EndpointTest < Minitest::Spec
     end
   end
 
-  let (:controller) { controller = Class.new do
-      def head(*args)
-        @data = [:head, args]
-      end
-      attr_reader :data
+  let (:controller) { self }
 
-      def inspect
-        @data.inspect
-      end
-    end.new }
+  let (:_data) { [] }
 
-  def matcher(result)
-    Matcher.(result) do |m|
-      m.not_found       { |result| controller.head 404 }
-      m.unauthenticated { |result| controller.head 401 }
-      m.created         { |result| controller.head 201, "Location: /song/#{result["model"].id}", result["representer.serializer.class"].new(result["model"]).to_json }
-      m.success         { |result| controller.head 200 }
-      m.invalid         { |result| controller.head 422, result["representer.errors.class"].new(result['result.contract'].errors).to_json }
-    end
+  def head(*args)
+    _data << [:head, *args]
   end
+
+  let(:handlers) { Trailblazer::Endpoint::Handlers::Rails.new(self).() }
 
   # not authenticated, 401
   it do
     result = Create.( { id: 1 }, "user.current" => false )
     # puts "@@@@@ #{result.inspect}"
 
-    matcher(result)
-    controller.inspect.must_equal %{[:head, [401]]}
+    Trailblazer::Endpoint.new.(handlers, result)
+    _data.inspect.must_equal %{[[:head, 401]]}
   end
 
   # created
@@ -92,8 +82,8 @@ class EndpointTest < Minitest::Spec
     result = Create.( '{"id": 9, "title": "Encores", "length": 999 }', "user.current" => ::Module )
     # puts "@@@@@ #{result.inspect}"
 
-    matcher(result)
-    controller.inspect.must_equal '[:head, [201, "Location: /song/9", "{\"id\":9,\"title\":\"Encores\"}"]]'
+    Trailblazer::Endpoint.new.(handlers, result)
+    _data.inspect.must_equal '[[:head, 201, "Location: /song/9", "{\"id\":9,\"title\":\"Encores\"}"]]'
   end
 
   class Update < Create
@@ -103,8 +93,8 @@ class EndpointTest < Minitest::Spec
   it do
     result = Update.( id: nil, song: '{"id": 9, "title": "Encores", "length": 999 }', "user.current" => ::Module )
 
-    matcher(result)
-    controller.inspect.must_equal '[:head, [404]]'
+    Trailblazer::Endpoint.new.(handlers, result)
+    _data.inspect.must_equal '[[:head, 404]]'
   end
 
   #---
@@ -113,37 +103,41 @@ class EndpointTest < Minitest::Spec
   it do
     result = Create.('{ "title": "" }', "user.current" => ::Module)
     puts "@@@@@ #{result.inspect}"
-    matcher(result)
-    controller.inspect.must_equal '[:head, [422, "{\"messages\":{\"title\":[\"can\'t be blank\"]}}"]]'
+    Trailblazer::Endpoint.new.(handlers, result)
+    _data.inspect.must_equal '[[:head, 422, "{\"messages\":{\"title\":[\"can\'t be blank\"]}}"]]'
+  end
+
+
+  include Trailblazer::Endpoint::Controller
+  #---
+  # Controller#endpoint
+  # custom handler.
+  it do
+    invoked = nil
+
+    endpoint(Update, { id: nil }) do |res|
+      res.not_found { invoked = "my not_found!" }
+    end
+
+    invoked.must_equal "my not_found!"
+    _data.must_equal [] # no rails code involved.
+  end
+
+  # generic handler because user handler doesn't match.
+  it do
+    invoked = nil
+
+    endpoint(Update, { id: nil }) do |res|
+      res.invalid { invoked = "my invalid!" }
+    end
+
+    _data.must_equal [[:head, 404]]
+    invoked.must_equal nil
+  end
+
+  # only generic handler
+  it do
+    endpoint(Update, { id: nil })
+    _data.must_equal [[:head, 404]]
   end
 end
-
-require "dry/matcher"
-
-
-# 422 validation errors
-Matcher = Dry::Matcher.new(
-    success: Dry::Matcher::Case.new(
-      match:   ->(result) { result.success? },
-      resolve: ->(result) { result }),
-    created: Dry::Matcher::Case.new(
-      match:   ->(result) { result.success? && result["model.action"] == :create }, # the "model.action" doesn't mean you need Model.
-      resolve: ->(result) { result }),
-    not_found: Dry::Matcher::Case.new(
-      match:   ->(result) { result.failure? && result["model.result.failure?"] }, # DISCUSS: do we want that?
-      resolve: ->(result) { result }),
-    # TODO: we could add unauthorized here.
-    unauthenticated: Dry::Matcher::Case.new(
-      match:   ->(result) { result.failure? && result["result.policy"].failure? }, # FIXME: we might need a &. here ;)
-      resolve: ->(result) { result }),
-    invalid: Dry::Matcher::Case.new(
-      match:   ->(result) { result.failure? && result["result.contract"] },
-      resolve: ->(result) { result })
-)
-
-
-    # result = Matcher.(res) do |m|
-    #   m.success { |v| asserted = "valid is true" }
-
-
-# TODO: generic interface for results "policy.result.success?", .messages, etc.
