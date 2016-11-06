@@ -18,6 +18,7 @@ class DryValidationTest < Minitest::Spec
     self.| Call
 
     include Contract::Validate
+
     def process(params)
       validate(params, contract: self["contract.params"], path: "contract.params") { |f| puts f.inspect }
     end
@@ -32,7 +33,8 @@ class DryValidationTest < Minitest::Spec
   it { Create.(id: nil)["result.contract.params"].errors.must_equal({:id=>["must be filled"]}) }
 end
 
-# class ContractTest < Minitest::Spec
+class ContractTest < Minitest::Spec
+  Song = Struct.new(:title)
 #   # generic form for testing.
 #   class Form
 #     def initialize(model, options={})
@@ -44,27 +46,32 @@ end
 #     end
 #   end
 
-#   # contract do..end (without constant)
-#   describe "contract do .. end" do
-#     class Index < Trailblazer::Operation
-#       include Contract::Step
-#       include Test::ReturnCall
+  #---
+  # contract do..end (without constant)
+  describe "contract do .. end" do
+    class Index < Trailblazer::Operation
+      extend Contract::DSL
 
-#       contract do
-#         property :title
-#       end
+      contract do
+        property :title
+      end
 
-#       include Model::Builder
-#       def model!(*); Struct.new(:title).new; end
+      self.| ->(*) { self["model"] = Song.new } # FIXME:
+      self.| Contract[self["contract.default.class"]]
+      self.| Call
 
-#       def call(params)
-#         validate(params) { |f| return f.to_nested_hash }
-#       end
-#     end
+      include Contract::Validate
+      # TODO: get model automatically in validate!
 
-#     # will create a Reform::Form for us.
-#     it { Index.(title: "Falling Down").must_equal({"title"=>"Falling Down"}) }
-#   end
+      def process(params)
+        # validate(params, model: Song.new) { |f| self["x"] = f.to_nested_hash }
+        validate(params) { |f| self["x"] = f.to_nested_hash }
+      end
+    end
+
+    # will create a Reform::Form for us.
+    it { Index.(title: "Falling Down")["x"].must_equal({"title"=>"Falling Down"}) }
+  end
 
 #   # TODO: in all step tests.
 #   describe "dependency injection" do
@@ -171,37 +178,47 @@ end
 #   end
 # end
 
-# class ValidateTest < Minitest::Spec
-#   class Form
-#     def initialize(*); end
-#     def call(params); Mock::Result.new(params); end
-#   end
+#---
+#- validate
+class ValidateTest < Minitest::Spec
+  class Create < Trailblazer::Operation
+    extend Contract::DSL
+    contract do
+      property :title
+      validates :title, presence: true
+    end
 
-#   class Create < Trailblazer::Operation
-#     include Contract::Explicit
-#     contract Form
 
-#     def process(params)
-#       if validate(params)
-#         self["x"] = "works!"
-#       else
-#         self["x"] = "try again"
-#       end
-#     end
+    include Contract::Validate
+    def process(params)
+      if validate(params)
+        self["x"] = "works!"
+        true
+      else
+        self["x"] = "try again"
+        false
+      end
+    end
 
-#     def model
-#     end
-#   end
+    self.| Model[Song, :create] # FIXME.
+    self.| Contract[self["contract.default.class"]]
+    self.& ->(input, options) { input.process(options["params"]) }, before: "operation.result"
+  end
 
-#   # validate returns the #validate result by building contract using #contract.
-#   it do
-#     Create.(false)["x"].must_equal "try again"
-#     Create.(false).success?.must_equal false
-#     # TODO: test errors
-#   end
-#   it { Create.(true)["x"].must_equal "works!" }
-#   it { Create.(true).success?.must_equal true }
+  # validate returns the #validate result
+  it do
+    Create.(title: nil)["x"].must_equal "try again"
+    Create.(title: nil).success?.must_equal false
+  end
+  it { Create.(title: "SVG")["x"].must_equal "works!" }
+  it { Create.(title: "SVG").success?.must_equal true }
 
+  # result object from validation.
+  #- result object, contract
+  it { Create.(title: 1)["result.contract"].success?.must_equal true }
+  it { Create.(title: 1)["result.contract"].errors.messages.must_equal({}) } # FIXME: change API with Fran.
+  it { Create.(title: nil)["result.contract"].success?.must_equal false }
+  it { Create.(title: nil)["result.contract"].errors.messages.must_equal({:title=>["can't be blank"]}) } # FIXME: change API with Fran.
 #   #---
 #   # validate with block returns result.
 #   class Update < Trailblazer::Operation
@@ -215,27 +232,63 @@ end
 
 #   it { Update.(false)["x"].must_equal false}
 #   it { Update.(true)["x"]. must_equal true}
-# end
 
-# #---
-# # result object from validation.
-# #- result object, contract
-# class ValidateResultTest < Minitest::Spec
-#   class Create < Trailblazer::Operation
-#     include Contract::Explicit
-#     contract do
-#       property :id
-#       validates :id, presence: true
-#     end
+  #---
+  # Contract::Validate[]
+  class Update < Trailblazer::Operation
+    extend Contract::DSL
+    contract do
+      property :title
+      validates :title, presence: true
+    end
 
-#     def process(params); validate(params, model: OpenStruct.new) end
-#   end
+    self.| Model[Song, :create] # FIXME.
+    self.| Contract[self["contract.default.class"]]
+    self.| Contract::Validate[] # generic validate call for you.
 
-#   it { Create.(id: 1)["result.contract"].success?.must_equal true }
-#   it { Create.(id: 1)["result.contract"].errors.messages.must_equal({}) } # FIXME: change API with Fran.
-#   it { Create.(id: nil)["result.contract"].success?.must_equal false }
-#   it { Create.(id: nil)["result.contract"].errors.messages.must_equal({:id=>["can't be blank"]}) } # FIXME: change API with Fran.
-# end
+    # include Contract::Validate
+    ->(*) { validate(options["params"][:song]) } # <-- TODO
+  end
+
+  # success
+  it do
+    result = Update.(title: "SVG")
+    result.success?.must_equal true
+    result["result.contract"].success?.must_equal true
+    result["result.contract"].errors.messages.must_equal({})
+  end
+
+  # failure
+  it do
+    result = Update.(title: nil)
+    result.success?.must_equal false
+    result["result.contract"].success?.must_equal false
+    result["result.contract"].errors.messages.must_equal({:title=>["can't be blank"]})
+  end
+
+  #---
+  # Contract::Validate[key: :song]
+  class Upsert < Trailblazer::Operation
+    extend Contract::DSL
+    contract do
+      property :title
+      validates :title, presence: true
+    end
+
+    self.| Model[Song, :create] # FIXME.
+    self.| Contract[self["contract.default.class"]]
+    self.| Contract::Validate[key: :song] # generic validate call for you.
+    # ->(*) { validate(options["params"][:song]) } # <-- TODO
+    puts self["pipetree"].inspect(style: :rows)
+  end
+
+  # success
+  it { Upsert.(song: { title: "SVG" }).success?.must_equal true }
+  # failure
+  it { Upsert.(song: { title: nil }).success?.must_equal false }
+  # key not found
+  it { Upsert.().success?.must_equal false }
+end
 
 # #---
 # # allow using #contract to inject model and arguments.
@@ -314,7 +367,7 @@ end
 #     contract.album_name.must_equal "Forever Malcom Young"
 #     contract.title.must_equal "Medicine Balls"
 #   end
-# end
+end
 
 # TODO: full stack test with validate, process, save, etc.
           # with model!

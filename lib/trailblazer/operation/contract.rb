@@ -20,23 +20,6 @@ end
 # Needs #[], #[]= skill dependency.
 class Trailblazer::Operation
   module Contract
-    #- import!
-    def self.[](contract_class)
-      {
-         include: [Builder],
-            step: Build, # calls contract_for ATM.
-            name: "contract.build",
-          skills: { "contract.default.class" => contract_class },
-        operator: :>,
-      }
-    end
-
-    def self.included(includer)
-      includer.extend DSL
-      includer.include Validate
-      # includer.| Build, before: Call # DISCUSS: future standard semantics. the plan is to make validate and contract another two pipeline steps.
-    end
-
     module DSL
       # This is the class level DSL method.
       #   Op.contract #=> returns contract class
@@ -52,8 +35,22 @@ class Trailblazer::Operation
       end
     end
 
+    Build = ->(operation, options) { operation["contract"] = operation.contract_for }
 
-    module Builder
+    #- import!
+    # def self.[](contract_class=self["contract.default.class"])
+    def self.[](contract_class)
+      {
+         include: [ContractFor],
+            step: Build, # calls contract_for ATM.
+            name: "contract.build",
+          skills: { },
+        operator: :>,
+      }
+    end
+
+
+    module ContractFor # FIXME: rename!
       # Instantiate the contract, either by using the user's contract passed into #validate
       # or infer the Operation contract.
       def contract_for(model:self["model"], options:{}, contract_class:self["contract.default.class"])
@@ -66,32 +63,30 @@ class Trailblazer::Operation
       end
     end
 
-  public
-    # Call like +contract(model)+ to create and memoize contract, e.g. for Composition.
-    # Adds a step Contract::Build to build the contract automatically/implicitly.
-    module Step
-      def self.included(includer)
-        includer.extend DSL
-        includer.include Builder # #contract!
-        includer.include Validate
-        includer.include V # FIXME.
-        includer.> Build, before: "operation.call", name: "contract.build"
-        includer.& ValidLegacySwitch, after: "operation.call"
-      end
-
-      module V
-        # validate relies on a pre-computed contract from the pipeline.
-        def validate(params, contract:self["contract"], **)
-          super
-        end
-      end
-    end
-
     # result.contract = {..}
     # result.contract.errors = {..}
+    # Deviate to left track if optional key is not found in params.
+    # Deviate to left if validation result falsey.
     module Validate
-      # for now, let's assume the contract is already built. we can do the ad-hoc build later.
-      def validate(params, contract:nil, path:"contract") # :params
+      def self.[](key:nil)
+        [
+          key ? {
+            step: ->(input, options) { options["params"] = options["params"][key] }, # FIXME: we probably shouldn't overwrite params?
+            operator: :&,
+            skills: {},
+            name: "validate.params.extract",
+            } : nil,
+          {
+            include: [self],
+            step: ->(input, options) { input.validate(options["params"]) }, # FIXME: how could we deal here with polymorphic keys?
+            operator: :&,
+            skills: { },
+            name: "contract.validate",
+          }
+        ].compact
+      end
+
+      def validate(params, contract:self["contract"], path:"contract") # :params
         # DISCUSS: should we only have path here and then look up contract ourselves?
         result = validate_contract(contract, params) # run validation.  # FIXME: must be overridable.
 
@@ -103,38 +98,12 @@ class Trailblazer::Operation
           # self["errors.#{path}"] = result.errors # TODO: remove me
         end
 
-        self["__valid"] = valid # how this flag gets interpreted is up to you. # FIXME: test that bool is returned from this method.
+        valid
       end
 
       def validate_contract(contract, params)
         contract.(params)
       end
     end
-
-    # The old way where you call Operation#contract at some point and then create and memoize the contract.
-    # I think we should advise people to not overuse this.
-    module Explicit
-      def self.included(includer)
-        includer.extend DSL
-        includer.include Builder # #contract!
-        includer.include Validate
-        includer.include V # FIXME.
-        includer.& ValidLegacySwitch, after: Call
-      end
-
-      module V
-        # validate relies on a pre-computed contract from the pipeline.
-        def validate(params, **options)
-          super(params, contract: contract(options))
-        end
-      end
-
-      def contract(**kws)
-        self["contract"] ||= contract_for(**kws)
-      end
-    end
-  end
-
-  Contract::Build = ->(operation, options) { operation["contract"] ||= operation.contract_for }
-  Contract::ValidLegacySwitch = ->(operation, options) { options["__valid"] } # deviate to Left when the legacy validation failed.
+  end # Contract
 end

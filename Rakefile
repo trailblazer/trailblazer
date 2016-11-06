@@ -10,6 +10,7 @@ Rake::TestTask.new(:test) do |test|
     test/operation/policy_test.rb
     test/operation/builder_test.rb
     test/operation/model_test.rb
+    test/operation/contract_test.rb
 
 
     }]
