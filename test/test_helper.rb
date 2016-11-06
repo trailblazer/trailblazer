@@ -15,6 +15,7 @@ require "trailblazer/operation/representer"
 require "trailblazer/operation/present"
 require "trailblazer/operation/policy"
 require "trailblazer/operation/guard"
+require "trailblazer/operation/persist"
 
 # require "raise"
 
