@@ -11,16 +11,6 @@ class PipedreamTest < Minitest::Spec
 
     module Model
       def self.[](model_class, action)
-        mod= Module.new do
-          @a, @b = model_class, action
-          def self.included(includer)
-            includer.include Trailblazer::Operation::Model::BuildMethods # import logic for #model!
-            # configure.
-            includer["model.class"]  = @a
-            includer["model.action"] = @b # DISCUSS: redundant from Model::DSL.
-          end
-        end
-
         {
           include: [Trailblazer::Operation::Model::BuildMethods],
              step: Trailblazer::Operation::Model::Build,
