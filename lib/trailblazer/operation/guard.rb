@@ -19,6 +19,7 @@ class Trailblazer::Operation
           ->(skills) { Result.new( value.(skills, skills), {} ) }
         end
       end
+      extend BuildPermission # DISCUSS: is that ok here?
     end
   end
 end

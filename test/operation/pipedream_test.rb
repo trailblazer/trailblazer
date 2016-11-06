@@ -21,13 +21,15 @@ class PipedreamTest < Minitest::Spec
     end
 
     module Policy
-      def self.[](proc)
-        @a = proc
-        def self.included(includer)
-            includer.include Trailblazer::Operation::Policy::Guard # TODO: include step here "manually"
-            includer.policy @a
-          end
-        self
+      module Guard
+        def self.[](proc)
+          {
+            include: [],
+               step: Trailblazer::Operation::Policy::Evaluate, # TODO: with different names?
+               name: "policy.guard.evaluate",
+             skills: { "policy.evaluator" => Trailblazer::Operation::Policy::Guard.build_permission(proc) }
+           }
+         end
       end
     end
 
@@ -54,7 +56,7 @@ class PipedreamTest < Minitest::Spec
 
 
     self.* "model.build",    Model[Song, :create]      # model!
-    # self.* "policy",   Policy[ ->(options){ options["user.current"] == ::Module } ]
+    self.* "policy",   Policy::Guard[ ->(options){ options["user.current"] == ::Module } ]
     # self.* "contract", Contract[MyContract]
   end
 
