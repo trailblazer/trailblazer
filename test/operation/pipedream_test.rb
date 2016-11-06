@@ -45,20 +45,56 @@ class PipedreamTest < Minitest::Spec
     end
 
     # "import" mechanism.
-    def self.*(name, cfg)
+    def self.step(operator, name, cfg=nil)
+      cfg ||= name #if cfg.nil?
+
       cfg[:skills].each { |k,v| self[k] = v } # import skills.
       self.include *cfg[:include]               # include overridable instance logic.
       # append step right here.
-      self.> cfg[:step], name: cfg[:name], before: "operation.result" # append_to: "setup" (group!)
+      self.send operator, cfg[:step], name: cfg[:name], before: "operation.result" # append_to: "setup" (group!)
     end
 
+    # design principles:
+    # * include as less code as possible into the op class.
+    # * make the flow super explicit without making it cryptic (only 3 new operators)
+    # * avoid including DSL modules in favor of passing those configurations directly to the "step".
 
-    self.* "model.build",    Model[Song, :create]      # model!
-    self.* "policy",   Policy::Guard[ ->(options){ options["user.current"] == ::Module } ]
-    self.* "contract", Contract[MyContract]
+    module DSLOperators
+      def >(name, cfg=nil)
+        cfg ||= name #if cfg.nil?
+
+        cfg[:skills].each { |k,v| self[k] = v } # import skills.
+        self.include *cfg[:include]               # include overridable instance logic.
+        # append step right here.
+        super cfg[:step], name: cfg[:name], before: "operation.result"
+      end
+
+      def <(name, cfg=nil)
+        cfg ||= name #if cfg.nil?
+
+        cfg[:skills].each { |k,v| self[k] = v } # import skills.
+        self.include *cfg[:include]               # include overridable instance logic.
+        # append step right here.
+        super cfg[:step], name: cfg[:name], before: "operation.result"
+      end
+    end
+    extend DSLOperators
+
+    self.> Model[Song, :create]      # model!)
+    self.> Policy::Guard[ ->(options){ options["user.current"] == ::Module } ]
+    self.> Contract[MyContract]
+    self.< Contract[MyContract]
+    # ok Model[Song, :create]      # model!)
+    # ok Policy::Guard[ ->(options){ options["user.current"] == ::Module } ]
+    # ok Contract[MyContract]
+    # fail Contract[MyContract]
+    # self.|> "contract"
+
   end
 
-  # TODO: test with contract constant (done). test with inline contract.
+  # TODO: test with contract constant (done).
+  #       test with inline contract.
+  #       test with override contract!.
 
   it do
     # puts "@@@@@ #{Create.({}).inspect}"
