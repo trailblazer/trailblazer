@@ -20,6 +20,16 @@ end
 # Needs #[], #[]= skill dependency.
 class Trailblazer::Operation
   module Contract
+    #- import!
+    def self.[](contract_class)
+      {
+        include: [Builder],
+           step: Build, # calls contract_for ATM.
+           name: "contract.build",
+         skills: { "contract.default.class" => contract_class }
+      }
+    end
+
     def self.included(includer)
       includer.extend DSL
       includer.include Validate

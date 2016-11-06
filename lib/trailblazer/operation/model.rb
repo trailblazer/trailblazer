@@ -1,5 +1,17 @@
 class Trailblazer::Operation
   module Model
+    #- import!
+    # when imported via Operation::<>
+    # This is the preferred mechanism in TRB2.
+    def self.[](model_class, action)
+      {
+        include: [BuildMethods],
+           step: Build,
+           name: "model.build",
+         skills: { "model.class" => model_class, "model.action" => action }
+      }
+    end
+
     def self.included(includer)
       includer.extend DSL # ::model
       includer.include BuildMethods # model! and friends.

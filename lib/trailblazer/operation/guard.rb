@@ -3,6 +3,15 @@ require "trailblazer/operation/policy" # FIXME.
 class Trailblazer::Operation
   module Policy
     module Guard
+      #-- import!
+      def self.[](proc)
+        {
+             step: Evaluate, # TODO: with different names?
+             name: "policy.guard.evaluate",
+           skills: { "policy.evaluator" => Guard.build_permission(proc) }
+        }
+      end
+
       def self.included(includer)
         includer.extend DSL # ::policy
         includer.extend BuildPermission

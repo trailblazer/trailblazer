@@ -9,41 +9,6 @@ class PipedreamTest < Minitest::Spec
       property :title
     end
 
-    module Model
-      def self.[](model_class, action)
-        {
-          include: [Trailblazer::Operation::Model::BuildMethods],
-             step: Trailblazer::Operation::Model::Build,
-             name: "model.build",
-           skills: { "model.class" => model_class, "model.action" => action }
-        }
-      end
-    end
-
-    module Policy
-      module Guard
-        def self.[](proc)
-          {
-            # include: [],
-               step: Trailblazer::Operation::Policy::Evaluate, # TODO: with different names?
-               name: "policy.guard.evaluate",
-             skills: { "policy.evaluator" => Trailblazer::Operation::Policy::Guard.build_permission(proc) }
-          }
-        end
-      end
-    end
-
-    module Contract
-      def self.[](contract_class)
-        {
-          include: [Trailblazer::Operation::Contract::Builder],
-             step: Trailblazer::Operation::Contract::Build, # calls contract_for ATM.
-             name: "contract.build",
-           skills: { "contract.default.class" => contract_class }
-        }
-      end
-    end
-
     # "import" mechanism.
     def self.step(operator, name, cfg=nil)
       cfg ||= name #if cfg.nil?
@@ -61,21 +26,21 @@ class PipedreamTest < Minitest::Spec
 
     module DSLOperators
       def >(name, cfg=nil)
-        cfg ||= name #if cfg.nil?
-
-        cfg[:skills].each { |k,v| self[k] = v } # import skills.
-        self.include *cfg[:include]               # include overridable instance logic.
-        # append step right here.
-        super cfg[:step], name: cfg[:name], before: "operation.result"
+        super *import!(name, cfg)
       end
 
       def <(name, cfg=nil)
-        cfg ||= name #if cfg.nil?
+        super *import!(name, cfg)
+      end
 
-        cfg[:skills].each { |k,v| self[k] = v } # import skills.
-        self.include *cfg[:include]               # include overridable instance logic.
-        # append step right here.
-        super cfg[:step], name: cfg[:name], before: "operation.result"
+    # :private:
+      def import!(name, config=nil)
+        config ||= name
+
+        config[:skills].each { |k,v| self[k] = v } # import skills.
+        include *config[:include]                  # include overridable instance logic.
+
+        [ config[:step], name: config[:name], before: "operation.result" ]
       end
     end
     extend DSLOperators
