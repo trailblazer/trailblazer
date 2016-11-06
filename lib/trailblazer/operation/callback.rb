@@ -3,25 +3,24 @@ require "disposable/callback"
 
 # Needs #[], #[]= skill dependency.
 module Trailblazer::Operation::Callback
-  def self.included(includer)
-    includer.extend DSL
-
-    includer.extend Declarative::Heritage::Inherited
-    includer.extend Declarative::Heritage::DSL
+  def self.[](group)
+    {
+      name: "callback.#{group}",
+      operator: :&,
+      step: ->(input, options) { input.callback!(group) },
+      include: [self],
+      skills: {},
+    }
   end
 
-  def callback!(name=:default, options={ operation: self, contract: contract, params: @params }) # FIXME: test options.
+  def callback!(name=:default, options=self) # FIXME: test options.
     config  = self["callback.#{name}.class"] || raise #.fetch(name) # TODO: test exception
-    group   = config[:group].new(contract)
+    group   = config[:group].new(self["contract"])
 
     options[:context] ||= (config[:context] == :operation ? self : group)
     group.(options)
 
     invocations[name] = group
-  end
-
-  def dispatch!(*args, &block)
-    callback!(*args, &block)
   end
 
   def invocations

@@ -1,33 +1,20 @@
 require 'test_helper'
-require "trailblazer/operation/callback"
-require "trailblazer/operation/contract"
 
 # callbacks are tested in Disposable::Callback::Group.
 class OperationCallbackTest < MiniTest::Spec
   Song = Struct.new(:name)
 
   class Create < Trailblazer::Operation
-    include Callback
-    include Contract::Explicit
-
-    contract do
-      property :name
-    end
+    extend Callback::DSL
 
     callback do
       on_change :notify_me!
       on_change :notify_you!
     end
 
+    self.| Callback[:default]
+
     # TODO: always dispatch, pass params.
-
-    def process(params)
-      @model = Song.new
-
-      validate(params, model: @model) do
-        callback!
-      end
-    end
 
     def dispatched
       self["dispatched"] ||= []
