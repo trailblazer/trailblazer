@@ -23,10 +23,11 @@ class Trailblazer::Operation
     #- import!
     def self.[](contract_class)
       {
-        include: [Builder],
-           step: Build, # calls contract_for ATM.
-           name: "contract.build",
-         skills: { "contract.default.class" => contract_class }
+         include: [Builder],
+            step: Build, # calls contract_for ATM.
+            name: "contract.build",
+          skills: { "contract.default.class" => contract_class },
+        operator: :>,
       }
     end
 

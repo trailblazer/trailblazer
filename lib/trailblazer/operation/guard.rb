@@ -6,9 +6,10 @@ class Trailblazer::Operation
       #-- import!
       def self.[](proc)
         {
-             step: Evaluate, # TODO: with different names?
-             name: "policy.guard.evaluate",
-           skills: { "policy.evaluator" => Guard.build_permission(proc) }
+              step: Evaluate, # TODO: with different names?
+              name: "policy.guard.evaluate",
+            skills: { "policy.evaluator" => Guard.build_permission(proc) },
+          operator: :&,
         }
       end
 

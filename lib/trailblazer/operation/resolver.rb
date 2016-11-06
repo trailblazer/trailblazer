@@ -9,6 +9,7 @@ class Trailblazer::Operation
         extend Model::DSL  # ::model
         extend Model::BuildMethods  # ::model!
         extend Policy::DSL # ::policy
+        extend Policy::BuildPermission
       end
 
       includer.> Model::Build, prepend: true

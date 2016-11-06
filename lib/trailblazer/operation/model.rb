@@ -5,10 +5,11 @@ class Trailblazer::Operation
     # This is the preferred mechanism in TRB2.
     def self.[](model_class, action)
       {
-        include: [BuildMethods],
-           step: Build,
-           name: "model.build",
-         skills: { "model.class" => model_class, "model.action" => action }
+         include: [BuildMethods],
+            step: Build,
+            name: "model.build",
+          skills: { "model.class" => model_class, "model.action" => action },
+        operator: :>,
       }
     end
 

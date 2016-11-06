@@ -1,12 +1,15 @@
 require "test_helper"
 require "trailblazer/operation/guard"
 
-class GuardTest < Minitest::Spec
+class LegacyGuardTest < Minitest::Spec
   #---
   # with proc, evaluated in operation context.
   class Create < Trailblazer::Operation
     include Policy::Guard
     policy ->(options) { options["params"][:pass] == self["params"][:pass] && options["params"][:pass] }
+
+    # self.| Policy::Guard[ ->(options) { options["params"][:pass] == self["params"][:pass] && options["params"][:pass] } ]
+
     def process(*); self[:x] = true; end
     puts self["pipetree"].inspect(style: :rows)
   end
