@@ -11,14 +11,22 @@ class PipedreamTest < Minitest::Spec
 
     module Model
       def self.[](model_class, action)
-        Module.new do
+        mod= Module.new do
           @a, @b = model_class, action
           def self.included(includer)
-            includer.include Trailblazer::Operation::Model
-            includer.model @a, @b
+            includer.include Trailblazer::Operation::Model::BuildMethods # import logic for #model!
+            # configure.
+            includer["model.class"]  = @a
+            includer["model.action"] = @b # DISCUSS: redundant from Model::DSL.
           end
-          self
         end
+
+        {
+          include: [Trailblazer::Operation::Model::BuildMethods],
+             step: Trailblazer::Operation::Model::Build,
+             name: "model.build",
+           skills: { "model.class" => model_class, "model.action" => action }
+        }
       end
     end
 
@@ -46,20 +54,23 @@ class PipedreamTest < Minitest::Spec
       end
     end
 
-
-    def self.*(name, mod)
-      self.include mod
-      self.> Trailblazer::Operation::Model::Build, before: "operation.result"
+    # "import" mechanism.
+    def self.*(name, cfg)
+      cfg[:skills].each { |k,v| self[k] = v } # import skills.
+      self.include *cfg[:include]               # include overridable instance logic.
+      # append step right here.
+      self.> cfg[:step], name: cfg[:name], before: "operation.result" # append_to: "setup" (group!)
     end
 
 
-    self.* "model",    Model[Song, :create]      # model!
-    self.* "policy",   Policy[ ->(options){ options["user.current"] == ::Module } ]
-    self.* "contract", Contract[MyContract]
+    self.* "model.build",    Model[Song, :create]      # model!
+    # self.* "policy",   Policy[ ->(options){ options["user.current"] == ::Module } ]
+    # self.* "contract", Contract[MyContract]
   end
 
   it do
     # puts "@@@@@ #{Create.({}).inspect}"
+    puts Create["pipetree"].inspect(style: :rows)
     result = Create.({}, { "user.current" => Module })
 
     result["model"].inspect.must_equal %{#<struct PipedreamTest::Song title=nil>}
