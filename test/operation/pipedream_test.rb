@@ -24,25 +24,23 @@ class PipedreamTest < Minitest::Spec
       module Guard
         def self.[](proc)
           {
-            include: [],
+            # include: [],
                step: Trailblazer::Operation::Policy::Evaluate, # TODO: with different names?
                name: "policy.guard.evaluate",
              skills: { "policy.evaluator" => Trailblazer::Operation::Policy::Guard.build_permission(proc) }
-           }
-         end
+          }
+        end
       end
     end
 
     module Contract
       def self.[](contract_class)
-        Module.new do
-          @a = contract_class
-          def self.included(includer)
-            includer.include Trailblazer::Operation::Contract::Step # contract!
-            includer["contract.default.class"]= @a
-          end
-          self
-        end
+        {
+          include: [Trailblazer::Operation::Contract::Builder],
+             step: Trailblazer::Operation::Contract::Build, # calls contract_for ATM.
+             name: "contract.build",
+           skills: { "contract.default.class" => contract_class }
+        }
       end
     end
 
@@ -57,8 +55,10 @@ class PipedreamTest < Minitest::Spec
 
     self.* "model.build",    Model[Song, :create]      # model!
     self.* "policy",   Policy::Guard[ ->(options){ options["user.current"] == ::Module } ]
-    # self.* "contract", Contract[MyContract]
+    self.* "contract", Contract[MyContract]
   end
+
+  # TODO: test with contract constant (done). test with inline contract.
 
   it do
     # puts "@@@@@ #{Create.({}).inspect}"
