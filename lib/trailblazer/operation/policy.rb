@@ -10,27 +10,11 @@ class Trailblazer::Operation
       }
     end
 
-    def self.included(includer)
-      includer.extend DSL
-      includer.extend BuildPermission
-      includer.& Evaluate, before: "operation.call", name: "policy.evaluate"
-    end
+    # includer.& Evaluate, before: "operation.call", name: "policy.evaluate"
 
-    module DSL
-      def policy(*args, &block)
-        heritage.record(:policy, *args, &block)
-
-        self["policy.evaluator"] = build_permission(*args, &block)
-      end
+    def self.build_permission(*args, &block)
+      Permission.new(*args, &block)
     end
-
-    module BuildPermission
-      # To be overridden by your policy strategy.
-      def build_permission(*args, &block)
-        Permission.new(*args, &block)
-      end
-    end
-    extend BuildPermission
 
     # This can be subclassed for other policy strategies, e.g. non-pundit Authsome.
     # NOTE: using a class here is faster than a simple proc: https://twitter.com/apotonick/status/791162989692891136

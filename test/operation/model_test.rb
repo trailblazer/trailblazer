@@ -10,15 +10,14 @@ class ModelTest < Minitest::Spec
   #---
   # use Model semantics, no customizations.
   class Create < Trailblazer::Operation
-    include Model
-    model Song, :create
+    self.| Model[ Song, :create ]
   end
 
   # :create new.
   it { Create.({})["model"].inspect.must_equal %{#<struct ModelTest::Song id=nil>} }
 
   class Update < Create
-    action :find
+    self.~ Model[:update] # DISCUSS: do we need the ~ operator?
   end
 
   # :find it
@@ -34,8 +33,8 @@ class ModelTest < Minitest::Spec
   #---
   # :find_by, exceptionless.
   class Find < Trailblazer::Operation
-    include Model
-    model Song, :find_by
+    self.| Model[Song, :find_by]
+    self.| Call
 
     def process(*); self["x"] = true end
   end
@@ -58,7 +57,7 @@ class ModelTest < Minitest::Spec
   #---
   # override #model!, without any Model inclusions.
   class Delete < Trailblazer::Operation
-    include Model::Builder
+    self.| :model!
     def model!(params); params.to_s end
   end
 
@@ -67,11 +66,8 @@ class ModelTest < Minitest::Spec
   #---
   # creating the model before operation instantiation (ex Model::External)
   class Show < Create
-    extend Model::DSL
-    extend Model::BuildMethods
-    model Song, :update
-
-    self.> Model::Build, before: New
+    extend Model::BuildMethods # FIXME: how do we communicate that and prevent the include from Model[] ?
+    self.| Model[Song, :update], before: "operation.new"
   end
 
   it { Show.({id: 1})["model"].inspect.must_equal %{#<struct ModelTest::Song id=1>} }
@@ -83,8 +79,10 @@ class ModelTest < Minitest::Spec
   # this tests that BuildMethods is interchangable and acts as an example how to  decouple
   # the model building from the operation.
   class Index < Trailblazer::Operation
-    extend Model::DSL
-    model Song, :find # ModelBuilder can read this via skills that we pass to it.
+    # DISCUSS: help user to do this kind of behavior?
+    # model Song, :find # ModelBuilder can read this via skills that we pass to it.
+    self["model.class"] = Song
+    self["model.action"] = :find
 
     # this is to be able to use BuildModel.
     class ModelBuilder
@@ -97,7 +95,7 @@ class ModelTest < Minitest::Spec
       delegates :@delegator, :[]
     end
 
-    self.> ->(input, options) { options["model"] = ModelBuilder.new(options).(options["params"]); input }, after: New
+    self.> ->(input, options) { options["model"] = ModelBuilder.new(options).(options["params"]); input }, after: "operation.new"
   end
 
   it { Index.(id: 1)["model"].inspect.must_equal %{#<struct ModelTest::Song id=1>} }

@@ -1,14 +1,11 @@
 require "test_helper"
-require "trailblazer/operation/guard"
 
-class LegacyGuardTest < Minitest::Spec
+class GuardTest < Minitest::Spec
   #---
   # with proc, evaluated in operation context.
   class Create < Trailblazer::Operation
-    include Policy::Guard
-    policy ->(options) { options["params"][:pass] == self["params"][:pass] && options["params"][:pass] }
-
-    # self.| Policy::Guard[ ->(options) { options["params"][:pass] == self["params"][:pass] && options["params"][:pass] } ]
+    self.| Policy::Guard[ ->(options) { options["params"][:pass] == self["params"][:pass] && options["params"][:pass] } ]
+    self.| Call
 
     def process(*); self[:x] = true; end
     puts self["pipetree"].inspect(style: :rows)
@@ -22,12 +19,16 @@ class LegacyGuardTest < Minitest::Spec
   it { Create.(pass: false)["result.policy"].success?.must_equal false }
 
   # with Callable, operation passed in.
-  class Update < Create
+  class Update < Trailblazer::Operation
     class MyGuard
       include Uber::Callable
       def call(operation, options); options["params"][:pass] == operation["params"][:pass] && options["params"][:pass] end
     end
-    policy MyGuard.new
+
+    self.| Policy::Guard[ MyGuard.new ]
+    self.| Call
+
+    def process(*); self[:x] = true; end
   end
 
   it { Update.(pass: false)[:x].must_equal nil }

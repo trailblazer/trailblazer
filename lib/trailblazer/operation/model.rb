@@ -3,46 +3,22 @@ class Trailblazer::Operation
     #- import!
     # when imported via Operation::<>
     # This is the preferred mechanism in TRB2.
-    def self.[](model_class, action)
+    def self.[](model_class, action=nil)
+      if action.nil?
+        # FIXME: prototyping inheritance. should we handle that here?
+        return { skills: { "model.action" => model_class } }
+      end
+
       {
          include: [BuildMethods],
             step: Build,
             name: "model.build",
           skills: { "model.class" => model_class, "model.action" => action },
-        operator: :>,
+        operator: :&,
       }
     end
 
-    def self.included(includer)
-      includer.extend DSL # ::model
-      includer.include BuildMethods # model! and friends.
-      includer.& Build, after: "operation.new", name: "model.build"
-    end
-
-    module DSL
-      def model(name, action=nil)
-        heritage.record(:model, name, action)
-
-        self["model.class"] = name
-        action(action) if action # coolest line ever.
-      end
-
-      def action(name)
-        heritage.record(:action, name)
-
-        self["model.action"] = name
-      end
-    end
-
-    # Include this if you only want to override #model! and provide your own model
-    # building logic. It will be run after "operation.new".
-    module Builder
-      def self.included(includer)
-        includer.> Model::Build, after: "operation.new", name: "model.build"
-      end
-    end
-
-  # Methods to create the model according to class configuration and params.
+    # Methods to create the model according to class configuration and params.
     module BuildMethods
       def model_class
         self["model.class"] or raise "[Trailblazer] You didn't call Operation::model."

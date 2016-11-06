@@ -13,23 +13,15 @@ class Trailblazer::Operation
         }
       end
 
-      def self.included(includer)
-        includer.extend DSL # ::policy
-        includer.extend BuildPermission
-        includer.& Evaluate, before: "operation.call", name: "policy.guard.evaluate"
-      end
+      # includer.& Evaluate, before: "operation.call", name: "policy.guard.evaluate"
 
-      module BuildPermission
-        # Simply return a proc that, when called, evaluates the Uber:::Value.
-        def build_permission(callable, &block)
-          value = Uber::Options::Value.new(callable || block)
+      def self.build_permission(callable, &block)
+        value = Uber::Options::Value.new(callable || block)
 
-          # call'ing the Uber value will run either proc or block.
-          # this gets wrapped in a Operation::Result object.
-          ->(skills) { Result.new( value.(skills, skills), {} ) }
-        end
+        # call'ing the Uber value will run either proc or block.
+        # this gets wrapped in a Operation::Result object.
+        ->(skills) { Result.new( value.(skills, skills), {} ) }
       end
-      extend BuildPermission # DISCUSS: is that ok here?
-    end
+    end # Guard
   end
 end

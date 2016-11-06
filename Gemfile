@@ -15,6 +15,8 @@ gem "roar", github: "apotonick/roar"
 gem "multi_json"
 
 gem "dry-auto_inject"
+gem "dry-matcher"
+gem "dry-validation"
 
 
 gem "trailblazer-operation", path: "../operation"
@@ -22,5 +24,4 @@ gem "pipetree", path: "../pipetree"
 
 gem "minitest-line"
 
-gem "raise"
-gem "dry-validation"
+gem "uber", path: "../uber"

@@ -17,8 +17,8 @@ class PolicyTest < Minitest::Spec
   #---
   # Instance-level: Only policy, no model
   class Create < Trailblazer::Operation
-    include Policy
-    policy Auth, :only_user?
+    self.| Policy[Auth, :only_user?]
+    self.| Call
 
     def process(*)
       self["process"] = true
@@ -47,11 +47,12 @@ class PolicyTest < Minitest::Spec
   it { Create.({}, "user.current" => Object, "policy.evaluator" => Trailblazer::Operation::Policy::Permission.new(Auth, :user_object?))["process"].must_equal true }
   it { Create.({}, "user.current" => Module, "policy.evaluator" => Trailblazer::Operation::Policy::Permission.new(Auth, :user_object?))["process"].must_equal nil }
 
+
   #---
   # inheritance, adding Model
   class Show < Create
-    include Model
-    model Song, :create
+    self.| Model[Song, :create]#, before: "policy.evaluate"
+    puts "@@@@@ #{Show["pipetree"].inspect}"
   end
 
   # invalid because user AND model.
@@ -72,13 +73,11 @@ class PolicyTest < Minitest::Spec
   end
 
   ##--
-  # Policy and Model before Build ("External" or almost Resolver)
+  # TOOOODOOO: Policy and Model before Build ("External" or almost Resolver)
   class Edit < Trailblazer::Operation
-    include Model
-    include Policy
-    model Song, :update
-    policy Auth, :user_and_model?
-
+    self.| Model[Song, :update]
+    self.| Policy[Auth, :user_and_model?]
+    self.| Call
 
     def process(*); self["process"] = true end
   end

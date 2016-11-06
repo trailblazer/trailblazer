@@ -18,24 +18,7 @@ class PipedreamTest < Minitest::Spec
     # * make the flow super explicit without making it cryptic (only 3 new operators)
     # * avoid including DSL modules in favor of passing those configurations directly to the "step".
 
-    module DSLOperators
-      def |(cfg)
-        import!(cfg)
-      end
 
-      def <(cfg, *args)
-        return super unless(cfg.is_a?(Hash))
-        import!(cfg.merge(operator: :<))
-      end
-
-    # :private:
-      def import!(config)
-        config[:skills].each { |k,v| self[k] = v } # import skills.
-        include *config[:include]                  # include overridable instance logic.
-        send(config[:operator], config[:step], name: config[:name], before: "operation.result") # self.> ..
-      end
-    end
-    extend DSLOperators
 
     self.|         Model[ Song, :create]      # model!)
     self.| Policy::Guard[ ->(options){ options["user.current"] == ::Module } ]
