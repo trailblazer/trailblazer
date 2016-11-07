@@ -60,7 +60,7 @@ class ModelTest < Minitest::Spec
   #---
   # override #model!, without any Model inclusions.
   class Delete < Trailblazer::Operation
-    self.| :model!
+    self.| Model[:model!]
     def model!(params); params.to_s end
   end
 
