@@ -3,5 +3,6 @@ module Trailblazer::Operation::Stepable
 
   def [](*args, &block)
     Configuration.new(self, args, block)
+    # [self, args, block]
   end
 end

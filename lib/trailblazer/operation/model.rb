@@ -5,16 +5,15 @@ class Trailblazer::Operation
     extend Stepable
 
     #- import!
-    # when imported via Operation::<>
+    # when imported via Operation::|
     # This is the preferred mechanism in TRB2.
-    def self.import!(operation, model_class, action=nil)
+    def self.import!(operation, pipe, model_class, action=nil)
       if action.nil? # not sure how to do overrides!
         # FIXME: prototyping inheritance. should we handle that here?
         return operation["model.action"] = model_class
       end
 
-      operation["pipetree"].& Step, # FIXME: this will do inheritance twice!
-        name:   "model.build"
+      pipe.(:&, Step, name: "model.build")
 
       operation["model.class"] = model_class
       operation["model.action"] = action

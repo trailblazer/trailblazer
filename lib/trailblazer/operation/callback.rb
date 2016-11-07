@@ -6,9 +6,9 @@ class Trailblazer::Operation
   module Callback
     extend Stepable
 
-    def self.import!(operation, group)
-      operation["pipetree"].& ->(input, options) { input.callback!(group) },
-        name: "callback.#{group}"
+    def self.import!(operation, pipe, group)
+      pipe.(:&, ->(input, options) { input.callback!(group) },
+        name: "callback.#{group}")
 
       operation.send :include, self
     end

@@ -7,10 +7,10 @@ class Trailblazer::Operation
 
     extend Stepable # :[]
 
-    def self.import!(operation, user_builder)
-      operation["pipetree"].>> Step,
+    def self.import!(operation, pipe, user_builder)
+      pipe.(:>>, Step,
         name:   "builder.call",
-        before: "operation.new"
+        before: "operation.new")
 
       operation["builder"] = user_builder
       false # suppress -inheritance. dislike. FIXME.

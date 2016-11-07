@@ -21,11 +21,11 @@ end
 class Trailblazer::Operation
   module Contract
     Step = ->(operation, options) { operation["contract"] = operation.contract_for } # the builder for contract.
+
     extend Stepable # ::[]
 
-    def self.import!(operation, user_builder)
-      operation["pipetree"].> Step,             # use Operation::> inheritance.
-        name:   "contract.build"
+    def self.import!(operation, pipe, user_builder_fixme)
+      pipe.(:>, Step, name: "contract.build")
 
       operation.send :include, ContractFor # DISCUSS: is that clever?
     end
@@ -50,12 +50,12 @@ class Trailblazer::Operation
     module Validate
       extend Stepable
 
-      def self.import!(operation, key:nil)
-        operation["pipetree"].& ->(input, options) { options["params"] = options["params"][key] }, # FIXME: we probably shouldn't overwrite params?
-          name: "validate.params.extract" if key
+      def self.import!(operation, pipe, key:nil)
+        pipe.(:&, ->(input, options) { options["params"] = options["params"][key] }, # FIXME: we probably shouldn't overwrite params?
+          name: "validate.params.extract") if key
 
-        operation["pipetree"].& ->(input, options) { input.validate(options["params"]) }, # FIXME: how could we deal here with polymorphic keys?
-          name: "contract.validate"
+        pipe.(:&, ->(input, options) { input.validate(options["params"]) }, # FIXME: how could we deal here with polymorphic keys?
+          name: "contract.validate")
 
         operation.send :include, self
       end
