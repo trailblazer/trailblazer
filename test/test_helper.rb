@@ -8,6 +8,7 @@ Reform::Form.class_eval do
   include Reform::Form::ActiveModel::Validations
 end
 
+require "trailblazer/operation/stepable"
 require "trailblazer/operation/builder"
 require "trailblazer/operation/model"
 require "trailblazer/operation/contract"

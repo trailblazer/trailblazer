@@ -1,19 +1,18 @@
 require "uber/builder"
 
-# Allows to add builders via ::builds.
+# http://trailblazer.to/gems/operation/2.0/builder.html
 class Trailblazer::Operation
   module Builder
     Step = ->(klass, options) { options["builder"].(options) }
 
-    def self.[](proc)
-      {
-            step: Step,
-            name: "builder.call",
-          skills: { "builder" => proc },
-        operator: :>>,
-          before: "operation.new",
-          inherit: false, # don't call `self.| Builder[]` on subclasses.
-      }
+    extend Stepable # :[]
+
+    def self.import!(operation, user_builder)
+      operation["pipetree"].>> Step,
+        name:   "builder.call",
+        before: "operation.new"
+
+      operation["builder"] = user_builder
     end
 
     def self.included(includer)
