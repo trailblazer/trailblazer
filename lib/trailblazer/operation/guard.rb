@@ -5,8 +5,8 @@ class Trailblazer::Operation
     module Guard
       extend Stepable
 
-      def self.import!(operation, pipe, user_proc)
-        pipe.(:&, Evaluate, name: "policy.guard.evaluate")
+      def self.import!(operation, import, user_proc)
+        import.(:&, Evaluate, name: "policy.guard.evaluate")
 
         operation["policy.evaluator"] = Guard.build_permission(user_proc)
       end

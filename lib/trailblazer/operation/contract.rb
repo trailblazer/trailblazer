@@ -24,8 +24,8 @@ class Trailblazer::Operation
 
     extend Stepable # ::[]
 
-    def self.import!(operation, pipe, user_builder_fixme)
-      pipe.(:>, Step, name: "contract.build")
+    def self.import!(operation, import, user_builder_fixme)
+      import.(:>, Step, name: "contract.build")
 
       operation.send :include, ContractFor # DISCUSS: is that clever?
     end
@@ -50,11 +50,11 @@ class Trailblazer::Operation
     module Validate
       extend Stepable
 
-      def self.import!(operation, pipe, key:nil)
-        pipe.(:&, ->(input, options) { options["params"] = options["params"][key] }, # FIXME: we probably shouldn't overwrite params?
+      def self.import!(operation, import, key:nil)
+        import.(:&, ->(input, options) { options["params"] = options["params"][key] }, # FIXME: we probably shouldn't overwrite params?
           name: "validate.params.extract") if key
 
-        pipe.(:&, ->(input, options) { input.validate(options["params"]) }, # FIXME: how could we deal here with polymorphic keys?
+        import.(:&, ->(input, options) { input.validate(options["params"]) }, # FIXME: how could we deal here with polymorphic keys?
           name: "contract.validate")
 
         operation.send :include, self

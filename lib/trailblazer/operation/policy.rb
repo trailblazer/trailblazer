@@ -14,8 +14,8 @@ class Trailblazer::Operation
 
     extend Stepable
 
-    def self.import!(operation, pipe, policy_class, action)
-      pipe.(:&, Evaluate, name: "policy.evaluate")
+    def self.import!(operation, import, policy_class, action)
+      import.(:&, Evaluate, name: "policy.evaluate")
 
       operation["policy.evaluator"] = Policy.build_permission(policy_class, action)
     end

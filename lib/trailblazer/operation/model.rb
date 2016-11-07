@@ -7,13 +7,13 @@ class Trailblazer::Operation
     #- import!
     # when imported via Operation::|
     # This is the preferred mechanism in TRB2.
-    def self.import!(operation, pipe, model_class, action=nil)
-      if action.nil? # not sure how to do overrides!
+    def self.import!(operation, import, model_class, action=nil)
+      if import.inheriting? # not sure how to do overrides!
         # FIXME: prototyping inheritance. should we handle that here?
         return operation["model.action"] = model_class
       end
 
-      pipe.(:&, Step, name: "model.build")
+      import.(:&, Step, name: "model.build")
 
       operation["model.class"] = model_class
       operation["model.action"] = action

@@ -7,8 +7,8 @@ class Trailblazer::Operation
 
     extend Stepable # :[]
 
-    def self.import!(operation, pipe, user_builder)
-      pipe.(:>>, Step,
+    def self.import!(operation, import, user_builder)
+      import.(:>>, Step,
         name:   "builder.call",
         before: "operation.new")
 
