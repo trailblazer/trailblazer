@@ -29,4 +29,10 @@ class PersistTest < Minitest::Spec
     result["2. fail"].must_equal "Persist"
     result.success?.must_equal false
   end
+
+
+  #---
+  it do
+    skip "show how save! could be applied and how we could rescue and deviate to left track"
+  end
 end

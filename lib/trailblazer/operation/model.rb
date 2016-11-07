@@ -1,21 +1,26 @@
 class Trailblazer::Operation
   module Model
+    Step = ->(operation, options) { options["model"] = operation.model!(options["params"]) }
+
+    extend Stepable
+
     #- import!
     # when imported via Operation::<>
     # This is the preferred mechanism in TRB2.
-    def self.[](model_class, action=nil)
+    def self.import!(operation, model_class, action=nil)
       if action.nil?
         # FIXME: prototyping inheritance. should we handle that here?
         return { skills: { "model.action" => model_class } }
       end
 
-      {
-         include: [BuildMethods],
-            step: Build,
-            name: "model.build",
-          skills: { "model.class" => model_class, "model.action" => action },
-        operator: :&,
-      }
+      operation.& Step,
+        name:   "model.build",
+        before: "operation.result"
+
+      operation["model.class"] = model_class
+      operation["model.action"] = action
+
+      operation.send :include, BuildMethods
     end
 
     # Methods to create the model according to class configuration and params.
@@ -55,7 +60,4 @@ class Trailblazer::Operation
       end
     end
   end
-
-  # calls operation.model!(params).
-  Model::Build  = ->(input, options) { options["model"] = input.model!(options["params"]) }
 end

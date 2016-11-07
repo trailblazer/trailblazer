@@ -20,35 +20,16 @@ end
 # Needs #[], #[]= skill dependency.
 class Trailblazer::Operation
   module Contract
-    module DSL
-      # This is the class level DSL method.
-      #   Op.contract #=> returns contract class
-      #   Op.contract do .. end # defines contract
-      #   Op.contract CommentForm # copies (and subclasses) external contract.
-      #   Op.contract CommentForm do .. end # copies and extends contract.
-      def contract(name=:default, constant=nil, &block)
-        heritage.record(:contract, name, constant, &block)
+    Step = ->(operation, options) { operation["contract"] = operation.contract_for } # the builder for contract.
+    extend Stepable # ::[]
 
-        path, form_class = Trailblazer::DSL::Build.new.({ prefix: :contract, class: Reform::Form, container: self }, name, constant, block)
+    def self.import!(operation, user_builder)
+      operation.> Step,             # use Operation::> inheritance.
+        name:   "contract.build",
+        before: "operation.result"
 
-        self[path] = form_class
-      end
+      operation.send :include, ContractFor # DISCUSS: is that clever?
     end
-
-    Build = ->(operation, options) { operation["contract"] = operation.contract_for }
-
-    #- import!
-    # def self.[](contract_class=self["contract.default.class"])
-    def self.[](contract_class)
-      {
-         include: [ContractFor],
-            step: Build, # calls contract_for ATM.
-            name: "contract.build",
-          skills: { },
-        operator: :>,
-      }
-    end
-
 
     module ContractFor # FIXME: rename!
       # Instantiate the contract, either by using the user's contract passed into #validate
@@ -103,6 +84,21 @@ class Trailblazer::Operation
 
       def validate_contract(contract, params)
         contract.(params)
+      end
+    end
+
+    module DSL
+      # This is the class level DSL method.
+      #   Op.contract #=> returns contract class
+      #   Op.contract do .. end # defines contract
+      #   Op.contract CommentForm # copies (and subclasses) external contract.
+      #   Op.contract CommentForm do .. end # copies and extends contract.
+      def contract(name=:default, constant=nil, &block)
+        heritage.record(:contract, name, constant, &block)
+
+        path, form_class = Trailblazer::DSL::Build.new.({ prefix: :contract, class: Reform::Form, container: self }, name, constant, block)
+
+        self[path] = form_class
       end
     end
   end # Contract
