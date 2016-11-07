@@ -39,7 +39,7 @@ class GuardTest < Minitest::Spec
   class New < Create
   end
 
-  it { New["pipetree"].inspect.must_equal %{[>>operation.new,&policy.guard.evaluate,>Call,operation.result]} }
+  it { New["pipetree"].inspect.must_equal %{[>>operation.new,&policy.guard.evaluate,>Call]} }
 end
 
 

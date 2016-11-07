@@ -4,8 +4,7 @@ class Trailblazer::Operation
 
     def self.import!(operation)
       operation["pipetree"].& ->(input, options) { options["contract"].save },
-        name:   "persist.save",
-        before: "operation.result"
+        name:   "persist.save"
     end
   end
 end

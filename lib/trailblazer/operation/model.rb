@@ -14,8 +14,7 @@ class Trailblazer::Operation
       end
 
       operation["pipetree"].& Step, # FIXME: this will do inheritance twice!
-        name:   "model.build",
-        before: "operation.result"
+        name:   "model.build"
 
       operation["model.class"] = model_class
       operation["model.action"] = action

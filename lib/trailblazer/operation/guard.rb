@@ -7,8 +7,7 @@ class Trailblazer::Operation
 
       def self.import!(operation, user_proc)
         operation["pipetree"].& Evaluate,
-          name:   "policy.guard.evaluate",
-          before: "operation.result"
+          name:   "policy.guard.evaluate"
 
         operation["policy.evaluator"] = Guard.build_permission(user_proc)
       end

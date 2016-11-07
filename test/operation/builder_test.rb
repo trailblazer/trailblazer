@@ -29,7 +29,7 @@ class BuilderTest < MiniTest::Spec
   class B < A
   end
 
-  it { B["pipetree"].inspect.must_equal %{[>>operation.new,>Call,operation.result]} }
+  it { B["pipetree"].inspect.must_equal %{[>>operation.new,>Call]} }
 
   #---
   # use Builder DSL

@@ -74,7 +74,7 @@ class PipetreeTest < Minitest::Spec
 
   puts Edit["pipetree"].inspect(style: :rows)
 
-  it { Edit["pipetree"].inspect.must_equal %{[>>operation.build,>>operation.new,&model.build,&policy.guard.evaluate,<LogBreach,>contract.build,&MyValidate,<ValidateFailureLogger,>MyAfterSave,>my.params,operation.result]} }
+  it { Edit["pipetree"].inspect.must_equal %{[>>operation.build,>>operation.new,&model.build,&policy.guard.evaluate,<LogBreach,>contract.build,&MyValidate,<ValidateFailureLogger,>MyAfterSave,>my.params["params"]]} }
 
   # valid case.
   it {

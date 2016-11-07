@@ -25,8 +25,7 @@ class Trailblazer::Operation
 
     def self.import!(operation, user_builder)
       operation["pipetree"].> Step,             # use Operation::> inheritance.
-        name:   "contract.build",
-        before: "operation.result"
+        name:   "contract.build"
 
       operation.send :include, ContractFor # DISCUSS: is that clever?
     end
@@ -53,12 +52,10 @@ class Trailblazer::Operation
 
       def self.import!(operation, key:nil)
         operation["pipetree"].& ->(input, options) { options["params"] = options["params"][key] }, # FIXME: we probably shouldn't overwrite params?
-          name: "validate.params.extract",
-          before: "operation.result" if key
+          name: "validate.params.extract" if key
 
         operation["pipetree"].& ->(input, options) { input.validate(options["params"]) }, # FIXME: how could we deal here with polymorphic keys?
-          name: "contract.validate",
-          before: "operation.result"
+          name: "contract.validate"
 
         operation.send :include, self
       end

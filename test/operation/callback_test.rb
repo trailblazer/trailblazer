@@ -42,7 +42,7 @@ class OperationCallbackTest < MiniTest::Spec
 
   #---
   #- inheritance
-  it { Update["pipetree"].inspect.must_equal %{[>>operation.new,&callback.default,operation.result]} }
+  it { Update["pipetree"].inspect.must_equal %{[>>operation.new,&callback.default]} }
 
 
   it "invokes all callbacks" do

@@ -16,8 +16,7 @@ class Trailblazer::Operation
 
     def self.import!(operation, policy_class, action)
       operation["pipetree"].& Evaluate,
-        name:   "policy.evaluate",
-        before: "operation.result"
+        name:   "policy.evaluate"
 
       operation["policy.evaluator"] = Policy.build_permission(policy_class, action)
     end

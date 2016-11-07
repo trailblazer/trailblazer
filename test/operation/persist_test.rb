@@ -14,9 +14,9 @@ class PersistTest < Minitest::Spec
     self.| Model[Song, :create]
     self.| Contract[self["contract.default.class"]]
     self.| Contract::Validate[]
-    self.< ->(input, options) { options["1. fail"] = "Validate" }, before: "operation.result"
+    self.< ->(input, options) { options["1. fail"] = "Validate" }
     self.| Persist[]
-    self.< ->(input, options) { options["2. fail"] = "Persist" }, before: "operation.result"
+    self.< ->(input, options) { options["2. fail"] = "Persist" }
   end
 
   it { Create.(title: "In Recital")["model"].title.must_equal "In Recital" }
@@ -35,7 +35,7 @@ class PersistTest < Minitest::Spec
   class Update < Create
   end
 
-  it { Update["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,>contract.build,&contract.validate,<self,&persist.save,<self,operation.result]} }
+  it { Update["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,>contract.build,&contract.validate,<self,&persist.save,<self]} }
 
   #---
   it do

@@ -8,8 +8,7 @@ class Trailblazer::Operation
 
     def self.import!(operation, group)
       operation["pipetree"].& ->(input, options) { input.callback!(group) },
-        name: "callback.#{group}",
-        before: "operation.result"
+        name: "callback.#{group}"
 
       operation.send :include, self
     end

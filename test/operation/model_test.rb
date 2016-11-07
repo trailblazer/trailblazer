@@ -24,7 +24,7 @@ class ModelTest < Minitest::Spec
   it { Update.({ id: 1 })["model"].inspect.must_equal %{#<struct ModelTest::Song id=1>} }
 
   #- inheritance
-  it { Update["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,operation.result]} }
+  it { Update["pipetree"].inspect.must_equal %{[>>operation.new,&model.build]} }
 
   # override #model with Model included.
   class Upsert < Create

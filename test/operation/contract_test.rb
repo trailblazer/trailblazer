@@ -202,7 +202,7 @@ class ValidateTest < Minitest::Spec
 
     self.| Model[Song, :create] # FIXME.
     self.| Contract[self["contract.default.class"]]
-    self.& ->(input, options) { input.process(options["params"]) }, before: "operation.result"
+    self.& ->(input, options) { input.process(options["params"]) }
   end
 
   # validate returns the #validate result
@@ -294,7 +294,7 @@ class ValidateTest < Minitest::Spec
   class New < Upsert
   end
 
-  it { New["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,>contract.build,&validate.params.extract,&contract.validate,operation.result]} }
+  it { New["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,>contract.build,&validate.params.extract,&contract.validate]} }
 end
 
 # #---
