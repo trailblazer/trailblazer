@@ -30,6 +30,12 @@ class PersistTest < Minitest::Spec
     result.success?.must_equal false
   end
 
+  #---
+  #- inheritance
+  class Update < Create
+  end
+
+  it { Update["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,>contract.build,&contract.validate,<self,&persist.save,<self,operation.result]} }
 
   #---
   it do

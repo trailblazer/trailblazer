@@ -13,6 +13,7 @@ class Trailblazer::Operation
         before: "operation.new"
 
       operation["builder"] = user_builder
+      false # suppress -inheritance. dislike. FIXME.
     end
 
     def self.included(includer)

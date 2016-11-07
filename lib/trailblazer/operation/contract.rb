@@ -24,7 +24,7 @@ class Trailblazer::Operation
     extend Stepable # ::[]
 
     def self.import!(operation, user_builder)
-      operation.> Step,             # use Operation::> inheritance.
+      operation["pipetree"].> Step,             # use Operation::> inheritance.
         name:   "contract.build",
         before: "operation.result"
 
@@ -49,22 +49,18 @@ class Trailblazer::Operation
     # Deviate to left track if optional key is not found in params.
     # Deviate to left if validation result falsey.
     module Validate
-      def self.[](key:nil)
-        [
-          key ? {
-            step: ->(input, options) { options["params"] = options["params"][key] }, # FIXME: we probably shouldn't overwrite params?
-            operator: :&,
-            skills: {},
-            name: "validate.params.extract",
-            } : nil,
-          {
-            include: [self],
-            step: ->(input, options) { input.validate(options["params"]) }, # FIXME: how could we deal here with polymorphic keys?
-            operator: :&,
-            skills: { },
-            name: "contract.validate",
-          }
-        ].compact
+      extend Stepable
+
+      def self.import!(operation, key:nil)
+        operation["pipetree"].& ->(input, options) { options["params"] = options["params"][key] }, # FIXME: we probably shouldn't overwrite params?
+          name: "validate.params.extract",
+          before: "operation.result" if key
+
+        operation["pipetree"].& ->(input, options) { input.validate(options["params"]) }, # FIXME: how could we deal here with polymorphic keys?
+          name: "contract.validate",
+          before: "operation.result"
+
+        operation.send :include, self
       end
 
       def validate(params, contract:self["contract"], path:"contract") # :params

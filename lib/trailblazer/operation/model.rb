@@ -8,12 +8,12 @@ class Trailblazer::Operation
     # when imported via Operation::<>
     # This is the preferred mechanism in TRB2.
     def self.import!(operation, model_class, action=nil)
-      if action.nil?
+      if action.nil? # not sure how to do overrides!
         # FIXME: prototyping inheritance. should we handle that here?
-        return { skills: { "model.action" => model_class } }
+        return operation["model.action"] = model_class
       end
 
-      operation.& Step,
+      operation["pipetree"].& Step, # FIXME: this will do inheritance twice!
         name:   "model.build",
         before: "operation.result"
 

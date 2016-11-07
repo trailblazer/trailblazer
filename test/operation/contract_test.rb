@@ -288,6 +288,13 @@ class ValidateTest < Minitest::Spec
   it { Upsert.(song: { title: nil }).success?.must_equal false }
   # key not found
   it { Upsert.().success?.must_equal false }
+
+  #---
+  #- inheritance
+  class New < Upsert
+  end
+
+  it { New["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,>contract.build,&validate.params.extract,&contract.validate,operation.result]} }
 end
 
 # #---

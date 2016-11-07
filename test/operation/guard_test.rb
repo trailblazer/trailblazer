@@ -35,7 +35,7 @@ class GuardTest < Minitest::Spec
   it { Update.(pass: true)[:x].must_equal true }
 
   #---
-  # inheritance
+  #- Guard inheritance
   class New < Create
   end
 

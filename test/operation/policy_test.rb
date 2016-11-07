@@ -51,9 +51,10 @@ class PolicyTest < Minitest::Spec
   #---
   # inheritance, adding Model
   class Show < Create
-    self.| Model[Song, :create]#, before: "policy.evaluate"
-    puts "@@@@@ #{Show["pipetree"].inspect}"
+    self.| Model[Song, :create], before: "policy.evaluate"
   end
+
+  it { Show["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,&policy.evaluate,>Call,operation.result]} }
 
   # invalid because user AND model.
   it do

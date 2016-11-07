@@ -23,6 +23,9 @@ class ModelTest < Minitest::Spec
   # :find it
   it { Update.({ id: 1 })["model"].inspect.must_equal %{#<struct ModelTest::Song id=1>} }
 
+  #- inheritance
+  it { Update["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,operation.result]} }
+
   # override #model with Model included.
   class Upsert < Create
     def model!(params); params.to_s end
@@ -71,6 +74,7 @@ class ModelTest < Minitest::Spec
   end
 
   it { Show.({id: 1})["model"].inspect.must_equal %{#<struct ModelTest::Song id=1>} }
+
 
   # TODO: with builder!
 

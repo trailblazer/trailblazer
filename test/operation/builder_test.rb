@@ -24,6 +24,12 @@ class BuilderTest < MiniTest::Spec
   it { A.({ sub: true })["x"].must_equal A::B }
   it { A::B["builder"].must_equal nil }
 
+  #---
+  #- Builder inheritance
+  class B < A
+  end
+
+  it { B["pipetree"].inspect.must_equal %{[>>operation.new,>Call,operation.result]} }
 
   #---
   # use Builder DSL

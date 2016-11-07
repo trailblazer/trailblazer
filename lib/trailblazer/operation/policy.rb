@@ -1,13 +1,25 @@
 class Trailblazer::Operation
   module Policy
-    #-- import!
-    def self.[](policy_class, action)
-      {
-          step: Evaluate, # TODO: with different names?
-          name: "policy.evaluate",
-        skills: { "policy.evaluator" => Policy.build_permission(policy_class, action) },
-        operator: :&,
-      }
+    # This is a generic evaluate function for all kinds of policies.
+    # Arguments to the Callable: (skills)
+    Evaluate = ->(input, options) {
+      result = options["policy.evaluator"].(options)
+
+      options["policy"]        = result["policy"] # assign the policy as a skill.
+      options["result.policy"] = result
+
+      # flow control
+      result.success? # since we & this, it's only executed OnRight and the return boolean decides the direction, input is passed straight through.
+    }
+
+    extend Stepable
+
+    def self.import!(operation, policy_class, action)
+      operation["pipetree"].& Evaluate,
+        name:   "policy.evaluate",
+        before: "operation.result"
+
+      operation["policy.evaluator"] = Policy.build_permission(policy_class, action)
     end
 
     # includer.& Evaluate, before: "operation.call", name: "policy.evaluate"
@@ -42,18 +54,6 @@ class Trailblazer::Operation
         Result.new(success, data)
       end
     end
-
-    # This is a generic evaluate function for all kinds of policies.
-    # Arguments to the Callable: (skills)
-    Evaluate = ->(input, options) {
-      result = options["policy.evaluator"].(options)
-
-      options["policy"]        = result["policy"] # assign the policy as a skill.
-      options["result.policy"] = result
-
-      # flow control
-      result.success? # since we & this, it's only executed OnRight and the return boolean decides the direction, input is passed straight through.
-    }
   end
 end
 

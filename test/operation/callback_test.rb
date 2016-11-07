@@ -40,6 +40,10 @@ class OperationCallbackTest < MiniTest::Spec
     end
   end
 
+  #---
+  #- inheritance
+  it { Update["pipetree"].inspect.must_equal %{[>>operation.new,&callback.default,operation.result]} }
+
 
   it "invokes all callbacks" do
     res = Create.({"name"=>"Keep On Running"})
