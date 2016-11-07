@@ -4,7 +4,23 @@ require 'test_helper'
 class OperationCallbackTest < MiniTest::Spec
   Song = Struct.new(:name)
 
+  #---
+  # with contract and disposable semantics
   class Create < Trailblazer::Operation
+    extend Contract::DSL
+
+    contract do
+      property :name
+    end
+
+    self.| Model[Song, :create]
+    self.| Contract[self["contract.default.class"]]
+    self.| Contract::Validate[]
+    # FIXME: what is input here??????
+    # self.> ->(input, options) { puts "@@@@@ #{options["contract"].inspect}" }
+    self.| Callback[:default]
+
+
     extend Callback::DSL
 
     callback do
@@ -12,7 +28,6 @@ class OperationCallbackTest < MiniTest::Spec
       on_change :notify_you!
     end
 
-    self.| Callback[:default]
 
     # TODO: always dispatch, pass params.
 
@@ -42,7 +57,7 @@ class OperationCallbackTest < MiniTest::Spec
 
   #---
   #- inheritance
-  it { Update["pipetree"].inspect.must_equal %{[>>operation.new,&callback.default]} }
+  it { Update["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,>contract.build,&contract.validate,&callback.default]} }
 
 
   it "invokes all callbacks" do
