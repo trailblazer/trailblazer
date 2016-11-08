@@ -24,7 +24,7 @@ class Trailblazer::Operation
 
     extend Stepable # ::[]
 
-    def self.import!(operation, import, user_builder_fixme)
+    def self.import!(operation, import, what_contract_fixme)
       import.(:>, Step, name: "contract.build")
 
       operation.send :include, ContractFor # DISCUSS: is that clever?

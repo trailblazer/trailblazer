@@ -16,8 +16,6 @@ class OperationCallbackTest < MiniTest::Spec
     self.| Model[Song, :create]
     self.| Contract[self["contract.default.class"]]
     self.| Contract::Validate[]
-    # FIXME: what is input here??????
-    # self.> ->(input, options) { puts "@@@@@ #{options["contract"].inspect}" }
     self.| Callback[:default]
 
 

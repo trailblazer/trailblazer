@@ -31,6 +31,24 @@ class DryValidationTest < Minitest::Spec
   # failure
   it { Create.(id: nil)["result.contract.params"].success?.must_equal false }
   it { Create.(id: nil)["result.contract.params"].errors.must_equal({:id=>["must be filled"]}) }
+
+  #---
+  # with Contract::Validate, but before op even gets instantiated.
+  class Update < Trailblazer::Operation #["contract"]
+    extend Contract::DSL
+
+    contract "params", (Dry::Validation.Schema do
+      required(:id).filled
+    end)
+
+    self.& ->(input, options) {
+
+      puts "@@@@@ #{options.inspect}"
+     options["contract.params"].(options["params"]).success? }, before: "operation.new"
+  end
+
+  it { Update.( id: 1 ).success?.must_equal true }
+  it { Update.( ).success?.must_equal false }
 end
 
 class ContractTest < Minitest::Spec
