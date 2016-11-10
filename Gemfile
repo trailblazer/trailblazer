@@ -10,7 +10,7 @@ gem "reform-rails"
 
 gem "roar", github: "apotonick/roar"
 # gem "reform", "~> 2.0.0"
-# gem "reform", path: "../reform"
+gem "reform"#, path: "../reform"
 # gem "roar", path: "../roar"
 gem "multi_json"
 
@@ -19,9 +19,9 @@ gem "dry-matcher"
 gem "dry-validation"
 
 
-gem "trailblazer-operation", path: "../operation"
-gem "pipetree", path: "../pipetree"
+# gem "trailblazer-operation", path: "../operation"
+gem "pipetree"#, path: "../pipetree"
 
 gem "minitest-line"
 
-gem "uber", path: "../uber"
+# gem "uber", path: "../uber"
