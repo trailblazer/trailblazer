@@ -5,7 +5,7 @@ class GuardTest < Minitest::Spec
   # with proc, evaluated in operation context.
   class Create < Trailblazer::Operation
     self.| Policy::Guard[ ->(options) { options["params"][:pass] == self["params"][:pass] && options["params"][:pass] } ]
-    self.| Call
+    self.| Process
 
     def process(*); self[:x] = true; end
     puts self["pipetree"].inspect(style: :rows)
@@ -26,7 +26,7 @@ class GuardTest < Minitest::Spec
     end
 
     self.| Policy::Guard[ MyGuard.new ]
-    self.| Call
+    self.| Process
 
     def process(*); self[:x] = true; end
   end
@@ -39,7 +39,7 @@ class GuardTest < Minitest::Spec
   class New < Create
   end
 
-  it { New["pipetree"].inspect.must_equal %{[>>operation.new,&policy.guard.evaluate,>Call]} }
+  it { New["pipetree"].inspect.must_equal %{[>>operation.new,&policy.guard.evaluate,>Process]} }
 end
 
 

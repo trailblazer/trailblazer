@@ -37,7 +37,7 @@ class ModelTest < Minitest::Spec
   # :find_by, exceptionless.
   class Find < Trailblazer::Operation
     self.| Model[Song, :find_by]
-    self.| Call
+    self.| Process
 
     def process(*); self["x"] = true end
   end

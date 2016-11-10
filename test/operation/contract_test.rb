@@ -15,7 +15,7 @@ class DryValidationTest < Minitest::Spec
     # end
 
     # self.| Contract[self["contract.params"]]
-    self.| Call
+    self.| Process
 
     include Contract::Validate
 
@@ -74,9 +74,10 @@ class ContractTest < Minitest::Spec
         property :title
       end
 
-      self.| ->(*) { self["model"] = Song.new } # FIXME:
+      self.> ->(*) { self["model"] = Song.new } # FIXME:
+      # self.| Model[Song, :create]
       self.| Contract[self["contract.default.class"]]
-      self.| Call
+      self.| Process
 
       include Contract::Validate
       # TODO: get model automatically in validate!
@@ -110,7 +111,7 @@ class ContractTest < Minitest::Spec
 
 #   # contract(model, [admin: true]).validate
 #   class Create < Trailblazer::Operation
-#     include Test::ReturnCall
+#     include Test::ReturnProcess
 #     include Contract::Explicit
 
 #     def call(options:false)
@@ -128,7 +129,7 @@ class ContractTest < Minitest::Spec
 #   # ::contract Form
 #   # contract(model).validate
 #   class Update < Trailblazer::Operation
-#     include Test::ReturnCall
+#     include Test::ReturnProcess
 #     include Contract::Explicit
 
 #     self["contract.default.class"] = Form
