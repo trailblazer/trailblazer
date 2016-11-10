@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "trailblazer-operation"
-  spec.add_dependency "uber", ">= 0.0.15"
+  spec.add_dependency "uber", "~> 0.1.0"
   spec.add_dependency "reform", ">= 2.0.0", "< 3.0.0"
   spec.add_dependency "declarative"
 

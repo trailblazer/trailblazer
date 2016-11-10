@@ -3,22 +3,20 @@ require "uber/builder"
 # http://trailblazer.to/gems/operation/2.0/builder.html
 class Trailblazer::Operation
   module Builder
-    Step = ->(klass, options) { options["builder"].(options) }
-
     extend Stepable # :[]
 
     def self.import!(operation, import, user_builder)
-      import.(:>>, Step,
+      import.(:>>, user_builder,
         name:   "builder.call",
         before: "operation.new")
 
-      operation["builder"] = user_builder
-      false # suppress -inheritance. dislike. FIXME.
+      false # suppress inheritance. dislike. FIXME at some point.
     end
 
+    # Include this when you want the ::builds DSL.
     def self.included(includer)
       includer.extend Uber::Builder::DSL # ::builds, ::builders
-      includer.| self[ Uber::Builder::Constant.new(includer, includer, includer.builders) ]
+      includer.| self[ includer.builders ] # pass class Builders object to our ::import!.
     end
   end
 end

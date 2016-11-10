@@ -4,15 +4,15 @@ require "trailblazer/operation/builder"
 class BuilderTest < MiniTest::Spec
   #---
   # pass proc to Builder[]
-  # this is the minimalistic way.
+  # this is the puristic way.
   class A < Trailblazer::Operation
-    builds = ->(options) do
+    builds = ->(klass, options) do
       return B if options["params"][:sub]
-      A
+      klass
     end
 
     self.| Builder[ builds ]
-    self.| Call
+    self.| Process
 
     class B < A
     end
@@ -25,11 +25,23 @@ class BuilderTest < MiniTest::Spec
   it { A::B["builder"].must_equal nil }
 
   #---
+  # use manual Builders object
+  MyBuilders = Uber::Builder::Builders.new
+  MyBuilders << Uber::Option[->(options) { return self::B if options["params"][:sub] }, instance_exec: true]
+
+  class Create < Trailblazer::Operation
+    self.| Builder[ MyBuilders ]
+    self.> ->(input, options) { options["x"] = input.class }
+  end
+
+  it { Create.()["x"].must_equal Create }
+
+  #---
   #- Builder inheritance
   class B < A
   end
 
-  it { B["pipetree"].inspect.must_equal %{[>>operation.new,>Call]} }
+  it { B["pipetree"].inspect.must_equal %{[>>operation.new,>Process]} }
 
   #---
   # use Builder DSL
@@ -44,7 +56,7 @@ class BuilderTest < MiniTest::Spec
     end
 
     def process(*); self["x"] = self.class end
-    self.| Call
+    self.| Process
   end
 
   it { ParentOperation.({})["x"].must_equal ParentOperation }
@@ -63,18 +75,16 @@ class OperationBuilderClassTest < MiniTest::Spec
   end
 
   class ParentOperation < Trailblazer::Operation
-    def process(params)
-    end
-
     class Sub < self
     end
 
-    include Builder
+    # include Builder
     # self["builder_class"] = SuperOperation["builder_class"]
-    self["builder"] = SuperOperation["builder"]
+    # self.builders = SuperOperation["builder"]
+    self.| Builder[ SuperOperation.builders ]
 
     def process(*); self["x"] = self.class end
-    self.| Call
+    self.| Process
   end
 
   it { ParentOperation.({})["x"].must_equal ParentOperation }
