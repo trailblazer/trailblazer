@@ -27,7 +27,7 @@ class BuilderTest < MiniTest::Spec
   #---
   # use manual Builders object
   MyBuilders = Uber::Builder::Builders.new
-  MyBuilders << Uber::Option[->(options) { return self::B if options["params"][:sub] }, instance_exec: true]
+  MyBuilders << ->(options) { return self::B if options["params"][:sub] }
 
   class Create < Trailblazer::Operation
     self.| Builder[ MyBuilders ]
@@ -64,7 +64,7 @@ class BuilderTest < MiniTest::Spec
 end
 
 #---
-# copying via ["builder"]
+# copying via Operation.builders
 class OperationBuilderClassTest < MiniTest::Spec
   class SuperOperation < Trailblazer::Operation
     include Builder
@@ -78,9 +78,6 @@ class OperationBuilderClassTest < MiniTest::Spec
     class Sub < self
     end
 
-    # include Builder
-    # self["builder_class"] = SuperOperation["builder_class"]
-    # self.builders = SuperOperation["builder"]
     self.| Builder[ SuperOperation.builders ]
 
     def process(*); self["x"] = self.class end
