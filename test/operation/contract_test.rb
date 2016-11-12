@@ -309,6 +309,11 @@ class ValidateTest < Minitest::Spec
   it { Upsert.().success?.must_equal false }
 
   #---
+  # params.validate gets set (TODO: change in 2.1)
+  it { Upsert.(song: { title: "SVG" })["params"].must_equal({:song=>{:title=>"SVG"}}) }
+  it { Upsert.(song: { title: "SVG" })["params.validate"].must_equal({:title=>"SVG"}) }
+
+  #---
   #- inheritance
   class New < Upsert
   end
