@@ -1,31 +1,26 @@
 require "test_helper"
-require "trailblazer/operation/callback"
-require "trailblazer/operation/contract"
-
 
 class DslCallbackTest < MiniTest::Spec
   module SongProcess
-    def process(params)
-      self[:_invocations] = _invocations
-      contract(model: OpenStruct.new).validate(params)
-      dispatch!
-    end
-
     def _invocations
-      @_invocations ||= []
+      self["x"] ||= []
     end
 
     def self.included(includer)
+      includer.extend Trailblazer::Operation::Contract::DSL
       includer.contract do
         property :title
       end
+      includer.| Trailblazer::Operation::Model[OpenStruct, :create]
+      includer.| Trailblazer::Operation::Contract[includer["contract.default.class"]]
+      includer.| Trailblazer::Operation::Contract::Validate[]
+      includer.| Trailblazer::Operation::Callback[:default]
     end
   end
 
   describe "inheritance across operations" do
     class Operation < Trailblazer::Operation
-      include Contract::Explicit
-      include Callback
+      extend Callback::DSL
       include SongProcess
 
       callback do
@@ -42,17 +37,14 @@ class DslCallbackTest < MiniTest::Spec
         def admin_default!(*); _invocations << :admin_default!; end
         def after_save!(*);    _invocations << :after_save!; end
 
-        def process(*)
-          super
-          dispatch!(:after_save)
-        end
+        self.| Trailblazer::Operation::Callback[:after_save]
       end
 
       def default!(*); _invocations << :default!; end
     end
 
-    it { Operation.({"title"=> "Love-less"})[:_invocations].must_equal([:default!]) }
-    it { Operation::Admin.({"title"=> "Love-less"})[:_invocations].must_equal([:default!, :admin_default!, :after_save!]) }
+    it { Operation.({"title"=> "Love-less"})["x"].must_equal([:default!]) }
+    it { Operation::Admin.({"title"=> "Love-less"})["x"].must_equal([:default!, :admin_default!, :after_save!]) }
   end
 
   describe "Op.callback :after_save, AfterSaveCallback" do
@@ -65,17 +57,11 @@ class DslCallbackTest < MiniTest::Spec
     end
 
     class OpWithExternalCallback < Trailblazer::Operation
-      include Test::ReturnCall
-      include Contract::Explicit
-      include Callback
       include SongProcess
+      extend Callback::DSL
       callback :after_save, AfterSaveCallback
 
-      def call(params)
-        contract(model: OpenStruct.new).validate(params)
-        dispatch!(:after_save)
-        _invocations
-      end
+      self.| Callback[:after_save]
     end
 
     it { OpWithExternalCallback.("title"=>"Thunder Rising").must_equal([:after_save!]) }
@@ -91,15 +77,13 @@ class DslCallbackTest < MiniTest::Spec
     end
 
     class OpUsingCallback < Trailblazer::Operation
-      include Contract::Explicit
-      include Callback
+      extend Callback::DSL
       include SongProcess
       callback :default, DefaultCallback
     end
 
     class OpExtendingCallback < Trailblazer::Operation
-      include Contract::Explicit
-      include Callback
+      extend Callback::DSL
       include SongProcess
       callback :default, DefaultCallback do
         on_change :after_save!
@@ -115,8 +99,8 @@ class DslCallbackTest < MiniTest::Spec
     end
 
     # this operation copies DefaultCallback and shouldn't run #after_save!.
-    it { OpUsingCallback.(title: "Thunder Rising")[:_invocations].must_equal([:default!]) }
+    it { OpUsingCallback.(title: "Thunder Rising")["x"].must_equal([:default!]) }
     # this operation copies DefaultCallback, extends it and runs #after_save!.
-    it { OpExtendingCallback.(title: "Thunder Rising")[:_invocations].must_equal([:extended_default!, :after_save!]) }
+    it { OpExtendingCallback.(title: "Thunder Rising")["x"].must_equal([:extended_default!, :after_save!]) }
   end
 end
