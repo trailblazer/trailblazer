@@ -1,5 +1,4 @@
 require "test_helper"
-require "trailblazer/operation/model"
 
 class ModelTest < Minitest::Spec
   Song = Struct.new(:id) do
