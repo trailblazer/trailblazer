@@ -12,6 +12,14 @@ class DslContractTest < MiniTest::Spec
       validate(params, model: model=OpenStruct.new) { contract.sync }
       model
     end
+
+    def self.included(includer)
+      includer.| Trailblazer::Operation::Model[OpenStruct, :create]
+      includer.| Trailblazer::Operation::Contract[includer["contract.default.class"]]
+      includer.| Trailblazer::Operation::Contract::Validate[]
+      includer.| Trailblazer::Operation::Persist[save_method: :sync]
+      # includer.> ->(op, *) { op["x"] = [] }
+    end
   end
 
   # ---
@@ -39,7 +47,7 @@ class DslContractTest < MiniTest::Spec
       property :id
     end
 
-    include Contract::Explicit
+    extend Contract::DSL
     contract IdContract
 
     include Call
@@ -48,7 +56,7 @@ class DslContractTest < MiniTest::Spec
   # UT: subclasses contract.
   it { Update["contract.default.class"].superclass.must_equal Update::IdContract }
   # IT: only knows `id`.
-  it { Update.(id: 1, title: "Coaster").inspect.must_equal %{<Result:true #<OpenStruct id=1> >} }
+  it { Update.(id: 1, title: "Coaster")["model"].inspect.must_equal %{#<OpenStruct id=1>} }
 
   # Op::contract with inheritance
   # no ::contract call.
@@ -59,7 +67,7 @@ class DslContractTest < MiniTest::Spec
   it { Upgrade["contract.default.class"].superclass.must_equal Update::IdContract }
   it { Upgrade["contract.default.class"].wont_equal Update["contract.default.class"] }
   # IT: only knows `id`.
-  it { Upgrade.(id: 1, title: "Coaster").inspect.must_equal %{<Result:true #<OpenStruct id=1> >} }
+  it { Upgrade.(id: 1, title: "Coaster")["model"].inspect.must_equal %{#<OpenStruct id=1>} }
 
   # ::contract B overrides old A contract.
   # this makes sure when calling contract(Constant), the old class gets wiped and is replaced with the new constant.
@@ -74,7 +82,7 @@ class DslContractTest < MiniTest::Spec
   # UT: subclasses contract.
   it { Upsert["contract.default.class"].superclass.must_equal Upsert::TitleContract }
   # IT: only knows `title`.
-  it { Upsert.(id: 1, title: "Coaster").inspect.must_equal %{<Result:true #<OpenStruct title="Coaster"> >} }
+  it { Upsert.(id: 1, title: "Coaster")["model"].inspect.must_equal %{#<OpenStruct title="Coaster">} }
 
   # ::contract B do ..end overrides and extends new.
   # using a constant will wipe out the existing class.
@@ -87,7 +95,7 @@ class DslContractTest < MiniTest::Spec
   # UT: subclasses contract.
   it { Upside["contract.default.class"].superclass.must_equal Upsert::TitleContract }
   # IT: only knows `title`.
-  it { Upside.(id: 1, title: "Coaster").inspect.must_equal %{<Result:true #<OpenStruct title="Coaster", id=1> >} }
+  it { Upside.(id: 1, title: "Coaster")["model"].inspect.must_equal %{#<OpenStruct title="Coaster", id=1>} }
 
 
 
@@ -95,7 +103,8 @@ class DslContractTest < MiniTest::Spec
   # contract do .. end
   # (with block)
   class Delete < Trailblazer::Operation
-    include Contract::Explicit, Call
+    include Call
+    extend Contract::DSL
     contract do
       property :title
     end
@@ -104,10 +113,11 @@ class DslContractTest < MiniTest::Spec
   # UT: contract path is "contract.default.class"
   it { Delete["contract.default.class"].definitions.keys.must_equal ["title"] }
   # IT: knows `title`.
-  it { Delete.(id: 1, title: "Coaster").inspect.must_equal %{<Result:true #<OpenStruct title=\"Coaster\"> >} }
+  it { Delete.(id: 1, title: "Coaster")["model"].inspect.must_equal %{#<OpenStruct title=\"Coaster\">} }
 
   class Wipe < Trailblazer::Operation
-    include Contract::Explicit
+    extend Contract::DSL
+
     self["x"] = contract do end
   end
   # UT: ::contract returns form class
@@ -115,7 +125,9 @@ class DslContractTest < MiniTest::Spec
 
   # subsequent calls merge.
   class Remove < Trailblazer::Operation
-    include Contract::Explicit, Call
+    extend Contract::DSL
+    include Call
+
     contract do
       property :title
     end
@@ -126,24 +138,18 @@ class DslContractTest < MiniTest::Spec
   end
 
   # IT: knows `title` and `id`, since contracts get merged.
-  it { Remove.(id: 1, title: "Coaster").inspect.must_equal %{<Result:true #<OpenStruct title=\"Coaster\", id=1> >} }
+  it { Remove.(id: 1, title: "Coaster")["model"].inspect.must_equal %{#<OpenStruct title=\"Coaster\", id=1>} }
 
 
 
 
 
-  module SongProcess
-    def process(params)
-      validate(params, model: @model = OpenStruct.new)
-    end
-  end
 
   # Operation::["contract.default.class"]
   # Operation::["contract.default.class"]=
   describe %{Operation::["contract.default.class"]} do
 
     class Update2 < Trailblazer::Operation
-      include Contract::Step
       self["contract.default.class"] = String
     end
 
@@ -153,7 +159,7 @@ class DslContractTest < MiniTest::Spec
   describe "inheritance across operations" do
     # inheritance
     class Operation < Trailblazer::Operation
-      include Contract
+      extend Contract::DSL
       contract do
         property :title
         property :band
@@ -201,9 +207,9 @@ class DslContractTest < MiniTest::Spec
     end
 
     class OpWithExternalContract < Trailblazer::Operation
-      include Contract::Explicit
+      extend Contract::DSL
       contract SongForm
-      include SongProcess
+      include Call
     end
 
     it { OpWithExternalContract.("songTitle"=> "Monsterparty")["contract"].songTitle.must_equal "Monsterparty" }
@@ -215,17 +221,17 @@ class DslContractTest < MiniTest::Spec
     end
 
     class OpNotExtendingContract < Trailblazer::Operation
-      include Contract::Explicit
+      extend Contract::DSL
       contract DifferentSongForm
-      include SongProcess
+      include Call
     end
 
     class OpExtendingContract < Trailblazer::Operation
-      include Contract::Explicit
+      extend Contract::DSL
       contract DifferentSongForm do
         property :genre
       end
-      include SongProcess
+      include Call
     end
 
     # this operation copies DifferentSongForm and shouldn't have `genre`.
@@ -252,7 +258,7 @@ class DslContractTest < MiniTest::Spec
     class Follow < Trailblazer::Operation
       ParamsForm = Class.new
 
-      include Contract
+      extend Contract::DSL
       contract :params, ParamsForm
     end
 
@@ -261,7 +267,7 @@ class DslContractTest < MiniTest::Spec
 
   describe "Op.contract :name do..end" do
     class Unfollow < Trailblazer::Operation
-      include Contract
+      extend Contract::DSL
       contract :params do
         property :title
       end
@@ -273,7 +279,7 @@ class DslContractTest < MiniTest::Spec
   # multiple ::contract calls.
   describe "multiple ::contract calls" do
     class Star < Trailblazer::Operation
-      include Contract
+      extend Contract::DSL
       contract do
         property :title
       end

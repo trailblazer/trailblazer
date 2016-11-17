@@ -14,6 +14,7 @@ Rake::TestTask.new(:test) do |test|
     test/operation/contract_test.rb
     test/operation/persist_test.rb
     test/operation/callback_test.rb
+    test/operation/dsl/contract_test.rb
     }]
   test.verbose = true
 end
