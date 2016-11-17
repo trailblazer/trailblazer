@@ -1,7 +1,6 @@
 require "test_helper"
-require "trailblazer/operation/resolver"
 
-class BuilderTest < Minitest::Spec
+class ResolverTest < Minitest::Spec
   Song = Struct.new(:id) do
     def self.find(id); new(id) end
   end
@@ -15,16 +14,19 @@ class BuilderTest < Minitest::Spec
   end
 
   class A < Trailblazer::Operation
-    include Builder
+    extend Builder::DSL
     builds ->(options) {
       return P if options["params"] == { some: "params", id:1 }
-      return B if options["policy"].inspect == %{<Auth: user:Module, model:#<struct BuilderTest::Song id=3>>} # both user and model:id are set!
-      return M if options["model"].inspect == %{#<struct BuilderTest::Song id=9>}
+      return B if options["policy"].inspect == %{<Auth: user:Module, model:#<struct ResolverTest::Song id=3>>} # both user and model:id are set!
+      return M if options["model"].inspect == %{#<struct ResolverTest::Song id=9>}
     }
 
-    include Resolver
-    model Song, :update
-    policy Auth, :user_and_model?
+    self.| Model[Song, :update], before: "operation.new"
+    self.| Policy[Auth, :user_and_model?], before: "operation.new"
+    require "trailblazer/operation/resolver"
+    self.| Resolver[], before: "operation.new"
+
+    self.| Process
 
     class P < self; end
     class B < self; end
@@ -32,6 +34,8 @@ class BuilderTest < Minitest::Spec
 
     def process(*); self["x"] = self.class end
   end
+
+  it { A["pipetree"].inspect.must_equal %{[&model.build,&policy.evaluate,>>builder.call,>>operation.new,>Process]} }
 
   it { r=A.({ some: "params", id: 1 }, { "user.current" => Module })
     puts r.inspect
