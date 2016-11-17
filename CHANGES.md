@@ -99,6 +99,10 @@ You can now inject the following objects via `::call`:
 
 * You can't call `Create.().contract` anymore. The contract instance(s) are available through the `Result` object.
 
+# 1.1.2
+
+* Stricter `uber` dependency.
+
 # 1.1.1
 
 * Rename `Operation::Representer::ClassMethods` to `Operation::Representer::DSL` and allow to use `DSL` and `Rendering` without `Deserialization` so you can use two different representers.
