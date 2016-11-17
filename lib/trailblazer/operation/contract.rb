@@ -51,10 +51,10 @@ class Trailblazer::Operation
       extend Stepable
 
       def self.import!(operation, import, key:nil)
-        import.(:&, ->(input, options) { options["params"] = options["params"][key] }, # FIXME: we probably shouldn't overwrite params?
-          name: "validate.params.extract") if key
+        import.(:&, ->(input, options) { options["params.validate"] = key ? options["params"][key] : options["params"] }, # FIXME: introduce nested pipes and pass composed input instead.
+          name: "validate.params.extract")
 
-        import.(:&, ->(input, options) { input.validate(options["params"]) }, # FIXME: how could we deal here with polymorphic keys?
+        import.(:&, ->(operation, options) { operation.validate(options["params.validate"]) }, # FIXME: how could we deal here with polymorphic keys?
           name: "contract.validate")
 
         operation.send :include, self
