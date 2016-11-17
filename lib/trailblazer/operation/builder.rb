@@ -15,8 +15,10 @@ class Trailblazer::Operation
 
     # Include this when you want the ::builds DSL.
     def self.included(includer)
-      includer.extend Uber::Builder::DSL # ::builds, ::builders
+      includer.extend DSL # ::builds, ::builders
       includer.| self[ includer.builders ] # pass class Builders object to our ::import!.
     end
+
+    DSL = Uber::Builder::DSL
   end
 end
