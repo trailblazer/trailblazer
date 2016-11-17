@@ -1,3 +1,7 @@
+# 1.1.2
+
+* Stricter `uber` dependency.
+
 # 1.1.1
 
 * Rename `Operation::Representer::ClassMethods` to `Operation::Representer::DSL` and allow to use `DSL` and `Rendering` without `Deserialization` so you can use two different representers.
