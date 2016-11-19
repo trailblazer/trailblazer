@@ -27,6 +27,7 @@ class DocContractTest < Minitest::Spec
   #---
   # DRY-validation params validation before op,
   # plus main contract.
+  #- result.path
   class Add < Trailblazer::Operation
     extend Contract::DSL
 
@@ -48,8 +49,9 @@ class DocContractTest < Minitest::Spec
     self.| Persist[method: :sync, contract: "contract.form"] # persist the contract's data via the model.
   end
 
-  it { Add.({}).inspect("model").must_equal %{<Result:false [nil] >} }
-  it { Add.({ id: 1 }).inspect("model").must_equal %{<Result:false [#<struct DocContractTest::Song id=nil, title=nil>] >} }
+  it { Add.({}).inspect("model", "result.contract.params").must_equal %{<Result:false [nil, #<Dry::Validation::Result output={} errors={:id=>[\"is missing\"]}>] >} }
+  it { Add.({ id: 1 }).inspect("model", "result.contract.params").must_equal %{<Result:false [#<struct DocContractTest::Song id=nil, title=nil>, #<Dry::Validation::Result output={:id=>1} errors={}>] >} }
+  # it { Add.({ id: 1, title: "" }).inspect("model", "result.contract.form").must_equal %{<Result:false [#<struct DocContractTest::Song id=nil, title=nil>] >} }
   it { Add.({ id: 1, title: "" }).inspect("model").must_equal %{<Result:false [#<struct DocContractTest::Song id=nil, title=nil>] >} }
   it { Add.({ id: 1, title: "Yo" }).inspect("model").must_equal %{<Result:true [#<struct DocContractTest::Song id=nil, title="Yo">] >} }
 

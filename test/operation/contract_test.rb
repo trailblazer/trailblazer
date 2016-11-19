@@ -235,10 +235,10 @@ class ValidateTest < Minitest::Spec
 
   # result object from validation.
   #- result object, contract
-  it { Create.(title: 1)["result.contract"].success?.must_equal true }
-  it { Create.(title: 1)["result.contract"].errors.messages.must_equal({}) } # FIXME: change API with Fran.
-  it { Create.(title: nil)["result.contract"].success?.must_equal false }
-  it { Create.(title: nil)["result.contract"].errors.messages.must_equal({:title=>["can't be blank"]}) } # FIXME: change API with Fran.
+  it { Create.(title: 1)["result.contract.default"].success?.must_equal true }
+  it { Create.(title: 1)["result.contract.default"].errors.messages.must_equal({}) } # FIXME: change API with Fran.
+  it { Create.(title: nil)["result.contract.default"].success?.must_equal false }
+  it { Create.(title: nil)["result.contract.default"].errors.messages.must_equal({:title=>["can't be blank"]}) } # FIXME: change API with Fran.
 #   #---
 #   # validate with block returns result.
 #   class Update < Trailblazer::Operation
@@ -274,16 +274,16 @@ class ValidateTest < Minitest::Spec
   it do
     result = Update.(title: "SVG")
     result.success?.must_equal true
-    result["result.contract"].success?.must_equal true
-    result["result.contract"].errors.messages.must_equal({})
+    result["result.contract.default"].success?.must_equal true
+    result["result.contract.default"].errors.messages.must_equal({})
   end
 
   # failure
   it do
     result = Update.(title: nil)
     result.success?.must_equal false
-    result["result.contract"].success?.must_equal false
-    result["result.contract"].errors.messages.must_equal({:title=>["can't be blank"]})
+    result["result.contract.default"].success?.must_equal false
+    result["result.contract.default"].errors.messages.must_equal({:title=>["can't be blank"]})
   end
 
   #---

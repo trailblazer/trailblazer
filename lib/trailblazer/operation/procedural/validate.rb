@@ -1,6 +1,6 @@
 module Trailblazer::Operation::Procedural
   module Validate
-    def validate(params, contract:self["contract.default"], path:"contract") # :params
+    def validate(params, contract:self["contract.default"], path:"contract.default") # :params
       # DISCUSS: should we only have path here and then look up contract ourselves?
       result = validate_contract(contract, params) # run validation.  # FIXME: must be overridable.
 

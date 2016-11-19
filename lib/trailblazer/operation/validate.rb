@@ -20,8 +20,9 @@ module Trailblazer::Operation::Contract
       options["params.validate"] = key ? options["params"][key] : options["params"]
     end
 
-    def self.validate!(operation, options, name:"default", path:"contract", **)
-      operation["result.#{path}"] = result = operation["contract.#{name}"].(options["params.validate"]) # FIXME: how could we deal here with polymorphic keys?
+    def self.validate!(operation, options, name:"default", **)
+      path = "contract.#{name}"
+      operation["result.#{path}"] = result = operation[path].(options["params.validate"]) # FIXME: how could we deal here with polymorphic keys?
       result.success?
     end
   end

@@ -1,4 +1,5 @@
 module Trailblazer::Operation::Procedural
+  # THIS IS UNTESTED, PRIVATE API AND WILL BE REMOVED SOON.
   module Contract
     # Instantiate the contract, either by using the user's contract passed into #validate
     # or infer the Operation contract.
