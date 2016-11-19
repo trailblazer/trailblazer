@@ -45,10 +45,13 @@ class DocContractTest < Minitest::Spec
     self.| Model[Song, :create]
     self.| Contract[name: "form"]
     self.| Contract::Validate[name: "form"]
-    self.| Persist[save_method: :sync]
+    self.| Persist[method: :sync, contract: "contract.form"]
   end
 
   it { Add.({}).inspect("model").must_equal %{<Result:false [nil] >} }
+  it { Add.({ id: 1 }).inspect("model").must_equal %{<Result:false [#<struct DocContractTest::Song id=nil, title=nil>] >} }
+  it { Add.({ id: 1, title: "" }).inspect("model").must_equal %{<Result:false [#<struct DocContractTest::Song id=nil, title=nil>] >} }
+  it { Add.({ id: 1, title: "Yo" }).inspect("model").must_equal %{<Result:true [#<struct DocContractTest::Song id=nil, title="Yo">] >} }
 
   #---
   # with contract block, and inheritance, the old way.
