@@ -36,20 +36,6 @@ class Trailblazer::Operation
         name: "contract.build")
     end
 
-    # TODO: allow users to use the old way with this.
-    module ContractFor # FIXME: rename!
-      # Instantiate the contract, either by using the user's contract passed into #validate
-      # or infer the Operation contract.
-      def contract_for(model:self["model"], options:{}, contract_class:self["contract.default.class"])
-        contract!(model: model, options: options, contract_class: contract_class)
-      end
-
-      # Override to construct your own contract.
-      def contract!(model:nil, options:{}, contract_class:nil)
-        contract_class.new(model, options)
-      end
-    end
-
     module DSL
       # This is the class level DSL method.
       #   Op.contract #=> returns contract class
