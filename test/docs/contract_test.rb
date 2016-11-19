@@ -41,11 +41,11 @@ class DocContractTest < Minitest::Spec
       validates :title, length: 1..3
     end
 
-    self.| Contract::Validate[name: "params"]
-    self.| Model[Song, :create]
-    self.| Contract[name: "form"]
-    self.| Contract::Validate[name: "form"]
-    self.| Persist[method: :sync, contract: "contract.form"]
+    self.| Contract::Validate[name: "params"]                # run DRY-validation contract against the params structure.
+    self.| Model[Song, :create]                              # create the op's main model.
+    self.| Contract[name: "form"]                            # create the Reform contract.
+    self.| Contract::Validate[name: "form"]                  # validate the Reform contract.
+    self.| Persist[method: :sync, contract: "contract.form"] # persist the contract's data via the model.
   end
 
   it { Add.({}).inspect("model").must_equal %{<Result:false [nil] >} }
