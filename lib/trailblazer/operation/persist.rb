@@ -5,7 +5,7 @@ class Trailblazer::Operation
     def self.import!(operation, import, options={})
       save_method = options[:method] || :save
 
-      import.(:&, ->(input, options) { options["contract"].send(save_method) }, # TODO: test me.
+      import.(:&, ->(input, options) { options["contract.default"].send(save_method) }, # TODO: test me.
         name: "persist.save")
     end
   end

@@ -66,6 +66,7 @@ class ContractTest < Minitest::Spec
 
   #---
   # contract do..end (without constant)
+  #- explicit validate call
   describe "contract do .. end" do
     class Index < Trailblazer::Operation
       extend Contract::DSL
@@ -76,7 +77,7 @@ class ContractTest < Minitest::Spec
 
       self.> ->(*) { self["model"] = Song.new } # FIXME:
       # self.| Model[Song, :create]
-      self.| Contract[self["contract.default.class"]]
+      self.| Contract[]
       self.| Process
 
       include Contract::Validate
@@ -132,7 +133,7 @@ class ContractTest < Minitest::Spec
 #     include Test::ReturnProcess
 #     include Contract::Explicit
 
-#     self["contract.default.class"] = Form
+#      = Form
 
 #     def call(*)
 #       contract.validate
@@ -220,7 +221,7 @@ class ValidateTest < Minitest::Spec
     end
 
     self.| Model[Song, :create] # FIXME.
-    self.| Contract[self["contract.default.class"]]
+    self.| Contract[]
     self.& ->(input, options) { input.process(options["params"]) }
   end
 
@@ -262,7 +263,7 @@ class ValidateTest < Minitest::Spec
     end
 
     self.| Model[Song, :create] # FIXME.
-    self.| Contract[self["contract.default.class"]]
+    self.| Contract[]
     self.| Contract::Validate[] # generic validate call for you.
 
     # include Contract::Validate
@@ -295,7 +296,7 @@ class ValidateTest < Minitest::Spec
     end
 
     self.| Model[Song, :create] # FIXME.
-    self.| Contract[self["contract.default.class"]]
+    self.| Contract[]
     self.| Contract::Validate[key: :song] # generic validate call for you.
     # ->(*) { validate(options["params"][:song]) } # <-- TODO
     puts self["pipetree"].inspect(style: :rows)

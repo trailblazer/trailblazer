@@ -15,7 +15,7 @@ class Trailblazer::Operation
 
     def callback!(name=:default, options=self) # FIXME: test options.
       config  = self["callback.#{name}.class"] || raise #.fetch(name) # TODO: test exception
-      group   = config[:group].new(self["contract"])
+      group   = config[:group].new(self["contract.default"])
 
       options[:context] ||= (config[:context] == :operation ? self : group)
       group.(options)

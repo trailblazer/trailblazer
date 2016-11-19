@@ -20,12 +20,19 @@ end
 # Needs #[], #[]= skill dependency.
 class Trailblazer::Operation
   module Contract
-    Step = ->(operation, options) { operation["contract"] = operation.contract_for } # the builder for contract.
+    # bla build contract at runtime.
+    def self.build_contract!(operation, options, name:"default", constant:nil)
+      contract_class = constant || options["contract.#{name}.class"]
+
+      puts "@@@@@ #{contract_class.inspect}"
+      operation["contract.#{name}"] = operation.contract_for(contract_class: contract_class)
+    end
 
     extend Stepable # ::[]
 
-    def self.import!(operation, import, what_contract_fixme)
-      import.(:>, Step, name: "contract.build")
+    def self.import!(operation, import, **args)
+      import.(:>, ->(operation, options) { build_contract!(operation, options, **args) },
+        name: "contract.build")
 
       operation.send :include, ContractFor # DISCUSS: is that clever?
     end
@@ -50,17 +57,21 @@ class Trailblazer::Operation
     module Validate
       extend Stepable
 
-      def self.import!(operation, import, key:nil)
+      def self.import!(operation, import, key: nil, name: "default")
         import.(:&, ->(input, options) { options["params.validate"] = key ? options["params"][key] : options["params"] }, # FIXME: introduce nested pipes and pass composed input instead.
           name: "validate.params.extract")
 
-        import.(:&, ->(operation, options) { operation.validate(options["params.validate"]) }, # FIXME: how could we deal here with polymorphic keys?
+        # call the actual contract.validate(params)
+        import.(:&, ->(operation, options) {
+
+          operation.validate(options["params.validate"], contract: operation["contract.#{name}"]) }, # FIXME: how could we deal here with polymorphic keys?
+
           name: "contract.validate")
 
         operation.send :include, self
       end
 
-      def validate(params, contract:self["contract"], path:"contract") # :params
+      def validate(params, contract:self["contract.default"], path:"contract") # :params
         # DISCUSS: should we only have path here and then look up contract ourselves?
         result = validate_contract(contract, params) # run validation.  # FIXME: must be overridable.
 
