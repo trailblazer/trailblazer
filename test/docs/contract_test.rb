@@ -53,6 +53,31 @@ class DocContractTest < Minitest::Spec
   it { Add.({ id: 1, title: "" }).inspect("model").must_equal %{<Result:false [#<struct DocContractTest::Song id=nil, title=nil>] >} }
   it { Add.({ id: 1, title: "Yo" }).inspect("model").must_equal %{<Result:true [#<struct DocContractTest::Song id=nil, title="Yo">] >} }
 
+  #-
+  # own builder
+  class Allocate < Trailblazer::Operation
+    extend Contract::DSL
+
+    contract do
+      property :title
+      property :current_user, virtual: true
+
+      validates :current_user, presence: true
+    end
+
+    self.| Model[Song, :create]
+    self.| Contract[builder: :default_contract!]
+    self.| Contract::Validate[]
+    self.| Persist[method: :sync]
+
+    def default_contract!
+      self["contract.default.class"].new(self["model"], current_user: self["user.current"])
+    end
+  end
+
+  it { Allocate.({}).inspect("model").must_equal %{<Result:false [#<struct DocContractTest::Song id=nil, title=nil>] >} }
+  it { Allocate.({ title: 1}, "user.current" => Module).inspect("model").must_equal %{<Result:true [#<struct DocContractTest::Song id=nil, title=1>] >} }
+
   #---
   # with contract block, and inheritance, the old way.
   class Block < Trailblazer::Operation
@@ -89,7 +114,6 @@ class DocContractTest < Minitest::Spec
   end
 
   it { Break.({ id:1, title: "Fame" }).inspect("model").must_equal %{<Result:true [#<struct DocContractTest::Song id=1, title=nil>] >} }
-
 end
 
 
