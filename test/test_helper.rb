@@ -20,6 +20,8 @@ require "trailblazer/operation/guard"
 require "trailblazer/operation/persist"
 require "trailblazer/operation/callback"
 
+require "trailblazer/operation/procedural/validate"
+
 # require "raise"
 
 module Mock

@@ -17,7 +17,7 @@ class DryValidationTest < Minitest::Spec
     # self.| Contract[self["contract.params"]]
     self.| Process
 
-    include Contract::Validate
+    include Procedural::Validate
 
     def process(params)
       validate(params, contract: self["contract.params"], path: "contract.params") { |f| puts f.inspect }
@@ -80,7 +80,7 @@ class ContractTest < Minitest::Spec
       self.| Contract[]
       self.| Process
 
-      include Contract::Validate
+      include Procedural::Validate
       # TODO: get model automatically in validate!
 
       def process(params)
@@ -209,7 +209,7 @@ class ValidateTest < Minitest::Spec
     end
 
 
-    include Contract::Validate
+    include Procedural::Validate
     def process(params)
       if validate(params)
         self["x"] = "works!"
@@ -266,7 +266,7 @@ class ValidateTest < Minitest::Spec
     self.| Contract[]
     self.| Contract::Validate[] # generic validate call for you.
 
-    # include Contract::Validate
+    # include Procedural::Validate
     ->(*) { validate(options["params"][:song]) } # <-- TODO
   end
 
