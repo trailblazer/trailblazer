@@ -166,6 +166,51 @@ class DocsContractSeparateKeyTest < Minitest::Spec
   it { Create.({"evergreen" => { title: "SVG" }}).inspect("model").must_equal %{<Result:true [#<struct DocsContractSeparateKeyTest::Song id=nil, title="SVG">] >} }
 end
 
+#---
+#- Contract[ constant: XXX ]
+class ContractConstantTest < Minitest::Spec
+  Song = Struct.new(:id, :title)
+  #:constant
+  class Create < Trailblazer::Operation
+    class MyContract < Reform::Form
+      property :title
+      validates :title, length: 2..33
+    end
+
+    self.| Model[Song, :create]
+    self.| Contract[constant: MyContract]
+    self.| Contract::Validate[]
+    self.| Persist[method: :sync]
+  end
+  #:constant end
+
+  it { Create.({ title: "A" }).inspect("model").must_equal %{<Result:false [#<struct ContractConstantTest::Song id=nil, title=nil>] >} }
+  it { Create.({ title: "Anthony's Song" }).inspect("model").must_equal %{<Result:true [#<struct ContractConstantTest::Song id=nil, title="Anthony's Song">] >} }
+end
+
+#- Contract[ constant: XXX, name: AAA ]
+class ContractNamedConstantTest < Minitest::Spec
+  Song = Struct.new(:id, :title)
+  #:constant-name
+  class Create < Trailblazer::Operation
+    class MyContract < Reform::Form
+      property :title
+      validates :title, length: 2..33
+    end
+
+    self.| Model[Song, :create]
+    self.| Contract[constant: MyContract, name: "form"]
+    self.| Contract::Validate[name: "form"]
+    self.| Persist[method: :sync, name: "contract.form"]
+  end
+  #:constant-name end
+
+  it { Create.({ title: "A" }).inspect("model").must_equal %{<Result:false [#<struct ContractNamedConstantTest::Song id=nil, title=nil>] >} }
+  it { Create.({ title: "Anthony's Song" }).inspect("model").must_equal %{<Result:true [#<struct ContractNamedConstantTest::Song id=nil, title="Anthony's Song">] >} }
+end
+
+
+
 
 class DryValidationContractTest < Minitest::Spec
   Song = Struct.new(:id, :title)
@@ -195,7 +240,7 @@ class DryValidationContractTest < Minitest::Spec
     self.| Model[Song, :create]                              # create the op's main model.
     self.| Contract[name: "form"]                            # create the Reform contract.
     self.| Contract::Validate[name: "form"]                  # validate the Reform contract.
-    self.| Persist[method: :sync, contract: "contract.form"] # persist the contract's data via the model.
+    self.| Persist[method: :sync, name: "contract.form"] # persist the contract's data via the model.
     #~form end
   end
   #:dry-schema end
@@ -260,27 +305,6 @@ class DocContractTest < Minitest::Spec
   #   #~est
   #   self.| Persist[method: :sync]
   # end
-
-  #---
-  # Arbitrary params validation before op.
-  #- Contract[ constant: XXX ]
-  class Attach < Trailblazer::Operation
-    class MyContract < Reform::Form
-      property :title
-      validates :title, length: 2..33
-    end
-
-    self.& ->(input, options) { options["params"].has_key?(:title) }
-    self.| Model[Song, :create]
-    self.| Contract[constant: MyContract]
-    self.| Contract::Validate[]
-    self.| Persist[method: :sync]
-  end
-
-  it { Attach.({}).inspect("model").must_equal %{<Result:false [nil] >} }
-  it { Attach.({ title: "A" }).inspect("model").must_equal %{<Result:false [#<struct DocContractTest::Song id=nil, title=nil>] >} }
-  it { Attach.({ title: "Anthony's Song" }).inspect("model").must_equal %{<Result:true [#<struct DocContractTest::Song id=nil, title="Anthony's Song">] >} }
-
 
   #-
   # own builder
