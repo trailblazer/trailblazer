@@ -177,6 +177,8 @@ class ContractConstantTest < Minitest::Spec
       validates :title, length: 2..33
     end
 
+
+
     self.| Model[Song, :create]
     self.| Contract[constant: MyContract]
     self.| Contract::Validate[]
@@ -209,8 +211,37 @@ class ContractNamedConstantTest < Minitest::Spec
   it { Create.({ title: "Anthony's Song" }).inspect("model").must_equal %{<Result:true [#<struct ContractNamedConstantTest::Song id=nil, title="Anthony's Song">] >} }
 end
 
+#---
+#- dependency injection
+#- contract class
+class ContractInjectConstantTest < Minitest::Spec
+  Song = Struct.new(:id, :title)
+  #:di-constant-contract
+  class MyContract < Reform::Form
+    property :title
+    validates :title, length: 2..33
+  end
+  #:di-constant-contract end
+  #:di-constant
+  class Create < Trailblazer::Operation
+    self.| Model[Song, :create]
+    self.| Contract[]
+    self.| Contract::Validate[]
+    self.| Persist[method: :sync]
+  end
+  #:di-constant end
 
-
+  it do
+  #:di-contract-call
+  Create.(
+    { title: "Anthony's Song" },
+    "contract.default.class" => MyContract
+  )
+  #:di-contract-call end
+  end
+  it { Create.({ title: "A" }, "contract.default.class" => MyContract).inspect("model").must_equal %{<Result:false [#<struct ContractInjectConstantTest::Song id=nil, title=nil>] >} }
+  it { Create.({ title: "Anthony's Song" }, "contract.default.class" => MyContract).inspect("model").must_equal %{<Result:true [#<struct ContractInjectConstantTest::Song id=nil, title="Anthony's Song">] >} }
+end
 
 class DryValidationContractTest < Minitest::Spec
   Song = Struct.new(:id, :title)
