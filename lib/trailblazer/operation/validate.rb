@@ -6,9 +6,9 @@ module Trailblazer::Operation::Contract
   module Validate
     extend Trailblazer::Operation::Stepable
 
-    def self.import!(operation, import, **args)
+    def self.import!(operation, import, skip_extract:false, **args)
       import.(:&, ->(input, options) { extract_params!(input, options, **args) },
-        name: "validate.params.extract")
+        name: "validate.params.extract") unless skip_extract
 
       # call the actual contract.validate(params)
       import.(:&, ->(operation, options) { validate!(operation, options, **args) },
@@ -20,7 +20,7 @@ module Trailblazer::Operation::Contract
       options["params.validate"] = key ? options["params"][key] : options["params"]
     end
 
-    def self.validate!(operation, options, name:"default", **)
+    def self.validate!(operation, options, name:"default", **) # TODO: add constant: here.
       path = "contract.#{name}"
       operation["result.#{path}"] = result = operation[path].(options["params.validate"]) # FIXME: how could we deal here with polymorphic keys?
       result.success?

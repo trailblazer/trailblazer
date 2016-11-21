@@ -299,7 +299,6 @@ class ValidateTest < Minitest::Spec
     self.| Contract[]
     self.| Contract::Validate[key: :song] # generic validate call for you.
     # ->(*) { validate(options["params"][:song]) } # <-- TODO
-    puts self["pipetree"].inspect(style: :rows)
   end
 
   # success
