@@ -45,6 +45,20 @@ class DocsContractOverviewTest < Minitest::Spec
   it do
     assert Create["contract.default.class"] < Reform::Form
   end
+
+  #- result
+  it do
+    #:result
+    result = Create.({ length: "A" })
+
+    result["result.contract.default"].success?        #=> false
+    result["result.contract.default"].errors          #=> Errors object
+    result["result.contract.default"].errors.messages #=> {:length=>["is not a number"]}
+
+    #:result end
+    result["result.contract.default"].success?.must_equal false
+    result["result.contract.default"].errors.messages.must_equal ({:length=>["is not a number"]})
+  end
 end
 
 class DocsContractNameTest < Minitest::Spec

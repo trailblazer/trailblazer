@@ -14,7 +14,6 @@ class DryValidationTest < Minitest::Spec
     #   required(:id).filled
     # end
 
-    # self.| Contract::Build[self["contract.params"]]
     self.| Process
 
     include Procedural::Validate
