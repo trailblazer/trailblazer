@@ -318,34 +318,17 @@ class DryExplicitSchemaTest < Minitest::Spec
   #:dry-schema-expl end
 end
 
-class DocContractTest < Minitest::Spec
+class DocContractBuilderTest < Minitest::Spec
   Song = Struct.new(:id, :title)
-
   #---
-  # Contract[constant: MyContract]
-  #- no-dsl
-  # class MyContract < Reform::Form
-  #   property :title
-  #   validates :title, length: 2..33
-  # end
-
-  # class Create < Trailblazer::Operation
-  #   self.| Model[Song, :create]
-  #   self.| Contract[constant: MyContract]
-  #   self.| Contract::Validate[]
-  #   #~est
-  #   self.| Persist[method: :sync]
-  # end
-
-  #-
-  # own builder
-  class Allocate < Trailblazer::Operation
+  #- builder:
+  #:builder-option
+  class Create < Trailblazer::Operation
     extend Contract::DSL
 
     contract do
       property :title
       property :current_user, virtual: true
-
       validates :current_user, presence: true
     end
 
@@ -354,14 +337,41 @@ class DocContractTest < Minitest::Spec
     self.| Contract::Validate[]
     self.| Persist[method: :sync]
 
-    def default_contract!
-      self["contract.default.class"].new(self["model"], current_user: self["user.current"])
+    def default_contract!(constant:, model:)
+      constant.new(model, current_user: self["user.current"])
     end
   end
+  #:builder-option end
 
-  it { Allocate.({}).inspect("model").must_equal %{<Result:false [#<struct DocContractTest::Song id=nil, title=nil>] >} }
-  it { Allocate.({ title: 1}, "user.current" => Module).inspect("model").must_equal %{<Result:true [#<struct DocContractTest::Song id=nil, title=1>] >} }
+  it { Create.({}).inspect("model").must_equal %{<Result:false [#<struct DocContractBuilderTest::Song id=nil, title=nil>] >} }
+  it { Create.({ title: 1}, "user.current" => Module).inspect("model").must_equal %{<Result:true [#<struct DocContractBuilderTest::Song id=nil, title=1>] >} }
 
+  #- proc
+  class Update < Trailblazer::Operation
+    extend Contract::DSL
+
+    contract do
+      property :title
+      property :current_user, virtual: true
+      validates :current_user, presence: true
+    end
+
+    self.| Model[Song, :create]
+    #:builder-proc
+    self.| Contract[builder: ->(operation, constant:, model:) {
+      constant.new(model, current_user: operation["user.current"])
+    }]
+    #:builder-proc end
+    self.| Contract::Validate[]
+    self.| Persist[method: :sync]
+  end
+
+  it { Update.({}).inspect("model").must_equal %{<Result:false [#<struct DocContractBuilderTest::Song id=nil, title=nil>] >} }
+  it { Update.({ title: 1}, "user.current" => Module).inspect("model").must_equal %{<Result:true [#<struct DocContractBuilderTest::Song id=nil, title=1>] >} }
+end
+
+class DocContractTest < Minitest::Spec
+  Song = Struct.new(:id, :title)
   #---
   # with contract block, and inheritance, the old way.
   class Block < Trailblazer::Operation

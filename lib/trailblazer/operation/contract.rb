@@ -23,10 +23,12 @@ class Trailblazer::Operation
     # bla build contract at runtime.
     def self.build_contract!(operation, options, name:"default", constant:nil, builder: nil)
       # TODO: we could probably clean this up a bit at some point.
-      return operation["contract.#{name}"] = Uber::Option[builder].(operation) if builder
-
       contract_class = constant || options["contract.#{name}.class"]
-      operation["contract.#{name}"] = contract_class.new(operation["model"])
+      model          = operation["model"] # FIXME: model.default
+
+      return operation["contract.#{name}"] = Uber::Option[builder].(operation, constant: contract_class, model: model) if builder
+
+      operation["contract.#{name}"] = contract_class.new(model)
     end
 
     extend Stepable # ::[]
@@ -42,10 +44,10 @@ class Trailblazer::Operation
       #   Op.contract do .. end # defines contract
       #   Op.contract CommentForm # copies (and subclasses) external contract.
       #   Op.contract CommentForm do .. end # copies and extends contract.
-      def contract(name=:default, constant=nil, &block)
+      def contract(name=:default, constant=nil, base: Reform::Form, &block)
         heritage.record(:contract, name, constant, &block)
 
-        path, form_class = Trailblazer::DSL::Build.new.({ prefix: :contract, class: Reform::Form, container: self }, name, constant, block)
+        path, form_class = Trailblazer::DSL::Build.new.({ prefix: :contract, class: base, container: self }, name, constant, block)
 
         self[path] = form_class
       end
