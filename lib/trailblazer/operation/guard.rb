@@ -3,7 +3,7 @@ require "trailblazer/operation/policy" # FIXME.
 class Trailblazer::Operation
   module Policy
     module Guard
-      extend Stepable
+      extend Macro
 
       def self.import!(operation, import, user_proc)
         import.(:&, Evaluate, name: "policy.guard.evaluate")

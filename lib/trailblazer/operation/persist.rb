@@ -1,6 +1,6 @@
 class Trailblazer::Operation
   module Persist
-    extend Stepable
+    extend Macro
 
     def self.import!(operation, import, options={})
       save_method   = options[:method] || :save

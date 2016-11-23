@@ -1,6 +1,6 @@
 class Trailblazer::Operation
   module Resolver
-    extend Stepable
+    extend Macro
 
     def self.import!(operation, import)
       operation.extend Model::BuildMethods

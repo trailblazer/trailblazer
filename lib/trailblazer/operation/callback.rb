@@ -4,7 +4,7 @@ require "disposable/callback"
 # Needs #[], #[]= skill dependency.
 class Trailblazer::Operation
   module Callback
-    extend Stepable
+    extend Macro
 
     def self.import!(operation, import, group)
       import.(:&, ->(input, options) { input.callback!(group) },

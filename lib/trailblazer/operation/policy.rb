@@ -12,7 +12,7 @@ class Trailblazer::Operation
       result.success? # since we & this, it's only executed OnRight and the return boolean decides the direction, input is passed straight through.
     }
 
-    extend Stepable
+    extend Macro
 
     def self.import!(operation, import, policy_class, action)
       import.(:&, Evaluate, name: "policy.evaluate")

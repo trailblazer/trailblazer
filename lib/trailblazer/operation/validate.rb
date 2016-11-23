@@ -4,7 +4,7 @@ module Trailblazer::Operation::Contract
   # Deviate to left track if optional key is not found in params.
   # Deviate to left if validation result falsey.
   module Validate
-    extend Trailblazer::Operation::Stepable
+    extend Trailblazer::Operation::Macro
 
     def self.import!(operation, import, skip_extract:false, **args)
       import.(:&, ->(input, options) { extract_params!(input, options, **args) },

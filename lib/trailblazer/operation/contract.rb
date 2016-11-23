@@ -20,7 +20,7 @@ end
 # Needs #[], #[]= skill dependency.
 module Trailblazer::Operation::Contract
   module Build
-    extend Trailblazer::Operation::Stepable # ::[]
+    extend Trailblazer::Operation::Macro # ::[]
 
     # bla build contract at runtime.
     def self.build_contract!(operation, options, name:"default", constant:nil, builder: nil)

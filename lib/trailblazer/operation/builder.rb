@@ -3,7 +3,7 @@ require "uber/builder"
 # http://trailblazer.to/gems/operation/2.0/builder.html
 class Trailblazer::Operation
   module Builder
-    extend Stepable # :[]
+    extend Macro # :[]
 
     def self.import!(operation, import, user_builder)
       import.(:>>, user_builder,

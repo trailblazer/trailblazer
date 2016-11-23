@@ -2,7 +2,7 @@ class Trailblazer::Operation
   module Model
     Step = ->(operation, options) { options["model"] = operation.model!(options["params"]) }
 
-    extend Stepable
+    extend Macro
 
     #- import!
     # when imported via Operation::|
