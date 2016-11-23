@@ -20,7 +20,7 @@ class DryContainerTest < Minitest::Spec
   #- with Dry-container
   class Create < Trailblazer::Operation
     self.| Model[Song, :create]
-    self.| Contract[]
+    self.| Contract::Build[]
     self.| Contract::Validate[]
     self.| Persist[method: :sync]
   end

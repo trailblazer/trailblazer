@@ -14,7 +14,7 @@ class DryValidationTest < Minitest::Spec
     #   required(:id).filled
     # end
 
-    # self.| Contract[self["contract.params"]]
+    # self.| Contract::Build[self["contract.params"]]
     self.| Process
 
     include Procedural::Validate
@@ -77,7 +77,7 @@ class ContractTest < Minitest::Spec
 
       self.> ->(*) { self["model"] = Song.new } # FIXME:
       # self.| Model[Song, :create]
-      self.| Contract[]
+      self.| Contract::Build[]
       self.| Process
 
       include Procedural::Validate
@@ -221,7 +221,7 @@ class ValidateTest < Minitest::Spec
     end
 
     self.| Model[Song, :create] # FIXME.
-    self.| Contract[]
+    self.| Contract::Build[]
     self.& ->(input, options) { input.process(options["params"]) }
   end
 
@@ -263,7 +263,7 @@ class ValidateTest < Minitest::Spec
     end
 
     self.| Model[Song, :create] # FIXME.
-    self.| Contract[]
+    self.| Contract::Build[]
     self.| Contract::Validate[] # generic validate call for you.
 
     # include Procedural::Validate
@@ -296,7 +296,7 @@ class ValidateTest < Minitest::Spec
     end
 
     self.| Model[Song, :create] # FIXME.
-    self.| Contract[]
+    self.| Contract::Build[]
     self.| Contract::Validate[key: :song] # generic validate call for you.
     # ->(*) { validate(options["params"][:song]) } # <-- TODO
   end

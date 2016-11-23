@@ -22,7 +22,7 @@ class DocsContractOverviewTest < Minitest::Spec
 
     #~bla end
     self.| Model[Song, :create]
-    self.| Contract[]
+    self.| Contract::Build[]
     self.| Contract::Validate[]
     self.| Persist[method: :sync]
     #~contractonly end
@@ -63,7 +63,7 @@ class DocsContractNameTest < Minitest::Spec
     #~contract end
     #~pipe
     self.| Model[Song, :create]
-    self.| Contract[name: "params"]
+    self.| Contract::Build[name: "params"]
     self.| Contract::Validate[name: "params"]
     #~pipe end
   end
@@ -105,7 +105,7 @@ class DocsContractExplicitTest < Minitest::Spec
     contract MyContract
 
     self.| Model[Song, :create]
-    self.| Contract[]
+    self.| Contract::Build[]
     self.| Contract::Validate[]
     self.| Persist[method: :sync]
   end
@@ -125,7 +125,7 @@ class DocsContractKeyTest < Minitest::Spec
     end
 
     self.| Model[Song, :create]
-    self.| Contract[]
+    self.| Contract::Build[]
     self.| Contract::Validate[key: "song"]
     self.| Persist[method: :sync]
   end
@@ -151,7 +151,7 @@ class DocsContractSeparateKeyTest < Minitest::Spec
     end
 
     self.| Model[Song, :create]
-    self.| Contract[]
+    self.| Contract::Build[]
     self.& :extract_params!
     self.| Contract::Validate[skip_extract: true]
     self.| Persist[method: :sync]
@@ -167,7 +167,7 @@ class DocsContractSeparateKeyTest < Minitest::Spec
 end
 
 #---
-#- Contract[ constant: XXX ]
+#- Contract::Build[ constant: XXX ]
 class ContractConstantTest < Minitest::Spec
   Song = Struct.new(:id, :title)
   #:constant
@@ -180,7 +180,7 @@ class ContractConstantTest < Minitest::Spec
 
 
     self.| Model[Song, :create]
-    self.| Contract[constant: MyContract]
+    self.| Contract::Build[constant: MyContract]
     self.| Contract::Validate[]
     self.| Persist[method: :sync]
   end
@@ -190,7 +190,7 @@ class ContractConstantTest < Minitest::Spec
   it { Create.({ title: "Anthony's Song" }).inspect("model").must_equal %{<Result:true [#<struct ContractConstantTest::Song id=nil, title="Anthony's Song">] >} }
 end
 
-#- Contract[ constant: XXX, name: AAA ]
+#- Contract::Build[ constant: XXX, name: AAA ]
 class ContractNamedConstantTest < Minitest::Spec
   Song = Struct.new(:id, :title)
   #:constant-name
@@ -201,7 +201,7 @@ class ContractNamedConstantTest < Minitest::Spec
     end
 
     self.| Model[Song, :create]
-    self.| Contract[constant: MyContract, name: "form"]
+    self.| Contract::Build[constant: MyContract, name: "form"]
     self.| Contract::Validate[name: "form"]
     self.| Persist[method: :sync, name: "contract.form"]
   end
@@ -225,7 +225,7 @@ class ContractInjectConstantTest < Minitest::Spec
   #:di-constant
   class Create < Trailblazer::Operation
     self.| Model[Song, :create]
-    self.| Contract[]
+    self.| Contract::Build[]
     self.| Contract::Validate[]
     self.| Persist[method: :sync]
   end
@@ -269,7 +269,7 @@ class DryValidationContractTest < Minitest::Spec
     self.| Contract::Validate[name: "params"]
     #~form
     self.| Model[Song, :create]                              # create the op's main model.
-    self.| Contract[name: "form"]                            # create the Reform contract.
+    self.| Contract::Build[name: "form"]                            # create the Reform contract.
     self.| Contract::Validate[name: "form"]                  # validate the Reform contract.
     self.| Persist[method: :sync, name: "contract.form"] # persist the contract's data via the model.
     #~form end
@@ -333,7 +333,7 @@ class DocContractBuilderTest < Minitest::Spec
     end
 
     self.| Model[Song, :create]
-    self.| Contract[builder: :default_contract!]
+    self.| Contract::Build[builder: :default_contract!]
     self.| Contract::Validate[]
     self.| Persist[method: :sync]
 
@@ -358,7 +358,7 @@ class DocContractBuilderTest < Minitest::Spec
 
     self.| Model[Song, :create]
     #:builder-proc
-    self.| Contract[builder: ->(operation, constant:, model:) {
+    self.| Contract::Build[builder: ->(operation, constant:, model:) {
       constant.new(model, current_user: operation["user.current"])
     }]
     #:builder-proc end
@@ -381,7 +381,7 @@ class DocContractTest < Minitest::Spec
     end
 
     self.| Model[Song, :create]
-    self.| Contract[]            # resolves to "contract.class.default" and is resolved at runtime.
+    self.| Contract::Build[]            # resolves to "contract.class.default" and is resolved at runtime.
     self.| Contract::Validate[]
     self.| Persist[method: :sync]
   end

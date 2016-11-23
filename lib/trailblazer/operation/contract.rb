@@ -18,8 +18,10 @@ end
 #
 # Needs Operation#model.
 # Needs #[], #[]= skill dependency.
-class Trailblazer::Operation
-  module Contract
+module Trailblazer::Operation::Contract
+  module Build
+    extend Trailblazer::Operation::Stepable # ::[]
+
     # bla build contract at runtime.
     def self.build_contract!(operation, options, name:"default", constant:nil, builder: nil)
       # TODO: we could probably clean this up a bit at some point.
@@ -31,26 +33,25 @@ class Trailblazer::Operation
       operation["contract.#{name}"] = contract_class.new(model)
     end
 
-    extend Stepable # ::[]
 
     def self.import!(operation, import, **args)
       import.(:>, ->(operation, options) { build_contract!(operation, options, **args) },
         name: "contract.build")
     end
+  end
 
-    module DSL
-      # This is the class level DSL method.
-      #   Op.contract #=> returns contract class
-      #   Op.contract do .. end # defines contract
-      #   Op.contract CommentForm # copies (and subclasses) external contract.
-      #   Op.contract CommentForm do .. end # copies and extends contract.
-      def contract(name=:default, constant=nil, base: Reform::Form, &block)
-        heritage.record(:contract, name, constant, &block)
+  module DSL
+    # This is the class level DSL method.
+    #   Op.contract #=> returns contract class
+    #   Op.contract do .. end # defines contract
+    #   Op.contract CommentForm # copies (and subclasses) external contract.
+    #   Op.contract CommentForm do .. end # copies and extends contract.
+    def contract(name=:default, constant=nil, base: Reform::Form, &block)
+      heritage.record(:contract, name, constant, &block)
 
-        path, form_class = Trailblazer::DSL::Build.new.({ prefix: :contract, class: base, container: self }, name, constant, block)
+      path, form_class = Trailblazer::DSL::Build.new.({ prefix: :contract, class: base, container: self }, name, constant, block)
 
-        self[path] = form_class
-      end
+      self[path] = form_class
     end
   end # Contract
 end
