@@ -57,7 +57,7 @@ class DocsContractOverviewTest < Minitest::Spec
 
     #:result end
     result["result.contract.default"].success?.must_equal false
-    result["result.contract.default"].errors.messages.must_equal ({:length=>["is not a number"]})
+    result["result.contract.default"].errors.messages.must_equal ({:title=>["can't be blank"], :length=>["is not a number"]})
   end
 end
 
