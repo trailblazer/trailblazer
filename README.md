@@ -176,6 +176,8 @@ class Comment::Create < Trailblazer::Operation
     validate(params[:comment], @model) do |f|
       f.save
     end
+
+    contract
   end
 end
 ```
