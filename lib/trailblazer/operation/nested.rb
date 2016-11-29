@@ -1,9 +1,8 @@
 module Trailblazer::Operation::Nested
   extend Trailblazer::Operation::Macro
 
-  # Please note that the instance_variable_get are here on purpose since I don't
-  # want to introduce readers that are used once.
-
+  # Please note that the instance_variable_get are here on purpose since the
+  # superinternal API is not entirely decided, yet.
   def self.import!(operation, import, step)
     import.(:>, ->(input, options) {
       result = step._call(*options.to_runtime_data)
