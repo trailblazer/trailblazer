@@ -1,7 +1,6 @@
 require "test_helper"
 
 class GuardTest < Minitest::Spec
-  #---
   # with proc, evaluated in operation context.
   class Create < Trailblazer::Operation
     self.| Policy::Guard[ ->(options) { options["params"][:pass] == self["params"][:pass] && options["params"][:pass] } ]

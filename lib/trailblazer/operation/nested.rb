@@ -6,8 +6,9 @@ module Trailblazer::Operation::Nested
   def self.import!(operation, import, step)
     import.(:&, ->(input, options) {
       result = step._call(*options.to_runtime_data)
+
       result.instance_variable_get(:@data).to_mutable_data.each do |k,v|
-        operation[k] = v
+        options[k] = v
       end
 
       result.success? # DISCUSS: what if we could simply return the result object here?

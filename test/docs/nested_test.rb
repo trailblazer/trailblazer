@@ -77,6 +77,24 @@ class DocsNestedOperationTest < Minitest::Spec
   # puts cr_result["contract.default"]
 end
 
+class NestedClassLevelTest < Minitest::Spec
+  #:class-level
+  class New < Trailblazer::Operation
+    self.| ->(options) { options["class"] = true }, before: "operation.new"
+    self.| ->(options) { options["x"] = true }
+  end
+
+  class Create < Trailblazer::Operation
+    self.| Nested[ New ]
+    self.| ->(options) { options["y"] = true }
+  end
+  #:class-level end
+
+  it { Create.().inspect("x", "y").must_equal %{<Result:true [true, true] >} }
+  it { Create.(); Create["class"].must_equal nil }
+end
+
+
 # =begin
 # class New
 #   Model[Song, :create]
