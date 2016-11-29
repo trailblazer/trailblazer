@@ -26,7 +26,7 @@ class ResolverTest < Minitest::Spec
     require "trailblazer/operation/resolver"
     self.| Resolver[], before: "operation.new"
 
-    self.| Process
+    self.| :process
 
     class P < self; end
     class B < self; end
@@ -35,7 +35,7 @@ class ResolverTest < Minitest::Spec
     def process(*); self["x"] = self.class end
   end
 
-  it { A["pipetree"].inspect.must_equal %{[&model.build,&policy.evaluate,>>builder.call,>>operation.new,>Process]} }
+  it { A["pipetree"].inspect.must_equal %{[&model.build,&policy.evaluate,>>builder.call,>>operation.new,>process]} }
 
   it { r=A.({ some: "params", id: 1 }, { "user.current" => Module })
     puts r.inspect

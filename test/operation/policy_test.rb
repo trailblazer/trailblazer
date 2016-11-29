@@ -18,7 +18,7 @@ class PolicyTest < Minitest::Spec
   # Instance-level: Only policy, no model
   class Create < Trailblazer::Operation
     self.| Policy[Auth, :only_user?]
-    self.| Process
+    self.| :process
 
     def process(*)
       self["process"] = true
@@ -54,7 +54,7 @@ class PolicyTest < Minitest::Spec
     self.| Model[Song, :create], before: "policy.evaluate"
   end
 
-  it { Show["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,&policy.evaluate,>Process]} }
+  it { Show["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,&policy.evaluate,>process]} }
 
   # invalid because user AND model.
   it do
@@ -78,7 +78,7 @@ class PolicyTest < Minitest::Spec
   class Edit < Trailblazer::Operation
     self.| Model[Song, :update]
     self.| Policy[Auth, :user_and_model?]
-    self.| Process
+    self.| :process
 
     def process(*); self["process"] = true end
   end

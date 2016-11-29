@@ -36,7 +36,7 @@ class ModelTest < Minitest::Spec
   # :find_by, exceptionless.
   class Find < Trailblazer::Operation
     self.| Model[Song, :find_by]
-    self.| Process
+    self.| :process
 
     def process(*); self["x"] = true end
   end
@@ -98,7 +98,7 @@ class ModelTest < Minitest::Spec
       delegates :@delegator, :[]
     end
 
-    self.> ->(input, options) { options["model"] = ModelBuilder.new(options).(options["params"]); input }, after: "operation.new"
+    self.> ->(options) { options["model"] = ModelBuilder.new(options).(options["params"]) }, after: "operation.new"
   end
 
   it { Index.(id: 1)["model"].inspect.must_equal %{#<struct ModelTest::Song id=1>} }

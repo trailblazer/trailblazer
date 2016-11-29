@@ -14,12 +14,12 @@ class DryValidationTest < Minitest::Spec
     #   required(:id).filled
     # end
 
-    self.| Process
+    self.| :process
 
     include Procedural::Validate
 
-    def process(params)
-      validate(params, contract: self["contract.params"], path: "contract.params") { |f| puts f.inspect }
+    def process(options)
+      validate(options["params"], contract: self["contract.params"], path: "contract.params") { |f| puts f.inspect }
     end
   end
 
@@ -40,10 +40,7 @@ class DryValidationTest < Minitest::Spec
       required(:id).filled
     end)
 
-    self.& ->(input, options) {
-
-      puts "@@@@@ #{options.inspect}"
-     options["contract.params"].(options["params"]).success? }, before: "operation.new"
+    self.& ->(options) { options["contract.params"].(options["params"]).success? }, before: "operation.new"
   end
 
   it { Update.( id: 1 ).success?.must_equal true }
@@ -74,17 +71,17 @@ class ContractTest < Minitest::Spec
         property :title
       end
 
-      self.> ->(*) { self["model"] = Song.new } # FIXME:
+      self.> ->(options) { options["model"] = Song.new }
       # self.| Model[Song, :create]
       self.| Contract::Build[]
-      self.| Process
+      self.| :process
 
       include Procedural::Validate
       # TODO: get model automatically in validate!
 
-      def process(params)
+      def process(options)
         # validate(params, model: Song.new) { |f| self["x"] = f.to_nested_hash }
-        validate(params) { |f| self["x"] = f.to_nested_hash }
+        validate(options["params"]) { |f| self["x"] = f.to_nested_hash }
       end
     end
 
@@ -209,8 +206,8 @@ class ValidateTest < Minitest::Spec
 
 
     include Procedural::Validate
-    def process(params)
-      if validate(params)
+    def process(options)
+      if validate(options["params"])
         self["x"] = "works!"
         true
       else
@@ -221,7 +218,7 @@ class ValidateTest < Minitest::Spec
 
     self.| Model[Song, :create] # FIXME.
     self.| Contract::Build[]
-    self.& ->(input, options) { input.process(options["params"]) }
+    self.& :process
   end
 
   # validate returns the #validate result

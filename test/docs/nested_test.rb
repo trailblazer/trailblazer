@@ -51,15 +51,15 @@ class DocsNestedOperationTest < Minitest::Spec
 
   #- shared data
   class B < Trailblazer::Operation
-    self.> ->(input, options) { options["can.B.see.it?"] = options["this.should.not.be.visible.in.B"] }
-    self.> ->(input, options) { options["can.B.see.user.current?"] = options["user.current"] }
-    self.> ->(input, options) { options["can.B.see.A.class.data?"] = options["A.class.data"] }
+    self.> ->(options) { options["can.B.see.it?"] = options["this.should.not.be.visible.in.B"] }
+    self.> ->(options) { options["can.B.see.user.current?"] = options["user.current"] }
+    self.> ->(options) { options["can.B.see.A.class.data?"] = options["A.class.data"] }
   end
 
   class A < Trailblazer::Operation
     self["A.class.data"] = true
 
-    self.> ->(input, options) { options["this.should.not.be.visible.in.B"] = true }
+    self.> ->(options) { options["this.should.not.be.visible.in.B"] = true }
     self.| Nested[ B ]
   end
 

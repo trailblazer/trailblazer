@@ -12,7 +12,7 @@ class BuilderTest < MiniTest::Spec
     end
 
     self.| Builder[ builds ]
-    self.| Process
+    self.| :process
 
     class B < A
     end
@@ -31,7 +31,7 @@ class BuilderTest < MiniTest::Spec
 
   class Create < Trailblazer::Operation
     self.| Builder[ MyBuilders ]
-    self.> ->(input, options) { options["x"] = input.class }
+    self["pipetree"].> ->(input, options) { options["x"] = input.class }
   end
 
   it { Create.()["x"].must_equal Create }
@@ -41,7 +41,7 @@ class BuilderTest < MiniTest::Spec
   class B < A
   end
 
-  it { B["pipetree"].inspect.must_equal %{[>>operation.new,>Process]} }
+  it { B["pipetree"].inspect.must_equal %{[>>operation.new,>process]} }
 
   #---
   # use Builder DSL
@@ -56,7 +56,7 @@ class BuilderTest < MiniTest::Spec
     end
 
     def process(*); self["x"] = self.class end
-    self.| Process
+    self.| :process
   end
 
   it { ParentOperation.({})["x"].must_equal ParentOperation }
@@ -81,7 +81,7 @@ class OperationBuilderClassTest < MiniTest::Spec
     self.| Builder[ SuperOperation.builders ]
 
     def process(*); self["x"] = self.class end
-    self.| Process
+    self.| :process
   end
 
   it { ParentOperation.({})["x"].must_equal ParentOperation }
