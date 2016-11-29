@@ -1,7 +1,11 @@
 require "test_helper"
 
 class DocsNestedOperationTest < Minitest::Spec
-  Song = Struct.new(:id, :title)
+  Song = Struct.new(:id, :title) do
+    def self.find(id)
+      return new(1, "Bristol") if id == 1
+    end
+  end
 
   # self.> :bla!
   #   def bla!(options)
@@ -14,30 +18,35 @@ class DocsNestedOperationTest < Minitest::Spec
 
   #---
   #- nested operations
-  class New < Trailblazer::Operation
+  class Edit < Trailblazer::Operation
     extend Contract::DSL
 
     contract do
-      property :id
+      property :title
     end
 
-    self.| Model[Song, :create]
+    self.| Model[ Song, :find ]
     self.| Contract::Build[]
   end
 
-  class Create < Trailblazer::Operation
-    self.| Nested[ New ] #, "policy.default" => self["policy.create"]
+  class Update < Trailblazer::Operation
+    self.| Nested[ Edit ] #, "policy.default" => self["policy.create"]
     self.| Contract::Validate[]
-    self.| Persist[method: :sync]
+    self.| Persist[ method: :sync ]
   end
 
-  puts Create["pipetree"].inspect(style: :rows)
+  puts Update["pipetree"].inspect(style: :rows)
 
+  #-
+  # Edit is successful.
   it do
-    result = Create.({ id: 1, title: "Miami" }, "user.current" => Module)
-    result.inspect("model").must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title=nil>] >}
-    # result["model"]
-    # result["contract.default"].must_equal ""
+    result = Update.({ id: 1, title: "Miami" }, "user.current" => Module)
+    result.inspect("model").must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title="Miami">] >}
+  end
+
+  # Edit fails
+  it do
+    Update.(id: 2).inspect("model").must_equal %{<Result:false [nil] >}
   end
 
   #- shared data
