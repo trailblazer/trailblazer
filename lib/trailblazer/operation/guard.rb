@@ -1,4 +1,5 @@
-require "trailblazer/operation/policy" # FIXME.
+require "trailblazer/operation/policy"
+require "uber/option"
 
 class Trailblazer::Operation
   module Policy
@@ -12,11 +13,11 @@ class Trailblazer::Operation
       end
 
       def self.build_permission(callable, &block)
-        value = Uber::Options::Value.new(callable || block)
+        value = Uber::Option[callable || block]
 
-        # call'ing the Uber value will run either proc or block.
+        # call'ing the Uber::Option will run either proc or block.
         # this gets wrapped in a Operation::Result object.
-        ->(skills) { Result.new( value.(skills, skills), {} ) }
+        ->(options) { Result.new( value.(options), {} ) }
       end
     end # Guard
   end
