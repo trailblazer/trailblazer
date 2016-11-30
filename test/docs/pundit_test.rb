@@ -25,12 +25,12 @@ class DocsPunditProcTest < Minitest::Spec
   end
   #:pundit end
 
-  it { Create.({}, "user.current" => Module).inspect("model").must_equal %{<Result:true [#<struct DocsPunditProcTest::Song id=nil>] >} }
+  it { Create.({}, "current_user" => Module).inspect("model").must_equal %{<Result:true [#<struct DocsPunditProcTest::Song id=nil>] >} }
   it { Create.({}                          ).inspect("model").must_equal %{<Result:false [#<struct DocsPunditProcTest::Song id=nil>] >} }
 
   it do
   #:pundit-result
-  result = Create.({}, "user.current" => Module)
+  result = Create.({}, "current_user" => Module)
   result["result.policy.default"].success? #=> true
   result["result.policy.default"]["policy"] #=> #<MyPolicy ...>
   #:pundit-result end
@@ -79,7 +79,7 @@ class PunditWithNameTest < Minitest::Spec
 
   it {
   #:name-call
-  result = Create.({}, "user.current" => Module)
+  result = Create.({}, "current_user" => Module)
   result["result.policy.after_model"].success? #=> true
   #:name-call end
     result["result.policy.after_model"].success?.must_equal true }

@@ -1,6 +1,7 @@
 class Trailblazer::Operation
   module Policy
-    # Step: This generically `call`s a policy and then pushes its result to skills.
+    # Step: This generically `call`s a policy and then pushes its result to `options`.
+    # You can use any callable object as a policy with this step.
     # :private:
     class Eval
       include Uber::Callable
@@ -36,5 +37,3 @@ class Trailblazer::Operation
     end
   end
 end
-
-# how to have more than one policy, and then also replace its interpreter with another ? self.| MyInterpreter, replace: "Policy::Evaluator.after_validate"

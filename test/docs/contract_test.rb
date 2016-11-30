@@ -352,13 +352,13 @@ class DocContractBuilderTest < Minitest::Spec
     self.| Persist[method: :sync]
 
     def default_contract!(constant:, model:)
-      constant.new(model, current_user: self["user.current"])
+      constant.new(model, current_user: self["current_user"])
     end
   end
   #:builder-option end
 
   it { Create.({}).inspect("model").must_equal %{<Result:false [#<struct DocContractBuilderTest::Song id=nil, title=nil>] >} }
-  it { Create.({ title: 1}, "user.current" => Module).inspect("model").must_equal %{<Result:true [#<struct DocContractBuilderTest::Song id=nil, title=1>] >} }
+  it { Create.({ title: 1}, "current_user" => Module).inspect("model").must_equal %{<Result:true [#<struct DocContractBuilderTest::Song id=nil, title=1>] >} }
 
   #- proc
   class Update < Trailblazer::Operation
@@ -373,7 +373,7 @@ class DocContractBuilderTest < Minitest::Spec
     self.| Model[Song, :create]
     #:builder-proc
     self.| Contract::Build[builder: ->(operation, constant:, model:) {
-      constant.new(model, current_user: operation["user.current"])
+      constant.new(model, current_user: operation["current_user"])
     }]
     #:builder-proc end
     self.| Contract::Validate[]
@@ -381,7 +381,7 @@ class DocContractBuilderTest < Minitest::Spec
   end
 
   it { Update.({}).inspect("model").must_equal %{<Result:false [#<struct DocContractBuilderTest::Song id=nil, title=nil>] >} }
-  it { Update.({ title: 1}, "user.current" => Module).inspect("model").must_equal %{<Result:true [#<struct DocContractBuilderTest::Song id=nil, title=1>] >} }
+  it { Update.({ title: 1}, "current_user" => Module).inspect("model").must_equal %{<Result:true [#<struct DocContractBuilderTest::Song id=nil, title=1>] >} }
 end
 
 class DocContractTest < Minitest::Spec

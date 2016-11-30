@@ -37,11 +37,11 @@ class ResolverTest < Minitest::Spec
 
   it { A["pipetree"].inspect.must_equal %{[&model.build,&policy.default.eval,>>builder.call,>>operation.new,>process]} }
 
-  it { r=A.({ some: "params", id: 1 }, { "user.current" => Module })
+  it { r=A.({ some: "params", id: 1 }, { "current_user" => Module })
     puts r.inspect
 
      }
-  it { A.({ some: "params", id: 1 }, { "user.current" => Module })["x"].must_equal A::P }
-  it { A.({                 id: 3 }, { "user.current" => Module })["x"].must_equal A::B }
-  it { A.({                 id: 9 }, { "user.current" => Module })["x"].must_equal A::M }
+  it { A.({ some: "params", id: 1 }, { "current_user" => Module })["x"].must_equal A::P }
+  it { A.({                 id: 3 }, { "current_user" => Module })["x"].must_equal A::B }
+  it { A.({                 id: 9 }, { "current_user" => Module })["x"].must_equal A::M }
 end

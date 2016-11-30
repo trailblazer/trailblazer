@@ -40,7 +40,7 @@ class DocsNestedOperationTest < Minitest::Spec
   #-
   # Edit is successful.
   it do
-    result = Update.({ id: 1, title: "Miami" }, "user.current" => Module)
+    result = Update.({ id: 1, title: "Miami" }, "current_user" => Module)
     result.inspect("model").must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title="Miami">] >}
   end
 
@@ -52,7 +52,7 @@ class DocsNestedOperationTest < Minitest::Spec
   #- shared data
   class B < Trailblazer::Operation
     self.> ->(options) { options["can.B.see.it?"] = options["this.should.not.be.visible.in.B"] }
-    self.> ->(options) { options["can.B.see.user.current?"] = options["user.current"] }
+    self.> ->(options) { options["can.B.see.current_user?"] = options["current_user"] }
     self.> ->(options) { options["can.B.see.A.class.data?"] = options["A.class.data"] }
   end
 
@@ -67,7 +67,7 @@ class DocsNestedOperationTest < Minitest::Spec
   it { A.()["can.B.see.it?"].must_equal nil }
   it { A.()["this.should.not.be.visible.in.B"].must_equal true }
   # runtime dependencies are visible in B.
-  it { A.({}, "user.current" => Module)["can.B.see.user.current?"].must_equal Module }
+  it { A.({}, "current_user" => Module)["can.B.see.current_user?"].must_equal Module }
   # class data from A doesn't bleed into B.
   it { A.()["can.B.see.A.class.data?"].must_equal nil }
 

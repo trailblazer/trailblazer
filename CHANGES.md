@@ -63,7 +63,7 @@ You can now inject the following objects via `::call`:
 ## Policy
 
 * No exception anymore, but `Operation#["policy.result"]`.
-* Access the current user via `self["user.current"]` now.
+* Access the current user via `self["current_user"]` now.
 * `Policy` is `Policy::Pundit` now as `Policy` is Trailblazer's authorization style.
 
 ## Representer

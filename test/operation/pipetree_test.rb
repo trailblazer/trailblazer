@@ -59,7 +59,7 @@ class PipetreeTest < Minitest::Spec
     self.< LogBreach, after: Policy::Evaluate
 
     model Song
-    policy ->(*) { self["user.current"] }
+    policy ->(*) { self["current_user"] }
 
     def log_breach!
       self["breach"] = true
@@ -80,7 +80,7 @@ class PipetreeTest < Minitest::Spec
   it {
     # puts "valid"
   # puts Edit["pipetree"].inspect(style: :rows)
-    result = Edit.({ title: "Stupid 7" }, "user.current" => true)
+    result = Edit.({ title: "Stupid 7" }, "current_user" => true)
     # puts "success! #{result.inspect}"
     result["my.valid"].must_equal true
     result["breach"].must_equal nil

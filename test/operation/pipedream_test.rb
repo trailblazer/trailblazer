@@ -21,7 +21,7 @@ class PipedreamTest < Minitest::Spec
 
 
     self.|         Model[ Song, :create]      # model!)
-    self.| Policy::Guard[ ->(options){ options["user.current"] == ::Module } ]
+    self.| Policy::Guard[ ->(options){ options["current_user"] == ::Module } ]
     self.|      Contract[ MyContract]
     self.|        Policy[ Auth, :user_and_model?]
     self.<      Contract[ MyContract]
@@ -32,7 +32,7 @@ class PipedreamTest < Minitest::Spec
 
 
     # ok Model[Song, :create]      # model!)
-    # ok Policy::Guard[ ->(options){ options["user.current"] == ::Module } ]
+    # ok Policy::Guard[ ->(options){ options["current_user"] == ::Module } ]
     # ok Contract[MyContract]
     # fail Contract[MyContract]
     # self.|> "contract"
@@ -48,7 +48,7 @@ class PipedreamTest < Minitest::Spec
 
   it do
     puts Create["pipetree"].inspect(style: :rows)
-    result = Create.({}, { "user.current" => Module })
+    result = Create.({}, { "current_user" => Module })
 
     result["model"].inspect.must_equal %{#<struct PipedreamTest::Song title=nil>}
     result["result.policy"].success?.must_equal true
