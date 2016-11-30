@@ -43,9 +43,8 @@ class PolicyTest < Minitest::Spec
     result["result.policy.default"].success?.must_equal false
     result["result.policy.default"]["message"].must_equal "Breach"
   end
-  # inject different policy.
-  it { Create.({}, "user.current" => Object, "policy.default.eval" => Trailblazer::Operation::Policy::Pundit::Permission.new(Auth, :user_object?))["process"].must_equal true }
-  it { Create.({}, "user.current" => Module, "policy.default.eval" => Trailblazer::Operation::Policy::Pundit::Permission.new(Auth, :user_object?))["process"].must_equal nil }
+  # inject different policy.Condition  it { Create.({}, "user.current" => Object, "policy.default.eval" => Trailblazer::Operation::Policy::Pundit::Condition.new(Auth, :user_object?))["process"].must_equal true }
+  it { Create.({}, "user.current" => Module, "policy.default.eval" => Trailblazer::Operation::Policy::Pundit::Condition.new(Auth, :user_object?))["process"].must_equal nil }
 
 
   #---
@@ -67,7 +66,7 @@ class PolicyTest < Minitest::Spec
   # valid because new policy.
   it do
     # puts Show["pipetree"].inspect
-    result = Show.({}, "user.current" => Module, "policy.default.eval" => Trailblazer::Operation::Policy::Pundit::Permission.new(Auth, :user_and_model?))
+    result = Show.({}, "user.current" => Module, "policy.default.eval" => Trailblazer::Operation::Policy::Pundit::Condition.new(Auth, :user_and_model?))
     result["process"].must_equal true
     result["model"].inspect.must_equal %{#<struct PolicyTest::Song id=nil>}
     result["policy.default"].inspect.must_equal %{<Auth: user:Module, model:#<struct PolicyTest::Song id=nil>>}
