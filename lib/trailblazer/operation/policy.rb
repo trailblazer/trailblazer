@@ -1,28 +1,43 @@
 class Trailblazer::Operation
   module Policy
-    # This is a generic evaluate function for all kinds of policies.
-    # Arguments to the Callable: (skills)
-    Evaluate = ->(input, options) {
-      result = options["policy.evaluator"].(options)
+    # Step: This generically `call`s a policy and then pushes its result to skills.
+    class Eval
+      include Uber::Callable
 
-      options["policy"]        = result["policy"] # assign the policy as a skill.
-      options["result.policy"] = result
+      def initialize(name:, path:)
+        @name = name
+        @path = path
+      end
 
-      # flow control
-      result.success? # since we & this, it's only executed OnRight and the return boolean decides the direction, input is passed straight through.
-    }
+      def call(input, options)
+        condition = options[@path] # this allows dependency injection.
+        result    = condition.(options)
+
+        options["policy.#{@name}"]        = result["policy"] # assign the policy as a skill.
+        options["result.policy.#{@name}"] = result
+
+        # flow control
+        result.success? # since we & this, it's only executed OnRight and the return boolean decides the direction, input is passed straight through.
+      end
+    end
 
     extend Macro
 
-    def self.import!(operation, import, policy_class, action)
-      import.(:&, Evaluate, name: "policy.evaluate")
+    def self.import!(operation, import, policy_class, action, options={})
+      name = options[:name] || :default
 
-      operation["policy.evaluator"] = Policy.build_permission(policy_class, action)
+      # configure class level.
+      operation[path = "policy.#{name}.eval"] = Policy.build(policy_class, action)
+
+      # add step.
+      import.(:&, Eval.new( name: name, path: path ),
+        name: path
+      )
     end
 
     # includer.& Evaluate, before: "operation.call", name: "policy.evaluate"
 
-    def self.build_permission(*args, &block)
+    def self.build(*args, &block)
       Permission.new(*args, &block)
     end
 

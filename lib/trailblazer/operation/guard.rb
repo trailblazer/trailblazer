@@ -6,18 +6,24 @@ class Trailblazer::Operation
     module Guard
       extend Macro
 
-      def self.import!(operation, import, user_proc)
-        import.(:&, Evaluate, name: "policy.guard.evaluate")
+      def self.import!(operation, import, user_proc, options={})
+        name = options[:name] || :default
 
-        operation["policy.evaluator"] = Guard.build_permission(user_proc)
+        # configure class level.
+        operation[path = "policy.#{name}.eval"] = Guard.build(user_proc)
+
+        # add step.
+        import.(:&, Eval.new( name: name, path: path ),
+          name: path
+        )
       end
 
-      def self.build_permission(callable, &block)
+      def self.build(callable, &block)
         value = Uber::Option[callable || block]
 
         # call'ing the Uber::Option will run either proc or block.
         # this gets wrapped in a Operation::Result object.
-        ->(options) { Result.new( value.(options), {} ) }
+        ->(options) { Result.new( !!value.(options), {} ) }
       end
     end # Guard
   end

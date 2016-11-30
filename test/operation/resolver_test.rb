@@ -17,7 +17,7 @@ class ResolverTest < Minitest::Spec
     extend Builder::DSL
     builds ->(options) {
       return P if options["params"] == { some: "params", id:1 }
-      return B if options["policy"].inspect == %{<Auth: user:Module, model:#<struct ResolverTest::Song id=3>>} # both user and model:id are set!
+      return B if options["policy.default"].inspect == %{<Auth: user:Module, model:#<struct ResolverTest::Song id=3>>} # both user and model:id are set!
       return M if options["model"].inspect == %{#<struct ResolverTest::Song id=9>}
     }
 
@@ -35,7 +35,7 @@ class ResolverTest < Minitest::Spec
     def process(*); self["x"] = self.class end
   end
 
-  it { A["pipetree"].inspect.must_equal %{[&model.build,&policy.evaluate,>>builder.call,>>operation.new,>process]} }
+  it { A["pipetree"].inspect.must_equal %{[&model.build,&policy.default.eval,>>builder.call,>>operation.new,>process]} }
 
   it { r=A.({ some: "params", id: 1 }, { "user.current" => Module })
     puts r.inspect

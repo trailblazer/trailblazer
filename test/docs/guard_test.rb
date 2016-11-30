@@ -1,8 +1,8 @@
 require "test_helper"
 
+#--
+# with proc
 class DocsGuardProcTest < Minitest::Spec
-  #--
-  # with proc
   #:proc
   class Create < Trailblazer::Operation
     self.| Policy::Guard[ ->(options) { options["params"][:pass] } ]
@@ -20,8 +20,8 @@ class DocsGuardProcTest < Minitest::Spec
   it { Create.(pass: true)["x"].must_equal true }
 
   #- result object, guard
-  it { Create.(pass: true)["result.policy"].success?.must_equal true }
-  it { Create.(pass: false)["result.policy"].success?.must_equal false }
+  it { Create.(pass: true)["result.policy.default"].success?.must_equal true }
+  it { Create.(pass: false)["result.policy.default"].success?.must_equal false }
 
 
 
@@ -31,12 +31,12 @@ class DocsGuardProcTest < Minitest::Spec
   class New < Create
   end
 
-  it { New["pipetree"].inspect.must_equal %{[>>operation.new,&policy.guard.evaluate,>process]} }
+  it { New["pipetree"].inspect.must_equal %{[>>operation.new,&policy.default.eval,>process]} }
 end
 
+#---
+# with Callable
 class DocsGuardTest < Minitest::Spec
-  #---
-  # with Callable
   #:callable
   class MyGuard
     include Uber::Callable
@@ -61,9 +61,47 @@ class DocsGuardTest < Minitest::Spec
   it { Create.(pass: true)[:x].must_equal true }
 end
 
+#---
+# with method
+# class DocsGuardMethodTest < Minitest::Spec
+#   #:method
+#   class Create < Trailblazer::Operation
+#     self.| Policy::Guard[ : ]
+#     self.| :process
+#     #~pipe-only
+#     def process(*); self[:x] = true; end
+#     #~pipe-only end
+#   end
+#   #:method end
+
+#   it { Create.(pass: false)[:x].must_equal nil }
+#   it { Create.(pass: true)[:x].must_equal true }
+# end
+
+#---
+# with name:
+class DocsGuardNamedTest < Minitest::Spec
+  #:name
+  class Create < Trailblazer::Operation
+    self.| Policy::Guard[ ->(options) { options["current_user"] }, name: :user ]
+    # ...
+  end
+  #:name end
+
+  it { Create.()["result.policy.user"].success?.must_equal false }
+  it { Create.({}, "current_user" => Module)["result.policy.user"].success?.must_equal true }
+
+  it {
+  #:name-result
+  result = Create.({}, "current_user" => true)
+  result["result.policy.user"].success? #=> true
+  #:name-result end
+  }
+end
+
+#---
+# class-level guard
 class DocsGuardClassLevelTest < Minitest::Spec
-  #---
-  # class-level guard
   #:class-level
   class Create < Trailblazer::Operation
     self.| Policy::Guard[ ->(options) { options["current_user"] == Module } ],
@@ -79,6 +117,27 @@ class DocsGuardClassLevelTest < Minitest::Spec
   it { Create.({}                          )["x"].must_equal nil }
 end
 
+#---
+# dependency injection
+class DocsGuardInjectionTest < Minitest::Spec
+  #:di-op
+  class Create < Trailblazer::Operation
+    self.| Policy::Guard[ ->(options) { options["current_user"] == Module } ]
+  end
+  #:di-op end
+
+  it { Create.({}, "current_user" => Module).inspect("").must_equal %{<Result:true [nil] >} }
+  it {
+    result =
+  #:di-call
+  Create.({},
+    "current_user"        => Module,
+    "policy.default.eval" => Trailblazer::Operation::Policy::Guard.build(->(options) { false })
+  )
+  #:di-call end
+    result.inspect("").must_equal %{<Result:false [nil] >} }
+end
+
+
 # TODO:
 #policy.default
-# no policy write on operation class.
