@@ -19,7 +19,7 @@ class DryContainerTest < Minitest::Spec
   #- dependency injection
   #- with Dry-container
   class Create < Trailblazer::Operation
-    self.| Model[Song, :create]
+    self.| Model[Song, :new]
     self.| Contract::Build[]
     self.| Contract::Validate[]
     self.| Persist[method: :sync]

@@ -11,7 +11,7 @@ class DslCallbackTest < MiniTest::Spec
       includer.contract do
         property :title
       end
-      includer.| Trailblazer::Operation::Model[OpenStruct, :create]
+      includer.| Trailblazer::Operation::Model[OpenStruct, :new]
       includer.| Trailblazer::Operation::Contract::Build[includer["contract.default.class"]]
       includer.| Trailblazer::Operation::Contract::Validate[]
       includer.| Trailblazer::Operation::Callback[:default]

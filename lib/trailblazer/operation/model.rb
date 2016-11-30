@@ -28,7 +28,7 @@ class Trailblazer::Operation
       end
 
       def action_name
-        self["model.action"] or :create
+        self["model.action"] or :new
       end
 
       def model!(params)
@@ -39,7 +39,7 @@ class Trailblazer::Operation
         send("#{action_name}_model", params)
       end
 
-      def create_model(params)
+      def new_model(params)
         model_class.new
       end
 

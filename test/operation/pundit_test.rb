@@ -50,7 +50,7 @@ class PolicyTest < Minitest::Spec
   #---
   # inheritance, adding Model
   class Show < Create
-    self.| Model[Song, :create], before: "policy.default.eval"
+    self.| Model[ Song, :new ], before: "policy.default.eval"
   end
 
   it { Show["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,&policy.default.eval,>process]} }

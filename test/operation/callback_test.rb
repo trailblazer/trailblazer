@@ -13,7 +13,7 @@ class OperationCallbackTest < MiniTest::Spec
       property :name
     end
 
-    self.| Model[Song, :create]
+    self.| Model[ Song, :new ]
     self.| Contract::Build[]
     self.| Contract::Validate[]
     self.| Callback[:default]

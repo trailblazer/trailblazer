@@ -20,7 +20,7 @@ class PipedreamTest < Minitest::Spec
 
 
 
-    self.|         Model[ Song, :create]      # model!)
+    self.|         Model[ Song, :new ]      # model!)
     self.| Policy::Guard[ ->(options){ options["current_user"] == ::Module } ]
     self.|      Contract[ MyContract]
     self.|        Policy[ Auth, :user_and_model?]
@@ -31,7 +31,7 @@ class PipedreamTest < Minitest::Spec
     # self.| :contract
 
 
-    # ok Model[Song, :create]      # model!)
+    # ok Model[Song, :new]      # model!)
     # ok Policy::Guard[ ->(options){ options["current_user"] == ::Module } ]
     # ok Contract[MyContract]
     # fail Contract[MyContract]

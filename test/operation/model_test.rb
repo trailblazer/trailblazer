@@ -9,10 +9,10 @@ class ModelTest < Minitest::Spec
   #---
   # use Model semantics, no customizations.
   class Create < Trailblazer::Operation
-    self.| Model[ Song, :create ]
+    self.| Model[ Song, :new ]
   end
 
-  # :create new.
+  # :new new.
   it { Create.({})["model"].inspect.must_equal %{#<struct ModelTest::Song id=nil>} }
 
   class Update < Create
