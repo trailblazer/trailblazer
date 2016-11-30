@@ -22,7 +22,7 @@ class ResolverTest < Minitest::Spec
     }
 
     self.| Model[Song, :update], before: "operation.new"
-    self.| Policy[Auth, :user_and_model?], before: "operation.new"
+    self.| Policy::Pundit[Auth, :user_and_model?], before: "operation.new"
     require "trailblazer/operation/resolver"
     self.| Resolver[], before: "operation.new"
 
