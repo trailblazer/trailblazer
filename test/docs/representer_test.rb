@@ -6,6 +6,7 @@ require "representable/json"
 class DocsRepresenterInferTest < Minitest::Spec
   Song = Struct.new(:id, :title)
 
+  #:infer
   class Create < Trailblazer::Operation
     class MyContract < Reform::Form
       property :id
@@ -13,12 +14,13 @@ class DocsRepresenterInferTest < Minitest::Spec
 
     self.| Model[ Song, :new ]
     self.| Contract::Build[ constant: MyContract ]
-    self.| Contract::Validate[ representer: Representer.infer(MyContract) ]
+    self.| Contract::Validate[ representer: Representer.infer(MyContract, format: Representable::JSON) ]
     self.| Persist[ method: :sync ]
   end
+  #:infer end
 
   let (:json) { MultiJson.dump(id: 1) }
-  it { Create.({}, "document.json" => json).inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterInferTest::Song id=1, title=nil>] >} }
+  it { Create.({}, "document" => json).inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterInferTest::Song id=1, title=nil>] >} }
 end
 
 #---
@@ -47,26 +49,46 @@ class DocsRepresenterExplicitTest < Minitest::Spec
   #:explicit-op end
 
   let (:json) { MultiJson.dump(id: 1) }
-  it { Create.({}, "document.json" => json).inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterExplicitTest::Song id=1, title=nil>] >} }
+  it { Create.({}, "document" => json).inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterExplicitTest::Song id=1, title=nil>] >} }
   it do
   #:explicit-call
-  Create.({}, "document.json" => '{"id": 1}')
+  Create.({}, "document" => '{"id": 1}')
   #:explicit-call end
+  end
+
+  #- render
+  it do
+  #:render
+  result = Create.({}, "document" => '{"id": 1}')
+  json   = result["representer.default.class"].new(result["model"]).to_json
+  json #=> '{"id":1}'
+  #:render end
+  json.must_equal '{"id":1}'
   end
 
   #-
   # with dependency injection
   # overriding the JSON representer with an XML one.
+  #:di-rep
   require "representable/xml"
+
   class MyXMLRepresenter < Representable::Decorator
     include Representable::XML
     property :id
     alias_method :from_json, :from_xml # FIXME. introduce #parse.
   end
+  #:di-rep end
 
   let (:xml) { %{<body><id>1</id></body>} }
-  it { Create.({}, "document.json" => xml,
-    "representer.default.class" => MyXMLRepresenter).inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterExplicitTest::Song id="1", title=nil>] >} }
+  it do
+  #:di-call
+  result = Create.({},
+    "document" => '<body><id>1</id></body>',
+    "representer.default.class" => MyXMLRepresenter # injection
+  )
+  #:di-call end
+    result.inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterExplicitTest::Song id="1", title=nil>] >}
+  end
 end
 
 #---
@@ -91,7 +113,7 @@ class DocsRepresenterDITest < Minitest::Spec
   end
 
   let (:json) { MultiJson.dump(id: 1) }
-  it { Create.({}, "document.json" => json,
+  it { Create.({}, "document" => json,
     "representer.default.class" => MyRepresenter).inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterDITest::Song id=1, title=nil>] >} }
 end
 
@@ -100,12 +122,14 @@ end
 class DocsRepresenterInlineTest < Minitest::Spec
   Song = Struct.new(:id, :title)
 
+  #:inline
   class Create < Trailblazer::Operation
     class MyContract < Reform::Form
       property :id
     end
 
     extend Representer::DSL
+
     representer do
       property :id
     end
@@ -115,9 +139,10 @@ class DocsRepresenterInlineTest < Minitest::Spec
     self.| Contract::Validate[ representer: self["representer.default.class"] ]
     self.| Persist[ method: :sync ]
   end
+  #:inline end
 
   let (:json) { MultiJson.dump(id: 1) }
-  it { Create.({}, "document.json" => json).inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterInlineTest::Song id=1, title=nil>] >} }
+  it { Create.({}, "document" => json).inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterInlineTest::Song id=1, title=nil>] >} }
 end
 
 #---

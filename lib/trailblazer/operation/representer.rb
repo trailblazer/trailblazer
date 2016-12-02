@@ -1,6 +1,6 @@
 class Trailblazer::Operation
   module Representer
-    def self.infer(contract_class, format: Representable::JSON)
+    def self.infer(contract_class, format:Representable::JSON)
       Disposable::Rescheme.from(contract_class,
         include:          [format],
         options_from:     :deserializer, # use :instance etc. in deserializer.

@@ -26,7 +26,7 @@ module Trailblazer::Operation::Contract
       options["params.validate"] = key ? options["params"][key] : options["params"]
     end
 
-    def self.validate!(operation, options, name: nil, representer:false, from: "document.json", format: :json, **)
+    def self.validate!(operation, options, name: nil, representer:false, from: "document", format: :json, **)
       path     = "contract.#{name}"
       contract = operation[path]
 
