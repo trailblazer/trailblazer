@@ -6,23 +6,27 @@ module Trailblazer::Operation::Contract
   module Validate
     extend Trailblazer::Operation::Macro
 
-    def self.import!(operation, import, skip_extract:false, **args)
-      skip_extract = true if args[:representer]
+    def self.import!(operation, import, skip_extract:false, name: "default", representer:false, **args) # DISCUSS: should we introduce something like Validate::Deserializer?
+      if representer
+        skip_extract = true
+        operation["representer.#{name}.class"] = representer
+      end
 
       import.(:&, ->(input, options) { extract_params!(input, options, **args) },
         name: "validate.params.extract") unless skip_extract
 
       # call the actual contract.validate(params)
-      import.(:&, ->(operation, options) { validate!(operation, options, **args) },
+      # DISCUSS: should we pass the representer here, or do that in #validate! i'm still mulling over what's the best, most generic approach.
+      import.(:&, ->(operation, options) { validate!(operation, options, name: name, representer: options["representer.#{name}.class"], **args) },
         name: "contract.validate")
       end
 
     def self.extract_params!(operation, options, key:nil, **)
-      # FIXME: introduce nested pipes and pass composed input instead.
+      # TODO: introduce nested pipes and pass composed input instead.
       options["params.validate"] = key ? options["params"][key] : options["params"]
     end
 
-    def self.validate!(operation, options, name:"default", representer: nil, from: "document.json", format: :json, **)
+    def self.validate!(operation, options, name: nil, representer:false, from: "document.json", format: :json, **)
       path     = "contract.#{name}"
       contract = operation[path]
 
