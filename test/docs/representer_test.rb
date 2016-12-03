@@ -170,21 +170,41 @@ class DocsRepresenterManualRenderTest < Minitest::Spec
 end
 
 #---
+# naming
+
+class DocsRepresenterNamingTest < Minitest::Spec
+  MyRepresenter = Object
+
+  #:naming
+  class Create < Trailblazer::Operation
+    extend Representer::DSL
+    representer MyRepresenter
+  end
+
+  Create["representer.default.class"] #=> MyRepresenter
+  #:naming end
+  it { Create["representer.default.class"].must_be_kind_of MyRepresenter }
+end
+
+#---
 # rendering
 require "roar/json/hal"
 
-class DocsRepresenterNamingTest < Minitest::Spec
+class DocsRepresenterFullExampleTest < Minitest::Spec
   Song = Struct.new(:id, :title) do
     def initialize(*)
       self.id = 1
     end
   end
 
+  #:errors-rep
   class ErrorsRepresenter < Representable::Decorator
     include Representable::JSON
     collection :errors
   end
+  #:errors-rep end
 
+  #:full
   class Create < Trailblazer::Operation
     extend Contract::DSL
     extend Representer::DSL
@@ -213,6 +233,7 @@ class DocsRepresenterNamingTest < Minitest::Spec
     self.| Contract::Validate[ representer: self["representer.parse.class"] ]
     self.| Persist[ method: :sync ]
   end
+  #:full end
 
   it do
     result =Create.({}, "document" => '{"title": "Tested"}')
