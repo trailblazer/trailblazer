@@ -75,7 +75,6 @@ class DocsRepresenterExplicitTest < Minitest::Spec
   class MyXMLRepresenter < Representable::Decorator
     include Representable::XML
     property :id
-    alias_method :from_json, :from_xml # FIXME. introduce #parse.
   end
   #:di-rep end
 

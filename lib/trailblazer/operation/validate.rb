@@ -36,7 +36,7 @@ module Trailblazer::Operation::Contract
           # use "document.json" as the body and let the representer deserialize to the contract.
           # this will be simplified once we have Deserializer.
           # translates to contract.("{document: bla}") { MyRepresenter.new(contract).from_json .. }
-          contract.(options[from]) { |document| representer.new(contract).send("from_#{format}", document) }
+          contract.(options[from]) { |document| representer.new(contract).parse(document) }
         else
           # let Reform handle the deserialization.
           contract.(options["params.validate"])
