@@ -241,6 +241,19 @@ class DocsRepresenterFullExampleTest < Minitest::Spec
     json = result["representer.render.class"].new(result["model"]).to_json
 
     json.must_equal %{{"id":1,"title":"Tested","_links":{"self":{"href":"/songs/1"}}}}
+
+
+  #:full-call
+  def create
+    result = Create.(params, "document" => request.body.read)
+
+    if result.success?
+      result["representer.render.class"].new(result["model"]).to_json
+    else
+      result["representer.errors.class"].new(result["result.contract.default"]).to_json
+    end
+  end
+  #:full-call end
   end
 
   it do
