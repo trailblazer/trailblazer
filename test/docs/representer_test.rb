@@ -168,3 +168,67 @@ class DocsRepresenterManualRenderTest < Minitest::Spec
     json.must_equal %{{"id":1}}
   end
 end
+
+#---
+# rendering
+require "roar/json/hal"
+
+class DocsRepresenterNamingTest < Minitest::Spec
+  Song = Struct.new(:id, :title) do
+    def initialize(*)
+      self.id = 1
+    end
+  end
+
+  class ErrorsRepresenter < Representable::Decorator
+    include Representable::JSON
+    collection :errors
+  end
+
+  class Create < Trailblazer::Operation
+    extend Contract::DSL
+    extend Representer::DSL
+
+    contract do
+      property :title
+      validates :title, presence: true
+    end
+
+    representer :parse do
+      property :title
+    end
+
+    representer :render do
+      include Roar::JSON::HAL
+
+      property :id
+      property :title
+      link(:self) { "/songs/#{represented.id}" }
+    end
+
+    representer :errors, ErrorsRepresenter # explicit reference.
+
+    self.| Model[ Song, :new ]
+    self.| Contract::Build[ ]
+    self.| Contract::Validate[ representer: self["representer.parse.class"] ]
+    self.| Persist[ method: :sync ]
+  end
+
+  it do
+    result =Create.({}, "document" => '{"title": "Tested"}')
+
+    json = result["representer.render.class"].new(result["model"]).to_json
+
+    json.must_equal %{{"id":1,"title":"Tested","_links":{"self":{"href":"/songs/1"}}}}
+  end
+
+  it do
+    result =Create.({}, "document" => '{"title": ""}')
+
+    if result.failure?
+       json = result["representer.errors.class"].new(result["result.contract.default"]).to_json
+    end
+
+    json.must_equal %{{"errors":[["title","can't be blank"]]}}
+  end
+end
