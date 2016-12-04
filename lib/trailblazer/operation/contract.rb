@@ -21,7 +21,6 @@ module Trailblazer::Operation::Contract
       operation["contract.#{name}"] = contract_class.new(model)
     end
 
-
     def self.import!(operation, import, **args)
       import.(:>, ->(operation, options) { build_contract!(operation, options, **args) },
         name: "contract.build")
