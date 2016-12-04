@@ -43,7 +43,7 @@ class DocsRepresenterExplicitTest < Minitest::Spec
 
     self.| Model[ Song, :new ]
     self.| Contract::Build[ constant: MyContract ]
-    self.| Contract::Validate[ representer: MyRepresenter ]
+    self.| Contract::Validate[ representer: MyRepresenter ] # :representer
     self.| Persist[ method: :sync ]
   end
   #:explicit-op end

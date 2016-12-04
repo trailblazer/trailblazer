@@ -1,15 +1,3 @@
-Reform::Form.class_eval do # THIS IS OF COURSE PROTOTYPING!
-  def call(params, &block)
-    bool = validate(params, &block)
-    Result.new(self)
-  end
-
-  class Result < SimpleDelegator
-    def success?
-      errors.empty?
-    end
-  end
-end
 # Best practices for using contract.
 #
 # * inject contract instance via constructor to #contract
