@@ -15,3 +15,21 @@ module Trailblazer::Operation::Nested
     }, {} )
   end
 end
+
+class Trailblazer::Operation
+  module Wrap
+    def self.import!(operation, import, wrap, &block)
+      pipe = ::Pipetree::Flow[]
+    end
+  end
+
+  # DISCUSS: this is prototyping!
+  def self.Wrap(*args, &block)
+    [Wrap, *args, block]
+    # extend Macro
+
+    # def self.import!(operation, import, wrap, &block)
+    # end
+  end
+end
+
