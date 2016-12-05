@@ -1,5 +1,5 @@
-require 'trailblazer'
-require 'minitest/autorun'
+require "trailblazer"
+require "minitest/autorun"
 
 # TODO: convert tests to non-rails.
 require "reform/rails"
