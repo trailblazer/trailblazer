@@ -42,7 +42,7 @@ class RescueTest < Minitest::Spec
       property :title
     end
 
-    step Rescue { |pipe|
+    step Rescue {
       step Model[ Song, :find ]
       step Contract::Build[ constant: MyContract ]
     }
@@ -52,4 +52,26 @@ class RescueTest < Minitest::Spec
 
   it { Create.( id: 1, title: "Prodigal Son" )["contract.default"].model.inspect.must_equal %{#<struct RescueTest::Song id=1, title="Prodigal Son">} }
   it { Create.( id: nil ).inspect("model").must_equal %{<Result:false [nil] >} }
+
+
+  #---
+  # nested raise (i hope people won't use this but it works)
+  A = Class.new(RuntimeError)
+  Y = Class.new(RuntimeError)
+
+  class NestedInsanity < Trailblazer::Operation
+    step Rescue {
+      step ->(options) { options["a"] = true }
+      step Rescue {
+        step ->(options) { options["y"] = true }
+        step ->(options) { raise Y if options["raise-y"] }
+        step ->(options) { options["z"] = true }
+      }
+      step ->(options) { options["b"] = true }
+      step ->(options) { raise A if options["raise-a"] }
+      step ->(options) { options["c"] = true }
+    }
+  end
+
+  it { NestedInsanity.({}).inspect("a", "y", "z", "b", "c").must_equal %{<Result:true [true, true, true, true, true] >} }
 end

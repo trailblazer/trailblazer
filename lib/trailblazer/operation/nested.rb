@@ -30,6 +30,7 @@ class Trailblazer::Operation
 
     class API
       include Pipetree::DSL
+      include Pipetree::DSL::Macros
 
       def initialize(target, pipe)
         @target, @pipe = target, pipe
@@ -44,7 +45,8 @@ class Trailblazer::Operation
       end
       alias_method :step, :| # DISCUSS: uhm...
     end
-  end
+  end # Wrap
+  DSL.macro!(:Wrap, Wrap)
 
   module Rescue
     def self.import!(operation, import, *ar, &block)
@@ -59,14 +61,6 @@ class Trailblazer::Operation
       operation.| operation.Wrap(rescue_block, &block)
     end
   end
-
-  # DISCUSS: this is prototyping!
-  def self.Wrap(*args, &block)
-    [Wrap, *args, block]
-  end
-
-  def self.Rescue(*args, &block)
-    [Rescue, args, block]
-  end
+  DSL.macro!(:Rescue, Rescue)
 end
 
