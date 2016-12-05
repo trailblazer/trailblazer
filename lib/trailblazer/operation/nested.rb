@@ -40,16 +40,31 @@ class Trailblazer::Operation
       def |(cfg, user_options={})
         Pipetree::DSL.import(@target, @pipe, cfg, user_options)
       end
+      alias_method :step, :| # DISCUSS: uhm...
+    end
+  end
+
+  module Rescue
+    def self.import!(operation, import, *ar, &block)
+      rescue_block = ->(pipe, operation, options) {
+        begin
+          pipe.(operation, options)
+        rescue => exception
+          #options["result.model.find"] = "argh! because #{exception.class}"
+          false
+        end }
+
+      operation.| operation.Wrap(rescue_block, &block)
     end
   end
 
   # DISCUSS: this is prototyping!
   def self.Wrap(*args, &block)
     [Wrap, *args, block]
-    # extend Macro
+  end
 
-    # def self.import!(operation, import, wrap, &block)
-    # end
+  def self.Rescue(*args, &block)
+    [Rescue, args, block]
   end
 end
 
