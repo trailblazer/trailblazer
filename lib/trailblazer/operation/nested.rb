@@ -21,7 +21,9 @@ class Trailblazer::Operation
     def self.import!(operation, import, wrap, &block)
       pipe_api = API.new(operation, pipe = ::Pipetree::Flow[])
 
-      yield pipe_api # create the nested pipe.
+      # DISCUSS: don't instance_exec when |pipe| given?
+      # yield pipe_api # create the nested pipe.
+      pipe_api.instance_exec(&block) # create the nested pipe.
 
       import.(:&, ->(input, options) { wrap.(pipe, input, options) }, {})
     end

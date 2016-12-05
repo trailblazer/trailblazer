@@ -11,22 +11,19 @@ class WrapTest < Minitest::Spec
     class MyContract < Reform::Form
       property :title
     end
-    # Transaction
-    #   extend U
-    # end
 
-    self.| Wrap ->(pipe, operation, options) {
+    step Wrap ->(pipe, operation, options) {
       begin
         pipe.(operation, options)
       rescue => exception
         options["result.model.find"] = "argh! because #{exception.class}"
         false
       end } { |pipe|
-      pipe.| Model[ Song, :find ]
-      pipe.| Contract::Build[ constant: MyContract ]
+      step Model[ Song, :find ]
+      step Contract::Build[ constant: MyContract ]
     }
-    self.| Contract::Validate[]
-    self.| Persist[ method: :sync ]
+    step Contract::Validate[]
+    step Persist[ method: :sync ]
   end
 
   it { Create.( id: 1, title: "Prodigal Son" )["contract.default"].model.inspect.must_equal %{#<struct WrapTest::Song id=1, title="Prodigal Son">} }
@@ -46,8 +43,8 @@ class RescueTest < Minitest::Spec
     end
 
     step Rescue { |pipe|
-      pipe.step Model[ Song, :find ]
-      pipe.step Contract::Build[ constant: MyContract ]
+      step Model[ Song, :find ]
+      step Contract::Build[ constant: MyContract ]
     }
     step Contract::Validate[]
     step Persist[ method: :sync ]
