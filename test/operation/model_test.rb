@@ -9,14 +9,14 @@ class ModelTest < Minitest::Spec
   #---
   # use Model semantics, no customizations.
   class Create < Trailblazer::Operation
-    self.| Model[ Song, :new ]
+    self.| Model Song, :new
   end
 
   # :new new.
   it { Create.({})["model"].inspect.must_equal %{#<struct ModelTest::Song id=nil>} }
 
   class Update < Create
-    self.~ Model[:update] # DISCUSS: do we need the ~ operator?
+    self.~ Model :update # DISCUSS: do we need the ~ operator?
   end
 
   # :find it
@@ -35,7 +35,7 @@ class ModelTest < Minitest::Spec
   #---
   # :find_by, exceptionless.
   class Find < Trailblazer::Operation
-    self.| Model[Song, :find_by]
+    self.| Model Song, :find_by
     self.| :process
 
     def process(*); self["x"] = true end
@@ -59,7 +59,7 @@ class ModelTest < Minitest::Spec
   #---
   # override #model!, without any Model inclusions.
   class Delete < Trailblazer::Operation
-    self.| Model[:model!]
+    self.| Model :model!
     def model!(params); params.to_s end
   end
 
@@ -69,7 +69,7 @@ class ModelTest < Minitest::Spec
   # creating the model before operation instantiation (ex Model::External)
   class Show < Create
     extend Model::BuildMethods # FIXME: how do we communicate that and prevent the include from Model[] ?
-    self.| Model[Song, :update], before: "operation.new"
+    self.| Model( Song, :update ), before: "operation.new"
   end
 
   it { Show.({id: 1})["model"].inspect.must_equal %{#<struct ModelTest::Song id=1>} }

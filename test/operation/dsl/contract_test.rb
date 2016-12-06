@@ -14,7 +14,7 @@ class DslContractTest < MiniTest::Spec
     end
 
     def self.included(includer)
-      includer.| Trailblazer::Operation::Model[OpenStruct, :new]
+      includer.| Trailblazer::Operation::Model( OpenStruct, :new )
       includer.| Trailblazer::Operation::Contract::Build[]
       includer.| Trailblazer::Operation::Contract::Validate[]
       includer.| Trailblazer::Operation::Persist[save_method: :sync]

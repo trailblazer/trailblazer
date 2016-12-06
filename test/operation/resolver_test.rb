@@ -21,7 +21,7 @@ class ResolverTest < Minitest::Spec
       return M if options["model"].inspect == %{#<struct ResolverTest::Song id=9>}
     }
 
-    self.| Model[Song, :update], before: "operation.new"
+    self.| Model( Song, :update ), before: "operation.new"
     self.| Policy::Pundit[Auth, :user_and_model?], before: "operation.new"
     require "trailblazer/operation/resolver"
     self.| Resolver[], before: "operation.new"

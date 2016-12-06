@@ -11,7 +11,7 @@ class PersistTest < Minitest::Spec
       property :title
     end
 
-    self.| Model[ Song, :new ]
+    self.| Model( Song, :new )
     self.| Contract::Build[]
     self.| Contract::Validate[]
     self.< ->(options) { options["1. fail"] = "Validate" }

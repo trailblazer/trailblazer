@@ -25,7 +25,7 @@ class DocsNestedOperationTest < Minitest::Spec
       property :title
     end
 
-    step Model[ Song, :find ]
+    step Model( Song, :find )
     step Contract::Build[]
   end
 

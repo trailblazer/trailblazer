@@ -2,11 +2,6 @@ class Trailblazer::Operation
   module Model
     Step = ->(operation, options) { options["model"] = operation.model!(options["params"]) }
 
-    extend Macro
-
-    #- import!
-    # when imported via Operation::|
-    # This is the preferred mechanism in TRB2.
     def self.import!(operation, import, model_class, action=nil)
       if import.inheriting? # not sure how to do overrides!
         # FIXME: prototyping inheritance. should we handle that here?
@@ -58,4 +53,6 @@ class Trailblazer::Operation
       end
     end
   end
+
+  DSL.macro!(:Model, Model)
 end

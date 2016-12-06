@@ -12,7 +12,7 @@ class DocsRepresenterInferTest < Minitest::Spec
       property :id
     end
 
-    self.| Model[ Song, :new ]
+    self.| Model( Song, :new )
     self.| Contract::Build[ constant: MyContract ]
     self.| Contract::Validate[ representer: Representer.infer(MyContract, format: Representable::JSON) ]
     self.| Persist[ method: :sync ]
@@ -41,7 +41,7 @@ class DocsRepresenterExplicitTest < Minitest::Spec
       property :id
     end
 
-    self.| Model[ Song, :new ]
+    self.| Model( Song, :new )
     self.| Contract::Build[ constant: MyContract ]
     self.| Contract::Validate[ representer: MyRepresenter ] # :representer
     self.| Persist[ method: :sync ]
@@ -105,7 +105,7 @@ class DocsRepresenterDITest < Minitest::Spec
       property :id
     end
 
-    self.| Model[ Song, :new ]
+    self.| Model( Song, :new )
     self.| Contract::Build[ constant: MyContract ]
     self.| Contract::Validate[]
     self.| Persist[ method: :sync ]
@@ -133,7 +133,7 @@ class DocsRepresenterInlineTest < Minitest::Spec
       property :id
     end
 
-    self.| Model[ Song, :new ]
+    self.| Model( Song, :new )
     self.| Contract::Build[ constant: MyContract ]
     self.| Contract::Validate[ representer: self["representer.default.class"] ]
     self.| Persist[ method: :sync ]
@@ -159,7 +159,7 @@ class DocsRepresenterManualRenderTest < Minitest::Spec
       property :id
     end
 
-    self.| Model[ Song, :find ]
+    self.| Model( Song, :find )
   end
 
   it do
@@ -228,7 +228,7 @@ class DocsRepresenterFullExampleTest < Minitest::Spec
 
     representer :errors, ErrorsRepresenter # explicit reference.
 
-    self.| Model[ Song, :new ]
+    self.| Model( Song, :new )
     self.| Contract::Build[ ]
     self.| Contract::Validate[ representer: self["representer.parse.class"] ]
     self.| Persist[ method: :sync ]

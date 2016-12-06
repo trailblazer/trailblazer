@@ -72,7 +72,7 @@ class ContractTest < Minitest::Spec
       end
 
       self.> ->(options) { options["model"] = Song.new }
-      # self.| Model[Song, :new]
+      # self.| Model( Song, :new )
       self.| Contract::Build[]
       self.| :process
 
@@ -135,8 +135,8 @@ class ContractTest < Minitest::Spec
 #       contract.validate
 #     end
 
-#     include Model::Builder
-#     def model!(*)
+#     include Model( :Builder
+# )    def model!(*)
 #       Object
 #     end
 #   end
@@ -216,7 +216,7 @@ class ValidateTest < Minitest::Spec
       end
     end
 
-    self.| Model[Song, :new] # FIXME.
+    self.| Model( Song, :new ) # FIXME.
     self.| Contract::Build[]
     self.& :process
   end
@@ -258,7 +258,7 @@ class ValidateTest < Minitest::Spec
       validates :title, presence: true
     end
 
-    self.| Model[Song, :new] # FIXME.
+    self.| Model( Song, :new ) # FIXME.
     self.| Contract::Build[]
     self.| Contract::Validate[] # generic validate call for you.
 
@@ -291,7 +291,7 @@ class ValidateTest < Minitest::Spec
       validates :title, presence: true
     end
 
-    self.| Model[Song, :new] # FIXME.
+    self.| Model( Song, :new ) # FIXME.
     self.| Contract::Build[]
     self.| Contract::Validate[key: :song] # generic validate call for you.
     # ->(*) { validate(options["params"][:song]) } # <-- TODO

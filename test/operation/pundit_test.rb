@@ -50,7 +50,7 @@ class PolicyTest < Minitest::Spec
   #---
   # inheritance, adding Model
   class Show < Create
-    self.| Model[ Song, :new ], before: "policy.default.eval"
+    self.| Model( Song, :new ), before: "policy.default.eval"
   end
 
   it { Show["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,&policy.default.eval,>process]} }
@@ -75,7 +75,7 @@ class PolicyTest < Minitest::Spec
   ##--
   # TOOOODOOO: Policy and Model before Build ("External" or almost Resolver)
   class Edit < Trailblazer::Operation
-    self.| Model[Song, :update]
+    self.| Model Song, :update
     self.| Policy::Pundit[Auth, :user_and_model?]
     self.| :process
 

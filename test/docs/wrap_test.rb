@@ -19,7 +19,7 @@ class WrapTest < Minitest::Spec
         options["result.model.find"] = "argh! because #{exception.class}"
         false
       end } { |pipe|
-      step Model[ Song, :find ]
+      step Model( Song, :find )
       step Contract::Build[ constant: MyContract ]
     }
     step Contract::Validate[]
@@ -43,7 +43,7 @@ class RescueTest < Minitest::Spec
     end
 
     step Rescue {
-      step Model[ Song, :find ]
+      step Model(Song, :find)
       step Contract::Build[ constant: MyContract ]
     }
     step Contract::Validate[]
