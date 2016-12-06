@@ -26,13 +26,13 @@ class DocsNestedOperationTest < Minitest::Spec
     end
 
     step Model( Song, :find )
-    step Contract::Build[]
+    step Contract::Build()
   end
 
   class Update < Trailblazer::Operation
     step Nested( Edit ) #, "policy.default" => self["policy.create"]
-    step Contract::Validate[]
-    step Persist[ method: :sync ]
+    step Contract::Validate()
+    step Persist( method: :sync )
   end
 
   puts Update["pipetree"].inspect(style: :rows)

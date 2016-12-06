@@ -14,8 +14,8 @@ class OperationCallbackTest < MiniTest::Spec
     end
 
     self.| Model( Song, :new )
-    self.| Contract::Build[]
-    self.| Contract::Validate[]
+    self.| Contract::Build()
+    self.| Contract::Validate()
     self.| Callback[:default]
 
 

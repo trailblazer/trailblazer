@@ -12,10 +12,10 @@ class PersistTest < Minitest::Spec
     end
 
     self.| Model( Song, :new )
-    self.| Contract::Build[]
-    self.| Contract::Validate[]
+    self.| Contract::Build()
+    self.| Contract::Validate()
     self.< ->(options) { options["1. fail"] = "Validate" }
-    self.| Persist[]
+    self.| Persist()
     self.< ->(options) { options["2. fail"] = "Persist" }
   end
 

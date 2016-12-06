@@ -8,8 +8,6 @@
 # Needs #[], #[]= skill dependency.
 module Trailblazer::Operation::Contract
   module Build
-    extend Trailblazer::Operation::Macro # ::[]
-
     # bla build contract at runtime.
     def self.build_contract!(operation, options, name:"default", constant:nil, builder: nil)
       # TODO: we could probably clean this up a bit at some point.
@@ -25,6 +23,10 @@ module Trailblazer::Operation::Contract
       import.(:>, ->(operation, options) { build_contract!(operation, options, **args) },
         name: "contract.build")
     end
+  end
+
+  def self.Build(*args, &block)
+    [ Build, args, block ]
   end
 
   module DSL

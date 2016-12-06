@@ -4,8 +4,6 @@ module Trailblazer::Operation::Contract
   # Deviate to left track if optional key is not found in params.
   # Deviate to left if validation result falsey.
   module Validate
-    extend Trailblazer::Operation::Macro
-
     def self.import!(operation, import, skip_extract:false, name: "default", representer:false, **args) # DISCUSS: should we introduce something like Validate::Deserializer?
       if representer
         skip_extract = true
@@ -44,5 +42,9 @@ module Trailblazer::Operation::Contract
 
       result.success?
     end
+  end
+
+  def self.Validate(*args, &block)
+    [ Validate, args, block ]
   end
 end

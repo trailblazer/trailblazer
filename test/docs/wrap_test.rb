@@ -20,10 +20,10 @@ class WrapTest < Minitest::Spec
         false
       end } { |pipe|
       step Model( Song, :find )
-      step Contract::Build[ constant: MyContract ]
+      step Contract::Build( constant: MyContract )
     }
-    step Contract::Validate[]
-    step Persist[ method: :sync ]
+    step Contract::Validate()
+    step Persist( method: :sync )
   end
 
   it { Create.( id: 1, title: "Prodigal Son" )["contract.default"].model.inspect.must_equal %{#<struct WrapTest::Song id=1, title="Prodigal Son">} }
@@ -44,10 +44,10 @@ class RescueTest < Minitest::Spec
 
     step Rescue {
       step Model(Song, :find)
-      step Contract::Build[ constant: MyContract ]
+      step Contract::Build( constant: MyContract )
     }
-    step Contract::Validate[]
-    step Persist[ method: :sync ]
+    step Contract::Validate()
+    step Persist( method: :sync )
   end
 
   it { Create.( id: 1, title: "Prodigal Son" )["contract.default"].model.inspect.must_equal %{#<struct RescueTest::Song id=1, title="Prodigal Son">} }

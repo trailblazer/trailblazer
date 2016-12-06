@@ -13,9 +13,9 @@ class DocsRepresenterInferTest < Minitest::Spec
     end
 
     self.| Model( Song, :new )
-    self.| Contract::Build[ constant: MyContract ]
-    self.| Contract::Validate[ representer: Representer.infer(MyContract, format: Representable::JSON) ]
-    self.| Persist[ method: :sync ]
+    self.| Contract::Build( constant: MyContract )
+    self.| Contract::Validate( representer: Representer.infer(MyContract, format: Representable::JSON) )
+    self.| Persist( method: :sync )
   end
   #:infer end
 
@@ -42,9 +42,9 @@ class DocsRepresenterExplicitTest < Minitest::Spec
     end
 
     self.| Model( Song, :new )
-    self.| Contract::Build[ constant: MyContract ]
-    self.| Contract::Validate[ representer: MyRepresenter ] # :representer
-    self.| Persist[ method: :sync ]
+    self.| Contract::Build( constant: MyContract )
+    self.| Contract::Validate( representer: MyRepresenter ) # :representer
+    self.| Persist( method: :sync )
   end
   #:explicit-op end
 
@@ -106,9 +106,9 @@ class DocsRepresenterDITest < Minitest::Spec
     end
 
     self.| Model( Song, :new )
-    self.| Contract::Build[ constant: MyContract ]
-    self.| Contract::Validate[]
-    self.| Persist[ method: :sync ]
+    self.| Contract::Build( constant: MyContract )
+    self.| Contract::Validate()
+    self.| Persist( method: :sync )
   end
 
   let (:json) { MultiJson.dump(id: 1) }
@@ -134,9 +134,9 @@ class DocsRepresenterInlineTest < Minitest::Spec
     end
 
     self.| Model( Song, :new )
-    self.| Contract::Build[ constant: MyContract ]
-    self.| Contract::Validate[ representer: self["representer.default.class"] ]
-    self.| Persist[ method: :sync ]
+    self.| Contract::Build( constant: MyContract )
+    self.| Contract::Validate( representer: self["representer.default.class"] )
+    self.| Persist( method: :sync )
   end
   #:inline end
 
@@ -229,9 +229,9 @@ class DocsRepresenterFullExampleTest < Minitest::Spec
     representer :errors, ErrorsRepresenter # explicit reference.
 
     self.| Model( Song, :new )
-    self.| Contract::Build[ ]
-    self.| Contract::Validate[ representer: self["representer.parse.class"] ]
-    self.| Persist[ method: :sync ]
+    self.| Contract::Build()
+    self.| Contract::Validate( representer: self["representer.parse.class"] )
+    self.| Persist( method: :sync )
   end
   #:full end
 
