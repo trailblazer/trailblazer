@@ -52,11 +52,13 @@ class Trailblazer::Operation
     def self.import!(operation, import, *ar, &block)
       rescue_block = ->(pipe, operation, options) {
         begin
-          pipe.(operation, options)
+          res = pipe.(operation, options)
+          res.first == ::Pipetree::Flow::Right # FIXME.
         rescue => exception
           #options["result.model.find"] = "argh! because #{exception.class}"
           false
-        end }
+        end
+      }
 
       # operation.| operation.Wrap(rescue_block, &block), name: "Rescue:#{block.source_location.last}"
       Wrap.import! operation, import, rescue_block, name: "Rescue:#{block.source_location.last}", &block
