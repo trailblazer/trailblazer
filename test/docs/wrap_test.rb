@@ -70,12 +70,14 @@ class RescueTest < Minitest::Spec
       step ->(options) { options["b"] = true }
       step ->(options) { raise A if options["raise-a"] }
       step ->(options) { options["c"] = true }
+      self.< ->(options) { options["inner-err"] = true }
     }
     step ->(options) { options["e"] = true }
+    self.< ->(options) { options["outer-err"] = true }
   end
 
-  it { NestedInsanity["pipetree"].inspect.must_equal %{[>>operation.new,&Rescue:63,>:74]} }
-  it { NestedInsanity.({}).inspect("a", "y", "z", "b", "c", "e").must_equal %{<Result:true [true, true, true, true, true, true] >} }
-  it { NestedInsanity.({}, "raise-y" => true).inspect("a", "y", "z", "b", "c", "e").must_equal %{<Result:false [true, true, nil, nil, nil, nil] >} }
-  it { NestedInsanity.({}, "raise-a" => true).inspect("a", "y", "z", "b", "c", "e").must_equal %{<Result:false [true, true, true, true, nil, nil] >} }
+  it { NestedInsanity["pipetree"].inspect.must_equal %{[>>operation.new,&Rescue:63,>:75,<RescueTest::NestedInsanity:76]} }
+  it { NestedInsanity.({}).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:true [true, true, true, true, true, true, nil, nil] >} }
+  it { NestedInsanity.({}, "raise-y" => true).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:false [true, true, nil, nil, nil, nil, true, true] >} }
+  it { NestedInsanity.({}, "raise-a" => true).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:false [true, true, true, true, nil, nil, nil, true] >} }
 end
