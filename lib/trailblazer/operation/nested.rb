@@ -18,14 +18,14 @@ end
 
 class Trailblazer::Operation
   module Wrap
-    def self.import!(operation, import, wrap, &block)
+    def self.import!(operation, import, wrap, _options={}, &block)
       pipe_api = API.new(operation, pipe = ::Pipetree::Flow[])
 
       # DISCUSS: don't instance_exec when |pipe| given?
       # yield pipe_api # create the nested pipe.
       pipe_api.instance_exec(&block) # create the nested pipe.
 
-      import.(:&, ->(input, options) { wrap.(pipe, input, options) }, {})
+      import.(:&, ->(input, options) { wrap.(pipe, input, options) }, _options)
     end
 
     class API
@@ -36,8 +36,8 @@ class Trailblazer::Operation
         @target, @pipe = target, pipe
       end
 
-      def _insert(operator, proc, options={})
-        Pipetree::DSL.insert(@pipetree, operator, proc, options, definer_name: @target.name)
+      def _insert(operator, proc, options={}) # TODO: test me.
+        Pipetree::DSL.insert(@pipe, operator, proc, options, definer_name: @target.name)
       end
 
       def |(cfg, user_options={})
@@ -58,7 +58,8 @@ class Trailblazer::Operation
           false
         end }
 
-      operation.| operation.Wrap(rescue_block, &block)
+      # operation.| operation.Wrap(rescue_block, &block), name: "Rescue:#{block.source_location.last}"
+      Wrap.import! operation, import, rescue_block, name: "Rescue:#{block.source_location.last}", &block
     end
   end
   DSL.macro!(:Rescue, Rescue)

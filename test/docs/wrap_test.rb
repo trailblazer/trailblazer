@@ -73,5 +73,7 @@ class RescueTest < Minitest::Spec
     }
   end
 
+  it { NestedInsanity["pipetree"].inspect.must_equal %{[>>operation.new,&Rescue:63]} }
   it { NestedInsanity.({}).inspect("a", "y", "z", "b", "c").must_equal %{<Result:true [true, true, true, true, true] >} }
+  it { NestedInsanity.({}, "raise-y" => true).inspect("a", "y", "z", "b", "c").must_equal %{<Result:false [true, true, nil, nil, nil] >} }
 end
