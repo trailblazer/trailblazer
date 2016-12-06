@@ -31,9 +31,12 @@ class WrapTest < Minitest::Spec
 end
 
 class RescueTest < Minitest::Spec
+  RecordNotFound = Class.new(RuntimeError)
+
   Song = Struct.new(:id, :title) do
     def self.find(id)
-      id.nil? ? raise : new(id)
+      raise if id == "RuntimeError!"
+      id.nil? ? raise(RecordNotFound) : new(id)
     end
   end
 
@@ -53,6 +56,27 @@ class RescueTest < Minitest::Spec
   it { Create.( id: 1, title: "Prodigal Son" )["contract.default"].model.inspect.must_equal %{#<struct RescueTest::Song id=1, title="Prodigal Son">} }
   it { Create.( id: nil ).inspect("model").must_equal %{<Result:false [nil] >} }
 
+  #-
+  # Rescue ExceptionClass
+  class WithExceptionNameTest < Minitest::Spec
+  #
+  class Create < Trailblazer::Operation
+    class MyContract < Reform::Form
+      property :title
+    end
+
+    step Rescue( RecordNotFound, KeyError ) {
+      step Model(Song, :find)
+      step Contract::Build( constant: MyContract )
+    }
+    step Contract::Validate()
+    step Persist( method: :sync )
+  end
+
+    it { Create.( id: 1, title: "Prodigal Son" )["contract.default"].model.inspect.must_equal %{#<struct RescueTest::Song id=1, title="Prodigal Son">} }
+    it { Create.( id: nil ).inspect("model").must_equal %{<Result:false [nil] >} }
+    it { assert_raises(RuntimeError) { Create.( id: "RuntimeError!" ) } }
+  end
 
   #---
   # nested raise (i hope people won't use this but it works)
@@ -76,7 +100,7 @@ class RescueTest < Minitest::Spec
     self.< ->(options) { options["outer-err"] = true }
   end
 
-  it { NestedInsanity["pipetree"].inspect.must_equal %{[>>operation.new,&Rescue:63,>:75,<RescueTest::NestedInsanity:76]} }
+  it { NestedInsanity["pipetree"].inspect.must_equal %{[>>operation.new,&Rescue:87,>:99,<RescueTest::NestedInsanity:100]} }
   it { NestedInsanity.({}).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:true [true, true, true, true, true, true, nil, nil] >} }
   it { NestedInsanity.({}, "raise-y" => true).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:false [true, true, nil, nil, nil, nil, true, true] >} }
   it { NestedInsanity.({}, "raise-a" => true).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:false [true, true, true, true, nil, nil, nil, true] >} }

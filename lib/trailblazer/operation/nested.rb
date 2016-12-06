@@ -50,12 +50,14 @@ class Trailblazer::Operation
   DSL.macro!(:Wrap, Wrap)
 
   module Rescue
-    def self.import!(operation, import, *ar, &block)
+    def self.import!(operation, import, *exceptions, &block)
+      exceptions = [StandardError] unless exceptions.any?
+
       rescue_block = ->(pipe, operation, options) {
         begin
           res = pipe.(operation, options)
           res.first == ::Pipetree::Flow::Right # FIXME.
-        rescue => exception
+        rescue *exceptions
           #options["result.model.find"] = "argh! because #{exception.class}"
           false
         end
