@@ -19,8 +19,8 @@ class DocsPunditProcTest < Minitest::Spec
 
   #:pundit
   class Create < Trailblazer::Operation
-    self.| Model( Song, :new )
-    self.| Policy::Pundit( MyPolicy, :create? )
+    step Model( Song, :new )
+    step Policy::Pundit( MyPolicy, :create? )
     # ...
   end
   #:pundit end
@@ -71,8 +71,8 @@ class PunditWithNameTest < Minitest::Spec
 
   #:name
   class Create < Trailblazer::Operation
-    self.| Model( Song, :new )
-    self.| Policy::Pundit( MyPolicy, :create?, name: "after_model" )
+    step Model( Song, :new )
+    step Policy::Pundit( MyPolicy, :create?, name: "after_model" )
     # ...
   end
   #:name end
@@ -90,10 +90,10 @@ end
 # class DocsGuardClassLevelTest < Minitest::Spec
 #   #:class-level
 #   class Create < Trailblazer::Operation
-#     self.| Policy::Guard[ ->(options) { options["current_user"] == Module } ],
+#     step Policy::Guard[ ->(options) { options["current_user"] == Module } ],
 #       before: "operation.new"
 #     #~pipe--only
-#     self.| ->(options) { options["x"] = true }
+#     step ->(options) { options["x"] = true }
 #     #~pipe--only end
 #   end
 #   #:class-level end

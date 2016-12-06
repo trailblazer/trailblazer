@@ -5,8 +5,8 @@ require "test_helper"
 class DocsGuardProcTest < Minitest::Spec
   #:proc
   class Create < Trailblazer::Operation
-    self.| Policy::Guard( ->(options) { options["params"][:pass] } )
-    self.| :process
+    step Policy::Guard( ->(options) { options["params"][:pass] } )
+    step :process
     #~pipeonly
 
     def process(*)
@@ -49,8 +49,8 @@ class DocsGuardTest < Minitest::Spec
 
   #:callable-op
   class Create < Trailblazer::Operation
-    self.| Policy::Guard( MyGuard.new )
-    self.| :process
+    step Policy::Guard( MyGuard.new )
+    step :process
     #~pipe-only
     def process(*); self[:x] = true; end
     #~pipe-only end
@@ -66,8 +66,8 @@ end
 # class DocsGuardMethodTest < Minitest::Spec
 #   #:method
 #   class Create < Trailblazer::Operation
-#     self.| Policy::Guard[ : ]
-#     self.| :process
+#     step Policy::Guard[ : ]
+#     step :process
 #     #~pipe-only
 #     def process(*); self[:x] = true; end
 #     #~pipe-only end
@@ -83,7 +83,7 @@ end
 class DocsGuardNamedTest < Minitest::Spec
   #:name
   class Create < Trailblazer::Operation
-    self.| Policy::Guard( ->(options) { options["current_user"] }, name: :user )
+    step Policy::Guard( ->(options) { options["current_user"] }, name: :user )
     # ...
   end
   #:name end
@@ -104,10 +104,10 @@ end
 class DocsGuardClassLevelTest < Minitest::Spec
   #:class-level
   class Create < Trailblazer::Operation
-    self.| Policy::Guard( ->(options) { options["current_user"] == Module } ),
+    step Policy::Guard( ->(options) { options["current_user"] == Module } ),
       before: "operation.new"
     #~pipe--only
-    self.| ->(options) { options["x"] = true }
+    step ->(options) { options["x"] = true }
     #~pipe--only end
   end
   #:class-level end
@@ -122,7 +122,7 @@ end
 class DocsGuardInjectionTest < Minitest::Spec
   #:di-op
   class Create < Trailblazer::Operation
-    self.| Policy::Guard( ->(options) { options["current_user"] == Module } )
+    step Policy::Guard( ->(options) { options["current_user"] == Module } )
   end
   #:di-op end
 
