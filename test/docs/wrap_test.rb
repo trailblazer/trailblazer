@@ -65,16 +65,21 @@ class RescueTest < Minitest::Spec
       property :title
     end
 
-    step Rescue( RecordNotFound, KeyError ) {
-      step Model(Song, :find)
+    step Rescue( RecordNotFound, KeyError, handler: :rollback! ) {
+      step Model( Song, :find )
       step Contract::Build( constant: MyContract )
     }
     step Contract::Validate()
     step Persist( method: :sync )
+
+    def rollback!(exception, options)
+      options["x"] = exception.class
+    end
   end
 
     it { Create.( id: 1, title: "Prodigal Son" )["contract.default"].model.inspect.must_equal %{#<struct RescueTest::Song id=1, title="Prodigal Son">} }
-    it { Create.( id: nil ).inspect("model").must_equal %{<Result:false [nil] >} }
+    it { Create.( id: 1, title: "Prodigal Son" ).inspect("x").must_equal %{<Result:true [nil] >} }
+    it { Create.( id: nil ).inspect("model", "x").must_equal %{<Result:false [nil, RescueTest::RecordNotFound] >} }
     it { assert_raises(RuntimeError) { Create.( id: "RuntimeError!" ) } }
   end
 
