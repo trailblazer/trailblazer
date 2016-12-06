@@ -25,14 +25,14 @@ class DocsNestedOperationTest < Minitest::Spec
       property :title
     end
 
-    self.| Model[ Song, :find ]
-    self.| Contract::Build[]
+    step Model[ Song, :find ]
+    step Contract::Build[]
   end
 
   class Update < Trailblazer::Operation
-    self.| Nested[ Edit ] #, "policy.default" => self["policy.create"]
-    self.| Contract::Validate[]
-    self.| Persist[ method: :sync ]
+    step Nested( Edit ) #, "policy.default" => self["policy.create"]
+    step Contract::Validate[]
+    step Persist[ method: :sync ]
   end
 
   puts Update["pipetree"].inspect(style: :rows)
@@ -60,7 +60,7 @@ class DocsNestedOperationTest < Minitest::Spec
     self["A.class.data"] = true
 
     self.> ->(options) { options["this.should.not.be.visible.in.B"] = true }
-    self.| Nested[ B ]
+    step Nested B
   end
 
   # mutual data from A doesn't bleed into B.
@@ -80,13 +80,13 @@ end
 class NestedClassLevelTest < Minitest::Spec
   #:class-level
   class New < Trailblazer::Operation
-    self.| ->(options) { options["class"] = true }, before: "operation.new"
-    self.| ->(options) { options["x"] = true }
+    step ->(options) { options["class"] = true }, before: "operation.new"
+    step ->(options) { options["x"] = true }
   end
 
   class Create < Trailblazer::Operation
-    self.| Nested[ New ]
-    self.| ->(options) { options["y"] = true }
+    step Nested New
+    step ->(options) { options["y"] = true }
   end
   #:class-level end
 
@@ -99,7 +99,7 @@ end
 # class New
 #   Model[Song, :create]
 #   Policy :new
-#   self.| :init!
+#   step :init!
 
 #   def init!
 
@@ -107,7 +107,7 @@ end
 # end
 
 # class Create < Op
-#   self.| New
+#   step New
 
 #   Model[Song, :create]
 #   Contract

@@ -1,22 +1,22 @@
-module Trailblazer::Operation::Nested
-  extend Trailblazer::Operation::Macro
-
-  # Please note that the instance_variable_get are here on purpose since the
-  # superinternal API is not entirely decided, yet.
-  def self.import!(operation, import, step)
-    import.(:&, ->(input, options) {
-      result = step._call(*options.to_runtime_data)
-
-      result.instance_variable_get(:@data).to_mutable_data.each do |k,v|
-        options[k] = v
-      end
-
-      result.success? # DISCUSS: what if we could simply return the result object here?
-    }, {} )
-  end
-end
-
 class Trailblazer::Operation
+  module Nested
+    # Please note that the instance_variable_get are here on purpose since the
+    # superinternal API is not entirely decided, yet.
+    def self.import!(operation, import, step)
+      import.(:&, ->(input, options) {
+        result = step._call(*options.to_runtime_data)
+
+        result.instance_variable_get(:@data).to_mutable_data.each do |k,v|
+          options[k] = v
+        end
+
+        result.success? # DISCUSS: what if we could simply return the result object here?
+      }, {} )
+    end
+  end
+
+  DSL.macro!(:Nested, Nested)
+
   module Wrap
     def self.import!(operation, import, wrap, _options={}, &block)
       pipe_api = API.new(operation, pipe = ::Pipetree::Flow[])
@@ -46,6 +46,7 @@ class Trailblazer::Operation
       alias_method :step, :| # DISCUSS: uhm...
     end
   end # Wrap
+
   DSL.macro!(:Wrap, Wrap)
 
   module Rescue
@@ -64,6 +65,7 @@ class Trailblazer::Operation
       Wrap.import! operation, import, rescue_block, name: "Rescue:#{block.source_location.last}", &block
     end
   end
+
   DSL.macro!(:Rescue, Rescue)
 end
 
