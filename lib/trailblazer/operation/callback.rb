@@ -4,8 +4,6 @@ require "disposable/callback"
 # Needs #[], #[]= skill dependency.
 class Trailblazer::Operation
   module Callback
-    extend Macro
-
     def self.import!(operation, import, group)
       import.(:&, ->(input, options) { input.callback!(group) },
         name: "callback.#{group}")
@@ -40,5 +38,9 @@ class Trailblazer::Operation
         self[path] = { group: group_class, context: constant ? nil : :operation }
       end
     end
+  end
+
+  def self.Callback(*args, &block)
+    [ Callback, args, block ]
   end
 end

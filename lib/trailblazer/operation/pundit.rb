@@ -1,8 +1,6 @@
 class Trailblazer::Operation
   module Policy
     module Pundit
-      extend Macro
-
       def self.import!(operation, import, policy_class, action, options={})
         Policy.add!(operation, import, options) { Pundit.build(policy_class, action) }
       end
@@ -35,6 +33,10 @@ class Trailblazer::Operation
           Result.new(success, data)
         end
       end
+    end
+
+    def self.Pundit(*args, &block)
+      [ Pundit, args, block ]
     end
   end
 end

@@ -17,7 +17,7 @@ class PolicyTest < Minitest::Spec
   #---
   # Instance-level: Only policy, no model
   class Create < Trailblazer::Operation
-    self.| Policy::Pundit[Auth, :only_user?]
+    self.| Policy::Pundit( Auth, :only_user? )
     self.| :process
 
     def process(*)
@@ -76,7 +76,7 @@ class PolicyTest < Minitest::Spec
   # TOOOODOOO: Policy and Model before Build ("External" or almost Resolver)
   class Edit < Trailblazer::Operation
     self.| Model Song, :update
-    self.| Policy::Pundit[Auth, :user_and_model?]
+    self.| Policy::Pundit( Auth, :user_and_model? )
     self.| :process
 
     def process(*); self["process"] = true end

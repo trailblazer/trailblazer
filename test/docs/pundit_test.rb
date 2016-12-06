@@ -20,7 +20,7 @@ class DocsPunditProcTest < Minitest::Spec
   #:pundit
   class Create < Trailblazer::Operation
     self.| Model( Song, :new )
-    self.| Policy::Pundit[ MyPolicy, :create? ]
+    self.| Policy::Pundit( MyPolicy, :create? )
     # ...
   end
   #:pundit end
@@ -72,7 +72,7 @@ class PunditWithNameTest < Minitest::Spec
   #:name
   class Create < Trailblazer::Operation
     self.| Model( Song, :new )
-    self.| Policy::Pundit[ MyPolicy, :create?, name: "after_model" ]
+    self.| Policy::Pundit( MyPolicy, :create?, name: "after_model" )
     # ...
   end
   #:name end

@@ -1,10 +1,8 @@
 class Trailblazer::Operation
   module Resolver
-    extend Macro
-
     def self.import!(operation, import)
       operation.extend Model::BuildMethods
-      operation.| Builder[operation.builders]
+      operation.| operation.Builder(operation.builders)
     end
 
     # def self.included(includer)
@@ -18,5 +16,9 @@ class Trailblazer::Operation
     #   includer.> Model::Build, prepend: true
     #   includer.& Policy::Evaluate, after: Model::Build
     # end
+  end
+
+  def self.Resolver(*args, &block)
+    [ Resolver, args, block ]
   end
 end

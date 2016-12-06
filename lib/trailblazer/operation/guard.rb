@@ -4,8 +4,6 @@ require "uber/option"
 class Trailblazer::Operation
   module Policy
     module Guard
-      extend Macro
-
       def self.import!(operation, import, user_proc, options={})
         Policy.add!(operation, import, options) { Guard.build(user_proc) }
       end
@@ -18,5 +16,9 @@ class Trailblazer::Operation
         ->(options) { Result.new( !!value.(options), {} ) }
       end
     end # Guard
+
+    def self.Guard(*args, &block)
+      [ Guard, args, block ]
+    end
   end
 end

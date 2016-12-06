@@ -5,7 +5,7 @@ require "test_helper"
 class DocsGuardProcTest < Minitest::Spec
   #:proc
   class Create < Trailblazer::Operation
-    self.| Policy::Guard[ ->(options) { options["params"][:pass] } ]
+    self.| Policy::Guard( ->(options) { options["params"][:pass] } )
     self.| :process
     #~pipeonly
 
@@ -49,7 +49,7 @@ class DocsGuardTest < Minitest::Spec
 
   #:callable-op
   class Create < Trailblazer::Operation
-    self.| Policy::Guard[ MyGuard.new ]
+    self.| Policy::Guard( MyGuard.new )
     self.| :process
     #~pipe-only
     def process(*); self[:x] = true; end
@@ -83,7 +83,7 @@ end
 class DocsGuardNamedTest < Minitest::Spec
   #:name
   class Create < Trailblazer::Operation
-    self.| Policy::Guard[ ->(options) { options["current_user"] }, name: :user ]
+    self.| Policy::Guard( ->(options) { options["current_user"] }, name: :user )
     # ...
   end
   #:name end
@@ -104,7 +104,7 @@ end
 class DocsGuardClassLevelTest < Minitest::Spec
   #:class-level
   class Create < Trailblazer::Operation
-    self.| Policy::Guard[ ->(options) { options["current_user"] == Module } ],
+    self.| Policy::Guard( ->(options) { options["current_user"] == Module } ),
       before: "operation.new"
     #~pipe--only
     self.| ->(options) { options["x"] = true }
@@ -122,7 +122,7 @@ end
 class DocsGuardInjectionTest < Minitest::Spec
   #:di-op
   class Create < Trailblazer::Operation
-    self.| Policy::Guard[ ->(options) { options["current_user"] == Module } ]
+    self.| Policy::Guard( ->(options) { options["current_user"] == Module } )
   end
   #:di-op end
 

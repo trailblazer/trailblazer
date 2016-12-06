@@ -11,7 +11,7 @@ class BuilderTest < MiniTest::Spec
       klass
     end
 
-    self.| Builder[ builds ]
+    self.| Builder( builds )
     self.| :process
 
     class B < A
@@ -30,7 +30,7 @@ class BuilderTest < MiniTest::Spec
   MyBuilders << ->(options) { return self::B if options["params"][:sub] }
 
   class Create < Trailblazer::Operation
-    self.| Builder[ MyBuilders ]
+    self.| Builder( MyBuilders )
     self["pipetree"].> ->(input, options) { options["x"] = input.class }
   end
 
@@ -78,7 +78,7 @@ class OperationBuilderClassTest < MiniTest::Spec
     class Sub < self
     end
 
-    self.| Builder[ SuperOperation.builders ]
+    self.| Builder( SuperOperation.builders )
 
     def process(*); self["x"] = self.class end
     self.| :process
