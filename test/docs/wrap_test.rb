@@ -57,7 +57,7 @@ class RescueTest < Minitest::Spec
   it { Create.( id: nil ).inspect("model").must_equal %{<Result:false [nil] >} }
 
   #-
-  # Rescue ExceptionClass
+  # Rescue ExceptionClass, handler: ->(*) { }
   class WithExceptionNameTest < Minitest::Spec
   #
   class Create < Trailblazer::Operation
@@ -71,6 +71,37 @@ class RescueTest < Minitest::Spec
     }
     step Contract::Validate()
     step Persist( method: :sync )
+
+    def rollback!(exception, options)
+      options["x"] = exception.class
+    end
+  end
+
+    it { Create.( id: 1, title: "Prodigal Son" )["contract.default"].model.inspect.must_equal %{#<struct RescueTest::Song id=1, title="Prodigal Son">} }
+    it { Create.( id: 1, title: "Prodigal Son" ).inspect("x").must_equal %{<Result:true [nil] >} }
+    it { Create.( id: nil ).inspect("model", "x").must_equal %{<Result:false [nil, RescueTest::RecordNotFound] >} }
+    it { assert_raises(RuntimeError) { Create.( id: "RuntimeError!" ) } }
+  end
+
+  #-
+  # cdennl use-case
+  class CdennlRescueAndTransactionTest < Minitest::Spec
+  #
+  class Create < Trailblazer::Operation
+    class MyContract < Reform::Form
+      property :title
+    end
+
+    step Rescue( RecordNotFound, handler: :rollback! ) {
+      step Wrap ->(pipe, operation, options) { Transaction.call do pipe.(operation, options) end } {
+        step Model( Song, :find )
+        self.> ->(options) { options["model"].lock! }
+        step Contract::Build( constant: MyContract )
+        step Contract::Validate( )
+        step Persist( method: :sync )
+      }
+    }
+    self.< ->(options) { snippet }
 
     def rollback!(exception, options)
       options["x"] = exception.class

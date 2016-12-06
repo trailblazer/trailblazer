@@ -9,7 +9,5 @@ class Trailblazer::Operation
     end
   end
 
-  def self.Persist(*args, &block)
-    [Persist, args, block]
-  end
+  DSL.macro!(:Persist, Persist)
 end
