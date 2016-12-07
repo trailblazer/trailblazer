@@ -64,6 +64,17 @@ class WrapTest < Minitest::Spec
     # returns falsey means deviate to left.
     it { Create.({}, "yield?" => true).inspect("x").must_equal %{<Result:true [true] >} }
   end
+
+  #-
+  # arguments for Wrap
+  class Update < Trailblazer::Operation
+    step Wrap ->(options, operation, pipe, &block) { operation["yield?"] ? block.call : false } {
+      step ->(options) { options["x"] = true }
+    }
+  end
+
+  it { Update.().inspect("x").must_equal %{<Result:false [nil] >} }
+  it { Update.({}, "yield?" => true).inspect("x").must_equal %{<Result:true [true] >} }
 end
 
 class RescueTest < Minitest::Spec
