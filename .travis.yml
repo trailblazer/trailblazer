@@ -3,8 +3,8 @@ before_install:
   - gem install bundler
 matrix:
   include:
-    - rvm: 2.0.0
-      gemfile: "test/gemfiles/Gemfile.ruby-2.0"
+    # - rvm: 2.0.0
+    #   gemfile: "test/gemfiles/Gemfile.ruby-2.0"
     - rvm: 2.1
       gemfile: Gemfile
     - rvm: 2.2
