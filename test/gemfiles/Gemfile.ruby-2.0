@@ -7,4 +7,4 @@ gem "multi_json"
 gem "trailblazer-operation"
 gem "minitest-line"
 gem "benchmark-ips"
-
+gem "activesupport", "~> 4.2.0"
