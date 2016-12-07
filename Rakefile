@@ -6,7 +6,7 @@ task :default => [:test]
 Rake::TestTask.new(:test) do |test|
   test.libs << 'test'
   # test.test_files = FileList['test/**/*_test.rb']
-  test.test_files = FileList[%w{
+  test_files = FileList[%w{
     test/operation/guard_test.rb
     test/operation/pundit_test.rb
     test/operation/builder_test.rb
@@ -19,5 +19,11 @@ Rake::TestTask.new(:test) do |test|
 
     test/docs/*_test.rb
     }]
+
+  if RUBY_VERSION == "1.9.3"
+    test_files = test_files - %w{test/operation/docs/dry_test.rb}
+  end
+
+  test.test_files = test_files
   test.verbose = true
 end
