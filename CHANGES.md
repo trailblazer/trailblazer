@@ -1,4 +1,5 @@
-# 1.2.0
+
+# 2.0.0
 
 ## Operation API change:
 
@@ -100,6 +101,10 @@ You can now inject the following objects via `::call`:
 ## Contract
 
 * You can't call `Create.().contract` anymore. The contract instance(s) are available through the `Result` object.
+
+# 2.0.0.beta1
+
+* Still undefined `self.~`.
 
 # 1.1.2
 
