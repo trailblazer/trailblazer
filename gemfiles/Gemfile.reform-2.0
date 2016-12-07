@@ -1,6 +1,0 @@
-source "http://rubygems.org"
-
-gemspec path: '../'
-
-gem "reform", "~> 2.0.5"
-gem "multi_json"

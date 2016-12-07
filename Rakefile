@@ -21,7 +21,7 @@ Rake::TestTask.new(:test) do |test|
     }]
 
   if RUBY_VERSION == "1.9.3"
-    test_files = test_files - %w{test/operation/docs/dry_test.rb}
+    test_files = test_files - %w{test/docs/dry_test.rb test/docs/auto_inject_test.rb}
   end
 
   test.test_files = test_files
