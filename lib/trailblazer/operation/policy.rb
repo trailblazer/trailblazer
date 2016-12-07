@@ -6,7 +6,7 @@ class Trailblazer::Operation
     class Eval
       include Uber::Callable
 
-      def initialize(name:, path:)
+      def initialize(name:nil, path:nil)
         @name = name
         @path = path
       end
