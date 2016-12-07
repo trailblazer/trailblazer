@@ -7,6 +7,7 @@ gemspec
 # gem "disposable", path: "../disposable"
 # gem "reform", github: "apotonick/reform"
 gem "reform-rails"
+gem "activesupport", "~> 4.2.0"
 
 gem "roar", github: "apotonick/roar"
 # gem "reform", "~> 2.0.0"

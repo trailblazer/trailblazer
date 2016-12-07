@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "trailblazer-operation"
   spec.add_dependency "uber", ">= 0.1.0", "< 0.2.0"
-  spec.add_dependency "reform", ">= 2.0.0", "< 3.0.0"
+  spec.add_dependency "reform", ">= 2.2.0", "< 3.0.0"
   spec.add_dependency "declarative"
 
   spec.add_development_dependency "activemodel" # for Reform::AM::V
