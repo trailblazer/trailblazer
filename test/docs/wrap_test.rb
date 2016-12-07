@@ -12,13 +12,13 @@ class WrapTest < Minitest::Spec
       property :title
     end
 
-    step Wrap ->(pipe, operation, options) {
+    step Wrap ->(options, *, &block) {
       begin
-        pipe.(operation, options)
+        block.call
       rescue => exception
         options["result.model.find"] = "argh! because #{exception.class}"
         false
-      end } { |pipe|
+      end } {
       step Model( Song, :find )
       step Contract::Build( constant: MyContract )
     }
@@ -28,6 +28,42 @@ class WrapTest < Minitest::Spec
 
   it { Create.( id: 1, title: "Prodigal Son" )["contract.default"].model.inspect.must_equal %{#<struct WrapTest::Song id=1, title="Prodigal Son">} }
   it { Create.( id: nil ).inspect("result.model.find").must_equal %{<Result:false [\"argh! because RuntimeError\"] >} }
+
+  #-
+  # Wrap return
+  class WrapReturnTest < Minitest::Spec
+    class Create < Trailblazer::Operation
+      step Wrap ->(options, *, &block) { options["yield?"] ? block.call : false } {
+        step ->(options) { options["x"] = true }
+        # ...
+      }
+    end
+
+    it { Create.().inspect("x").must_equal %{<Result:false [nil] >} }
+    # returns falsey means deviate to left.
+    it { Create.({}, "yield?" => true).inspect("x").must_equal %{<Result:true [true] >} }
+  end
+
+  class WrapWithCallableTest < Minitest::Spec
+    class MyWrapper
+      extend Uber::Callable
+
+      def self.call(options, *, &block)
+        options["yield?"] ? yield : false
+      end
+    end
+
+    class Create < Trailblazer::Operation
+      step Wrap( MyWrapper ) {
+        step ->(options) { options["x"] = true }
+        # ...
+      }
+    end
+
+    it { Create.().inspect("x").must_equal %{<Result:false [nil] >} }
+    # returns falsey means deviate to left.
+    it { Create.({}, "yield?" => true).inspect("x").must_equal %{<Result:true [true] >} }
+  end
 end
 
 class RescueTest < Minitest::Spec
@@ -37,6 +73,9 @@ class RescueTest < Minitest::Spec
     def self.find(id)
       raise if id == "RuntimeError!"
       id.nil? ? raise(RecordNotFound) : new(id)
+    end
+
+    def lock!
     end
   end
 
@@ -83,9 +122,20 @@ class RescueTest < Minitest::Spec
     it { assert_raises(RuntimeError) { Create.( id: "RuntimeError!" ) } }
   end
 
+
   #-
   # cdennl use-case
   class CdennlRescueAndTransactionTest < Minitest::Spec
+    module Sequel
+      cattr_accessor :result
+
+      def self.transaction
+        yield.tap do |res|
+          self.result = res
+        end
+      end
+    end
+
   #
   class Create < Trailblazer::Operation
     class MyContract < Reform::Form
@@ -93,25 +143,33 @@ class RescueTest < Minitest::Spec
     end
 
     step Rescue( RecordNotFound, handler: :rollback! ) {
-      step Wrap ->(pipe, operation, options) { Transaction.call do pipe.(operation, options) end } {
+      step Wrap ->(*, &block) { Sequel.transaction do block.call end } {
         step Model( Song, :find )
-        self.> ->(options) { options["model"].lock! }
+        step ->(options) { options["model"].lock! }
         step Contract::Build( constant: MyContract )
         step Contract::Validate( )
         step Persist( method: :sync )
       }
     }
-    self.< ->(options) { snippet }
+    self.< :error! # handle all kinds of errors.
 
     def rollback!(exception, options)
       options["x"] = exception.class
     end
+
+    def error!(options)
+      options["err"] = true
+    end
   end
 
-    it { Create.( id: 1, title: "Prodigal Son" )["contract.default"].model.inspect.must_equal %{#<struct RescueTest::Song id=1, title="Prodigal Son">} }
-    it { Create.( id: 1, title: "Prodigal Son" ).inspect("x").must_equal %{<Result:true [nil] >} }
+    it { Create.( id: 1, title: "Pie" ).inspect("model", "x", "err").must_equal %{<Result:true [#<struct RescueTest::Song id=1, title=\"Pie\">, nil, nil] >} }
+    # raise exceptions in Model:
     it { Create.( id: nil ).inspect("model", "x").must_equal %{<Result:false [nil, RescueTest::RecordNotFound] >} }
     it { assert_raises(RuntimeError) { Create.( id: "RuntimeError!" ) } }
+    it do
+      Create.( id: 1, title: "Pie" )
+      Sequel.result.first.must_equal Pipetree::Flow::Right
+    end
   end
 
   #---

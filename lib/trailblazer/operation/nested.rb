@@ -17,46 +17,14 @@ class Trailblazer::Operation
 
   DSL.macro!(:Nested, Nested)
 
-  module Wrap
-    def self.import!(operation, import, wrap, _options={}, &block)
-      pipe_api = API.new(operation, pipe = ::Pipetree::Flow[])
-
-      # DISCUSS: don't instance_exec when |pipe| given?
-      # yield pipe_api # create the nested pipe.
-      pipe_api.instance_exec(&block) # create the nested pipe.
-
-      import.(:&, ->(input, options) { wrap.(pipe, input, options) }, _options)
-    end
-
-    class API
-      include Pipetree::DSL
-      include Pipetree::DSL::Macros
-
-      def initialize(target, pipe)
-        @target, @pipe = target, pipe
-      end
-
-      def _insert(operator, proc, options={}) # TODO: test me.
-        Pipetree::DSL.insert(@pipe, operator, proc, options, definer_name: @target.name)
-      end
-
-      def |(cfg, user_options={})
-        Pipetree::DSL.import(@target, @pipe, cfg, user_options)
-      end
-      alias_method :step, :| # DISCUSS: uhm...
-    end
-  end # Wrap
-
-  DSL.macro!(:Wrap, Wrap)
-
   module Rescue
-    def self.import!(operation, import, *exceptions, handler:->(*){}, &block)
+    def self.import!(_operation, import, *exceptions, handler:->(*){}, &block)
       exceptions = [StandardError] unless exceptions.any?
       handler    = Pipetree::DSL::Option.(handler)
 
-      rescue_block = ->(pipe, operation, options) {
+      rescue_block = ->(options, operation, *, &nested_pipe) {
         begin
-          res = pipe.(operation, options)
+          res = nested_pipe.call
           res.first == ::Pipetree::Flow::Right # FIXME.
         rescue *exceptions => exception
           handler.call(operation, exception, options)
@@ -66,7 +34,7 @@ class Trailblazer::Operation
       }
 
       # operation.| operation.Wrap(rescue_block, &block), name: "Rescue:#{block.source_location.last}"
-      Wrap.import! operation, import, rescue_block, name: "Rescue:#{block.source_location.last}", &block
+      Wrap.import! _operation, import, rescue_block, name: "Rescue:#{block.source_location.last}", &block
     end
   end
 
