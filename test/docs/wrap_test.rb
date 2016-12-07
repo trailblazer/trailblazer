@@ -35,8 +35,12 @@ class WrapTest < Minitest::Spec
     class Create < Trailblazer::Operation
       step Wrap ->(options, *, &block) { options["yield?"] ? block.call : false } {
         step ->(options) { options["x"] = true }
+        step :noop!
         # ...
       }
+
+      def noop!(options)
+      end
     end
 
     it { Create.().inspect("x").must_equal %{<Result:false [nil] >} }
@@ -75,146 +79,96 @@ class WrapTest < Minitest::Spec
 
   it { Update.().inspect("x").must_equal %{<Result:false [nil] >} }
   it { Update.({}, "yield?" => true).inspect("x").must_equal %{<Result:true [true] >} }
-end
 
-class RescueTest < Minitest::Spec
-  RecordNotFound = Class.new(RuntimeError)
-
-  Song = Struct.new(:id, :title) do
-    def self.find(id)
-      raise if id == "RuntimeError!"
-      id.nil? ? raise(RecordNotFound) : new(id)
-    end
-
-    def lock!
-    end
-  end
-
-  class Create < Trailblazer::Operation
-    class MyContract < Reform::Form
-      property :title
-    end
-
-    step Rescue {
-      step Model(Song, :find)
-      step Contract::Build( constant: MyContract )
-    }
-    step Contract::Validate()
-    step Persist( method: :sync )
-  end
-
-  it { Create.( id: 1, title: "Prodigal Son" )["contract.default"].model.inspect.must_equal %{#<struct RescueTest::Song id=1, title="Prodigal Son">} }
-  it { Create.( id: nil ).inspect("model").must_equal %{<Result:false [nil] >} }
-
-  #-
-  # Rescue ExceptionClass, handler: ->(*) { }
-  class WithExceptionNameTest < Minitest::Spec
-  #
-  class Create < Trailblazer::Operation
-    class MyContract < Reform::Form
-      property :title
-    end
-
-    step Rescue( RecordNotFound, KeyError, handler: :rollback! ) {
-      step Model( Song, :find )
-      step Contract::Build( constant: MyContract )
-    }
-    step Contract::Validate()
-    step Persist( method: :sync )
-
-    def rollback!(exception, options)
-      options["x"] = exception.class
-    end
-  end
-
-    it { Create.( id: 1, title: "Prodigal Son" )["contract.default"].model.inspect.must_equal %{#<struct RescueTest::Song id=1, title="Prodigal Son">} }
-    it { Create.( id: 1, title: "Prodigal Son" ).inspect("x").must_equal %{<Result:true [nil] >} }
-    it { Create.( id: nil ).inspect("model", "x").must_equal %{<Result:false [nil, RescueTest::RecordNotFound] >} }
-    it { assert_raises(RuntimeError) { Create.( id: "RuntimeError!" ) } }
-  end
-
-
-  #-
-  # cdennl use-case
-  class CdennlRescueAndTransactionTest < Minitest::Spec
+  class WrapExampleProcTest < Minitest::Spec
     module Sequel
-      cattr_accessor :result
-
       def self.transaction
-        yield.tap do |res|
-          self.result = res
-        end
+        yield
       end
     end
 
-  #
+  #:sequel-transaction
   class Create < Trailblazer::Operation
+    #~wrap-only
     class MyContract < Reform::Form
       property :title
     end
 
-    step Rescue( RecordNotFound, handler: :rollback! ) {
-      step Wrap ->(*, &block) { Sequel.transaction do block.call end } {
-        step Model( Song, :find )
-        step ->(options) { options["model"].lock! }
-        step Contract::Build( constant: MyContract )
-        step Contract::Validate( )
-        step Persist( method: :sync )
-      }
+    #~wrap-only end
+    step Wrap ->(*, &block) { Sequel.transaction do block.call end } {
+      step Model( Song, :new )
+      #~wrap-only
+      step Contract::Build( constant: MyContract )
+      step Contract::Validate( )
+      step Persist( method: :sync )
+      #~wrap-only end
     }
-    self.< :error! # handle all kinds of errors.
-
-    def rollback!(exception, options)
-      options["x"] = exception.class
-    end
+    failure :error! # handle all kinds of errors.
+    #~wrap-only
+    step :notify!
 
     def error!(options)
-      options["err"] = true
+      # handle errors after the wrap
     end
+
+    def notify!(options)
+      # send emails, because success...
+    end
+    #~wrap-only end
+  end
+  #:sequel-transaction end
+
+    it { Create.( title: "Pie" ).inspect("model", "x", "err").must_equal %{<Result:true [#<struct WrapTest::Song id=nil, title=\"Pie\">, nil, nil] >} }
   end
 
-    it { Create.( id: 1, title: "Pie" ).inspect("model", "x", "err").must_equal %{<Result:true [#<struct RescueTest::Song id=1, title=\"Pie\">, nil, nil] >} }
-    # raise exceptions in Model:
-    it { Create.( id: nil ).inspect("model", "x").must_equal %{<Result:false [nil, RescueTest::RecordNotFound] >} }
-    it { assert_raises(RuntimeError) { Create.( id: "RuntimeError!" ) } }
-    it do
-      Create.( id: 1, title: "Pie" )
-      Sequel.result.first.must_equal Pipetree::Flow::Right
+  class WrapExampleCallableTest < Minitest::Spec
+    module Sequel
+      def self.transaction
+        yield
+      end
+    end
+
+  #:callable-t
+  class MyTransaction
+    extend Uber::Callable
+
+    def self.call(options, *)
+      Sequel.transaction { yield } # yield runs the nested pipe.
     end
   end
+  #:callable-t end
+  #:sequel-transaction-callable
+  class Create < Trailblazer::Operation
+    #~wrap-onlyy
+    class MyContract < Reform::Form
+      property :title
+    end
 
-  #---
-  # nested raise (i hope people won't use this but it works)
-  A = Class.new(RuntimeError)
-  Y = Class.new(RuntimeError)
-
-  class NestedInsanity < Trailblazer::Operation
-    step Rescue {
-      step ->(options) { options["a"] = true }
-      step Rescue {
-        step ->(options) { options["y"] = true }
-        step ->(options) { raise Y if options["raise-y"] }
-        step ->(options) { options["z"] = true }
-      }
-      step ->(options) { options["b"] = true }
-      step ->(options) { raise A if options["raise-a"] }
-      step ->(options) { options["c"] = true }
-      self.< ->(options) { options["inner-err"] = true }
+    #~wrap-onlyy end
+    step Wrap( MyTransaction ) {
+      step Model( Song, :new )
+      #~wrap-onlyy
+      step Contract::Build( constant: MyContract )
+      step Contract::Validate( )
+      step Persist( method: :sync )
+      #~wrap-onlyy end
     }
-    step ->(options) { options["e"] = true }
-    self.< ->(options) { options["outer-err"] = true }
+    failure :error! # handle all kinds of errors.
+    #~wrap-onlyy
+    step :notify!
+
+    def error!(options)
+      # handle errors after the wrap
+    end
+
+    def notify!(options)
+      # send emails, because success...
+    end
+    #~wrap-onlyy end
   end
+  #:sequel-transaction-callable end
 
-  it { NestedInsanity["pipetree"].inspect.must_equal %{[>>operation.new,&Rescue:87,>:99,<RescueTest::NestedInsanity:100]} }
-  it { NestedInsanity.({}).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:true [true, true, true, true, true, true, nil, nil] >} }
-  it { NestedInsanity.({}, "raise-y" => true).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:false [true, true, nil, nil, nil, nil, true, true] >} }
-  it { NestedInsanity.({}, "raise-a" => true).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:false [true, true, true, true, nil, nil, nil, true] >} }
-
-  #-
-  # inheritance
-  class UbernestedInsanity < NestedInsanity
+    it { Create.( title: "Pie" ).inspect("model", "x", "err").must_equal %{<Result:true [#<struct WrapTest::Song id=nil, title=\"Pie\">, nil, nil] >} }
   end
-
-  it { UbernestedInsanity.({}).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:true [true, true, true, true, true, true, nil, nil] >} }
-  it { UbernestedInsanity.({}, "raise-a" => true).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:false [true, true, true, true, nil, nil, nil, true] >} }
 end
+

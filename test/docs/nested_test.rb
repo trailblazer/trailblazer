@@ -7,17 +7,9 @@ class DocsNestedOperationTest < Minitest::Spec
     end
   end
 
-  # self.> :bla!
-  #   def bla!(options)
-  #     self["model"] =
-  #       self["result"]["model"]
-  #     self["contract.default"] = self["result"]["contract.default"]
-  #   end
-
-
-
   #---
   #- nested operations
+  #:edit
   class Edit < Trailblazer::Operation
     extend Contract::DSL
 
@@ -28,14 +20,44 @@ class DocsNestedOperationTest < Minitest::Spec
     step Model( Song, :find )
     step Contract::Build()
   end
+  #:edit end
 
+    # step Nested( Edit ) #, "policy.default" => self["policy.create"]
+  #:update
   class Update < Trailblazer::Operation
-    step Nested( Edit ) #, "policy.default" => self["policy.create"]
+    step Nested( Edit )
     step Contract::Validate()
     step Persist( method: :sync )
   end
+  #:update end
 
   puts Update["pipetree"].inspect(style: :rows)
+
+  #-
+  # Edit allows grabbing model and contract
+  it do
+  #:edit-call
+  result = Edit.(id: 1)
+
+  result["model"]            #=> #<Song id=1, title=\"Bristol\">
+  result["contract.default"] #=> #<Reform::Form ..>
+  #:edit-call end
+    result.inspect("model").must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title=\"Bristol\">] >}
+    result["contract.default"].model.must_equal result["model"]
+  end
+
+  #-
+  # Update also allows grabbing model and contract
+  it do
+  #:update-call
+  result = Update.(id: 1, title: "Call It A Night")
+
+  result["model"]            #=> #<Song id=1 , title=\"Call It A Night\">
+  result["contract.default"] #=> #<Reform::Form ..>
+  #:update-call end
+    result.inspect("model").must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title=\"Call It A Night\">] >}
+    result["contract.default"].model.must_equal result["model"]
+  end
 
   #-
   # Edit is successful.
@@ -93,34 +115,3 @@ class NestedClassLevelTest < Minitest::Spec
   it { Create.().inspect("x", "y").must_equal %{<Result:true [true, true] >} }
   it { Create.(); Create["class"].must_equal nil }
 end
-
-
-# =begin
-# class New
-#   Model[Song, :create]
-#   Policy :new
-#   step :init!
-
-#   def init!
-
-#   end
-# end
-
-# class Create < Op
-#   step New
-
-#   Model[Song, :create]
-#   Contract
-#   Present
-#   Persist
-#   ->(*) { Mailer }
-
-#   include Present
-# end
-
-# Create.(..., present: true)
-
-# class Update < Create
-# end
-
-# =end
