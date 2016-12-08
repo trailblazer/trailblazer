@@ -145,7 +145,7 @@ class DocsContractKeyTest < Minitest::Spec
   end
   #:key end
 
-  it { Create.({}).inspect("model").must_equal %{<Result:false [#<struct DocsContractKeyTest::Song id=nil, title=nil>] >} }
+  it { Create.({}).inspect("model", "result.contract.default.extract").must_equal %{<Result:false [#<struct DocsContractKeyTest::Song id=nil, title=nil>, nil] >} }
   it { Create.({"song" => { title: "SVG" }}).inspect("model").must_equal %{<Result:true [#<struct DocsContractKeyTest::Song id=nil, title="SVG">] >} }
 end
 

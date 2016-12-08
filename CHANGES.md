@@ -102,6 +102,10 @@ You can now inject the following objects via `::call`:
 
 * You can't call `Create.().contract` anymore. The contract instance(s) are available through the `Result` object.
 
+# 2.0.0.beta2
+
+* Removed `Operation::Controller`.
+
 # 2.0.0.beta1
 
 * Still undefined `self.~`.
