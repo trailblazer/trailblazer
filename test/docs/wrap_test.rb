@@ -23,7 +23,7 @@ class WrapTest < Minitest::Spec
       step Contract::Build( constant: MyContract )
     }
     step Contract::Validate()
-    step Persist( method: :sync )
+    step Contract::Persist( method: :sync )
   end
 
   it { Create.( id: 1, title: "Prodigal Son" )["contract.default"].model.inspect.must_equal %{#<struct WrapTest::Song id=1, title="Prodigal Son">} }
@@ -100,7 +100,7 @@ class WrapTest < Minitest::Spec
       #~wrap-only
       step Contract::Build( constant: MyContract )
       step Contract::Validate( )
-      step Persist( method: :sync )
+      step Contract::Persist( method: :sync )
       #~wrap-only end
     }
     failure :error! # handle all kinds of errors.
@@ -150,7 +150,7 @@ class WrapTest < Minitest::Spec
       #~wrap-onlyy
       step Contract::Build( constant: MyContract )
       step Contract::Validate( )
-      step Persist( method: :sync )
+      step Contract::Persist( method: :sync )
       #~wrap-onlyy end
     }
     failure :error! # handle all kinds of errors.

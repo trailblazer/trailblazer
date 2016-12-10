@@ -27,7 +27,7 @@ class DocsNestedOperationTest < Minitest::Spec
   class Update < Trailblazer::Operation
     step Nested( Edit )
     step Contract::Validate()
-    step Persist( method: :sync )
+    step Contract::Persist( method: :sync )
   end
   #:update end
 

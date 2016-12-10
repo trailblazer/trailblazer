@@ -22,7 +22,7 @@ class DryContainerTest < Minitest::Spec
     self.| Model( Song, :new )
     self.| Contract::Build()
     self.| Contract::Validate()
-    self.| Persist( method: :sync )
+    self.| Contract::Persist( method: :sync )
   end
   #:key end
 

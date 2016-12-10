@@ -61,7 +61,7 @@ class RescueTest < Minitest::Spec
       step Contract::Build( constant: MyContract )
     }
     step Contract::Validate()
-    step Persist( method: :sync )
+    step Contract::Persist( method: :sync )
   end
   #:simple end
 
@@ -82,7 +82,7 @@ class RescueTest < Minitest::Spec
       step Contract::Build( constant: MyContract )
     }
     step Contract::Validate()
-    step Persist( method: :sync )
+    step Contract::Persist( method: :sync )
 
     def rollback!(exception, options)
       options["x"] = exception.class
@@ -122,7 +122,7 @@ class RescueTest < Minitest::Spec
         step ->(options) { options["model"].lock! } # lock the model.
         step Contract::Build( constant: MyContract )
         step Contract::Validate( )
-        step Persist( method: :sync )
+        step Contract::Persist( method: :sync )
       }
     }
     failure :error! # handle all kinds of errors.

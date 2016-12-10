@@ -15,7 +15,7 @@ class PersistTest < Minitest::Spec
     self.| Contract::Build()
     self.| Contract::Validate()
     self.< ->(options) { options["1. fail"] = "Validate" }
-    self.| Persist()
+    self.| Contract::Persist()
     self.< ->(options) { options["2. fail"] = "Persist" }
   end
 

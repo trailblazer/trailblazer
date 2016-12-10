@@ -17,7 +17,7 @@ class DslContractTest < MiniTest::Spec
       includer.| Trailblazer::Operation::Model( OpenStruct, :new )
       includer.| Trailblazer::Operation::Contract::Build()
       includer.| Trailblazer::Operation::Contract::Validate()
-      includer.| Trailblazer::Operation::Persist( save_method: :sync )
+      includer.| Trailblazer::Operation::Contract::Persist( save_method: :sync )
       # includer.> ->(op, *) { op["x"] = [] }
     end
   end

@@ -15,7 +15,7 @@ class DocsRepresenterInferTest < Minitest::Spec
     step Model( Song, :new )
     step Contract::Build( constant: MyContract )
     step Contract::Validate( representer: Representer.infer(MyContract, format: Representable::JSON) )
-    step Persist( method: :sync )
+    step Contract::Persist( method: :sync )
   end
   #:infer end
 
@@ -44,7 +44,7 @@ class DocsRepresenterExplicitTest < Minitest::Spec
     step Model( Song, :new )
     step Contract::Build( constant: MyContract )
     step Contract::Validate( representer: MyRepresenter ) # :representer
-    step Persist( method: :sync )
+    step Contract::Persist( method: :sync )
   end
   #:explicit-op end
 
@@ -108,7 +108,7 @@ class DocsRepresenterDITest < Minitest::Spec
     step Model( Song, :new )
     step Contract::Build( constant: MyContract )
     step Contract::Validate()
-    step Persist( method: :sync )
+    step Contract::Persist( method: :sync )
   end
 
   let (:json) { MultiJson.dump(id: 1) }
@@ -136,7 +136,7 @@ class DocsRepresenterInlineTest < Minitest::Spec
     step Model( Song, :new )
     step Contract::Build( constant: MyContract )
     step Contract::Validate( representer: self["representer.default.class"] )
-    step Persist( method: :sync )
+    step Contract::Persist( method: :sync )
   end
   #:inline end
 
@@ -231,7 +231,7 @@ class DocsRepresenterFullExampleTest < Minitest::Spec
     step Model( Song, :new )
     step Contract::Build()
     step Contract::Validate( representer: self["representer.parse.class"] )
-    step Persist( method: :sync )
+    step Contract::Persist( method: :sync )
   end
   #:full end
 

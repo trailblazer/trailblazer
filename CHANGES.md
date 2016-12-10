@@ -105,6 +105,7 @@ You can now inject the following objects via `::call`:
 # 2.0.0.beta2
 
 * Removed `Operation::Controller`.
+* Renamed `Persist` to `Contract::Persist`.
 
 # 2.0.0.beta1
 
