@@ -9,6 +9,10 @@ class MyPolicy
   def create?
     @user == Module && @model.id.nil?
   end
+
+  def new?
+    @user == Class
+  end
 end
 #:policy end
 
@@ -38,13 +42,31 @@ class DocsPunditProcTest < Minitest::Spec
     result["result.policy.default"]["policy"].is_a?(MyPolicy).must_equal true
   end
 
-   #---
-  #- Guard inheritance
+  #---
+  #- override
   class New < Create
-    override Policy::Pundit( nil, :new? )
+    override Policy::Pundit( MyPolicy, :new? )
   end
 
   it { New["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,&policy.default.eval]} }
+  it { New.({}, "current_user" => Class ).inspect("model").must_equal %{<Result:true [#<struct DocsPunditProcTest::Song id=nil>] >} }
+  it { New.({}, "current_user" => nil ).inspect("model").must_equal %{<Result:false [#<struct DocsPunditProcTest::Song id=nil>] >} }
+
+  #---
+  #- override with :name
+  class Edit < Trailblazer::Operation
+    step Policy::Pundit( MyPolicy, :create?, name: "first" )
+    step Policy::Pundit( MyPolicy, :new?,    name: "second" )
+  end
+
+  class Update < Edit
+    override Policy::Pundit( MyPolicy, :new?, name: "first" )
+  end
+
+  it { Edit["pipetree"].inspect.must_equal %{[>>operation.new,&policy.first.eval,&policy.second.eval]} }
+  it { Edit.({}, "current_user" => Class).inspect("model").must_equal %{<Result:false [nil] >} }
+  it { Update["pipetree"].inspect.must_equal %{[>>operation.new,&policy.first.eval,&policy.second.eval]} }
+  it { Update.({}, "current_user" => Class).inspect("model").must_equal %{<Result:true [nil] >} }
 
   #---
   # dependency injection

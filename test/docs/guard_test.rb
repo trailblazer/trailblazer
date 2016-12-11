@@ -29,6 +29,7 @@ class DocsGuardProcTest < Minitest::Spec
    #---
   #- Guard inheritance
   class New < Create
+    override Policy::Guard( ->(options) { options["current_user"] } )
   end
 
   it { New["pipetree"].inspect.must_equal %{[>>operation.new,&policy.default.eval,>process]} }

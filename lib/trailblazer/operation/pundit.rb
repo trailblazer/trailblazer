@@ -1,12 +1,12 @@
 class Trailblazer::Operation
   module Policy
     module Pundit
-      def self.import!(operation, import, policy_class, action, options={})
-        Policy.add!(operation, import, options) { Pundit.build(policy_class, action) }
+      def self.import!(operation, import, policy_class, action, options={}, insert_options={})
+        Policy.add!(operation, import, options, insert_options) { Pundit.build(policy_class, action) }
       end
 
-      def self.override!(*args)
-        Policy.override!(*args)
+      def self.override!(*args, options)
+        Pundit.import!(*args, options, replace: options[:path])
       end
 
       def self.build(*args, &block)
@@ -38,7 +38,14 @@ class Trailblazer::Operation
         end
       end
     end
-  end
 
-  DSL.macro!(:Pundit, Policy::Pundit, Policy.singleton_class)
+    def self.Pundit(policy, condition, name: :default, &block)
+      options = {
+        name:  name,
+        path: "policy.#{name}.eval",
+      }
+
+      [Pundit, [policy, condition, options], block]
+    end
+  end
 end

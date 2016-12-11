@@ -24,21 +24,22 @@ class Trailblazer::Operation
 
     # Adds the `yield` result to the pipe and treats it like a
     # policy-compatible  object at runtime.
-    def self.add!(operation, import, options)
-      name = options[:name] || :default
-      path = "policy.#{name}.eval"
+    def self.add!(operation, import, options, insert_options, &block)
+      name = options[:name]
+      path = options[:path]
 
-      # configure class level.
-      operation[path] = yield
+      configure!(operation, import, options, &block)
 
       # add step.
       import.(:&, Eval.new( name: name, path: path ),
-        name: path
+        insert_options.merge(name: path)
       )
     end
 
-    def self.override!(operation, import, policy, rule)
-
+  private
+    def self.configure!(operation, import, options)
+      # configure class level.
+      operation[ options[:path] ] = yield
     end
   end
 end

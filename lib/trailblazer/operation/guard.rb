@@ -4,8 +4,12 @@ require "uber/option"
 class Trailblazer::Operation
   module Policy
     module Guard
-      def self.import!(operation, import, user_proc, options={})
-        Policy.add!(operation, import, options) { Guard.build(user_proc) }
+      def self.import!(operation, import, user_proc, options={}, insert_options={})
+        Policy.add!(operation, import, options, insert_options) { Guard.build(user_proc) }
+      end
+
+      def self.override!(*args, options)
+        Guard.import!(*args, options, replace: options[:path])
       end
 
       def self.build(callable)
@@ -16,7 +20,14 @@ class Trailblazer::Operation
         ->(options) { Result.new( !!value.(options), {} ) }
       end
     end # Guard
-  end
 
-  DSL.macro!(:Guard, Policy::Guard, Policy.singleton_class)
+    def self.Guard(proc, name: :default, &block)
+      options = {
+        name:  name,
+        path: "policy.#{name}.eval",
+      }
+
+      [Guard, [proc, options], block]
+    end
+  end
 end
