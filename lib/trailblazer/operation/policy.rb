@@ -2,7 +2,6 @@ class Trailblazer::Operation
   module Policy
     # Step: This generically `call`s a policy and then pushes its result to `options`.
     # You can use any callable object as a policy with this step.
-    # :private:
     class Eval
       include Uber::Callable
 
@@ -23,17 +22,23 @@ class Trailblazer::Operation
       end
     end
 
-    # Adds the `yield` result to the pipe and treats it like a policy-compatible object at runtime.
+    # Adds the `yield` result to the pipe and treats it like a
+    # policy-compatible  object at runtime.
     def self.add!(operation, import, options)
       name = options[:name] || :default
+      path = "policy.#{name}.eval"
 
       # configure class level.
-      operation[path = "policy.#{name}.eval"] = yield
+      operation[path] = yield
 
       # add step.
       import.(:&, Eval.new( name: name, path: path ),
         name: path
       )
+    end
+
+    def self.override!(operation, import, policy, rule)
+
     end
   end
 end

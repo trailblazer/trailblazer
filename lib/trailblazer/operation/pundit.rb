@@ -5,6 +5,10 @@ class Trailblazer::Operation
         Policy.add!(operation, import, options) { Pundit.build(policy_class, action) }
       end
 
+      def self.override!(*args)
+        Policy.override!(*args)
+      end
+
       def self.build(*args, &block)
         Condition.new(*args, &block)
       end
@@ -34,9 +38,7 @@ class Trailblazer::Operation
         end
       end
     end
-
-    def self.Pundit(*args, &block)
-      [ Pundit, args, block ]
-    end
   end
+
+  DSL.macro!(:Pundit, Policy::Pundit, Policy.singleton_class)
 end

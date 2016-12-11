@@ -18,7 +18,5 @@ class Trailblazer::Operation
     # end
   end
 
-  def self.Resolver(*args, &block)
-    [ Resolver, args, block ]
-  end
+  DSL.macro!(:Resolver, Resolver)
 end

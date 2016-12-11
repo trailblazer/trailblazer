@@ -41,6 +41,7 @@ class DocsPunditProcTest < Minitest::Spec
    #---
   #- Guard inheritance
   class New < Create
+    override Policy::Pundit( nil, :new? )
   end
 
   it { New["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,&policy.default.eval]} }

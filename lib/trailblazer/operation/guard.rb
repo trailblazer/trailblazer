@@ -16,9 +16,7 @@ class Trailblazer::Operation
         ->(options) { Result.new( !!value.(options), {} ) }
       end
     end # Guard
-
-    def self.Guard(*args, &block)
-      [ Guard, args, block ]
-    end
   end
+
+  DSL.macro!(:Guard, Policy::Guard, Policy.singleton_class)
 end

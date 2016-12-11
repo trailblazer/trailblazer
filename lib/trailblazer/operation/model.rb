@@ -8,12 +8,19 @@ class Trailblazer::Operation
         return operation["model.action"] = model_class
       end
 
-      import.(:&, Step, name: "model.build")
-
+      # configure
       operation["model.class"] = model_class
       operation["model.action"] = action
 
+      # add
+      import.(:&, Step, name: "model.build")
+
       operation.send :include, BuildMethods
+    end
+
+    def self.override!(operation, import, model_class, action)
+      model_class and operation["model.class"] = model_class
+      action and operation["model.action"] = action
     end
 
     # Methods to create the model according to class configuration and params.

@@ -9,9 +9,7 @@ class Trailblazer::Operation
           name: "persist.save")
       end
     end
-
-    def self.Persist(*args, &block)
-      [ Persist, args, block ]
-    end
   end
+
+  DSL.macro!(:Persist, Contract::Persist, Contract.singleton_class) # Contract::Persist()
 end

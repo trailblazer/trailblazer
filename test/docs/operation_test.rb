@@ -35,3 +35,12 @@ class DocsOperationExampleTest < Minitest::Spec
   it { Song::Create.({ }).inspect("model").must_equal %{<Result:false [#<struct DocsOperationExampleTest::Song id=nil, title=nil, created_by=nil>] >} }
   it { Song::Create.({ title: "Nothin'" }, "current_user"=>Module).inspect("model").must_equal %{<Result:true [#<struct DocsOperationExampleTest::Song id=nil, title="Nothin'", created_by=Module>] >} }
 end
+
+class DndTest < Minitest::Spec
+  class Create < Trailblazer::Operation
+    consider :authorize!
+    failure  :auth_err!
+    consider :save!
+    self.< Wrap
+  end
+end

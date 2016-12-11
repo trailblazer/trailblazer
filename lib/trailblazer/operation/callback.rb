@@ -40,7 +40,5 @@ class Trailblazer::Operation
     end
   end
 
-  def self.Callback(*args, &block)
-    [ Callback, args, block ]
-  end
+  DSL.macro!(:Callback, Callback) # Operation::Callback()
 end

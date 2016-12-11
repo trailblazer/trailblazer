@@ -20,7 +20,5 @@ class Trailblazer::Operation
     DSL = Uber::Builder::DSL
   end
 
-  def self.Builder(*args, &block)
-    [ Builder, args, block ]
-  end
+  DSL.macro!(:Builder, Builder) # Operation::Builder()
 end

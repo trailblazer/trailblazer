@@ -16,7 +16,7 @@ class ModelTest < Minitest::Spec
   it { Create.({})["model"].inspect.must_equal %{#<struct ModelTest::Song id=nil>} }
 
   class Update < Create
-    self.~ Model :update # DISCUSS: do we need the ~ operator?
+    override Model nil, :update
   end
 
   # :find it
