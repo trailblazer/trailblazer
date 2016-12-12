@@ -16,7 +16,7 @@ class ModelTest < Minitest::Spec
   it { Create.({})["model"].inspect.must_equal %{#<struct ModelTest::Song id=nil>} }
 
   class Update < Create
-    override Model nil, :update
+    override Model(Song, :update)
   end
 
   # :find it

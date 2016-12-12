@@ -5,10 +5,6 @@ class Trailblazer::Operation
         Policy.add!(operation, import, options, insert_options) { Pundit.build(policy_class, action) }
       end
 
-      def self.override!(*args, options)
-        Pundit.import!(*args, options, replace: options[:path])
-      end
-
       def self.build(*args, &block)
         Condition.new(*args, &block)
       end

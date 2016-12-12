@@ -55,7 +55,7 @@ class OperationCallbackTest < MiniTest::Spec
 
   #---
   #- inheritance
-  it { Update["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,>contract.build,&validate.params.extract,&contract.validate,&callback.default]} }
+  it { Update["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,>contract.build,&contract.default.params,&contract.default.validate,&callback.default]} }
 
 
   it "invokes all callbacks" do

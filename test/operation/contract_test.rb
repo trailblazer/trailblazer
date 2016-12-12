@@ -295,6 +295,7 @@ class ValidateTest < Minitest::Spec
     self.| Contract::Build()
     self.| Contract::Validate( key: :song) # generic validate call for you.
     # ->(*) { validate(options["params"][:song]) } # <-- TODO
+    step Contract::Persist( method: :sync )
   end
 
   # success
@@ -305,16 +306,24 @@ class ValidateTest < Minitest::Spec
   it { Upsert.().success?.must_equal false }
 
   #---
-  # params.validate gets set (TODO: change in 2.1)
+  # contract.default.params gets set (TODO: change in 2.1)
   it { Upsert.(song: { title: "SVG" })["params"].must_equal({:song=>{:title=>"SVG"}}) }
-  it { Upsert.(song: { title: "SVG" })["params.validate"].must_equal({:title=>"SVG"}) }
+  it { Upsert.(song: { title: "SVG" })["contract.default.params"].must_equal({:title=>"SVG"}) }
 
   #---
   #- inheritance
   class New < Upsert
   end
 
-  it { New["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,>contract.build,&validate.params.extract,&contract.validate]} }
+  it { New["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,>contract.build,&contract.default.params,&contract.default.validate,&persist.save]} }
+
+  #- overwriting Validate
+  class NewHit < Upsert
+    override Contract::Validate( key: :hit )
+  end
+
+  it { NewHit["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,>contract.build,&contract.default.params,&contract.default.validate,&persist.save]} }
+  it { NewHit.(:hit => { title: "Hooray For Me" }).inspect("model").must_equal %{<Result:true [#<struct ContractTest::Song title=\"Hooray For Me\">] >} }
 end
 
 # #---

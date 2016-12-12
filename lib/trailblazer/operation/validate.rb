@@ -5,27 +5,32 @@ class Trailblazer::Operation
     # Deviate to left track if optional key is not found in params.
     # Deviate to left if validation result falsey.
     module Validate
-      def self.import!(operation, import, skip_extract:false, name: "default", representer:false, **args) # DISCUSS: should we introduce something like Validate::Deserializer?
+      def self.import!(operation, import, skip_extract:false, name: "default", representer:false, key: nil) # DISCUSS: should we introduce something like Validate::Deserializer?
         if representer
           skip_extract = true
           operation["representer.#{name}.class"] = representer
         end
 
-        import.(:&, ->(input, options) { extract_params!(input, options, **args) },
-          name: "validate.params.extract") unless skip_extract
+        params_path = "contract.#{name}.params" # extract_params! save extracted params here.
+
+        import.(:&, ->(input, options) { extract_params!(input, options, key: key, path: params_path) },
+          name: params_path) unless skip_extract
 
         # call the actual contract.validate(params)
         # DISCUSS: should we pass the representer here, or do that in #validate! i'm still mulling over what's the best, most generic approach.
-        import.(:&, ->(operation, options) { validate!(operation, options, name: name, representer: options["representer.#{name}.class"], **args) },
-          name: "contract.validate")
+        import.(:&, ->(operation, options) do
+            validate!(operation, options, name: name, representer: options["representer.#{name}.class"], key: key, params_path: params_path)
+          end,
+          name: "contract.#{name}.validate", # visible name of the pipe step.
+        )
         end
 
-      def self.extract_params!(operation, options, key:nil, **)
+      def self.extract_params!(operation, options, key:nil, path:nil)
         # TODO: introduce nested pipes and pass composed input instead.
-        options["params.validate"] = key ? options["params"][key] : options["params"]
+        options[path] = key ? options["params"][key] : options["params"]
       end
 
-      def self.validate!(operation, options, name: nil, representer:false, from: "document", **)
+      def self.validate!(operation, options, name: nil, representer:false, from: "document", params_path:nil, **)
         path     = "contract.#{name}"
         contract = operation[path]
 
@@ -38,7 +43,7 @@ class Trailblazer::Operation
             contract.(options[from]) { |document| representer.new(contract).parse(document) }
           else
             # let Reform handle the deserialization.
-            contract.(options["params.validate"])
+            contract.(options[params_path])
           end
 
         result.success?

@@ -1,7 +1,7 @@
 class Trailblazer::Operation
   module Wrap
     def self.import!(operation, import, wrap, _options={}, &block)
-      pipe_api = API.new(operation, pipe = ::Pipetree::Flow[])
+      pipe_api = API.new(operation, pipe = ::Pipetree::Flow.new)
 
       # DISCUSS: don't instance_exec when |pipe| given?
       # yield pipe_api # create the nested pipe.

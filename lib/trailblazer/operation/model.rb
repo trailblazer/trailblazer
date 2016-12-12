@@ -3,11 +3,6 @@ class Trailblazer::Operation
     Step = ->(operation, options) { options["model"] = operation.model!(options["params"]) }
 
     def self.import!(operation, import, model_class, action=nil)
-      if import.inheriting? # not sure how to do overrides!
-        # FIXME: prototyping inheritance. should we handle that here?
-        return operation["model.action"] = model_class
-      end
-
       # configure
       operation["model.class"] = model_class
       operation["model.action"] = action
@@ -16,11 +11,6 @@ class Trailblazer::Operation
       import.(:&, Step, name: "model.build")
 
       operation.send :include, BuildMethods
-    end
-
-    def self.override!(operation, import, model_class, action)
-      model_class and operation["model.class"] = model_class
-      action and operation["model.action"] = action
     end
 
     # Methods to create the model according to class configuration and params.

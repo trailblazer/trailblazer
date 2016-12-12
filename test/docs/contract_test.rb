@@ -171,7 +171,7 @@ class DocsContractSeparateKeyTest < Minitest::Spec
     step Contract::Persist( method: :sync )
 
     def extract_params!(options)
-      options["params.validate"] = options["params"][type]
+      options["contract.default.params"] = options["params"][type]
     end
   end
   #:key-extr end
@@ -289,6 +289,8 @@ class DryValidationContractTest < Minitest::Spec
     #~form end
   end
   #:dry-schema end
+
+  puts "@@@@@ #{Create["pipetree"].inspect(style: :rows)}"
 
   it { Create.({}).inspect("model", "result.contract.params").must_equal %{<Result:false [nil, #<Dry::Validation::Result output={} errors={:id=>[\"is missing\"]}>] >} }
   it { Create.({ id: 1 }).inspect("model", "result.contract.params").must_equal %{<Result:false [#<struct DryValidationContractTest::Song id=nil, title=nil>, #<Dry::Validation::Result output={:id=>1} errors={}>] >} }
