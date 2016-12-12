@@ -20,7 +20,7 @@ class NestedRescueTest < Minitest::Spec
       self.< ->(options) { options["inner-err"] = true }
     }
     step ->(options) { options["e"] = true }
-    self.< ->(options) { options["outer-err"] = true }
+    failure ->(options) { options["outer-err"] = true }
   end
 
   it { NestedInsanity["pipetree"].inspect.must_equal %{[>>operation.new,&Rescue:10,>:22,<NestedRescueTest::NestedInsanity:23]} }

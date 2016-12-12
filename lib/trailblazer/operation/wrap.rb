@@ -32,6 +32,5 @@ class Trailblazer::Operation
   DSL.macro!(:Wrap, Wrap)
 end
 
-
 # (options, *) => (options, operation, bla)
 # (*, params:, **) => (options, operation, bla, options)
