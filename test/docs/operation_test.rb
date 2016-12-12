@@ -44,3 +44,57 @@ class DndTest < Minitest::Spec
     self.< Wrap
   end
 end
+
+class DocsResultTest < Minitest::Spec
+  Song = Struct.new(:id, :title, :created_by) do
+    def save; true; end
+  end
+
+  #:step-options
+  class Song::Create < Trailblazer::Operation
+    step     :model!
+    step     :assign!
+    consider :validate!
+
+    def model!(options, current_user:, **)
+      options["model"] = Song.new
+      options["model"].created_by = current_user
+    end
+
+    def assign!(*, params:, model:, **)
+      model.title= params[:title]
+    end
+
+    #:step-val
+    def validate!(options, model:, **)
+      options["result.validate"] = ( model.created_by && model.title )
+    end
+    #:step-val end
+  end
+  #:step-options end
+
+  it do
+    current_user = Struct.new(:email).new("nick@trailblazer.to")
+  #:step-res
+  result = Song::Create.({ title: "Roxanne" }, "current_user" => current_user)
+
+  result["model"] #=> #<Song title="Roxanne", "created_by"=<User ...>
+  result["result.validate"] #=> true
+  #:step-res end
+
+    result.inspect("current_user", "model").must_equal %{<Result:true [#<struct email=\"nick@trailblazer.to\">, #<struct DocsResultTest::Song id=nil, title="Roxanne", created_by=#<struct email=\"nick@trailblazer.to\">>] >}
+
+  #:step-binary
+  result.success? #=> true
+  result.failure? #=> falsee
+  #:step-binary end
+
+  #:step-dep
+  result["current_user"] #=> <User ...>
+  #:step-dep end
+
+  #:step-inspect
+  result.inspect("current_user", "model") #=> "<Result:true [#<User email=\"nick@tra... "
+  #:step-inspect end
+  end
+end
