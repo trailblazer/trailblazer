@@ -8,10 +8,6 @@ class Trailblazer::Operation
         Policy.add!(operation, import, options, insert_options) { Guard.build(user_proc) }
       end
 
-      def self.override!(*args, options)
-        Guard.import!(*args, options, replace: options[:path])
-      end
-
       def self.build(callable)
         value = Uber::Option[callable]
 
