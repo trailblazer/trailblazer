@@ -106,6 +106,8 @@ You can now inject the following objects via `::call`:
 
 * Removed `Operation::Controller`.
 * Renamed `Persist` to `Contract::Persist`.
+* Simplify inheritance by introducing `Operation::override`.
+* `Contract` paths are now consistent.
 
 # 2.0.0.beta1
 
