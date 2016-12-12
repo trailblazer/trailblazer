@@ -1,8 +1,10 @@
 class Trailblazer::Operation
   module Rescue
-    def self.import!(_operation, import, *exceptions, handler:->(*){}, &block)
+    Noop = ->(*) {}
+
+    def self.import!(_operation, import, *exceptions, handler: Noop, &block)
       exceptions = [StandardError] unless exceptions.any?
-      handler    = Pipetree::DSL::Option.(handler)
+      handler    = Option.(handler)
 
       rescue_block = ->(options, operation, *, &nested_pipe) {
         begin
