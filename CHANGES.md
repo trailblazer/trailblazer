@@ -102,6 +102,10 @@ You can now inject the following objects via `::call`:
 
 * You can't call `Create.().contract` anymore. The contract instance(s) are available through the `Result` object.
 
+# 2.0.0.rc1
+
+* `consider` got removed since `step` now evaluates the step's result and deviates (or not).
+
 # 2.0.0.beta3
 
 * New, very slick keyword arguments for steps.
