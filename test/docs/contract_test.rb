@@ -217,7 +217,7 @@ class ContractNamedConstantTest < Minitest::Spec
     step Model( Song, :new )
     step Contract::Build( constant: MyContract, name: "form" )
     step Contract::Validate( name: "form" )
-    step Contract::Persist( method: :sync, name: "contract.form" )
+    step Contract::Persist( method: :sync, name: "form" )
   end
   #:constant-name end
 
@@ -285,7 +285,7 @@ class DryValidationContractTest < Minitest::Spec
     step Model( Song, :new )                             # create the op's main model.
     step Contract::Build( name: "form" )                 # create the Reform contract.
     step Contract::Validate( name: "form" )              # validate the Reform contract.
-    step Contract::Persist( method: :sync, name: "contract.form" ) # persist the contract's data via the model.
+    step Contract::Persist( method: :sync, name: "form" ) # persist the contract's data via the model.
     #~form end
   end
   #:dry-schema end
