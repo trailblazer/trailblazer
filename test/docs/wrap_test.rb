@@ -35,7 +35,7 @@ class WrapTest < Minitest::Spec
     class Create < Trailblazer::Operation
       step Wrap ->(options, *, &block) { options["yield?"] ? block.call : false } {
         step ->(options) { options["x"] = true }
-        step :noop!
+        success :noop!
         # ...
       }
 
@@ -87,6 +87,10 @@ class WrapTest < Minitest::Spec
       end
     end
 
+    module MyNotifier
+      def self.mail; true; end
+    end
+
   #:sequel-transaction
   class Create < Trailblazer::Operation
     #~wrap-only
@@ -112,7 +116,7 @@ class WrapTest < Minitest::Spec
     end
 
     def notify!(options)
-      # send emails, because success...
+      MyNotifier.mail
     end
     #~wrap-only end
   end
@@ -126,6 +130,10 @@ class WrapTest < Minitest::Spec
       def self.transaction
         yield
       end
+    end
+
+    module MyNotifier
+      def self.mail; true; end
     end
 
   #:callable-t
@@ -162,7 +170,7 @@ class WrapTest < Minitest::Spec
     end
 
     def notify!(options)
-      # send emails, because success...
+      MyNotifier.mail # send emails, because success...
     end
     #~wrap-onlyy end
   end

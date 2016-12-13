@@ -4,8 +4,8 @@ class DocsOperationExampleTest < Minitest::Spec
   Song = Struct.new(:id, :title, :created_by) do
     def save; true; end
   end
-  #:op
 
+  #:op
   class Song::Create < Trailblazer::Operation
     extend Contract::DSL
 
@@ -15,7 +15,7 @@ class DocsOperationExampleTest < Minitest::Spec
     end
 
     step     Model( Song, :new )
-    consider :assign_current_user!
+    step     :assign_current_user!
     step     Contract::Build()
     step     Contract::Validate( )
     failure  :log_error!
@@ -38,9 +38,9 @@ end
 
 class DndTest < Minitest::Spec
   class Create < Trailblazer::Operation
-    consider :authorize!
+    step     :authorize!
     failure  :auth_err!
-    consider :save!
+    step     :save!
     self.< Wrap
   end
 end
@@ -54,7 +54,7 @@ class DocsResultTest < Minitest::Spec
   class Song::Create < Trailblazer::Operation
     step     :model!
     step     :assign!
-    consider :validate!
+    step     :validate!
 
     def model!(options, current_user:, **)
       options["model"] = Song.new
@@ -97,4 +97,88 @@ class DocsResultTest < Minitest::Spec
   result.inspect("current_user", "model") #=> "<Result:true [#<User email=\"nick@tra... "
   #:step-inspect end
   end
+end
+
+class DocsDependencyTest < Minitest::Spec
+  Song = Struct.new(:id, :title, :created_by) do
+    def save; true; end
+  end
+  Hit = Struct.new(:id)
+
+  #:dep-op
+  class Song::Create < Trailblazer::Operation
+    self["my.model.class"] = Song
+
+    #~dep-pipe
+    step :model!
+
+    def model!(options, **)
+      options["my.model"] =           # setting runtime data.
+        options["my.model.class"].new # reading class data at runtime.
+    end
+    #~dep-pipe end
+  end
+  #:dep-op end
+
+  it do
+    #:dep-op-class
+    Song::Create["my.model.class"] #=> Song
+    #:dep-op-class end
+
+    #:dep-op-res
+    result = Song::Create.({})
+
+    result["my.model.class"] #=> Song
+    result["my.model"] #=> #<Song title=nil>
+    #:dep-op-res end
+
+    Song::Create["my.model.class"].must_equal Song
+    result["my.model.class"].must_equal Song
+    result["my.model"].inspect.must_equal %{#<struct DocsDependencyTest::Song id=nil, title=nil, created_by=nil>}
+  end
+
+  it do
+    #:dep-di
+    result = Song::Create.({}, "my.model.class" => Hit)
+
+    result["my.model"] #=> #<Hit id=nil>
+    #:dep-di end
+    result["my.model"].inspect.must_equal %{#<struct DocsDependencyTest::Hit id=nil>}
+  end
+end
+
+
+
+class DocsOperationAPIExampleTest < Minitest::Spec
+  Song = Struct.new(:id, :title, :created_by) do
+    def save; true; end
+  end
+
+  class MyContract < Reform::Form
+    property :title
+    validates :title, presence: true
+  end
+
+  #:op-api
+  class Song::Create < Trailblazer::Operation
+    step    Model( Song, :new )
+    step    :assign_current_user!
+    step    Contract::Build( constant: MyContract )
+    step    Contract::Validate()
+    failure :log_error!
+    step    Contract::Persist()
+
+    def log_error!(options)
+      # ..
+    end
+
+    def assign_current_user!(options)
+      options["model"].created_by =
+        options["current_user"]
+    end
+  end
+  #:op-api end
+
+  it { Song::Create.({ }).inspect("model").must_equal %{<Result:false [#<struct DocsOperationAPIExampleTest::Song id=nil, title=nil, created_by=nil>] >} }
+  it { Song::Create.({ title: "Nothin'" }, "current_user"=>Module).inspect("model").must_equal %{<Result:true [#<struct DocsOperationAPIExampleTest::Song id=nil, title="Nothin'", created_by=Module>] >} }
 end

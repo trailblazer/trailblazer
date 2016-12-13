@@ -35,7 +35,7 @@ class ResolverTest < Minitest::Spec
     def process(*); self["x"] = self.class end
   end
 
-  it { A["pipetree"].inspect.must_equal %{[&model.build,&policy.default.eval,>>builder.call,>>operation.new,>process]} }
+  it { A["pipetree"].inspect.must_equal %{[&model.build,&policy.default.eval,>>builder.call,>>operation.new,&process]} }
 
   it { r=A.({ some: "params", id: 1 }, { "current_user" => Module })
     puts r.inspect

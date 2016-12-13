@@ -166,7 +166,7 @@ class DocsContractSeparateKeyTest < Minitest::Spec
 
     step Model( Song, :new )
     step Contract::Build()
-    consider :extract_params!
+    step :extract_params!
     step Contract::Validate( skip_extract: true )
     step Contract::Persist( method: :sync )
 

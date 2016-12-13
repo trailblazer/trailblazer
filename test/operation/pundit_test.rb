@@ -53,7 +53,7 @@ class PolicyTest < Minitest::Spec
     self.| Model( Song, :new ), before: "policy.default.eval"
   end
 
-  it { Show["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,&policy.default.eval,>process]} }
+  it { Show["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,&policy.default.eval,&process]} }
 
   # invalid because user AND model.
   it do
