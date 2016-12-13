@@ -106,6 +106,10 @@ You can now inject the following objects via `::call`:
 
 * `consider` got removed since `step` now evaluates the step's result and deviates (or not).
 
+# 2.0.0.rc2
+
+* It's now Contract::Persist( name: "params" ) instead of ( name: "contract.params" ).
+
 # 2.0.0.beta3
 
 * New, very slick keyword arguments for steps.
