@@ -36,7 +36,7 @@ Trailblazer is no "complex web of objects and indirection". It solves many probl
 
 Since Trailblazer decouples the High-Level Stack from the framework, it runs with virtually any Ruby framework. We are constantly working on documenting how to do that.
 
-* Trailblazer with Rails [Book](http://trailblazer.to/books/trailblazer.html) | [Repository](https://github.com/apotonick/gemgem-trbrb)
+* Trailblazer with Rails [Book](http://trailblazer.to/#book) | [Repository](https://github.com/apotonick/gemgem-trbrb)
 * Trailblazer with Sinatra [Guide](http://trailblazer.to/guides/sinatra/getting-started.html) | [Repository](https://github.com/apotonick/gemgem-sinatra)
 * Trailblazer with Hanami - coming soon!
 * Trailblazer with Roda - coming soon!
