@@ -13,11 +13,11 @@ class Trailblazer::Operation
       def self.build_contract!(operation, options, name:"default", constant:nil, builder: nil)
         # TODO: we could probably clean this up a bit at some point.
         contract_class = constant || options["contract.#{name}.class"]
-        model          = operation["model"] # FIXME: model.default
+        model          = options["model"] # FIXME: model.default
 
-        return operation["contract.#{name}"] = Uber::Option[builder].(operation, constant: contract_class, model: model) if builder
+        return options["contract.#{name}"] = Uber::Option[builder].(operation, constant: contract_class, model: model) if builder
 
-        operation["contract.#{name}"] = contract_class.new(model)
+        options["contract.#{name}"] = contract_class.new(model)
       end
 
       def self.import!(operation, import, **args)
