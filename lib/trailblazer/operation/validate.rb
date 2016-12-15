@@ -32,10 +32,10 @@ class Trailblazer::Operation
 
       def self.validate!(operation, options, name: nil, representer:false, from: "document", params_path:nil, **)
         path     = "contract.#{name}"
-        contract = operation[path]
+        contract = options[path]
 
         # this is for 1.1-style compatibility and should be removed once we have Deserializer in place:
-        operation["result.#{path}"] = result =
+        options["result.#{path}"] = result =
           if representer
             # use "document" as the body and let the representer deserialize to the contract.
             # this will be simplified once we have Deserializer.
