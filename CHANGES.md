@@ -1,54 +1,10 @@
-
 # 2.0.0
 
-## Operation API change:
-
-* You can now have any number of contracts, `contract [:name], constant/block`.
-
-`Contract`, Setup, Model
-expose via `result[:_invocations] = _invocations`
-
-* Changed `Operation#validate`: the signature now is `validate(params, model=self.model, options={}, contract_class)`.
-* Changed `Operation#contract`: the signature now is `contract(model=self.model, options={}, contract_class)`.
-
-Both changes simplify injecting additional dependencies into the contract, or making use of `Composition` contracts. Read more [here](http://trailblazer.to/gems/operation/contract.html). Note that in 1.2, there are deprecation mechanics to handle old code.
-
-* Added `Trailblazer::Builder` for a builder-and-call mechanism decoupled from the operation.
-* Finally removed `Operation::[]`. Be careful, this is now replaced and will return the specified competence.
-
-TRB 1.1
-  build_operation(params).run
-    process(@params)
-TRB 1.2
-  build_operation(params, *).call(params)
-
-* Removed `Operation::reject`. This is available in `trailblazer-compat`.
-* `Operation#invalid!` is now an optional module `Trailblazer::Operation::Invalid`.
-* `Operation::present` is now optional. Include `Present`.
-
-# CHANGES:
-# * Removed `Operation::[]` in favor of `Operation::()`.
-# * `Operation#invalid!` doesn't accept a result anymore.
-# * Removed `Operation#valid?` in favor of the result object.
-#
-
-## Model
-
-* The `model` method doesn't exist anymore, use `self["model"]` or write your own.
-* `find_by` diverts to left track.
-* `:create` is `:new` now.
-
-## DI
-
-You can now inject the following objects via `::call`:
-
-* `"contract.default.class"`
-* `"contract"`: The contract instance.
-* `"model.class"`
+All old semantics will be available via [trailblazer-compat](https://github.com/trailblazer/trailblazer-compat).
 
 * Removed `Operation::run` as it was a bad decision. Raising an exception on invalid is a very test-specific scenario and shouldn't have been handled in the core doce.
 * Removed `Operation::present`, since you can simply call `Operation::new` (without builders) or `Operation::build_operation` (with builders).
-* Removed `Operation::valid?`. This is in the result object via `result[:valid]`.
+* Removed `Operation::valid?`. This is in the result object via `result.success?`.
 * Removed `Operation#errors`. This is in the result object via `result[:errors]` if the operation was invalid.
 * Removed the private option `:raise_on_invalid`. Use `Contract::Raise` instead, if you need it in tests.
 
@@ -56,6 +12,12 @@ You can now inject the following objects via `::call`:
 * Removed `Operation::callbacks` (without args). Please use `Operation::["callback.<name>.class"]`.
 * Removed `Operation::contract_class`. Please use `Operation::["contract.default.class"]`.
 * Removed `Operation::contract_class=`. Please use `Operation::["contract.default.class"]=`. Doesn't inherit.
+
+## Model
+
+* The `model` method doesn't exist anymore, use `self["model"]` or write your own.
+* `:find_by` diverts to left track.
+* `:create` is `:new` now.
 
 ## Builder
 
@@ -66,7 +28,7 @@ You can now inject the following objects via `::call`:
 
 * No exception anymore, but `Operation#["policy.result"]`.
 * Access the current user via `self["current_user"]` now.
-* `Policy` is `Policy::Pundit` now as `Policy` is Trailblazer's authorization style.
+* `Policy` is `Policy::Pundit` now as `Policy` is Trailblazer's (upcoming) authorization style.
 
 ## Representer
 
@@ -82,13 +44,6 @@ You can now inject the following objects via `::call`:
 
 * Removed `Operation::Dispatch`, it's called `Operation::Callback`.
 
-## #call
-* You can return whatever you want now by overriding `Op::call`.
-* Removed `Op.call().contract`, you now have to do `Op.call()[:operation].contract`.
-
-
-* Removed the deprecation for `validate`, signature is `(params[, model, options, contract_class])`.
-* Removed the deprecation for `contract`, signature is `([model, options, contract_class])`.
 
 ## Collection
 
@@ -96,11 +51,13 @@ You can now inject the following objects via `::call`:
 
 ## Controller
 
-* Removed `Controller#params!`, no one was using it.
+* Removed `Controller`, this is now in [trailblazer-rails](https://github.com/trailblazer/trailblazer-rails/).
 
 ## Contract
 
-* You can't call `Create.().contract` anymore. The contract instance(s) are available through the `Result` object.
+* You can't call `Create.().contract` anymore. The contract instance(s) are available through the `Result` object via `["contract.default"]`.
+* Removed the deprecation for `validate`, signature is `(params[, model, options, contract_class])`.
+* Removed the deprecation for `contract`, signature is `([model, options, contract_class])`.
 
 # 2.0.0.rc1
 
