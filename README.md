@@ -1,6 +1,6 @@
 # Trailblazer
 
-_Trailblazer is a thin layer on top of Rails. It gently enforces encapsulation, an intuitive code structure and gives you an object-oriented architecture._
+_Trailblazer provides new high-level abstractions for Ruby frameworks. It gently enforces encapsulation, an intuitive code structure and gives you an object-oriented architecture._
 
 [![Gitter Chat](https://badges.gitter.im/trailblazer/chat.svg)](https://gitter.im/trailblazer/chat)
 [![TRB Newsletter](https://img.shields.io/badge/TRB-newsletter-lightgrey.svg)](http://trailblazer.to/newsletter/)
@@ -31,17 +31,6 @@ Trailblazer is all about structure. It helps re-organize existing code into smal
 Again, you can pick which layers you want. Trailblazer doesn't impose technical implementations, it offers mature solutions for recurring problems in all types of Rails applications.
 
 Trailblazer is no "complex web of objects and indirection". It solves many problems that have been around for years with a cleanly layered architecture. Only use what you like. And that's the bottom line.
-
-## Trailblazer Likes 'Em All
-
-Since Trailblazer decouples the High-Level Stack from the framework, it runs with virtually any Ruby framework. We are constantly working on documenting how to do that.
-
-* Trailblazer with Rails [Book](http://trailblazer.to/books/trailblazer.html) | [Repository](https://github.com/apotonick/gemgem-trbrb)
-* Trailblazer with Sinatra [Guide](http://trailblazer.to/guides/sinatra/getting-started.html) | [Repository](https://github.com/apotonick/gemgem-sinatra)
-* Trailblazer with Hanami - coming soon!
-* Trailblazer with Roda - coming soon!
-* Trailblazer with Grape - coming _very_ soon!
-
 
 ## Concepts over Technology
 
@@ -81,7 +70,7 @@ Trailblazer extends the conventional MVC stack in Rails. Keep in mind that addin
 
 The opposite is the case: Controller, view and model become lean endpoints for HTTP, rendering and persistence. Redundant code gets eliminated by putting very little application code into the right layer.
 
-![The Trailblazer stack.](https://raw.github.com/apotonick/trailblazer/master/doc/Trb-The-Stack.png)
+![The Trailblazer stack.](https://raw.github.com/apotonick/trailblazer/master/doc/operation-2017.png)
 
 ## Routing
 
@@ -135,7 +124,9 @@ An operation is not just a monolithic replacement for your business code. It's a
 
 ```ruby
 class Comment::Create < Trailblazer::Operation
-  def process(params)
+  step :process!
+
+  def process!(options)
     # do whatever you feel like.
   end
 end
@@ -170,13 +161,10 @@ class Comment::Create < Trailblazer::Operation
     property :body, validates: {presence: true}
   end
 
-  def process(params)
-    @model = Comment.new
-
-    validate(params[:comment], @model) do |f|
-      f.save
-    end
-  end
+  step Model( Comment, :new )
+  step Contract::Build()
+  step Contract::Validate( key: :comment )
+  step Contract::Persist( )
 end
 ```
 
@@ -185,43 +173,6 @@ The contract (aka _form_) is defined in the `::contract` block. You can implemen
 In the `#process` method you can define your business logic.
 
 [Learn more.](http://trailblazer.to/gems/operation/api.html)
-
-## Callbacks
-
-Post-processing logic (also known as _callbacks_) is configured in operations.
-
-Callbacks can be defined in groups. They use the form object's state tracking to find out whether they should be run.
-
-```ruby
-class Comment::Create < Trailblazer::Operation
-  include Callback
-  callback(:after_save) do
-    on_change :markdownize_body! # this is only run when the form object has changed.
-  end
-end
-```
-
-Callbacks are never triggered automatically, you have to invoke them! This is called _Imperative Callback_.
-
-```ruby
-class Comment::Create < Trailblazer::Operation
-  include Callback
-  def process(params)
-    validate(params) do
-      contract.save
-      callback!(:after_save) # run markdownize_body!, but only if form changed.
-    end
-  end
-
-  def markdownize_body!(comment)
-    comment.body = Markdownize.(comment.body)
-  end
-end
-```
-
-No magical triggering of unwanted logic anymore, but explicit invocations where you want it.
-
-[Learn more.](http://trailblazer.to/gems/operation/callback.html)
 
 ## Models
 
@@ -259,9 +210,7 @@ The rule is enabled via the `::policy` call.
 
 ```ruby
 class Comment::Create < Trailblazer::Operation
-  include Policy
-
-  policy Comment::Policy, :create?
+  step Policy( Comment::Policy, :create? )
 end
 ```
 
@@ -269,11 +218,6 @@ The policy is evaluated in `#setup!`, raises an exception if `false` and suppres
 
 [Learn more.](http://trailblazer.to/gems/operation/policy.html)
 
-## Pipetree
-
-The operation code is not supposed to be procedural, but in form of a function pipeline. You can still write procedural code with stacked methods calls where ever you want, e.g. in `process`.
-
-However, a much smarter way to chain logic is to use the *pipetree*.
 
 ## Views
 
@@ -349,16 +293,8 @@ The obvious needs to be in your `Gemfile`.
 ```ruby
 gem "trailblazer"
 gem "trailblazer-rails" # if you are in rails.
-gem "cells"
+gem "trailblazer-cells"
 ```
 
 Cells is _not_ required per default! Add it if you use it, which is highly recommended.
-
-## The Book
-
-![](https://raw.githubusercontent.com/apotonick/trailblazer/master/doc/trb.jpg)
-
-Please buy it: [Trailblazer - A new architecture for Rails](https://leanpub.com/trailblazer).
-
-The [demo application](https://github.com/apotonick/gemgem-trbrb) implements what we discuss in the book.
 
