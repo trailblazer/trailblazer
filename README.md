@@ -156,6 +156,8 @@ The operation makes use of the form object using the `#validate` method.
 
 ```ruby
 class Comment::Create < Trailblazer::Operation
+  extend Contract::DSL
+  
   contract do
     # this is a Reform::Form class!
     property :body, validates: {presence: true}
@@ -172,7 +174,7 @@ The contract (aka _form_) is defined in the `::contract` block. You can implemen
 
 In the `#process` method you can define your business logic.
 
-[Learn more.](http://trailblazer.to/gems/operation/api.html)
+[Learn more.](http://trailblazer.to/gems/operation/2.0/contract.html)
 
 ## Models
 
