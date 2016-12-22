@@ -16,28 +16,5 @@ class Trailblazer::Operation
   end
 
   DSL.macro!(:Nested, Nested)
-
-  module Rescue
-    def self.import!(_operation, import, *exceptions, handler:->(*){}, &block)
-      exceptions = [StandardError] unless exceptions.any?
-      handler    = Pipetree::DSL::Option.(handler)
-
-      rescue_block = ->(options, operation, *, &nested_pipe) {
-        begin
-          res = nested_pipe.call
-          res.first == ::Pipetree::Flow::Right # FIXME.
-        rescue *exceptions => exception
-          handler.call(operation, exception, options)
-          #options["result.model.find"] = "argh! because #{exception.class}"
-          false
-        end
-      }
-
-      # operation.| operation.Wrap(rescue_block, &block), name: "Rescue:#{block.source_location.last}"
-      Wrap.import! _operation, import, rescue_block, name: "Rescue:#{block.source_location.last}", &block
-    end
-  end
-
-  DSL.macro!(:Rescue, Rescue)
 end
 
