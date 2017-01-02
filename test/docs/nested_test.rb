@@ -117,6 +117,8 @@ class NestedClassLevelTest < Minitest::Spec
 end
 
 class NestedWithCallableTest < Minitest::Spec
+  Song = Struct.new(:id, :title)
+
   class X < Trailblazer::Operation
     step ->(options) { options["x"] = true }
   end
@@ -125,14 +127,55 @@ class NestedWithCallableTest < Minitest::Spec
     step ->(options) { options["y"] = true }
   end
 
-  class Create < Trailblazer::Operation
+  class A < Trailblazer::Operation
     step ->(options) { options["z"] = true }
     step Nested( ->(options, *) { options["class"] } )
   end
 
-  it { Create.({}, "class" => X).inspect("x", "y", "z").must_equal "<Result:true [true, nil, true] >" }
-  it { Create.({}, "class" => Y).inspect("x", "y", "z").must_equal "<Result:true [nil, true, true] >" }
+  it { A.({}, "class" => X).inspect("x", "y", "z").must_equal "<Result:true [true, nil, true] >" }
+  it { A.({}, "class" => Y).inspect("x", "y", "z").must_equal "<Result:true [nil, true, true] >" }
   # it { Create.({}).inspect("x", "y", "z").must_equal "<Result:true [nil, true, true] >" }
+
+  class Song
+    module Contract
+      class Create < Reform::Form
+        property :title
+      end
+    end
+  end
+
+  User = Struct.new(:is_admin) do
+    def admin?
+      !! is_admin
+    end
+  end
+
+  class Create < Trailblazer::Operation
+    step Nested( ->(options, current_user:nil, **) { current_user.admin? ? Admin : NeedsModeration })
+
+    class NeedsModeration < Trailblazer::Operation
+      step Model( Song, :new )
+      step Contract::Build( constant: Song::Contract::Create )
+      step Contract::Validate()
+      step :notify_moderator!
+
+      def notify_moderator!(options, **)
+        #~noti
+        options["x"] = true
+        #~noti end
+      end
+    end
+
+    class Admin < Trailblazer::Operation # TODO: test if current_user is passed in.
+
+    end
+  end
+
+  let (:admin) { User.new(true) }
+  let (:anonymous) { User.new(false) }
+
+  it { Create.({}, "current_user" => anonymous).inspect("x").must_equal %{<Result:true [true] >} }
+  it { Create.({}, "current_user" => admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
 end
 
 # builder: Nested + deviate to left if nil / skip_track if true

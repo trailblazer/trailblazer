@@ -6,7 +6,8 @@ class Trailblazer::Operation
       if step.is_a?(Class) && step <= Trailblazer::Operation # interestingly, with < we get a weird nil exception. bug in Ruby?
         proc = ->(input, options) { step._call(*options.to_runtime_data) }
       else
-        proc = ->(input, options) { step.(options, input).(*options.to_runtime_data) }
+        option = Option::KW.(step)
+        proc = ->(input, options) { option.(input, options).(*options.to_runtime_data) }
       end
 
       import.(:&, ->(input, options) {
