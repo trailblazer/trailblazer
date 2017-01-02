@@ -4,7 +4,6 @@ require "trailblazer/operation/pipetree"
 require "trailblazer/dsl"
 require "trailblazer/version"
 
-require "trailblazer/operation/builder"
 require "trailblazer/operation/model"
 require "trailblazer/operation/contract"
 require "trailblazer/operation/validate"

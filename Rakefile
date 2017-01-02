@@ -9,7 +9,6 @@ Rake::TestTask.new(:test) do |test|
   test_files = FileList[%w{
     test/operation/guard_test.rb
     test/operation/pundit_test.rb
-    test/operation/builder_test.rb
     test/operation/model_test.rb
     test/operation/contract_test.rb
     test/operation/persist_test.rb

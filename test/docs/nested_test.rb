@@ -115,3 +115,24 @@ class NestedClassLevelTest < Minitest::Spec
   it { Create.().inspect("x", "y").must_equal %{<Result:true [true, true] >} }
   it { Create.(); Create["class"].must_equal nil }
 end
+
+class NestedWithCallableTest < Minitest::Spec
+  class X < Trailblazer::Operation
+    step ->(options) { options["x"] = true }
+  end
+
+  class Y < Trailblazer::Operation
+    step ->(options) { options["y"] = true }
+  end
+
+  class Create < Trailblazer::Operation
+    step ->(options) { options["z"] = true }
+    step Nested( ->(options, *) { options["class"] } )
+  end
+
+  it { Create.({}, "class" => X).inspect("x", "y", "z").must_equal "<Result:true [true, nil, true] >" }
+  it { Create.({}, "class" => Y).inspect("x", "y", "z").must_equal "<Result:true [nil, true, true] >" }
+  # it { Create.({}).inspect("x", "y", "z").must_equal "<Result:true [nil, true, true] >" }
+end
+
+# builder: Nested + deviate to left if nil / skip_track if true
