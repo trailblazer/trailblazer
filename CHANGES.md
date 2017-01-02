@@ -1,3 +1,12 @@
+# 2.0.1
+
+* Remove Builder, it was the wrong choice and didn't work. Instead, allow Nested( -> ) with a dynamic nested operation computation. You can then run the concrete operation via Nested().
+
+    ```ruby
+    step Nested( ->(options, params:, *) { params[:type] == "moderated" ? Moderated : Comment } )
+    ```
+
+
 # 2.0.0
 
 All old semantics will be available via [trailblazer-compat](https://github.com/trailblazer/trailblazer-compat).
