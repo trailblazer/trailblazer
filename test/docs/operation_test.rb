@@ -182,3 +182,70 @@ class DocsOperationAPIExampleTest < Minitest::Spec
   it { Song::Create.({ }).inspect("model").must_equal %{<Result:false [#<struct DocsOperationAPIExampleTest::Song id=nil, title=nil, created_by=nil>] >} }
   it { Song::Create.({ title: "Nothin'" }, "current_user"=>Module).inspect("model").must_equal %{<Result:true [#<struct DocsOperationAPIExampleTest::Song id=nil, title="Nothin'", created_by=Module>] >} }
 end
+
+
+class DocsOperationInheritanceTest < Minitest::Spec
+  Song = Struct.new(:id, :title, :created_by) do
+    def save; true; end
+  end
+
+  class MyContract < Reform::Form
+    property :title
+    validates :title, presence: true
+  end
+
+  #:inh-new
+  class New < Trailblazer::Operation
+    step Model( Song, :new )
+    step Contract::Build( constant: MyContract )
+  end
+  #:inh-new end
+
+  puts New["pipetree"].inspect(style: :row)
+=begin
+  #:inh-new-pipe
+   0 =======================>>operation.new
+   1 ==========================&model.build
+   2 =======================>contract.build
+  #:inh-new-pipe end
+=end
+
+  #:inh-create
+  class Create < New
+    step Contract::Validate()
+    step Contract::Persist()
+  end
+  #:inh-create end
+
+  puts Create["pipetree"].inspect(style: :row)
+=begin
+  #:inh-create-pipe
+   0 =======================>>operation.new
+   1 ==========================&model.build
+   2 =======================>contract.build
+   3 ==============&contract.default.params
+   4 ============&contract.default.validate
+   5 =========================&persist.save
+  #:inh-create-pipe end
+=end
+
+
+  #:op-inheritance
+  class Song::Create < Trailblazer::Operation
+    step    Model( Song, :new )
+    step    Contract::Build( constant: MyContract )
+    step    Contract::Validate()
+    step    Contract::Persist()
+
+    def log_error!(options)
+      # ..
+    end
+
+    def assign_current_user!(options)
+      options["model"].created_by =
+        options["current_user"]
+    end
+  end
+  #:op-inheritance end
+
+end
