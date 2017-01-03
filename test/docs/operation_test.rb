@@ -229,23 +229,41 @@ class DocsOperationInheritanceTest < Minitest::Spec
   #:inh-create-pipe end
 =end
 
+  module MyApp
+  end
 
-  #:op-inheritance
-  class Song::Create < Trailblazer::Operation
-    step    Model( Song, :new )
-    step    Contract::Build( constant: MyContract )
-    step    Contract::Validate()
-    step    Contract::Persist()
+  #:override-app
+  module MyApp::Operation
+    class New < Trailblazer::Operation
+      extend Contract::DSL
 
-    def log_error!(options)
-      # ..
-    end
+      contract do
+        property :title
+      end
 
-    def assign_current_user!(options)
-      options["model"].created_by =
-        options["current_user"]
+      step Model( nil, :new )
+      step Contract::Build()
     end
   end
-  #:op-inheritance end
+  #:override-app end
 
+  #:override-new
+  class Song::New < MyApp::Operation::New
+    step Model( Song, :new )
+  end
+  #:override-new end
+
+  puts Song::New["pipetree"].inspect(style: :row)
+=begin
+  #:override-pipe
+  Song::New["pipetree"].inspect(style: :row)
+   0 =======================>>operation.new
+   1 ==========================&model.build
+   2 =======================>contract.build
+  #:override-pipe end
+=end
+
+  it do
+    Song::New.().inspect("model").must_equal %{<Result:true [#<struct DocsOperationInheritanceTest::Song id=nil, title=nil, created_by=nil>] >}
+  end
 end
