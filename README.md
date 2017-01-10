@@ -132,7 +132,7 @@ class Comment::Create < Trailblazer::Operation
 end
 ```
 
-Operations only need to implement `#process` which receives the arguments from the caller.
+Operations only need to define and implement steps, like the `#process!` steps. Those steps receive the arguments from the caller.
 
 You cannot instantiate them per design. The only way to invoke them is `call`.
 
@@ -157,7 +157,7 @@ The operation makes use of the form object using the `#validate` method.
 ```ruby
 class Comment::Create < Trailblazer::Operation
   extend Contract::DSL
-  
+
   contract do
     # this is a Reform::Form class!
     property :body, validates: {presence: true}
