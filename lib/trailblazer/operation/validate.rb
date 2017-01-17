@@ -1,20 +1,6 @@
 class Trailblazer::Operation
       Railway = Pipetree::Railway
 
-      # Allows defining dependencies and inject/override them via runtime options, if desired.
-      class Railway::Step
-        include Uber::Callable
-
-        def initialize(step, dependencies={})
-          @step, @dependencies = step, dependencies
-        end
-
-        def call(input, options)
-          @dependencies.each { |k, v| options[k] ||= v } # not sure i like this, but the step's API is cool.
-
-          @step.(input, options)
-        end
-      end
   module Contract
     # result.contract = {..}
     # result.contract.errors = {..}
@@ -40,7 +26,7 @@ class Trailblazer::Operation
     module Validate
       # Macro: extract the contract's input from params by reading `:key`.
       def self.Extract(key:nil, path:nil, params_path:nil)
-        step = ->(input, options) { Validate.extract_params!(options, key: key, path: path) },
+        step = ->(input, options) { extract_params!(options, key: key, path: path) },
 
         [ step, name: params_path ]
       end
@@ -53,7 +39,7 @@ class Trailblazer::Operation
       # Macro: Validates contract `:name`.
       def self.Call(name:"default", representer:false, params_path:nil)
         step = ->(input, options) {
-          Validate.validate!(options, name: name, representer: options["representer.#{name}.class"], params_path: params_path)
+          validate!(options, name: name, representer: options["representer.#{name}.class"], params_path: params_path)
         }
 
         step = Railway::Step.new( step, "representer.#{name}.class" => representer )
