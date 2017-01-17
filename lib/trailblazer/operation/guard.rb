@@ -3,11 +3,11 @@ require "uber/option"
 
 class Trailblazer::Operation
   module Policy
-    module Guard
-      def self.import!(operation, import, user_proc, options={}, insert_options={})
-        Policy.add!(operation, import, options, insert_options) { Guard.build(user_proc) }
-      end
+    def self.Guard(proc, name: :default, &block)
+      Policy.step(Guard.build(proc), name: name)
+    end
 
+    module Guard
       def self.build(callable)
         value = Uber::Option[callable]
 
@@ -16,14 +16,5 @@ class Trailblazer::Operation
         ->(options) { Result.new( !!value.(options), {} ) }
       end
     end # Guard
-
-    def self.Guard(proc, name: :default, &block)
-      options = {
-        name:  name,
-        path: "policy.#{name}.eval",
-      }
-
-      [Guard, [proc, options], block]
-    end
   end
 end

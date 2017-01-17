@@ -3,8 +3,6 @@ class Trailblazer::Operation
     # Step: This generically `call`s a policy and then pushes its result to `options`.
     # You can use any callable object as a policy with this step.
     class Eval
-      include Uber::Callable
-
       def initialize(name:nil, path:nil)
         @name = name
         @path = path
@@ -24,22 +22,14 @@ class Trailblazer::Operation
 
     # Adds the `yield` result to the pipe and treats it like a
     # policy-compatible  object at runtime.
-    def self.add!(operation, import, options, insert_options, &block)
+    def self.step(condition, options, &block)
       name = options[:name]
-      path = options[:path]
+      path = "policy.#{name}.eval"
 
-      configure!(operation, import, options, &block)
+      step = Eval.new( name: name, path: path )
+      step = Railway::Step.new(step, path => condition)
 
-      # add step.
-      import.(:&, Eval.new( name: name, path: path ),
-        insert_options.merge(name: path)
-      )
-    end
-
-  private
-    def self.configure!(operation, import, options)
-      # configure class level.
-      operation[ options[:path] ] = yield
+      [ step, name: path ]
     end
   end
 end
