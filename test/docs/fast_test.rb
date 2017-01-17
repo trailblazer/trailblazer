@@ -34,12 +34,14 @@ class DocsFailFastOptionTest < Minitest::Spec
 end
 
 class DocsFailFastOptionWithStepTest < Minitest::Spec
-  Song = Object
+  Song = Class.new do
+    def self.find_by(*); Object end
+  end
 
   #:ffopt-step
   class Update < Trailblazer::Operation
-    step :empty_id?,            fail_fast: true
-    step Model( Song, :find_by)
+    step :empty_id?,             fail_fast: true
+    step Model( Song, :find_by )
     failure :handle_empty_db!   # won't be executed if #empty_id? returns falsey.
 
     def empty_id?(options, params:, **)
@@ -49,6 +51,7 @@ class DocsFailFastOptionWithStepTest < Minitest::Spec
   #:ffopt-step end
 
   it { Update.({ id: nil }).inspect("model").must_equal %{<Result:false [nil] >} }
+  it { Update.({ id: 1 }).inspect("model").must_equal %{<Result:true [Object] >} }
   it do
   #:ffopt-step-res
     result = Update.({ id: nil })

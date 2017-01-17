@@ -249,7 +249,7 @@ class DocsOperationInheritanceTest < Minitest::Spec
 
   #:override-new
   class Song::New < MyApp::Operation::New
-    step Model( Song, :new )
+    step Model( Song, :new ), override: true
   end
   #:override-new end
 
@@ -264,6 +264,7 @@ class DocsOperationInheritanceTest < Minitest::Spec
 =end
 
   it do
+    Song::New["pipetree"].inspect.must_equal %{[>operation.new,>model.build,>contract.build]}
     Song::New.().inspect("model").must_equal %{<Result:true [#<struct DocsOperationInheritanceTest::Song id=nil, title=nil, created_by=nil>] >}
   end
 end
