@@ -1,55 +1,53 @@
 class Trailblazer::Operation
+  def self.Model(model_class, action=nil)
+    step = Model.for(model_class, action)
+
+    step = Railway::Step.new(step, "model.class" => model_class, "model.action" => action)
+
+    [ step, name: "model.build" ]
+  end
+
   module Model
-    Step = ->(operation, options) { options["model"] = operation.model!(options["params"]) }
+    def self.for(model_class, action)
+      builder = Model::Builder.new
 
-    def self.import!(operation, import, model_class, action=nil)
-      # configure
-      operation["model.class"] = model_class
-      operation["model.action"] = action
+      ->(input, options) do
+        options["model"] = model = builder.(options, options["params"])
 
-      # add
-      import.(:&, Step, name: "model.build")
+        options["result.model"] = result = Result.new(!model.nil?, {})
 
-      operation.send :include, BuildMethods
+        result.success?
+      end
     end
 
-    # Methods to create the model according to class configuration and params.
-    module BuildMethods
-      def model_class
-        self["model.class"] or raise "[Trailblazer] You didn't call Operation::model."
+    class Builder
+      def call(options, params)
+        deprecate_update!(options)
+        action      = options["model.action"] || :new
+        model_class = options["model.class"]
+
+        send("#{action}!", model_class, params)
       end
 
-      def action_name
-        self["model.action"] or :new
-      end
-
-      def model!(params)
-        instantiate_model(params)
-      end
-
-      def instantiate_model(params)
-        send("#{action_name}_model", params)
-      end
-
-      def new_model(params)
+      def new!(model_class, params)
         model_class.new
       end
 
-      def update_model(params)
+      def find!(model_class, params)
         model_class.find(params[:id])
       end
 
-      alias_method :find_model, :update_model
-
       # Doesn't throw an exception and will return false to divert to Left.
-      def find_by_model(params)
-        model = model_class.find_by(id: params[:id])
+      def find_by!(model_class, params)
+        model_class.find_by(id: params[:id])
+      end
 
-        self["result.model"] = Result.new(!model.nil?, {})
-        model
+    private
+      def deprecate_update!(options) # TODO: remove in 2.1.
+        return unless options["model.action"] == :update
+        options["model.action"] = :find
+        warn "[Trailblazer] Model( .., :update ) is deprecated, please use :find or :find_by."
       end
     end
   end
-
-  DSL.macro!(:Model, Model)
 end
