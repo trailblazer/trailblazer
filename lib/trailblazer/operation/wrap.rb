@@ -1,7 +1,7 @@
 class Trailblazer::Operation
   module Wrap
     def self.import!(operation, import, wrap, _options={}, &block)
-      pipe_api = API.new(operation, pipe = ::Pipetree::Flow.new)
+      pipe_api = API.new(operation, pipe = ::Pipetree::Railway.new)
 
       # DISCUSS: don't instance_exec when |pipe| given?
       # yield pipe_api # create the nested pipe.
@@ -18,14 +18,11 @@ class Trailblazer::Operation
         @target, @pipe = target, pipe
       end
 
-      def _insert(operator, proc, options={}) # TODO: test me.
-        Pipetree::DSL.insert(@pipe, operator, proc, options, definer_name: @target.name)
+      # add the step to the local pipe, but don't inherit.
+      # goal is to let all that do the pipe, without any operation coupling.
+      def add(track, strut_class, proc, options={})
+        Pipetree::DSL.insert(@target, @pipe, track, strut_class, proc, options)
       end
-
-      def |(cfg, user_options={})
-        Pipetree::DSL.import(@target, @pipe, cfg, user_options)
-      end
-      alias_method :step, :| # DISCUSS: uhm...
     end
   end # Wrap
 

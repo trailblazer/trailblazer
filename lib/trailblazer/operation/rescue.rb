@@ -9,7 +9,7 @@ class Trailblazer::Operation
       rescue_block = ->(options, operation, *, &nested_pipe) {
         begin
           res = nested_pipe.call
-          res.first == ::Pipetree::Flow::Right # FIXME.
+          res.first == ::Pipetree::Railway::Right # FIXME.
         rescue *exceptions => exception
           handler.call(operation, exception, options)
           false

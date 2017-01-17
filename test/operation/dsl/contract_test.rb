@@ -14,10 +14,10 @@ class DslContractTest < MiniTest::Spec
     end
 
     def self.included(includer)
-      includer.| Trailblazer::Operation::Model( OpenStruct, :new )
-      includer.| Trailblazer::Operation::Contract::Build()
-      includer.| Trailblazer::Operation::Contract::Validate()
-      includer.| Trailblazer::Operation::Contract::Persist( method: :sync )
+      includer.step Trailblazer::Operation::Model( OpenStruct, :new )
+      includer.step Trailblazer::Operation::Contract::Build()
+      includer.step Trailblazer::Operation::Contract::Validate()
+      includer.step Trailblazer::Operation::Contract::Persist( method: :sync )
       # includer.> ->(op, *) { op["x"] = [] }
     end
   end

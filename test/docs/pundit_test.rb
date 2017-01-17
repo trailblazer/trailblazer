@@ -1,20 +1,20 @@
 require "test_helper"
 
-#:policy
-class MyPolicy
-  def initialize(user, model)
-    @user, @model = user, model
-  end
+  #:policy
+  class MyPolicy
+    def initialize(user, model)
+      @user, @model = user, model
+    end
 
-  def create?
-    @user == Module && @model.id.nil?
-  end
+    def create?
+      @user == Module && @model.id.nil?
+    end
 
-  def new?
-    @user == Class
+    def new?
+      @user == Class
+    end
   end
-end
-#:policy end
+  #:policy end
 
 #--
 # with policy
@@ -29,6 +29,7 @@ class DocsPunditProcTest < Minitest::Spec
   end
   #:pundit end
 
+  it { Create["pipetree"].inspect.must_equal %{[>operation.new,>model.build,>policy.default.eval]} }
   it { Create.({}, "current_user" => Module).inspect("model").must_equal %{<Result:true [#<struct DocsPunditProcTest::Song id=nil>] >} }
   it { Create.({}                          ).inspect("model").must_equal %{<Result:false [#<struct DocsPunditProcTest::Song id=nil>] >} }
 
@@ -45,10 +46,10 @@ class DocsPunditProcTest < Minitest::Spec
   #---
   #- override
   class New < Create
-    override Policy::Pundit( MyPolicy, :new? )
+    step Policy::Pundit( MyPolicy, :new? ), override: true
   end
 
-  it { New["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,&policy.default.eval]} }
+  it { New["pipetree"].inspect.must_equal %{[>operation.new,>model.build,>policy.default.eval]} }
   it { New.({}, "current_user" => Class ).inspect("model").must_equal %{<Result:true [#<struct DocsPunditProcTest::Song id=nil>] >} }
   it { New.({}, "current_user" => nil ).inspect("model").must_equal %{<Result:false [#<struct DocsPunditProcTest::Song id=nil>] >} }
 
@@ -60,12 +61,12 @@ class DocsPunditProcTest < Minitest::Spec
   end
 
   class Update < Edit
-    override Policy::Pundit( MyPolicy, :new?, name: "first" )
+    step Policy::Pundit( MyPolicy, :new?, name: "first" ), override: true
   end
 
-  it { Edit["pipetree"].inspect.must_equal %{[>>operation.new,&policy.first.eval,&policy.second.eval]} }
+  it { Edit["pipetree"].inspect.must_equal %{[>operation.new,>policy.first.eval,>policy.second.eval]} }
   it { Edit.({}, "current_user" => Class).inspect("model").must_equal %{<Result:false [nil] >} }
-  it { Update["pipetree"].inspect.must_equal %{[>>operation.new,&policy.first.eval,&policy.second.eval]} }
+  it { Update["pipetree"].inspect.must_equal %{[>operation.new,>policy.first.eval,>policy.second.eval]} }
   it { Update.({}, "current_user" => Class).inspect("model").must_equal %{<Result:true [nil] >} }
 
   #---

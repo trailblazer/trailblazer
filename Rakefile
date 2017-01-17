@@ -23,6 +23,6 @@ Rake::TestTask.new(:test) do |test|
     test_files = test_files - %w{test/docs/dry_test.rb test/docs/auto_inject_test.rb}
   end
 
-  test.test_files = test_files
+  test.test_files = test_files #- ["test/docs/rescue_test.rb"]
   test.verbose = true
 end

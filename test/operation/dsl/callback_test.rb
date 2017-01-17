@@ -37,7 +37,7 @@ class DslCallbackTest < MiniTest::Spec
         def admin_default!(*); _invocations << :admin_default!; end
         def after_save!(*);    _invocations << :after_save!; end
 
-        self.| Trailblazer::Operation::Callback[:after_save]
+        step Trailblazer::Operation::Callback[:after_save]
       end
 
       def default!(*); _invocations << :default!; end
@@ -61,7 +61,7 @@ class DslCallbackTest < MiniTest::Spec
       extend Callback::DSL
       callback :after_save, AfterSaveCallback
 
-      self.| Callback[:after_save]
+      step Callback[:after_save]
     end
 
     it { OpWithExternalCallback.("title"=>"Thunder Rising").must_equal([:after_save!]) }

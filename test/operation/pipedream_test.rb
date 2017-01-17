@@ -20,22 +20,22 @@ class PipedreamTest < Minitest::Spec
 
 
 
-    self.|         Model[ Song, :new ]      # model!)
-    self.| Policy::Guard[ ->(options){ options["current_user"] == ::Module } ]
-    self.|      Contract[ MyContract]
-    self.|        Policy[ Auth, :user_and_model?]
-    self.<      Contract[ MyContract]
+    step         Model[ Song, :new ]      # model!)
+    step Policy::Guard[ ->(options){ options["current_user"] == ::Module } ]
+    step      Contract[ MyContract]
+    step        Policy[ Auth, :user_and_model?]
+    failure      Contract[ MyContract]
 
-    # self.| :model
-    # self.| :guard
-    # self.| :contract
+    # step :model
+    # step :guard
+    # step :contract
 
 
     # ok Model[Song, :new]      # model!)
     # ok Policy::Guard[ ->(options){ options["current_user"] == ::Module } ]
     # ok Contract[MyContract]
     # fail Contract[MyContract]
-    # self.|> "contract"
+    # step> "contract"
 
     # | :bla
     # | ->

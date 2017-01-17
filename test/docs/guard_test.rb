@@ -29,10 +29,10 @@ class DocsGuardProcTest < Minitest::Spec
    #---
   #- Guard inheritance
   class New < Create
-    override Policy::Guard( ->(options) { options["current_user"] } )
+    step Policy::Guard( ->(options) { options["current_user"] } ), override: true
   end
 
-  it { New["pipetree"].inspect.must_equal %{[>>operation.new,&policy.default.eval,&process]} }
+  it { New["pipetree"].inspect.must_equal %{[>operation.new,>policy.default.eval,>process]} }
 end
 
 #---

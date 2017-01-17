@@ -1,10 +1,14 @@
 # 2.0.1
 
-* Remove Builder, it was the wrong choice and didn't work. Instead, allow Nested( -> ) with a dynamic nested operation computation. You can then run the concrete operation via Nested().
+* Add `fail_fast: true` for `step` and `failure` to short-circuit the pipe. Note that more "eloquent" semantics are coming in `trailblazer-bpmn`.
+* Add `fail!`, `fail_fast!`, `pass!`, and `pass_fast!`. Note that they are all experimental API and not documented, yet.
+* Remove Builder and allow dynamic `Nested`.
 
     ```ruby
-    step Nested( ->(options, params:, *) { params[:type] == "moderated" ? Moderated : Comment } )
+    step Nested( ->(options, params:) { params[:type] == "moderated" ? Moderated : Comment } )
     ```
+
+* Remove `override` in favor of `step .., override: true`. Note that this method wasn't documented.
 
 
 # 2.0.0

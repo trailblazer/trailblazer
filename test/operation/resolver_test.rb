@@ -21,12 +21,12 @@
 #       return M if options["model"].inspect == %{#<struct ResolverTest::Song id=9>}
 #     }
 
-#     self.| Model( Song, :update ), before: "operation.new"
-#     self.| Policy::Pundit( Auth, :user_and_model? ), before: "operation.new"
+#     step Model( Song, :update ), before: "operation.new"
+#     step Policy::Pundit( Auth, :user_and_model? ), before: "operation.new"
 #     require "trailblazer/operation/resolver"
-#     self.| Resolver(), before: "operation.new"
+#     step Resolver(), before: "operation.new"
 
-#     self.| :process
+#     step :process
 
 #     class P < self; end
 #     class B < self; end

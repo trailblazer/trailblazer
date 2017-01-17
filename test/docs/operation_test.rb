@@ -41,7 +41,7 @@ class DndTest < Minitest::Spec
     step     :authorize!
     failure  :auth_err!
     step     :save!
-    self.< Wrap
+    failure Wrap
   end
 end
 

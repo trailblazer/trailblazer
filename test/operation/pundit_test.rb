@@ -17,8 +17,8 @@ class PolicyTest < Minitest::Spec
   #---
   # Instance-level: Only policy, no model
   class Create < Trailblazer::Operation
-    self.| Policy::Pundit( Auth, :only_user? )
-    self.| :process
+    step Policy::Pundit( Auth, :only_user? )
+    step :process
 
     def process(*)
       self["process"] = true
@@ -50,10 +50,10 @@ class PolicyTest < Minitest::Spec
   #---
   # inheritance, adding Model
   class Show < Create
-    self.| Model( Song, :new ), before: "policy.default.eval"
+    step Model( Song, :new ), before: "policy.default.eval"
   end
 
-  it { Show["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,&policy.default.eval,&process]} }
+  it { Show["pipetree"].inspect.must_equal %{[>operation.new,>model.build,>policy.default.eval,>process]} }
 
   # invalid because user AND model.
   it do
@@ -75,9 +75,9 @@ class PolicyTest < Minitest::Spec
   ##--
   # TOOOODOOO: Policy and Model before Build ("External" or almost Resolver)
   class Edit < Trailblazer::Operation
-    self.| Model Song, :update
-    self.| Policy::Pundit( Auth, :user_and_model? )
-    self.| :process
+    step Model Song, :update
+    step Policy::Pundit( Auth, :user_and_model? )
+    step :process
 
     def process(*); self["process"] = true end
   end

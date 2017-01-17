@@ -17,13 +17,13 @@ class NestedRescueTest < Minitest::Spec
       step ->(options) { options["b"] = true }
       success ->(options) { raise A if options["raise-a"] }
       step ->(options) { options["c"] = true }
-      self.< ->(options) { options["inner-err"] = true }
+      failure ->(options) { options["inner-err"] = true }
     }
     step ->(options) { options["e"] = true }
     failure ->(options) { options["outer-err"] = true }
   end
 
-  it { NestedInsanity["pipetree"].inspect.must_equal %{[>>operation.new,&Rescue:10,&:22,<NestedRescueTest::NestedInsanity:23]} }
+  it { NestedInsanity["pipetree"].inspect.must_equal %{[>operation.new,>Rescue:10,>rescue_test.rb:22,<rescue_test.rb:23]} }
   it { NestedInsanity.({}).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:true [true, true, true, true, true, true, nil, nil] >} }
   it { NestedInsanity.({}, "raise-y" => true).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:false [true, true, nil, nil, nil, nil, true, true] >} }
   it { NestedInsanity.({}, "raise-a" => true).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:false [true, true, true, true, nil, nil, nil, true] >} }
@@ -148,7 +148,7 @@ class RescueTest < Minitest::Spec
     it { assert_raises(RuntimeError) { Create.( id: "RuntimeError!" ) } }
     it do
       Create.( id: 1, title: "Pie" )
-      Sequel.result.first.must_equal Pipetree::Flow::Right
+      Sequel.result.first.must_equal Pipetree::Railway::Right
     end
   end
 end

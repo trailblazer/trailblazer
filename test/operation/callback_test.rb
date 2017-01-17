@@ -13,10 +13,10 @@ class OperationCallbackTest < MiniTest::Spec
       property :name
     end
 
-    self.| Model( Song, :new )
-    self.| Contract::Build()
-    self.| Contract::Validate()
-    self.| Callback( :default )
+    step Model( Song, :new )
+    step Contract::Build()
+    step Contract::Validate()
+    step Callback( :default )
 
 
     extend Callback::DSL
@@ -55,7 +55,7 @@ class OperationCallbackTest < MiniTest::Spec
 
   #---
   #- inheritance
-  it { Update["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,>contract.build,&contract.default.params,&contract.default.validate,&callback.default]} }
+  it { Update["pipetree"].inspect.must_equal %{[>operation.new,>model.build,>contract.build,>contract.default.params,>contract.default.validate,>callback.default]} }
 
 
   it "invokes all callbacks" do

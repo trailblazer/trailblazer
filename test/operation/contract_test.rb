@@ -14,7 +14,7 @@ class DryValidationTest < Minitest::Spec
     #   required(:id).filled
     # end
 
-    self.| :process
+    step :process
 
     include Procedural::Validate
 
@@ -40,7 +40,7 @@ class DryValidationTest < Minitest::Spec
       required(:id).filled
     end)
 
-    self.& ->(options) { options["contract.params"].(options["params"]).success? }, before: "operation.new"
+    step ->(options) { options["contract.params"].(options["params"]).success? }, before: "operation.new"
   end
 
   it { Update.( id: 1 ).success?.must_equal true }
@@ -71,10 +71,10 @@ class ContractTest < Minitest::Spec
         property :title
       end
 
-      self.> ->(options) { options["model"] = Song.new }
-      # self.| Model( Song, :new )
-      self.| Contract::Build()
-      self.| :process
+      success ->(options) { options["model"] = Song.new }
+      # step Model( Song, :new )
+      step Contract::Build()
+      step :process
 
       include Procedural::Validate
       # TODO: get model automatically in validate!
@@ -216,9 +216,9 @@ class ValidateTest < Minitest::Spec
       end
     end
 
-    self.| Model( Song, :new ) # FIXME.
-    self.| Contract::Build()
-    self.& :process
+    step Model( Song, :new ) # FIXME.
+    step Contract::Build()
+    step :process
   end
 
   # validate returns the #validate result
@@ -258,9 +258,9 @@ class ValidateTest < Minitest::Spec
       validates :title, presence: true
     end
 
-    self.| Model( Song, :new ) # FIXME.
-    self.| Contract::Build()
-    self.| Contract::Validate() # generic validate call for you.
+    step Model( Song, :new ) # FIXME.
+    step Contract::Build()
+    step Contract::Validate() # generic validate call for you.
 
     # include Procedural::Validate
     ->(*) { validate(options["params"][:song]) } # <-- TODO
@@ -291,9 +291,9 @@ class ValidateTest < Minitest::Spec
       validates :title, presence: true
     end
 
-    self.| Model( Song, :new ) # FIXME.
-    self.| Contract::Build()
-    self.| Contract::Validate( key: :song) # generic validate call for you.
+    step Model( Song, :new ) # FIXME.
+    step Contract::Build()
+    step Contract::Validate( key: :song) # generic validate call for you.
     # ->(*) { validate(options["params"][:song]) } # <-- TODO
     step Contract::Persist( method: :sync )
   end
@@ -315,14 +315,14 @@ class ValidateTest < Minitest::Spec
   class New < Upsert
   end
 
-  it { New["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,>contract.build,&contract.default.params,&contract.default.validate,&persist.save]} }
+  it { New["pipetree"].inspect.must_equal %{[>operation.new,>model.build,>contract.build,>contract.default.params,>contract.default.validate,>persist.save]} }
 
   #- overwriting Validate
   class NewHit < Upsert
-    override Contract::Validate( key: :hit )
+    step Contract::Validate( key: :hit ), override: true
   end
 
-  it { NewHit["pipetree"].inspect.must_equal %{[>>operation.new,&model.build,>contract.build,&contract.default.params,&contract.default.validate,&persist.save]} }
+  it { NewHit["pipetree"].inspect.must_equal %{[>operation.new,>model.build,>contract.build,>contract.default.params,>contract.default.validate,>persist.save]} }
   it { NewHit.(:hit => { title: "Hooray For Me" }).inspect("model").must_equal %{<Result:true [#<struct ContractTest::Song title=\"Hooray For Me\">] >} }
 end
 

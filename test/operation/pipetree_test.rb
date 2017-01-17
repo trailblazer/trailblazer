@@ -42,21 +42,21 @@ class PipetreeTest < Minitest::Spec
 
     MyValidate = ->(input, options) { res= input.validate(options["params"]) { |f| f.sync } }
     # we can have a separate persist step and wrap in transaction. where do we pass contract, though?
-    self.& MyValidate, before: Call #replace: Contract::ValidLegacySwitch
+    step MyValidate, before: Call #replace: Contract::ValidLegacySwitch
     #
     MyAfterSave = ->(input, options) { input["after_save"] = true }
-    self.> MyAfterSave, after: MyValidate
+    success MyAfterSave, after: MyValidate
 
     ValidateFailureLogger = ->(input, options) { input["validate fail"] = true }
-    self.< ValidateFailureLogger, after: MyValidate
+    failure ValidateFailureLogger, after: MyValidate
 
-    self.> ->(input, options) { input.process(options["params"]) }, replace: Call, name: "my.params"
+    success ->(input, options) { input.process(options["params"]) }, replace: Call, name: "my.params"
 
     include Model
 
     LogBreach = ->(input, options) { input.log_breach! }
 
-    self.< LogBreach, after: Policy::Evaluate
+    failure LogBreach, after: Policy::Evaluate
 
     model Song
     policy ->(*) { self["current_user"] }

@@ -9,21 +9,21 @@ class ModelTest < Minitest::Spec
   #---
   # use Model semantics, no customizations.
   class Create < Trailblazer::Operation
-    self.| Model Song, :new
+    step Model Song, :new
   end
 
   # :new new.
   it { Create.({})["model"].inspect.must_equal %{#<struct ModelTest::Song id=nil>} }
 
   class Update < Create
-    override Model(Song, :update)
+    step Model(Song, :update), override: true
   end
 
   # :find it
   it { Update.({ id: 1 })["model"].inspect.must_equal %{#<struct ModelTest::Song id=1>} }
 
   #- inheritance
-  it { Update["pipetree"].inspect.must_equal %{[>>operation.new,&model.build]} }
+  it { Update["pipetree"].inspect.must_equal %{[>operation.new,>model.build]} }
 
   # override #model with Model included.
   class Upsert < Create
@@ -35,8 +35,8 @@ class ModelTest < Minitest::Spec
   #---
   # :find_by, exceptionless.
   class Find < Trailblazer::Operation
-    self.| Model Song, :find_by
-    self.| :process
+    step Model Song, :find_by
+    step :process
 
     def process(*); self["x"] = true end
   end
@@ -59,7 +59,7 @@ class ModelTest < Minitest::Spec
   #---
   # override #model!, without any Model inclusions.
   class Delete < Trailblazer::Operation
-    self.| Model :model!
+    step Model :model!
     def model!(params); params.to_s end
   end
 
@@ -69,7 +69,7 @@ class ModelTest < Minitest::Spec
   # creating the model before operation instantiation (ex Model::External)
   class Show < Create
     extend Model::BuildMethods # FIXME: how do we communicate that and prevent the include from Model[] ?
-    self.| Model( Song, :update ), before: "operation.new"
+    step Model( Song, :update ), before: "operation.new"
   end
 
   it { Show.({id: 1})["model"].inspect.must_equal %{#<struct ModelTest::Song id=1>} }
@@ -98,7 +98,7 @@ class ModelTest < Minitest::Spec
       delegates :@delegator, :[]
     end
 
-    self.> ->(options) { options["model"] = ModelBuilder.new(options).(options["params"]) }, after: "operation.new"
+    success ->(options) { options["model"] = ModelBuilder.new(options).(options["params"]) }, after: "operation.new"
   end
 
   it { Index.(id: 1)["model"].inspect.must_equal %{#<struct ModelTest::Song id=1>} }
