@@ -75,7 +75,7 @@ class PolicyTest < Minitest::Spec
   ##--
   # TOOOODOOO: Policy and Model before Build ("External" or almost Resolver)
   class Edit < Trailblazer::Operation
-    step Model Song, :update
+    step Model Song, :find
     step Policy::Pundit( Auth, :user_and_model? )
     step :process
 
