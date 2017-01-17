@@ -1,28 +1,21 @@
-require "declarative"
 require "disposable/callback"
 
-# Needs #[], #[]= skill dependency.
 class Trailblazer::Operation
+  def self.Callback(group)
+    step = ->(input, options) { Callback.(group, input, options) }
+
+    [ step, name: "callback.#{group}" ]
+  end
+
   module Callback
-    def self.import!(operation, import, group)
-      import.(:&, ->(input, options) { input.callback!(group) },
-        name: "callback.#{group}")
+    def self.call(name=:default, operation, options)
+      config  = options["callback.#{name}.class"] || raise #.fetch(name) # TODO: test exception
+      group   = config[:group].new(options["contract.default"])
 
-      operation.send :include, self
-    end
-
-    def callback!(name=:default, options=self) # FIXME: test options.
-      config  = self["callback.#{name}.class"] || raise #.fetch(name) # TODO: test exception
-      group   = config[:group].new(self["contract.default"])
-
-      options[:context] ||= (config[:context] == :operation ? self : group)
+      options[:context] ||= (config[:context] == :operation ? operation : group)
       group.(options)
 
-      invocations[name] = group
-    end
-
-    def invocations
-      @invocations ||= {}
+      options["result.callback.#{name}"] = group
     end
 
     module DSL
@@ -39,6 +32,4 @@ class Trailblazer::Operation
       end
     end
   end
-
-  DSL.macro!(:Callback, Callback) # Operation::Callback()
 end
