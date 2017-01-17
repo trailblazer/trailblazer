@@ -315,14 +315,14 @@ class ValidateTest < Minitest::Spec
   class New < Upsert
   end
 
-  it { New["pipetree"].inspect.must_equal %{[>operation.new,>model.build,>contract.build,>contract.default.params,>contract.default.validate,>persist.save]} }
+  it { New["pipetree"].inspect.must_equal %{[>operation.new,>model.build,>contract.build,>contract.default.validate,>persist.save]} }
 
   #- overwriting Validate
   class NewHit < Upsert
     step Contract::Validate( key: :hit ), override: true
   end
 
-  it { NewHit["pipetree"].inspect.must_equal %{[>operation.new,>model.build,>contract.build,>contract.default.params,>contract.default.validate,>persist.save]} }
+  it { NewHit["pipetree"].inspect.must_equal %{[>operation.new,>model.build,>contract.build,>contract.default.validate,>persist.save]} }
   it { NewHit.(:hit => { title: "Hooray For Me" }).inspect("model").must_equal %{<Result:true [#<struct ContractTest::Song title=\"Hooray For Me\">] >} }
 end
 

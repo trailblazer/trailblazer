@@ -35,7 +35,7 @@ class PersistTest < Minitest::Spec
   class Update < Create
   end
 
-  it { Update["pipetree"].inspect.must_equal %{[>operation.new,>model.build,>contract.build,>contract.default.params,>contract.default.validate,<persist_test.rb:17,>persist.save,<persist_test.rb:19]} }
+  it { Update["pipetree"].inspect.must_equal %{[>operation.new,>model.build,>contract.build,>contract.default.validate,<persist_test.rb:17,>persist.save,<persist_test.rb:19]} }
 
   #---
   it do

@@ -1,36 +1,67 @@
 class Trailblazer::Operation
+      Railway = Pipetree::Railway
+
+      # Allows defining dependencies and inject/override them via runtime options, if desired.
+      class Railway::Step
+        include Uber::Callable
+
+        def initialize(step, dependencies={})
+          @step, @dependencies = step, dependencies
+        end
+
+        def call(input, options)
+          @dependencies.each { |k, v| options[k] ||= v } # not sure i like this, but the step's API is cool.
+
+          @step.(input, options)
+        end
+      end
   module Contract
     # result.contract = {..}
     # result.contract.errors = {..}
     # Deviate to left track if optional key is not found in params.
     # Deviate to left if validation result falsey.
+    def self.Validate(skip_extract:false, name: "default", representer:false, key: nil) # DISCUSS: should we introduce something like Validate::Deserializer?
+      return Validate::Call(name: name, representer: representer) if skip_extract || representer
+
+      params_path = "contract.#{name}.params" # extract_params! save extracted params here.
+
+      extract_step, options  = Validate::Extract(key: key, path: params_path, params_path: params_path)
+      validate_step, options = Validate::Call(name: name, representer: representer, params_path: params_path)
+
+      pipe = Railway.new
+        .add(Railway::Right, Railway.&(extract_step),  options)
+        .add(Railway::Right, Railway.&(validate_step), options)
+
+      step = ->(input, options) { pipe.(input, options).first <= Railway::Right }
+
+      [step, name: "contract.#{name}.validate"]
+    end
+
     module Validate
-      def self.import!(operation, import, skip_extract:false, name: "default", representer:false, key: nil) # DISCUSS: should we introduce something like Validate::Deserializer?
-        if representer
-          skip_extract = true
-          operation["representer.#{name}.class"] = representer
-        end
+      # Macro: extract the contract's input from params by reading `:key`.
+      def self.Extract(key:nil, path:nil, params_path:nil)
+        step = ->(input, options) { Validate.extract_params!(options, key: key, path: path) },
 
-        params_path = "contract.#{name}.params" # extract_params! save extracted params here.
+        [ step, name: params_path ]
+      end
 
-        import.(:&, ->(input, options) { extract_params!(input, options, key: key, path: params_path) },
-          name: params_path) unless skip_extract
-
-        # call the actual contract.validate(params)
-        # DISCUSS: should we pass the representer here, or do that in #validate! i'm still mulling over what's the best, most generic approach.
-        import.(:&, ->(operation, options) do
-            validate!(operation, options, name: name, representer: options["representer.#{name}.class"], key: key, params_path: params_path)
-          end,
-          name: "contract.#{name}.validate", # visible name of the pipe step.
-        )
-        end
-
-      def self.extract_params!(operation, options, key:nil, path:nil)
+      def self.extract_params!(options, key:nil, path:nil)
         # TODO: introduce nested pipes and pass composed input instead.
         options[path] = key ? options["params"][key] : options["params"]
       end
 
-      def self.validate!(operation, options, name: nil, representer:false, from: "document", params_path:nil, **)
+      # Macro: Validates contract `:name`.
+      def self.Call(name:"default", representer:false, params_path:nil)
+        step = ->(input, options) {
+          Validate.validate!(options, name: name, representer: options["representer.#{name}.class"], params_path: params_path)
+        }
+
+        step = Railway::Step.new( step, "representer.#{name}.class" => representer )
+
+        [ step, name: "contract.#{name}.call" ]
+      end
+
+      def self.validate!(options, name: nil, representer:false, from: "document", params_path:nil, **)
         path     = "contract.#{name}"
         contract = options[path]
 
@@ -50,6 +81,4 @@ class Trailblazer::Operation
       end
     end
   end
-
-  DSL.macro!(:Validate, Contract::Validate, Contract.singleton_class)
 end
