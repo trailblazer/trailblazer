@@ -11,12 +11,12 @@ class Trailblazer::Operation
 
       return Validate::Call(name: name, representer: representer, params_path: params_path) if skip_extract || representer
 
-      extract_step, options  = Validate::Extract(key: key, path: params_path, params_path: params_path)
-      validate_step, options = Validate::Call(name: name, representer: representer, params_path: params_path)
+      extract_step,  extract_options  = Validate::Extract(key: key, params_path: params_path)
+      validate_step, validate_options = Validate::Call(name: name, representer: representer, params_path: params_path)
 
       pipe = Railway.new # TODO: make nested pipes simpler.
-        .add(Railway::Right, Railway.&(extract_step),  options)
-        .add(Railway::Right, Railway.&(validate_step), options)
+        .add(Railway::Right, Railway.&(extract_step),  extract_options)
+        .add(Railway::Right, Railway.&(validate_step), validate_options)
 
       step = ->(input, options) { pipe.(input, options).first <= Railway::Right }
 
@@ -25,15 +25,15 @@ class Trailblazer::Operation
 
     module Validate
       # Macro: extract the contract's input from params by reading `:key`.
-      def self.Extract(key:nil, path:nil, params_path:nil)
-        step = ->(input, options) { extract_params!(options, key: key, path: path) },
+      def self.Extract(key:nil, params_path:nil)
+        step = ->(input, options) { extract_params!(options, key: key, params_path: params_path) }
 
         [ step, name: params_path ]
       end
 
-      def self.extract_params!(options, key:nil, path:nil)
+      def self.extract_params!(options, key:nil, params_path:nil)
         # TODO: introduce nested pipes and pass composed input instead.
-        options[path] = key ? options["params"][key] : options["params"]
+        options[params_path] = key ? options["params"][key] : options["params"]
       end
 
       # Macro: Validates contract `:name`.

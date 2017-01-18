@@ -1,5 +1,16 @@
 require "test_helper"
-require "trailblazer/operation/contract"
+
+class ContractExtractMacroTest < Minitest::Spec
+  class Create < Trailblazer::Operation
+    step Contract::Validate::Extract( key: "song", params_path: "x" )
+  end
+
+  it { Create["pipetree"].inspect.must_equal %{[>operation.new,>x]} }
+  it { Create.({}).inspect("x").must_equal %{<Result:false [nil] >} }
+  it { Create.({ "song" => Object }).inspect("x").must_equal %{<Result:true [Object] >} }
+end
+
+
 
       require "dry/validation"
 

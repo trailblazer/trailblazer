@@ -142,6 +142,7 @@ class WrapTest < Minitest::Spec
 
     def self.call(options, *)
       Sequel.transaction { yield } # yield runs the nested pipe.
+      # return value decides about left or right track!
     end
   end
   #:callable-t end
