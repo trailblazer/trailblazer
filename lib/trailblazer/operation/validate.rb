@@ -7,14 +7,14 @@ class Trailblazer::Operation
     # Deviate to left track if optional key is not found in params.
     # Deviate to left if validation result falsey.
     def self.Validate(skip_extract:false, name: "default", representer:false, key: nil) # DISCUSS: should we introduce something like Validate::Deserializer?
-      return Validate::Call(name: name, representer: representer) if skip_extract || representer
-
       params_path = "contract.#{name}.params" # extract_params! save extracted params here.
+
+      return Validate::Call(name: name, representer: representer, params_path: params_path) if skip_extract || representer
 
       extract_step, options  = Validate::Extract(key: key, path: params_path, params_path: params_path)
       validate_step, options = Validate::Call(name: name, representer: representer, params_path: params_path)
 
-      pipe = Railway.new
+      pipe = Railway.new # TODO: make nested pipes simpler.
         .add(Railway::Right, Railway.&(extract_step),  options)
         .add(Railway::Right, Railway.&(validate_step), options)
 
