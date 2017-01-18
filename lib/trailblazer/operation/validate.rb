@@ -47,7 +47,7 @@ class Trailblazer::Operation
         [ step, name: "contract.#{name}.call" ]
       end
 
-      def self.validate!(options, name: nil, representer:false, from: "document", params_path:nil, **)
+      def self.validate!(options, name:nil, representer:false, from: "document", params_path:nil)
         path     = "contract.#{name}"
         contract = options[path]
 
