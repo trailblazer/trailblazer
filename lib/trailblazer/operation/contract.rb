@@ -8,9 +8,15 @@
 # Needs #[], #[]= skill dependency.
 class Trailblazer::Operation
   module Contract
+    def self.Build(name:"default", constant:nil, builder: nil)
+      step = ->(input, options) { Build.for(input, options, name: name, constant: constant, builder: builder) }
+
+      [ step, name: "contract.build" ]
+    end
+
     module Build
       # bla build contract at runtime.
-      def self.build_contract!(operation, options, name:"default", constant:nil, builder: nil)
+      def self.for(operation, options, name:"default", constant:nil, builder: nil)
         # TODO: we could probably clean this up a bit at some point.
         contract_class = constant || options["contract.#{name}.class"]
         model          = options["model"] # FIXME: model.default
@@ -18,11 +24,6 @@ class Trailblazer::Operation
         return options["contract.#{name}"] = Uber::Option[builder].(operation, constant: contract_class, model: model) if builder
 
         options["contract.#{name}"] = contract_class.new(model)
-      end
-
-      def self.import!(operation, import, **args)
-        import.(:>, ->(operation, options) { build_contract!(operation, options, **args) },
-          name: "contract.build")
       end
     end
 
@@ -41,6 +42,4 @@ class Trailblazer::Operation
       end
     end # Contract
   end
-
-  DSL.macro!(:Build, Contract::Build, Contract.singleton_class)
 end
