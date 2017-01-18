@@ -26,14 +26,12 @@ class Trailblazer::Operation
     module Validate
       # Macro: extract the contract's input from params by reading `:key`.
       def self.Extract(key:nil, params_path:nil)
-        step = ->(input, options) { extract_params!(options, key: key, params_path: params_path) }
+        # TODO: introduce nested pipes and pass composed input instead.
+        step = ->(input, options) do
+          options[params_path] = key ? options["params"][key] : options["params"]
+        end
 
         [ step, name: params_path ]
-      end
-
-      def self.extract_params!(options, key:nil, params_path:nil)
-        # TODO: introduce nested pipes and pass composed input instead.
-        options[params_path] = key ? options["params"][key] : options["params"]
       end
 
       # Macro: Validates contract `:name`.
