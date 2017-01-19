@@ -177,6 +177,7 @@ class NestedWithCallableTest < Minitest::Spec
   it { Create.({}, "current_user" => anonymous).inspect("x").must_equal %{<Result:true [true] >} }
   it { Create.({}, "current_user" => admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
 
+  #:method
   class Update < Trailblazer::Operation
     step Nested( :build! )
 
@@ -184,24 +185,27 @@ class NestedWithCallableTest < Minitest::Spec
       current_user.admin? ? Create::Admin : Create::NeedsModeration
     end
   end
+  #:method end
 
   it { Update.({}, "current_user" => anonymous).inspect("x").must_equal %{<Result:true [true] >} }
   it { Update.({}, "current_user" => admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
 
+  #:callable-builder
   class MyBuilder
     extend Uber::Callable
+
     def self.call(options, current_user:nil, **)
       current_user.admin? ? Create::Admin : Create::NeedsModeration
     end
   end
+  #:callable-builder end
 
+  #:callable
   class Delete < Trailblazer::Operation
     step Nested( MyBuilder )
-
-    def build!(options, current_user:nil, **)
-      current_user.admin? ? Create::Admin : Create::NeedsModeration
-    end
+    # ..
   end
+  #:callable end
 
   it { Delete.({}, "current_user" => anonymous).inspect("x").must_equal %{<Result:true [true] >} }
   it { Delete.({}, "current_user" => admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
