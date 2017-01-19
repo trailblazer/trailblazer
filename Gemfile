@@ -22,8 +22,8 @@ gem "dry-validation"
 
 # gem "trailblazer-operation", path: "../operation"
 # gem "pipetree", path: "../pipetree"
-gem "trailblazer-operation", github: "trailblazer/trailblazer-operation"
-gem "pipetree", github: "apotonick/pipetree"
+# gem "trailblazer-operation", github: "trailblazer/trailblazer-operation"
+# gem "pipetree", github: "apotonick/pipetree"
 
 
 gem "minitest-line"

@@ -2,13 +2,13 @@
 
 * Add `fail_fast: true` for `step` and `failure` to short-circuit the pipe. Note that more "eloquent" semantics are coming in `trailblazer-bpmn`.
 * Add `fail!`, `fail_fast!`, `pass!`, and `pass_fast!`. Note that they are all experimental API and not documented, yet.
-* Remove Builder and allow dynamic `Nested`.
+* Remove Builder and allow [dynamic `Nested`](http://trailblazer.to/gems/operation/2.0/api.html#nested-callable).
 
     ```ruby
     step Nested( ->(options, params:) { params[:type] == "moderated" ? Moderated : Comment } )
     ```
-
 * Remove `override` in favor of `step .., override: true`. Note that this method wasn't documented.
+* Numerous internal simplifications [documented here](https://github.com/trailblazer/trailblazer-operation/blob/master/CHANGES.md#0010).
 
 
 # 2.0.0
