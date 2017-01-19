@@ -27,7 +27,7 @@ class Trailblazer::Operation
       path = "policy.#{name}.eval"
 
       step = Eval.new( name: name, path: path )
-      step = Railway::Step.new(step, path => condition)
+      step = Pipetree::Step.new(step, path => condition)
 
       [ step, name: path ]
     end

@@ -1,7 +1,7 @@
 class Trailblazer::Operation
-      Railway = Pipetree::Railway
-
   module Contract
+    Railway = Pipetree::Railway
+
     # result.contract = {..}
     # result.contract.errors = {..}
     # Deviate to left track if optional key is not found in params.
@@ -40,7 +40,7 @@ class Trailblazer::Operation
           validate!(options, name: name, representer: options["representer.#{name}.class"], params_path: params_path)
         }
 
-        step = Railway::Step.new( step, "representer.#{name}.class" => representer )
+        step = Pipetree::Step.new( step, "representer.#{name}.class" => representer )
 
         [ step, name: "contract.#{name}.call" ]
       end

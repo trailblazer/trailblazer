@@ -2,7 +2,7 @@ class Trailblazer::Operation
   def self.Model(model_class, action=nil)
     step = Model.for(model_class, action)
 
-    step = Railway::Step.new(step, "model.class" => model_class, "model.action" => action)
+    step = Pipetree::Step.new(step, "model.class" => model_class, "model.action" => action)
 
     [ step, name: "model.build" ]
   end
