@@ -289,6 +289,40 @@ class DocsOperationStepOptionsTest < Minitest::Spec
    1 ==========================&model.build
   #:name-auto-pipe end
 =end
+
+    #:replace-inh
+    class Update < New
+      step Model(Song, :find_by), replace: "model.build"
+    end
+    #:replace-inh end
+
+    puts Update["pipetree"].inspect(style: :row)
+=begin
+  #:replace-inh-pipe
+   0 =======================>>operation.new
+   2 ==========================&model.build
+  #:replace-inh-pipe end
+=end
+
+    it { Update.({}).inspect("model").must_equal %{<Result:false [nil] >} }
+
+
+#     #:delete-inh
+#     class Noop < New
+#       step nil, delete: "model.build"
+#     end
+#     #:delete-inh end
+
+# puts "yo"
+#     puts Update["pipetree"].inspect(style: :row)
+# =begin
+#   #:delete-inh-pipe
+#    0 =======================>>operation.new
+#    2 ==========================&model.build
+#   #:delete-inh-pipe end
+# =end
+
+#     it { Noop.({}).inspect("model").must_equal %{<Result:false [nil] >} }
   end
 
   class ManualNameTest < Minitest::Spec
@@ -343,27 +377,5 @@ class DocsOperationStepOptionsTest < Minitest::Spec
    3 ==========================&model.build
   #:pos-inh-pipe end
 =end
-
-    #:replace-inh
-    class Update < New
-      step Model(Song, :find_by), replace: "model.build"
-      #~replace-val
-      def validate_params!(*)
-        true
-      end
-      #~replace-val end
-    end
-    #:replace-inh end
-
-    puts Update["pipetree"].inspect(style: :row)
-=begin
-  #:replace-inh-pipe
-   0 =======================>>operation.new
-   1 =====================&validate_params!
-   2 ==========================&model.build
-  #:replace-inh-pipe end
-=end
-
-    it { Update.({}).inspect("model").must_equal %{<Result:false [nil] >} }
   end
 end
