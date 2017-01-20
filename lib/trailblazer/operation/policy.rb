@@ -10,7 +10,7 @@ class Trailblazer::Operation
 
       def call(input, options)
         condition = options[@path] # this allows dependency injection.
-        result    = condition.(options)
+        result    = condition.(input, options)
 
         options["policy.#{@name}"]        = result["policy"] # assign the policy as a skill.
         options["result.policy.#{@name}"] = result

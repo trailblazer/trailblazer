@@ -1,5 +1,4 @@
 require "trailblazer/operation/policy"
-require "uber/option"
 
 class Trailblazer::Operation
   module Policy
@@ -9,11 +8,10 @@ class Trailblazer::Operation
 
     module Guard
       def self.build(callable)
-        value = Uber::Option[callable]
+        value = Option.(callable) # Operation::Option
 
-        # call'ing the Uber::Option will run either proc or block.
         # this gets wrapped in a Operation::Result object.
-        ->(options) { Result.new( !!value.(options), {} ) }
+        ->(input, options) { Result.new( !!value.(input, options), {} ) }
       end
     end # Guard
   end

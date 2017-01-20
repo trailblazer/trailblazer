@@ -64,20 +64,21 @@ end
 
 #---
 # with method
-# class DocsGuardMethodTest < Minitest::Spec
-#   #:method
-#   class Create < Trailblazer::Operation
-#     step Policy::Guard[ : ]
-#     step :process
-#     #~pipe-only
-#     def process(*); self[:x] = true; end
-#     #~pipe-only end
-#   end
-#   #:method end
+class DocsGuardMethodTest < Minitest::Spec
+  #:method
+  class Create < Trailblazer::Operation
+    step Policy::Guard( :pass? )
+    step :process
+    #~pipe-only
+    def pass?(options, *); options["params"][:pass] end
+    def process(*); self["x"] = true; end
+    #~pipe-only end
+  end
+  #:method end
 
-#   it { Create.(pass: false)[:x].must_equal nil }
-#   it { Create.(pass: true)[:x].must_equal true }
-# end
+  it { Create.(pass: false).inspect("x").must_equal %{<Result:false [nil] >} }
+  it { Create.(pass: true).inspect("x").must_equal %{<Result:true [true] >} }
+end
 
 #---
 # with name:
