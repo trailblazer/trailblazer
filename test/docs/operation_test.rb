@@ -267,3 +267,103 @@ class DocsOperationInheritanceTest < Minitest::Spec
     Song::New.().inspect("model").must_equal %{<Result:true [#<struct DocsOperationInheritanceTest::Song id=nil, title=nil, created_by=nil>] >}
   end
 end
+
+class DocsOperationStepOptionsTest < Minitest::Spec
+  Song = Struct.new(:title) do
+    def self.find_by(*)
+      nil
+    end
+  end
+
+  class AutomaticNameTest < Minitest::Spec
+    #:name-auto
+    class New < Trailblazer::Operation
+      step Model( Song, :new )
+    end
+    #:name-auto end
+
+    puts New["pipetree"].inspect(style: :row)
+=begin
+  #:name-auto-pipe
+   0 =======================>>operation.new
+   1 ==========================&model.build
+  #:name-auto-pipe end
+=end
+  end
+
+  class ManualNameTest < Minitest::Spec
+    #:name-manu
+    class New < Trailblazer::Operation
+      step Model( Song, :new ), name: "build.song.model"
+      step :validate_params!,   name: "my.params.validate"
+      # ..
+    end
+    #:name-manu end
+
+    puts New["pipetree"].inspect(style: :row)
+=begin
+  #:name-manu-pipe
+   0 =======================>>operation.new
+   1 =====================&build.song.model
+   2 ===================&my.params.validate
+  #:name-manu-pipe end
+=end
+  end
+
+  class BeforeTest < Minitest::Spec
+    #:pos-before
+    class New < Trailblazer::Operation
+      step Model( Song, :new )
+      step :validate_params!,   before: "model.build"
+      # ..
+    end
+    #:pos-before end
+
+    puts New["pipetree"].inspect(style: :row)
+=begin
+  #:pos-before-pipe
+   0 =======================>>operation.new
+   1 =====================&validate_params!
+   2 ==========================&model.build
+  #:pos-before-pipe end
+=end
+
+    #:pos-inh
+    class Create < New
+      step :policy!, after: "operation.new"
+    end
+    #:pos-inh end
+
+    puts Create["pipetree"].inspect(style: :row)
+=begin
+  #:pos-inh-pipe
+   0 =======================>>operation.new
+   1 ==============================&policy!
+   2 =====================&validate_params!
+   3 ==========================&model.build
+  #:pos-inh-pipe end
+=end
+
+    #:replace-inh
+    class Update < New
+      step Model(Song, :find_by), replace: "model.build"
+      #~replace-val
+      def validate_params!(*)
+        true
+      end
+      #~replace-val end
+    end
+    #:replace-inh end
+
+    puts Update["pipetree"].inspect(style: :row)
+=begin
+  #:replace-inh-pipe
+   0 =======================>>operation.new
+   1 =====================&validate_params!
+   2 ==========================&model.build
+  #:replace-inh-pipe end
+=end
+
+    it { Update.({}).inspect("model").must_equal %{<Result:false [nil] >} }
+  end
+end
