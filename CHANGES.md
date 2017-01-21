@@ -1,3 +1,14 @@
+# 2.0.2
+
+* Remove `uber` dependency as we use our own `Option::KW` now.
+* In `Contract::Build( builder: )` you now also have access to the `name:` keyword. Note that you need to double-splat in builders.
+
+        ```ruby
+        Contract::Build( builder: ->(options, constant:, **) )
+        ```
+  Same for `:method` and `Callable`.
+* `Policy::Guard( :method )` now works.
+
 # 2.0.1
 
 * Add `fail_fast: true` for `step` and `failure` to short-circuit the pipe. Note that more "eloquent" semantics are coming in `trailblazer-bpmn`.
