@@ -20,10 +20,11 @@ class Trailblazer::Operation
         # TODO: we could probably clean this up a bit at some point.
         contract_class = constant || options["contract.#{name}.class"]
         model          = options["model"] # FIXME: model.default
+        name           = "contract.#{name}"
 
-        return options["contract.#{name}"] = Uber::Option[builder].(operation, constant: contract_class, model: model) if builder
+        return options[name] = Option::KW.(builder).(operation, options, constant: contract_class, name: name) if builder
 
-        options["contract.#{name}"] = contract_class.new(model)
+        options[name] = contract_class.new(model)
       end
     end
 

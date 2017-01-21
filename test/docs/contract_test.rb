@@ -353,7 +353,7 @@ class DocContractBuilderTest < Minitest::Spec
     step Contract::Validate()
     step Contract::Persist( method: :sync )
 
-    def default_contract!(constant:, model:)
+    def default_contract!(options, constant:, model:, **)
       constant.new(model, current_user: self["current_user"])
     end
   end
@@ -374,8 +374,8 @@ class DocContractBuilderTest < Minitest::Spec
 
     step Model( Song, :new )
     #:builder-proc
-    step Contract::Build( builder: ->(operation, constant:, model:) {
-      constant.new(model, current_user: operation["current_user"])
+    step Contract::Build( builder: ->(options, constant:, model:, **) {
+      constant.new(model, current_user: options["current_user"])
     })
     #:builder-proc end
     step Contract::Validate()

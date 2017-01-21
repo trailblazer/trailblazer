@@ -17,8 +17,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "trailblazer-operation", ">= 0.0.10", "< 0.1.0"
-  spec.add_dependency "uber", ">= 0.1.0", "< 0.2.0"
+  spec.add_dependency "trailblazer-operation", ">= 0.0.12", "< 0.1.0"
   spec.add_dependency "reform", ">= 2.2.0", "< 3.0.0"
   spec.add_dependency "declarative"
 
