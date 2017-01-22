@@ -1,3 +1,7 @@
+# 2.0.3
+
+* `Guard` now allows kw args for its option.
+
 # 2.0.2
 
 * Remove `uber` dependency as we use our own `Option::KW` now.

@@ -8,7 +8,7 @@ class Trailblazer::Operation
 
     module Guard
       def self.build(callable)
-        value = Option.(callable) # Operation::Option
+        value = Option::KW.(callable) # Operation::Option
 
         # this gets wrapped in a Operation::Result object.
         ->(input, options) { Result.new( !!value.(input, options), {} ) }
