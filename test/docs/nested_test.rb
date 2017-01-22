@@ -120,6 +120,7 @@ class NestedWithCallableTest < Minitest::Spec
   Song = Struct.new(:id, :title)
 
   class X < Trailblazer::Operation
+    step ->(options, params:, **) { options["params.original"] = params }
     step ->(options) { options["x"] = true }
   end
 
@@ -132,7 +133,7 @@ class NestedWithCallableTest < Minitest::Spec
     step Nested( ->(options, *) { options["class"] } )
   end
 
-  it { A.({}, "class" => X).inspect("x", "y", "z").must_equal "<Result:true [true, nil, true] >" }
+  it { A.({ a: 1 }, "class" => X).inspect("x", "y", "z", "params.original").must_equal "<Result:true [true, nil, true, {:a=>1}] >" }
   it { A.({}, "class" => Y).inspect("x", "y", "z").must_equal "<Result:true [nil, true, true] >" }
   # it { Create.({}).inspect("x", "y", "z").must_equal "<Result:true [nil, true, true] >" }
 
