@@ -117,6 +117,55 @@ class DocsNestedOperationTest < Minitest::Spec
   it { C.()["can.B.see.A.class.data?"].must_equal nil }
 end
 
+class NestedInput < Minitest::Spec
+  #:input-multiply
+  class Multiplier < Trailblazer::Operation
+    step ->(options, x:, y:, **) { options["product"] = x*y }
+  end
+  #:input-multiply end
+
+  #:input-pi
+  class MultiplyByPi < Trailblazer::Operation
+    step ->(options) { options["pi_constant"] = 3.14159 }
+    step Nested( Multiplier, input: ->(options, mutable_data:, runtime_data:, **) do
+      { "y" => mutable_data["pi_constant"],
+        "x" => runtime_data["x"] }
+    end )
+  end
+  #:input-pi end
+
+  it { MultiplyByPi.({}, "x" => 9).inspect("product").must_equal %{<Result:true [28.27431] >} }
+
+  it do
+    #:input-result
+    result = MultiplyByPi.({}, "x" => 9)
+    result["product"] #=> [28.27431]
+    #:input-result end
+  end
+end
+
+class NestedInputCallable < Minitest::Spec
+  Multiplier = NestedInput::Multiplier
+
+  class MyInput
+    extend Uber::Callable
+
+    def self.call(options, mutable_data:, runtime_data:, **)
+      {
+        "y" => mutable_data["pi_constant"],
+        "x" => runtime_data["x"]
+      }
+    end
+  end
+
+  class MultiplyByPi < Trailblazer::Operation
+    step ->(options) { options["pi_constant"] = 3.14159 }
+    step Nested( Multiplier, input: MyInput )
+  end
+
+  it { MultiplyByPi.({}, "x" => 9).inspect("product").must_equal %{<Result:true [28.27431] >} }
+end
+
 #---
 #- Nested( .., output: )
 class NestedOutput < Minitest::Spec
