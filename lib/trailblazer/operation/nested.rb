@@ -5,40 +5,47 @@ class Trailblazer::Operation
     [ step, { name: "Nested(#{step})" } ]
   end
 
+  # WARNING: this is experimental API, but it will end up with something like that.
+  module Element
+    # DISCUSS: add builders here.
+    def initialize(wrapped=nil)
+      @wrapped = wrapped
+    end
+
+    module Dynamic
+      def initialize(wrapped)
+        @wrapped = Option::KW.(wrapped)
+      end
+    end
+  end
+
   module Nested
     # Is executed at runtime and calls the nested operation.
     class Caller
-      def initialize(step)
-        @step = step
-      end
+      include Element
 
       def call(input, options, options_for_nested)
         call_nested(nested(input, options), options_for_nested)
       end
 
     private
-      def nested(input, options)
-        @step
-      end
-
       def call_nested(operation, options)
         operation._call(options)
       end
 
+      def nested(*); @wrapped end
+
       class Dynamic < Caller
-        def initialize(step)
-          @step = Option::KW.(step)
-        end
+        include Element::Dynamic
 
         def nested(input, options)
-          @step.(input, options)
+          @wrapped.(input, options)
         end
       end
     end
 
     class Options
-      def initialize(*)
-      end
+      include Element
 
       # Per default, only runtime data for nested operation.
       def call(input, options)
@@ -46,12 +53,10 @@ class Trailblazer::Operation
       end
 
       class Dynamic
-        def initialize(mapper)
-          @mapper = Option::KW.(mapper)
-        end
+        include Element::Dynamic
 
         def call(operation, options)
-          @mapper.(operation, options, runtime_data: options.to_runtime_data[0], mutable_data: options.to_mutable_data )
+          @wrapped.(operation, options, runtime_data: options.to_runtime_data[0], mutable_data: options.to_mutable_data )
         end
       end
     end
