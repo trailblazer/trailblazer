@@ -76,6 +76,7 @@ class DocsNestedOperationTest < Minitest::Spec
   class B < Trailblazer::Operation
     success ->(options) { options["can.B.see.it?"] = options["this.should.not.be.visible.in.B"] }
     success ->(options) { options["can.B.see.current_user?"] = options["current_user"] }
+    success ->(options) { options["can.B.see.params?"] = options["params"] }
     success ->(options) { options["can.B.see.A.class.data?"] = options["A.class.data"] }
   end
 
@@ -91,6 +92,7 @@ class DocsNestedOperationTest < Minitest::Spec
   it { A.()["this.should.not.be.visible.in.B"].must_equal true }
   # runtime dependencies are visible in B.
   it { A.({}, "current_user" => Module)["can.B.see.current_user?"].must_equal Module }
+  it { A.({ a: 1 })["can.B.see.params?"].must_equal({ a: 1 }) }
   # class data from A doesn't bleed into B.
   it { A.()["can.B.see.A.class.data?"].must_equal nil }
 
