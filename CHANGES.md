@@ -2,6 +2,7 @@
 
 * `Guard` now allows kw args for its option.
 * Fix a bug where `Nested( ->{} )` wouldn't `_call` the nested operation and did too much work on re-nested the already nested params. Thanks to @eliranf for spotting this.
+* Add `Nested(..., input: )` to dynamically decide the input to the nested operation.
 
 # 2.0.2
 
