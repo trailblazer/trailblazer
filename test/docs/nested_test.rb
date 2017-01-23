@@ -71,6 +71,7 @@ class DocsNestedOperationTest < Minitest::Spec
     Update.(id: 2).inspect("model").must_equal %{<Result:false [nil] >}
   end
 
+  #---
   #- shared data
   class B < Trailblazer::Operation
     success ->(options) { options["can.B.see.it?"] = options["this.should.not.be.visible.in.B"] }
@@ -82,7 +83,7 @@ class DocsNestedOperationTest < Minitest::Spec
     self["A.class.data"] = true
 
     success ->(options) { options["this.should.not.be.visible.in.B"] = true }
-    step Nested B
+    step Nested( B )
   end
 
   # mutual data from A doesn't bleed into B.
@@ -97,6 +98,23 @@ class DocsNestedOperationTest < Minitest::Spec
   # cr_result = Create.({}, "result" => result)
   # puts cr_result["model"]
   # puts cr_result["contract.default"]
+
+  #---
+  #- Nested( .., input: )
+  class C < Trailblazer::Operation
+    self["C.class.data"] = true
+
+    success ->(options) { options["this.should.not.be.visible.in.B"] = true }
+
+    step Nested( B, input: ->(options, runtime_data:, mutable_data:, **) {
+      runtime_data.merge( "this.should.not.be.visible.in.B" => mutable_data["this.should.not.be.visible.in.B"] )
+    } )
+  end
+
+  it { C.()["can.B.see.it?"].must_equal true }
+  it { C.()["this.should.not.be.visible.in.B"].must_equal true } # this IS visible since we use :input!
+  it { C.({}, "current_user" => Module)["can.B.see.current_user?"].must_equal Module }
+  it { C.()["can.B.see.A.class.data?"].must_equal nil }
 end
 
 class NestedClassLevelTest < Minitest::Spec
@@ -107,7 +125,7 @@ class NestedClassLevelTest < Minitest::Spec
   end
 
   class Create < Trailblazer::Operation
-    step Nested New
+    step Nested( New )
     step ->(options) { options["y"] = true }
   end
   #:class-level end
@@ -116,6 +134,8 @@ class NestedClassLevelTest < Minitest::Spec
   it { Create.(); Create["class"].must_equal nil }
 end
 
+#---
+# Nested( ->{} )
 class NestedWithCallableTest < Minitest::Spec
   Song = Struct.new(:id, :title)
 
@@ -178,6 +198,7 @@ class NestedWithCallableTest < Minitest::Spec
   it { Create.({}, "current_user" => anonymous).inspect("x").must_equal %{<Result:true [true] >} }
   it { Create.({}, "current_user" => admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
 
+  #---
   #:method
   class Update < Trailblazer::Operation
     step Nested( :build! )
@@ -191,6 +212,7 @@ class NestedWithCallableTest < Minitest::Spec
   it { Update.({}, "current_user" => anonymous).inspect("x").must_equal %{<Result:true [true] >} }
   it { Update.({}, "current_user" => admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
 
+  #---
   #:callable-builder
   class MyBuilder
     extend Uber::Callable
