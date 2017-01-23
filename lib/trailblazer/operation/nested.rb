@@ -1,6 +1,6 @@
 class Trailblazer::Operation
-  def self.Nested(step, input:nil)
-    step = Nested.for(step, input)
+  def self.Nested(step, input:nil, output:nil)
+    step = Nested.for(step, input, output)
 
     [ step, { name: "Nested(#{step})" } ]
   end
@@ -22,18 +22,22 @@ class Trailblazer::Operation
   module Nested
     # Please note that the instance_variable_get are here on purpose since the
     # superinternal API is not entirely decided, yet.
-    def self.for(step, input) # DISCUSS: use builders here?
+    def self.for(step, input, output) # DISCUSS: use builders here?
       invoker            = Caller::Dynamic.new(step)
       invoker            = Caller.new(step) if step.is_a?(Class) && step <= Trailblazer::Operation # interestingly, with < we get a weird nil exception. bug in Ruby?
 
       options_for_nested = Options.new
       options_for_nested = Options::Dynamic.new(input) if input
 
+      options_for_composer = Options::Output.new
+      options_for_composer = Options::Output::Dynamic.new(output) if output
+
       # This lambda is the strut added on the track, executed at runtime.
       ->(operation, options) do
         result = invoker.(operation, options, options_for_nested.(operation, options)) # TODO: what about containers?
 
-        result.instance_variable_get(:@data).to_mutable_data.each { |k,v| options[k] = v }
+        options_for_composer.(operation, options, result).each { |k,v| options[k] = v }
+
         result.success? # DISCUSS: what if we could simply return the result object here?
       end
     end
@@ -75,6 +79,26 @@ class Trailblazer::Operation
 
         def call(operation, options)
           @wrapped.(operation, options, runtime_data: options.to_runtime_data[0], mutable_data: options.to_mutable_data )
+        end
+      end
+
+      class Output
+        include Element
+
+        def call(input, options, result)
+          mutable_data_for(result).each { |k,v| options[k] = v }
+        end
+
+        def mutable_data_for(result)
+          result.instance_variable_get(:@data).to_mutable_data
+        end
+
+        class Dynamic < Output
+          include Element::Dynamic
+
+          def call(input, options, result)
+            @wrapped.(input, options, mutable_data: mutable_data_for(result))
+          end
         end
       end
     end

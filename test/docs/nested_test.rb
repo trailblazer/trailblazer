@@ -117,6 +117,33 @@ class DocsNestedOperationTest < Minitest::Spec
   it { C.()["can.B.see.A.class.data?"].must_equal nil }
 end
 
+#---
+#- Nested( .., output: )
+class NestedOutput < Minitest::Spec
+  Edit = DocsNestedOperationTest::Edit
+
+  #:output
+  class Update < Trailblazer::Operation
+    step Nested( Edit, output: ->(options, mutable_data:, **) do
+      {
+        "contract.my" => mutable_data["contract.default"],
+        "model"       => mutable_data["model"]
+      }
+    end )
+    step Contract::Validate( name: "my" )
+    step Contract::Persist( method: :sync, name: "my" )
+  end
+  #:output end
+
+  it { Update.( id: 1, title: "Call It A Night" ).inspect("model", "contract.default").must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title=\"Call It A Night\">, nil] >} }
+
+  it do
+    result = Update.( id: 1, title: "Call It A Night" )
+
+    result["model"]            #=> #<Song id=1 , title=\"Call It A Night\">
+  end
+end
+
 class NestedClassLevelTest < Minitest::Spec
   #:class-level
   class New < Trailblazer::Operation
