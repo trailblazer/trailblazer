@@ -6,15 +6,7 @@ class Trailblazer::Operation
   end
 
   module Nested
-    # The returned lambda will be executed at runtime and call the nested operation.
-    def self.invoker_for(step)
-      if step.is_a?(Class) && step <= Trailblazer::Operation # interestingly, with < we get a weird nil exception. bug in Ruby?
-        invoker = Caller.new(step)
-      else
-        invoker = Caller::Dynamic.new(step)
-      end
-    end
-
+    # Is executed at runtime and calls the nested operation.
     class Caller
       def initialize(step)
         @step = step
@@ -45,6 +37,9 @@ class Trailblazer::Operation
     end
 
     class Options
+      def initialize(*)
+      end
+
       # Per default, only runtime data for nested operation.
       def call(input, options)
         options.to_runtime_data[0]
@@ -63,8 +58,9 @@ class Trailblazer::Operation
 
     # Please note that the instance_variable_get are here on purpose since the
     # superinternal API is not entirely decided, yet.
-    def self.for(step, input)
-      invoker = invoker_for(step)
+    def self.for(step, input) # DISCUSS: use builders here?
+      invoker            = Caller::Dynamic.new(step)
+      invoker            = Caller.new(step) if step.is_a?(Class) && step <= Trailblazer::Operation # interestingly, with < we get a weird nil exception. bug in Ruby?
 
       options_for_nested = Options.new
       options_for_nested = Options::Dynamic.new(input) if input
