@@ -20,6 +20,24 @@ class Trailblazer::Operation
   end
 
   module Nested
+    # Please note that the instance_variable_get are here on purpose since the
+    # superinternal API is not entirely decided, yet.
+    def self.for(step, input) # DISCUSS: use builders here?
+      invoker            = Caller::Dynamic.new(step)
+      invoker            = Caller.new(step) if step.is_a?(Class) && step <= Trailblazer::Operation # interestingly, with < we get a weird nil exception. bug in Ruby?
+
+      options_for_nested = Options.new
+      options_for_nested = Options::Dynamic.new(input) if input
+
+      # This lambda is the strut added on the track, executed at runtime.
+      ->(operation, options) do
+        result = invoker.(operation, options, options_for_nested.(operation, options)) # TODO: what about containers?
+
+        result.instance_variable_get(:@data).to_mutable_data.each { |k,v| options[k] = v }
+        result.success? # DISCUSS: what if we could simply return the result object here?
+      end
+    end
+
     # Is executed at runtime and calls the nested operation.
     class Caller
       include Element
@@ -58,24 +76,6 @@ class Trailblazer::Operation
         def call(operation, options)
           @wrapped.(operation, options, runtime_data: options.to_runtime_data[0], mutable_data: options.to_mutable_data )
         end
-      end
-    end
-
-    # Please note that the instance_variable_get are here on purpose since the
-    # superinternal API is not entirely decided, yet.
-    def self.for(step, input) # DISCUSS: use builders here?
-      invoker            = Caller::Dynamic.new(step)
-      invoker            = Caller.new(step) if step.is_a?(Class) && step <= Trailblazer::Operation # interestingly, with < we get a weird nil exception. bug in Ruby?
-
-      options_for_nested = Options.new
-      options_for_nested = Options::Dynamic.new(input) if input
-
-      # This lambda is the strut added on the track, executed at runtime.
-      ->(operation, options) do
-        result = invoker.(operation, options, options_for_nested.(operation, options)) # TODO: what about containers?
-
-        result.instance_variable_get(:@data).to_mutable_data.each { |k,v| options[k] = v }
-        result.success? # DISCUSS: what if we could simply return the result object here?
       end
     end
   end
