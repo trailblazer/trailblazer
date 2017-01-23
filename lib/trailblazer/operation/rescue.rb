@@ -1,5 +1,5 @@
 class Trailblazer::Operation
-  def self.Rescue(*exceptions, handler: Rescue::Noop, &block)
+  def self.Rescue(*exceptions, handler: lambda { |*| }, &block)
     exceptions = [StandardError] unless exceptions.any?
     handler    = Option.(handler)
 
@@ -16,10 +16,6 @@ class Trailblazer::Operation
     step, _ = Wrap(rescue_block, &block)
 
     [ step, name: "Rescue:#{block.source_location.last}" ]
-  end
-
-  module Rescue
-    Noop = ->(*) {}
   end
 end
 
