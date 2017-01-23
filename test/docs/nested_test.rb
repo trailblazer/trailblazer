@@ -147,6 +147,7 @@ end
 class NestedInputCallable < Minitest::Spec
   Multiplier = NestedInput::Multiplier
 
+  #:input-callable
   class MyInput
     extend Uber::Callable
 
@@ -157,11 +158,14 @@ class NestedInputCallable < Minitest::Spec
       }
     end
   end
+  #:input-callable end
 
+  #:input-callable-op
   class MultiplyByPi < Trailblazer::Operation
     step ->(options) { options["pi_constant"] = 3.14159 }
     step Nested( Multiplier, input: MyInput )
   end
+  #:input-callable-op end
 
   it { MultiplyByPi.({}, "x" => 9).inspect("product").must_equal %{<Result:true [28.27431] >} }
 end
