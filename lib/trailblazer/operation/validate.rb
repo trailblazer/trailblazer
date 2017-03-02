@@ -37,10 +37,10 @@ class Trailblazer::Operation
       # Macro: Validates contract `:name`.
       def self.Call(name:"default", representer:false, params_path:nil)
         step = ->(input, options) {
-          validate!(options, name: name, representer: options["representer.#{name}.class"], params_path: params_path)
+          validate!(options, name: name, representer: options["representer.contract.#{name}.class"], params_path: params_path)
         }
 
-        step = Pipetree::Step.new( step, "representer.#{name}.class" => representer )
+        step = Pipetree::Step.new( step, "representer.contract.#{name}.class" => representer ) # wrapper class to set dependency so it can be used inside the step
 
         [ step, name: "contract.#{name}.call" ]
       end

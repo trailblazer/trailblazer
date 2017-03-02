@@ -58,6 +58,137 @@ class DryValidationTest < Minitest::Spec
   it { Update.( ).success?.must_equal false }
 end
 
+class ReformValidationTest < Minitest::Spec
+  class Create < Trailblazer::Operation
+
+    Song = Struct.new(:title)
+    extend Contract::DSL
+
+    contract do
+      property :title
+
+      validates :title,  presence: true
+    end
+
+
+    success ->(options) { options["model"] = Song.new }
+    step Contract::Build()
+    step Contract::Validate()
+
+  end
+
+  #- result object, contract
+  # success
+  it { Create.(title: "Don't worry, be happy")["result.contract.default"].success?.must_equal true }
+  it { Create.(title: "Don't worry, be happy")["result.contract.default"].errors.messages.must_equal({}) }
+  # failure
+  it { Create.(id: 12)["result.contract.default"].success?.must_equal false }
+  it { Create.(id: 12)["result.contract.default"].errors.messages.must_equal({:title=>["can't be blank"]})}
+
+end
+
+class ReformWithRepresenterValidationTest < Minitest::Spec
+
+  class MyRepresenter < Representable::Decorator
+    include Representable::JSON
+    property :title, as: :song_title
+  end
+
+  class Create < Trailblazer::Operation
+
+
+    Song = Struct.new(:title)
+    extend Contract::DSL
+
+    contract do
+      property :title
+
+      validates :title,  presence: true
+    end
+
+
+    success ->(options) { options["model"] = Song.new }
+    step Contract::Build()
+    step Contract::Validate(representer: MyRepresenter)
+
+  end
+
+  #- result object, contract
+  # success
+  it { Create.({},"document" => '{"song_title": "Don\'t worry, be happy"}')["result.contract.default"].success?.must_equal true }
+  it { Create.({},"document" => '{"song_title": "Don\'t worry, be happy"}')["result.contract.default"].errors.messages.must_equal({}) }
+  # failure
+  it { Create.({},"document" => '{"title": "Don\'t worry, be happy"}')["result.contract.default"].success?.must_equal false }
+  it { Create.({},"document" => '{"title": "Don\'t worry, be happy"}')["result.contract.default"].errors.messages.must_equal({:title=>["can't be blank"]})}
+
+end
+
+class DryValidationWithValidateMacroTest < Minitest::Spec
+  class Create < Trailblazer::Operation
+    extend Contract::DSL
+
+    contract "params", (Dry::Validation.Schema do
+      required(:id).filled
+    end)
+
+    step Contract::Validate( name: "params" )
+
+  end
+
+  #- result object, contract
+  # success
+  it { Create.(id: 1)["result.contract.params"].success?.must_equal true }
+  it { Create.(id: 1)["result.contract.params"].errors.must_equal({}) }
+  # failure
+  it { Create.(id: nil)["result.contract.params"].success?.must_equal false }
+  it { Create.(id: nil)["result.contract.params"].errors.must_equal({:id=>["must be filled"]}) }
+
+  #---
+  # with Contract::Validate, but before op even gets instantiated.
+  class Update < Trailblazer::Operation #["contract"]
+    extend Contract::DSL
+
+    contract "params", (Dry::Validation.Schema do
+      required(:id).filled
+    end)
+
+    step Contract::Validate( name: "params" ), before: "operation.new"
+  end
+
+  it { Update.( id: 1 ).success?.must_equal true }
+  it { Update.( ).success?.must_equal false }
+
+  class Show < Trailblazer::Operation #["contract"]
+
+    extend Representer::DSL
+
+    representer do
+      include Representable::JSON
+      property :id, as: :my_id, exec_context: :decorator
+
+      def id
+        represented[:id]
+      end
+    end
+
+    extend Contract::DSL
+
+    contract "default", (Dry::Validation.Schema do
+      required(:id).filled
+    end)
+
+    step Contract::Validate( name: "default" )
+  end
+
+  it {
+    result = Show.( id: 1 )
+    result.success?.must_equal true
+    result['representer.default.class'].new(result['result.contract.default'].output).to_json.must_equal '{"my_id":1}'
+  }
+
+  it { Show.( ).success?.must_equal false }
+end
+
 class ContractTest < Minitest::Spec
   Song = Struct.new(:title)
 #   # generic form for testing.
