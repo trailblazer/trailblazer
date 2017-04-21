@@ -22,9 +22,10 @@ class Trailblazer::Operation
   module Nested
     # Please note that the instance_variable_get are here on purpose since the
     # superinternal API is not entirely decided, yet.
-    def self.for(step, input, output) # DISCUSS: use builders here?
+    # @api private
+    def self.for(step, input, output, is_nestable_object=method(:nestable_object?)) # DISCUSS: use builders here?
       invoker            = Caller::Dynamic.new(step)
-      invoker            = Caller.new(step) if step.is_a?(Class) && step <= Trailblazer::Operation # interestingly, with < we get a weird nil exception. bug in Ruby?
+      invoker            = Caller.new(step) if is_nestable_object.(step)
 
       options_for_nested = Options.new
       options_for_nested = Options::Dynamic.new(input) if input
@@ -40,6 +41,11 @@ class Trailblazer::Operation
 
         result.success? # DISCUSS: what if we could simply return the result object here?
       end
+    end
+
+    def self.nestable_object?(object)
+      # interestingly, with < we get a weird nil exception. bug in Ruby?
+      object.is_a?(Class) && object <= Trailblazer::Operation
     end
 
     # Is executed at runtime and calls the nested operation.
