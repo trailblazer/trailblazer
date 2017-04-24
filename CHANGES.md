@@ -1,6 +1,6 @@
 # 2.0.4
 
-* When using Nested(X), the automatic :name is now `"Nested(X)"` instead of the cryptic proc string.
+* When using `Nested(X)`, the automatic `:name` option is now `"Nested(X)"` instead of the cryptic proc string.
 
 
 # 2.0.3
