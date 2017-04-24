@@ -1,8 +1,8 @@
 class Trailblazer::Operation
-  def self.Nested(step, input:nil, output:nil)
-    step = Nested.for(step, input, output)
+  def self.Nested(callable, input:nil, output:nil)
+    step = Nested.for(callable, input, output)
 
-    [ step, { name: "Nested(#{step})" } ]
+    [ step, { name: "Nested(#{callable})" } ]
   end
 
   # WARNING: this is experimental API, but it will end up with something like that.

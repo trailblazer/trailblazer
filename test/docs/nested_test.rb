@@ -317,3 +317,18 @@ class NestedWithCallableTest < Minitest::Spec
 end
 
 # builder: Nested + deviate to left if nil / skip_track if true
+
+#---
+# automatic :name
+class NestedNameTest < Minitest::Spec
+  class Create < Trailblazer::Operation
+    class Present < Trailblazer::Operation
+      # ...
+    end
+
+    step Nested( Present )
+    # ...
+  end
+
+  it { Create["pipetree"].inspect.must_equal %{[>operation.new,>Nested(NestedNameTest::Create::Present)]} }
+end
