@@ -1,3 +1,7 @@
+# 2.0.5
+
+* In Wrap, use `self` instead of a hard class reference. This allows using Wrap in the compat gem.
+
 # 2.0.4
 
 * When using `Nested(X)`, the automatic `:name` option is now `"Nested(X)"` instead of the cryptic proc string.
