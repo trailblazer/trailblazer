@@ -1,6 +1,6 @@
 class Trailblazer::Operation
   def self.Wrap(wrap, &block)
-    operation = Class.new(Trailblazer::Operation) # DISCUSS: Trailblazer::Operation.inherit(skip_operation.new: true)
+    operation = Class.new(self) # self is Trailblazer::Operation.
     # DISCUSS: don't instance_exec when |pipe| given?
     operation.instance_exec(&block) # evaluate the nested pipe.
 
