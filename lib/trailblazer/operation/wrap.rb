@@ -1,6 +1,8 @@
 class Trailblazer::Operation
+  Base = self # TODO: we won't need this with 2.1.
+
   def self.Wrap(wrap, &block)
-    operation = Class.new(self) # self is Trailblazer::Operation.
+    operation = Class.new(Base)
     # DISCUSS: don't instance_exec when |pipe| given?
     operation.instance_exec(&block) # evaluate the nested pipe.
 

@@ -1,3 +1,7 @@
+# 2.0.6
+
+* Fix what we broke in 2.0.5, where `Wrap` would always use the current operation subclass and not the empty `Trailblazer::Operation`. Thanks to @mensfeld.
+
 # 2.0.5
 
 * In Wrap, use `self` instead of a hard class reference. This allows using Wrap in the compat gem.
