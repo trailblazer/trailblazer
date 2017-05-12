@@ -142,7 +142,7 @@ Comment::Create.call(whatever: "goes", in: "here")
 Comment::Create.(whatever: "goes", in: "here")
 ```
 
-Their high degree of encapsulation makes them a [replacement for test factories](#test), too.
+Their high degree of encapsulation makes them a [replacement for test factories](#tests), too.
 
 [Learn more.](http://trailblazer.to/gems/operation)
 
