@@ -264,7 +264,7 @@ end
 
 The operation can then parse incoming JSON documents in `validate` and render a document via `to_json`.
 
-[Learn more.](http://trailblazer.to/gems/operation/representer.html)
+[Learn more.](http://trailblazer.to/gems/operation/2.0/representer.html)
 
 ## Tests
 
