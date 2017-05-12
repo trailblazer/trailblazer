@@ -1,5 +1,6 @@
 require "test_helper"
 require "representable/json"
+require 'reform/form/dry'
 
 #---
 # infer
@@ -210,8 +211,13 @@ class DocsRepresenterFullExampleTest < Minitest::Spec
     extend Representer::DSL
 
     contract do
+      feature Reform::Form::Dry
+
       property :title
-      validates :title, presence: true
+
+      validation do
+        required(:title).filled(:str?)
+      end
     end
 
     representer :parse do
