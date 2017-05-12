@@ -179,5 +179,40 @@ class WrapTest < Minitest::Spec
 
     it { Create.( title: "Pie" ).inspect("model", "x", "err").must_equal %{<Result:true [#<struct WrapTest::Song id=nil, title=\"Pie\">, nil, nil] >} }
   end
+
+  class WrapNestedErrorsExampleOperation < Minitest::Spec
+    module Sequel
+      def self.transaction
+        yield
+      end
+    end
+
+  #:sequel-transaction
+  class WrapNestedErrorsOperation  < Trailblazer::Operation
+    step Wrap ->(*, &block) { Sequel.transaction(&block) } { # Adding ` == Pipetree::Railway::Right` makes it work but is extremely hacky
+      step -> (options) { false }
+    }
+    step :log_step
+    success :log_success
+    failure :log_failure
+
+    def log_step(options)
+      options["step"] = true
+    end
+
+    def log_failure(options)
+      options["failure"] = true
+    end
+
+    def log_success(options)
+      options["success"] = true
+    end
+
+
+  end
+  #:sequel-transaction end
+
+    it { WrapNestedErrorsOperation.().inspect("step", "failure", "success").must_equal %{<Result:false [nil, true, nil] >} }
+  end
 end
 
