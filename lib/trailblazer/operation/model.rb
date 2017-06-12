@@ -2,16 +2,26 @@ class Trailblazer::Operation
   def self.Model(model_class, action=nil)
     step = Model.for(model_class, action)
 
-    step = Pipetree::Step.new(step, "model.class" => model_class, "model.action" => action)
+    # step = Pipetree::Step.new(step, "model.class" => model_class, "model.action" => action)
+    task           = Railway::TaskBuilder.( step )
+    runner_options = {
+      alteration: ->(wrap_circuit) do
+        Trailblazer::Circuit::Activity::Before( wrap_circuit,
+          Trailblazer::Circuit::Wrap::Call,
+          Trailblazer::Operation::Railway::Inject( "model.class" => model_class, "model.action" => action ),
+          direction: Trailblazer::Circuit::Right
+        )
+      end
+    }
 
-    [ step, name: "model.build" ]
+    [ task, { name: "model.build" }, runner_options ]
   end
 
   module Model
     def self.for(model_class, action)
       builder = Model::Builder.new
 
-      ->(input, options) do
+      ->(options, **) do
         options["model"] = model = builder.(options, options["params"])
 
         options["result.model"] = result = Result.new(!model.nil?, {})

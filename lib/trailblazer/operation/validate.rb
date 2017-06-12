@@ -1,7 +1,5 @@
 class Trailblazer::Operation
   module Contract
-    Railway = Pipetree::Railway
-
     # result.contract = {..}
     # result.contract.errors = {..}
     # Deviate to left track if optional key is not found in params.

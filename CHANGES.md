@@ -1,3 +1,17 @@
+# 2.1
+
+* `operation.new` step removed.
+* Undocumented step behavior removed. You can't write to `self` anymore.
+
+        ```ruby
+        step :process
+        def process(*)
+          self["x"] = true
+        end
+        ```
+
+    Always write to `options`.
+
 # 2.0.6
 
 * Fix what we broke in 2.0.5, where `Wrap` would always use the current operation subclass and not the empty `Trailblazer::Operation`. Thanks to @mensfeld.
