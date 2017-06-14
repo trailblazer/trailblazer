@@ -15,20 +15,17 @@ class ModelTest < Minitest::Spec
   # :new new.
   it { Create.({})["model"].inspect.must_equal %{#<struct ModelTest::Song id=nil>} }
 
-  puts "***** Update"
   class Update < Create
-    puts self["__activity__"].circuit.instance_variable_get(:@map).size
     step Model( Song, :find ), override: true
-    puts self["__activity__"].circuit.instance_variable_get(:@map).size
   end
-  puts Update["__task_wraps__"].inspect
-  puts "::"
-  puts Update["__activity__"].inspect
+
+  #---
+  #- inheritance
 
   # :find it
   it { Update.({ id: 1 })["model"].inspect.must_equal %{#<struct ModelTest::Song id=1>} }
 
-  #- inheritance
+  # inherited inspect is ok
   it { Trailblazer::Operation::Inspect.(Update).must_equal %{[>model.build]} }
 
   #---
