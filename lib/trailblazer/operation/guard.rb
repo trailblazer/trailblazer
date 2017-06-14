@@ -3,15 +3,15 @@ require "trailblazer/operation/policy"
 class Trailblazer::Operation
   module Policy
     def self.Guard(proc, name: :default, &block)
-      Policy.step(Guard.build(proc), name: name)
+      Policy.step( Guard.build(proc), name: name )
     end
 
     module Guard
       def self.build(callable)
-        value = Option::KW.(callable) # Operation::Option
+        value = Trailblazer::Circuit::Task::Args::KW(callable)
 
         # this gets wrapped in a Operation::Result object.
-        ->(input, options) { Result.new( !!value.(input, options), {} ) }
+        ->(direction, options, flow_options) { Result.new( !!value.(direction, options, flow_options), {} ) }
       end
     end # Guard
   end

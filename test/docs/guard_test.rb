@@ -19,8 +19,8 @@ class DocsGuardProcTest < Minitest::Spec
     #~pipeonly
     step :process
 
-    def process(*)
-      self["x"] = true
+    def process(options, **)
+      options["x"] = true
     end
     #~pipeonly end
   end
@@ -42,7 +42,7 @@ class DocsGuardProcTest < Minitest::Spec
     step Policy::Guard( ->(options, current_user:, **) { current_user } ), override: true
   end
 
-  it { New["pipetree"].inspect.must_equal %{[>operation.new,>policy.default.eval,>process]} }
+  it { Trailblazer::Operation::Inspect.(New).must_equal %{[>policy.default.eval,>process]} }
 end
 
 #---
@@ -63,7 +63,10 @@ class DocsGuardTest < Minitest::Spec
     step Policy::Guard( MyGuard.new )
     #~pipe-only
     step :process
-    def process(*); self[:x] = true; end
+
+    def process(options, **)
+      options[:x] = true
+    end
     #~pipe-only end
   end
   #:callable-op end
@@ -84,7 +87,10 @@ class DocsGuardMethodTest < Minitest::Spec
     end
     #~pipe-onlyy
     step :process
-    def process(*); self["x"] = true; end
+
+    def process(options, **)
+      options["x"] = true
+    end
     #~pipe-onlyy end
   end
   #:method end
@@ -129,7 +135,7 @@ class DocsGuardInjectionTest < Minitest::Spec
   #:di-call
   Create.({},
     "current_user"        => Module,
-    "policy.default.eval" => Trailblazer::Operation::Policy::Guard.build(->(options) { false })
+    "policy.default.eval" => Trailblazer::Operation::Policy::Guard.build(->(options, **) { false })
   )
   #:di-call end
     result.inspect("").must_equal %{<Result:false [nil] >} }
@@ -157,7 +163,7 @@ class DocsGuardPositionTest < Minitest::Spec
   end
   #:before end
 
-  it { Create["pipetree"].inspect.must_equal %{[>operation.new,>policy.default.eval,>model!]} }
+  it { Trailblazer::Operation::Inspect.(Create).must_equal %{[>policy.default.eval,>model!]} }
   it do
     #:before-pipe
       puts Create["pipetree"].inspect(style: :rows) #=>

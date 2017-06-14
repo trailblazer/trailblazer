@@ -8,9 +8,11 @@ class Trailblazer::Operation
         @path = path
       end
 
-      def call(options, **kws)
+      # incoming low-level {Task API}.
+      # outgoing Task::Binary API.
+      def call(direction, options, flow_options)
         condition = options[ @path ] # this allows dependency injection.
-        result    = condition.(options, **kws)
+        result    = condition.(direction, options, flow_options)
 
         options["policy.#{@name}"]        = result["policy"] # assign the policy as a skill.
         options["result.policy.#{@name}"] = result
@@ -29,7 +31,8 @@ class Trailblazer::Operation
       step = Eval.new( name: name, path: path )
 
 
-      task           = Railway::TaskBuilder.( step )
+      # task           = Railway::TaskBuilder.( step )
+      task = Trailblazer::Circuit::Task::Binary( step ) # maps step return value to Left/Right.
 
       runner_options = {
         alteration: ->(wrap_circuit) do
