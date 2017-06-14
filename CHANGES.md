@@ -12,6 +12,8 @@
 
     Always write to `options`.
 
+* self[] removed
+
 # 2.0.6
 
 * Fix what we broke in 2.0.5, where `Wrap` would always use the current operation subclass and not the empty `Trailblazer::Operation`. Thanks to @mensfeld.

@@ -16,7 +16,7 @@ class Trailblazer::Operation
         end
 
         # Instantiate the actual policy object, and call it.
-        def call(input, options)
+        def call(options, **)
           policy = build_policy(options)          # this translates to Pundit interface.
           result!(policy.send(@action), policy)
         end

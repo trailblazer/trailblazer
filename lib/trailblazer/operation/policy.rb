@@ -8,9 +8,9 @@ class Trailblazer::Operation
         @path = path
       end
 
-      def call(input, options)
-        condition = options[@path] # this allows dependency injection.
-        result    = condition.(input, options)
+      def call(options, **kws)
+        condition = options[ @path ] # this allows dependency injection.
+        result    = condition.(options, **kws)
 
         options["policy.#{@name}"]        = result["policy"] # assign the policy as a skill.
         options["result.policy.#{@name}"] = result
@@ -27,9 +27,25 @@ class Trailblazer::Operation
       path = "policy.#{name}.eval"
 
       step = Eval.new( name: name, path: path )
-      step = Pipetree::Step.new(step, path => condition)
 
-      [ step, name: path ]
+
+      task           = Railway::TaskBuilder.( step )
+
+      runner_options = {
+        alteration: ->(wrap_circuit) do
+          Trailblazer::Circuit::Activity::Before( wrap_circuit,
+            Trailblazer::Circuit::Wrap::Call,
+            Trailblazer::Operation::Railway::Inject( path => condition ),
+            direction: Trailblazer::Circuit::Right
+          )
+        end
+      }
+
+
+
+      # step = Pipetree::Step.new(step, path => condition)
+
+      [ task, { name: path }, runner_options ]
     end
   end
 end
