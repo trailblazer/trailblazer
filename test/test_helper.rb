@@ -9,7 +9,6 @@ Reform::Form.class_eval do
 end
 
 require "trailblazer/operation/callback"
-require "trailblazer/operation/procedural/validate"
 
 module Mock
   class Result
