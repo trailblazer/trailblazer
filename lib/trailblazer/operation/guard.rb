@@ -6,8 +6,7 @@ class Trailblazer::Operation
 
     module Guard
       def self.build(callable)
-        value = Trailblazer::Operation::DeprecatedOptions::KW(callable) # TODO: remove in 2.2.
-        # value = Trailblazer::Circuit::Task::Args::KW(callable)
+        value = Trailblazer::Circuit::Task::Args::KW(callable)
 
         # this gets wrapped in a Operation::Result object.
         ->(direction, options, flow_options) { Result.new( !!value.(direction, options, flow_options), {} ) }

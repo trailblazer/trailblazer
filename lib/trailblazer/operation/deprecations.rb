@@ -16,7 +16,6 @@ module Trailblazer
       def self.deprecate(proc)
         warn "[Trailblazer] Please use the step API `def my_step!(options, **)` for your step: #{proc}"
       end
-    end
-
+    end # DeprecatedOptions
   end
 end
