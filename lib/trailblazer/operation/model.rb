@@ -4,14 +4,12 @@ class Trailblazer::Operation
 
     # step = Pipetree::Step.new(step, "model.class" => model_class, "model.action" => action)
     task           = Railway::TaskBuilder.( step )
+
     runner_options = {
-      alteration: ->(wrap_circuit) do
-        Trailblazer::Circuit::Activity::Before( wrap_circuit,
-          Trailblazer::Circuit::Wrap::Call,
-          Trailblazer::Operation::Railway::Inject( "model.class" => model_class, "model.action" => action ),
-          direction: Trailblazer::Circuit::Right
-        )
-      end
+      alteration: TaskWrap::Injection::SetDefaults(
+        "model.class"  => model_class,
+        "model.action" => action
+      )
     }
 
     [ task, { name: "model.build" }, runner_options ]

@@ -35,15 +35,10 @@ class Trailblazer::Operation
       task = Trailblazer::Circuit::Task::Binary( step ) # maps step return value to Left/Right.
 
       runner_options = {
-        alteration: ->(wrap_circuit) do
-          Trailblazer::Circuit::Activity::Before( wrap_circuit,
-            Trailblazer::Circuit::Wrap::Call,
-            Trailblazer::Operation::Railway::Inject( path => condition ),
-            direction: Trailblazer::Circuit::Right
-          )
-        end
+        alteration: TaskWrap::Injection::SetDefaults(
+          path => condition
+        )
       }
-
 
 
       # step = Pipetree::Step.new(step, path => condition)

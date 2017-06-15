@@ -18,6 +18,7 @@
 TODO:
 document Task API and define step API
 deprecate step->(options) ?
+injectable, per-operation step arguments strategy?
 
 # 2.0.6
 
