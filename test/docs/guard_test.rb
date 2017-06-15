@@ -23,10 +23,7 @@ class DocsGuardProcTest < Minitest::Spec
   it { Create.(pass: true)["result.policy.default"].success?.must_equal true }
   it { Create.(pass: false)["result.policy.default"].success?.must_equal false }
 
-
-
-
-   #---
+  #---
   #- Guard inheritance
   class New < Create
     step Policy::Guard( ->(options, current_user:, **) { current_user } ), override: true

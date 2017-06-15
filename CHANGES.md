@@ -13,6 +13,7 @@
     Always write to `options`.
 
 * self[] removed
+* Fixed `Guard` where procs could receive one argument, only. Guards follow the step interface: `Policy::Guard( ->(options, **) { .. } )
 
 TODO:
 document Task API and define step API
