@@ -3,13 +3,13 @@ require "test_helper"
 #--
 # with proc
 class DocsGuardProcTest < Minitest::Spec
-  # test without KWs, only options.
+  # test without KWs, only options. should deprecate.
   class Update < Trailblazer::Operation
     step Policy::Guard( ->(options) { options["params"][:pass] } )
     step ->(options, *) { options["x"] = true }
   end
 
-  it { Update.(pass: false)["x"].must_equal nil }
+  it { Update.(pass: false)["x"].must_be_nil }
   it { Update.(pass: true)["x"].must_equal true }
   # TODO: test excp when current_user not available
 
@@ -26,7 +26,7 @@ class DocsGuardProcTest < Minitest::Spec
   end
   #:proc end
 
-  it { Create.(pass: false)["x"].must_equal nil }
+  it { Create.(pass: false)["x"].must_be_nil }
   it { Create.(pass: true)["x"].must_equal true }
 
   #- result object, guard
@@ -71,7 +71,7 @@ class DocsGuardTest < Minitest::Spec
   end
   #:callable-op end
 
-  it { Create.(pass: false)[:x].must_equal nil }
+  it { Create.(pass: false)[:x].must_be_nil }
   it { Create.(pass: true)[:x].must_equal true }
 end
 

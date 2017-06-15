@@ -18,3 +18,5 @@ gem "trailblazer-operation", path: "../operation"
 # gem "trailblazer-operation", github: "trailblazer/trailblazer-operation"
 
 gem "minitest-line"
+
+gem "trailblazer-circuit", path: "../circuit"
