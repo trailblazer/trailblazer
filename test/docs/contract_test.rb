@@ -29,16 +29,15 @@ class DocsContractOverviewTest < Minitest::Spec
   end
   #:overv-reform end
 
-  puts Create["pipetree"].inspect(style: :rows)
+  puts Trailblazer::Operation::Inspect.(Create, style: :rows)
 
 =begin
   #:overv-reform-pipe
-   0 =======================>>operation.new
-   1 ==========================&model.build
-   2 =======================>contract.build
-   3 ==============&validate.params.extract
-   4 ====================&contract.validate
-   5 =========================&persist.save
+   0 ==========================&model.build
+   1 =======================>contract.build
+   2 ==============&validate.params.extract
+   3 ====================&contract.validate
+   4 =========================&persist.save
   #:overv-reform-pipe end
 =end
 
@@ -384,7 +383,7 @@ class DryValidationContractTest < Minitest::Spec
   end
   #:dry-schema end
 
-  puts "@@@@@ #{Create["pipetree"].inspect(style: :rows)}"
+  puts "@@@@@ #{Trailblazer::Operation::Inspect.(Create, style: :rows)}"
 
   it { Create.({}).inspect("model", "result.contract.params").must_equal %{<Result:false [nil, #<Dry::Validation::Result output={} errors={:id=>[\"is missing\"]}>] >} }
   it { Create.({ id: 1 }).inspect("model", "result.contract.params").must_equal %{<Result:false [#<struct DryValidationContractTest::Song id=nil, title=nil>, #<Dry::Validation::Result output={:id=>1} errors={}>] >} }
@@ -401,7 +400,7 @@ class DryValidationContractTest < Minitest::Spec
       required(:id).filled
     end)
 
-    step Contract::Validate( name: "params" ), before: "operation.new"
+    step Contract::Validate( name: "params" ), prepend: true
     #~more
     #~more end
   end
@@ -423,7 +422,7 @@ class DryExplicitSchemaTest < Minitest::Spec
     extend Contract::DSL
     contract "params", MySchema
 
-    step Contract::Validate( name: "params" ), before: "operation.new"
+    step Contract::Validate( name: "params" ), prepend: true
   end
   #:dry-schema-expl end
 end

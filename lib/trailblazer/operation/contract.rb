@@ -8,21 +8,23 @@
 # Needs #[], #[]= skill dependency.
 class Trailblazer::Operation
   module Contract
-    def self.Build(name:"default", constant:nil, builder: nil)
-      step = ->(input, options) { Build.for(input, options, name: name, constant: constant, builder: builder) }
+    def self.Build(name: "default", constant: nil, builder: nil)
+      step = ->(direction, options, flow_options) { Build.(options, flow_options, name: name, constant: constant, builder: builder) }
 
-      [ step, name: "contract.build" ]
+      task = Trailblazer::Circuit::Task::Binary( step )
+
+      [ task, name: "contract.build" ]
     end
 
     module Build
-      # bla build contract at runtime.
-      def self.for(operation, options, name:"default", constant:nil, builder: nil)
+      # Build contract at runtime.
+      def self.call(options, flow_options, name: "default", constant: nil, builder: nil)
         # TODO: we could probably clean this up a bit at some point.
         contract_class = constant || options["contract.#{name}.class"]
-        model          = options["model"] # FIXME: model.default
+        model          = options["model"]
         name           = "contract.#{name}"
 
-        return options[name] = Option::KW.(builder).(operation, options, constant: contract_class, name: name) if builder
+        return options[name] = Trailblazer::Circuit::Task::Args::KW(builder).(options.merge( constant: contract_class, name: name ), flow_options) if builder
 
         options[name] = contract_class.new(model)
       end

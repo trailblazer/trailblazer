@@ -4,43 +4,54 @@ class Trailblazer::Operation
     # result.contract.errors = {..}
     # Deviate to left track if optional key is not found in params.
     # Deviate to left if validation result falsey.
-    def self.Validate(skip_extract:false, name: "default", representer:false, key: nil) # DISCUSS: should we introduce something like Validate::Deserializer?
+    def self.Validate(skip_extract: false, name: "default", representer: false, key: nil) # DISCUSS: should we introduce something like Validate::Deserializer?
       params_path = "contract.#{name}.params" # extract_params! save extracted params here.
 
       return Validate::Call(name: name, representer: representer, params_path: params_path) if skip_extract || representer
 
-      extract_step,  extract_options  = Validate::Extract(key: key, params_path: params_path)
-      validate_step, validate_options = Validate::Call(name: name, representer: representer, params_path: params_path)
+      extract_validate = Class.new(Trailblazer::Operation) do
+        step Validate::Extract(key: key, params_path: params_path)
+        step Validate::Call(name: name, representer: representer, params_path: params_path)
+      end # TODO: use Activity with ::task/
 
-      pipe = Railway.new # TODO: make nested pipes simpler.
-        .add(Railway::Right, Railway.&(extract_step),  extract_options)
-        .add(Railway::Right, Railway.&(validate_step), validate_options)
+      # task = Trailblazer::Operation::Nested( extract_validate["__activity__"] ) # FIXME
+      __task = Trailblazer::Circuit::Nested( extract_validate["__activity__"] ) # FIXME
+      # FIXME: map end properly to an exit.
+      task = ->(*args) {
+        direction, options, flow_options = __task.(*args)
+        [
+          direction.is_a?(Railway::End::Failure) ? Trailblazer::Circuit::Left : Trailblazer::Circuit::Right,
+          options,
+          flow_options
+        ]
+      }
 
-      step = ->(input, options) { pipe.(input, options).first <= Railway::Right }
-
-      [step, name: "contract.#{name}.validate"]
+      [ task, { name: "contract.#{name}.validate" }, {} ]
     end
 
     module Validate
       # Macro: extract the contract's input from params by reading `:key`.
       def self.Extract(key:nil, params_path:nil)
         # TODO: introduce nested pipes and pass composed input instead.
-        step = ->(input, options) do
+        step = ->(directon, options, flow_options) do
           options[params_path] = key ? options["params"][key] : options["params"]
         end
 
-        [ step, name: params_path ]
+        task = Trailblazer::Circuit::Task::Binary( step )
+
+        [ task, { name: params_path }, {} ]
       end
 
       # Macro: Validates contract `:name`.
       def self.Call(name:"default", representer:false, params_path:nil)
-        step = ->(input, options) {
+        step = ->(direction, options, flow_options) {
           validate!(options, name: name, representer: options["representer.#{name}.class"], params_path: params_path)
         }
 
-        step = Pipetree::Step.new( step, "representer.#{name}.class" => representer )
+        task = Trailblazer::Circuit::Task::Binary( step )
+        # Pipetree::Step.new( step, "representer.#{name}.class" => representer ) # FIXME!
 
-        [ step, name: "contract.#{name}.call" ]
+        [ task, { name: "contract.#{name}.call" }, {} ]
       end
 
       def self.validate!(options, name:nil, representer:false, from: "document", params_path:nil)
