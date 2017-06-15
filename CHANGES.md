@@ -15,7 +15,8 @@
 * self[] removed
 
 TODO:
-document Task API
+document Task API and define step API
+deprecate step->(options) ?
 
 # 2.0.6
 
