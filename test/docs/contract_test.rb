@@ -146,7 +146,7 @@ class DocsContractSeparateKeyTest < Minitest::Spec
     step Contract::Validate( skip_extract: true )
     step Contract::Persist( method: :sync )
 
-    def extract_params!(options)
+    def extract_params!(options, **)
       options["contract.default.params"] = options["params"][type]
     end
   end
@@ -447,7 +447,7 @@ class DocContractBuilderTest < Minitest::Spec
     step Contract::Persist( method: :sync )
 
     def default_contract!(options, constant:, model:, **)
-      constant.new(model, current_user: self["current_user"])
+      constant.new(model, current_user: options ["current_user"])
     end
   end
   #:builder-option end

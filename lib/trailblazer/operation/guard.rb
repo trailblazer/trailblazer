@@ -6,10 +6,10 @@ class Trailblazer::Operation
 
     module Guard
       def self.build(callable)
-        value = Trailblazer::Circuit::Task::Args::KW(callable)
+        value = Trailblazer::Args::KW(callable)
 
         # this gets wrapped in a Operation::Result object.
-        ->(direction, options, flow_options) { Result.new( !!value.(direction, options, flow_options), {} ) }
+        ->(direction, options, flow_options) { Result.new( !!value.(options, flow_options), {} ) }
       end
     end # Guard
   end

@@ -16,7 +16,7 @@ class Trailblazer::Operation
 
       # task = Trailblazer::Operation::Nested( extract_validate["__activity__"] ) # FIXME
       __task = Trailblazer::Circuit::Nested( extract_validate["__activity__"] ) # FIXME
-      # FIXME: map end properly to an exit.
+      # FIXME: map end properly to another task.
       task = ->(*args) {
         direction, options, flow_options = __task.(*args)
         [
