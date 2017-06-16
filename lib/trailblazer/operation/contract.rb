@@ -24,7 +24,7 @@ class Trailblazer::Operation
         model          = options["model"]
         name           = "contract.#{name}"
 
-        return options[name] = Trailblazer::Circuit::Task::Args::KW(builder).(options.merge( constant: contract_class, name: name ), flow_options) if builder
+        return options[name] = Trailblazer::Args::KW(builder).(options.merge( constant: contract_class, name: name ), flow_options) if builder
 
         options[name] = contract_class.new(model)
       end

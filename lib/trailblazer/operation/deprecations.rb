@@ -1,6 +1,6 @@
 module Trailblazer
   class Operation
-    class DeprecatedOptions < Trailblazer::Circuit::Task::Args
+    class DeprecatedOptions < Args
       def self.call!(proc, direction, options, flow_options, *args)
         if proc.is_a?(Proc) && proc.arity == 1
           deprecate(proc)
