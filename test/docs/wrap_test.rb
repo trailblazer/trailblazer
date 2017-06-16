@@ -34,12 +34,12 @@ class WrapTest < Minitest::Spec
   class WrapReturnTest < Minitest::Spec
     class Create < Trailblazer::Operation
       step Wrap ->(options, *, &block) { options["yield?"] ? block.call : false } {
-        step ->(options) { options["x"] = true }
+        step ->(options, **) { options["x"] = true }
         success :noop!
         # ...
       }
 
-      def noop!(options)
+      def noop!(options, **)
       end
     end
 
@@ -59,7 +59,7 @@ class WrapTest < Minitest::Spec
 
     class Create < Trailblazer::Operation
       step Wrap( MyWrapper ) {
-        step ->(options) { options["x"] = true }
+        step ->(options, **) { options["x"] = true }
         # ...
       }
     end
@@ -69,16 +69,18 @@ class WrapTest < Minitest::Spec
     it { Create.({}, "yield?" => true).inspect("x").must_equal %{<Result:true [true] >} }
   end
 
-  #-
-  # arguments for Wrap
+  #---
+  #- arguments for Wrap
+  #   ->(options, operation, operation_class, &block)
+  #
+  #  THOSE WILL SOON BE DEPRECATED AND REMOVED.
   class Update < Trailblazer::Operation
-    step Wrap ->(options, operation, pipe, &block) { operation["yield?"] ? block.call : false } {
-      step ->(options) { options["x"] = true }
+    step Wrap ->(options, operation, pipe, &block) { options["additional_args_soon_deprecated"] = [operation.class, pipe["__sequence__"].size]; block.call } {
+      step ->(options, **) { options["x"] = true }
     }
   end
 
-  it { Update.().inspect("x").must_equal %{<Result:false [nil] >} }
-  it { Update.({}, "yield?" => true).inspect("x").must_equal %{<Result:true [true] >} }
+  it { Update.().inspect("x", "additional_args_soon_deprecated").must_equal %{<Result:true [true, [WrapTest::Update, 1]] >} }
 
   class WrapExampleProcTest < Minitest::Spec
     module Sequel
@@ -115,7 +117,7 @@ class WrapTest < Minitest::Spec
       # handle errors after the wrap
     end
 
-    def notify!(options)
+    def notify!(options, **)
       MyNotifier.mail
     end
     #~wrap-only end
@@ -170,7 +172,7 @@ class WrapTest < Minitest::Spec
       # handle errors after the wrap
     end
 
-    def notify!(options)
+    def notify!(options, **)
       MyNotifier.mail # send emails, because success...
     end
     #~wrap-onlyy end

@@ -2,27 +2,30 @@ class Trailblazer::Operation
   Base = self # TODO: we won't need this with 2.1.
 
   def self.Wrap(user_wrap, &block)
-    # TODO: immutable API for creating operations.
-    operation = Class.new(Base)
-    operation.instance_exec(&block) # evaluate the wrapped operation code.
+    # TODO: immutable API for creating operations. Operation.build(step .. , step ..)
+    operation_class = Class.new(Base)
+    operation_class.instance_exec(&block) # evaluate the wrapped operation code.
 
-    step = Wrap.Task(user_wrap, operation) # FIXME: must return Nested
+    step = Wrap.Task(user_wrap, operation_class) # FIXME: must return Nested
 
     [ step, {}, {} ]
   end
 
   module Wrap
-    def self.Task(user_wrap, activity)
+    def self.Task(user_wrap, operation_class)
       ->(direction, options, flow_options) {
 
-        # this block is invoked when the user_wrap calls `yield`.
-        default_block = ->{ # runs the Wrap'ped operation.
-          activity.__call__( activity[:Start], options, flow_options ) # here, an exception could happen. they are usually caught in the user code's Wrap'per.
+        # This block is passed to the user's wrap. It's invoked when the user_wrap calls `yield`.
+        default_block = ->{ # runs the Wrap'ped operation_class.
+          _options, _flow_options = Railway::TaskWrap.arguments_for_call(operation_class, direction, options, flow_options)
+
+          # here, an exception could happen. they are usually caught in the user_wrap.
+          operation_class["__activity__"].( operation_class["__activity__"][:Start], _options, _flow_options )
         }
 
-        # direction, options, flow_options = user_wrap.(options, flow_options[:exec_context], activity, &default_block )
+        # direction, options, flow_options = user_wrap.(options, flow_options[:exec_context], operation_class, &default_block )
         # call the user's wrap block. it returns true/false (ATM, but we can soon extend that to a Task interface).
-        result = user_wrap.(options, flow_options[:exec_context], activity, &default_block )
+        result = user_wrap.( options, flow_options[:exec_context], operation_class, &default_block )
 
         # DISCUSS: result can be [ Success/Failure, options, flow_options ] or false.
 
