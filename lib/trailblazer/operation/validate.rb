@@ -7,9 +7,12 @@ class Trailblazer::Operation
     def self.Validate(skip_extract: false, name: "default", representer: false, key: nil) # DISCUSS: should we introduce something like Validate::Deserializer?
       params_path = "contract.#{name}.params" # extract_params! save extracted params here.
 
-      return Validate::Call(name: name, representer: representer, params_path: params_path) if skip_extract || representer
+      # Return the Validate::Call task if the first step, the params extraction, is not desired.
+      if skip_extract || representer
+        return Validate::Call(name: name, representer: representer, params_path: params_path)
+      end
 
-      extract_validate = Class.new(Trailblazer::Operation) do
+      extract_validate = Class.new(Trailblazer::Operation) do # TODO: use Base so compat works.
         step Validate::Extract(key: key, params_path: params_path)
         step Validate::Call(name: name, representer: representer, params_path: params_path)
       end # TODO: use Activity with ::task/
@@ -20,7 +23,7 @@ class Trailblazer::Operation
       task = ->(*args) {
         direction, options, flow_options = __task.(*args)
         [
-          direction.is_a?(Railway::End::Failure) ? Trailblazer::Circuit::Left : Trailblazer::Circuit::Right,
+          direction.is_a?(Railway::End::Failure) ? Trailblazer::Circuit::Left : Trailblazer::Circuit::Right, # TODO: merge with Wrap.
           options,
           flow_options
         ]
