@@ -1,14 +1,17 @@
 class Trailblazer::Operation
   def self.Rescue(*exceptions, handler: lambda { |*| }, &block)
     exceptions = [StandardError] unless exceptions.any?
-    handler    = Option.(handler)
+    handler    = Trailblazer::Option(handler)
 
-    rescue_block = ->(options, operation, *, &nested_pipe) {
+    # This block is evaluated by {Wrap} which currently expects a binary return type.
+    rescue_block = ->(options, operation, *, &nested_activity) {
       begin
-        res = nested_pipe.call
-        res.first == ::Pipetree::Railway::Right # FIXME.
+        direction, options, flow_options = nested_activity.call
+
+        # direction == Circuit::Right # FIXME. rewire this properly FIXME: do we want Circuit knowledge around here?
+        direction.kind_of?(Railway::End::Success) # FIXME: redundant logic from Railway::call.
       rescue *exceptions => exception
-        handler.call(operation, exception, options)
+        handler.call(exception, options, exec_context: operation) # FIXME: when there's an error here, it shows the wrong exception!
         false
       end
     }

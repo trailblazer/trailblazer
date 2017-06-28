@@ -14,7 +14,7 @@ class Trailblazer::Operation
 
     module Dynamic
       def initialize(wrapped)
-        @wrapped = Option::KW.(wrapped)
+        @wrapped = Trailblazer::Option::KW(wrapped)
       end
     end
   end

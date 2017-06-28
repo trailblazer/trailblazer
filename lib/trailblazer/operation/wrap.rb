@@ -1,6 +1,7 @@
 class Trailblazer::Operation
-  Base = self # TODO: we won't need this with 2.1.
+  Base = self # TODO: we won't need this with 3.0.
 
+  # TODO: make Wrap::Subprocess not binary but actually wire its ends via the circuit.
   def self.Wrap(user_wrap, &block)
     # TODO: immutable API for creating operations. Operation.build(step .. , step ..)
     operation_class = Class.new(Base)
@@ -16,10 +17,13 @@ class Trailblazer::Operation
       ->(direction, options, flow_options) {
 
         # This block is passed to the user's wrap. It's invoked when the user_wrap calls `yield`.
+        # @return {Task interface}
         default_block = ->{ # runs the Wrap'ped operation_class.
           _options, _flow_options = Railway::TaskWrap.arguments_for_call(operation_class, direction, options, flow_options)
 
           # here, an exception could happen. they are usually caught in the user_wrap.
+          # we need to run Activity#call here so the original __call__ doesn't override :exec_context. this will be fixed
+          # with call being a circuit itself.
           operation_class["__activity__"].( operation_class["__activity__"][:Start], _options, _flow_options )
         }
 

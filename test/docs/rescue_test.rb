@@ -8,19 +8,19 @@ class NestedRescueTest < Minitest::Spec
 
   class NestedInsanity < Trailblazer::Operation
     step Rescue {
-      step ->(options) { options["a"] = true }
+      step ->(options, **) { options["a"] = true }
       step Rescue {
-        step ->(options) { options["y"] = true }
-        success ->(options) { raise Y if options["raise-y"] }
-        step ->(options) { options["z"] = true }
+        step ->(options, **) { options["y"] = true }
+        success ->(options, **) { raise Y if options["raise-y"] }
+        step ->(options, **) { options["z"] = true }
       }
-      step ->(options) { options["b"] = true }
-      success ->(options) { raise A if options["raise-a"] }
-      step ->(options) { options["c"] = true }
-      failure ->(options) { options["inner-err"] = true }
+      step ->(options, **) { options["b"] = true }
+      success ->(options, **) { raise A if options["raise-a"] }
+      step ->(options, **) { options["c"] = true }
+      failure ->(options, **) { options["inner-err"] = true }
     }
-    step ->(options) { options["e"] = true }
-    failure ->(options) { options["outer-err"] = true }
+    step ->(options, **) { options["e"] = true }
+    failure ->(options, **) { options["outer-err"] = true }
   end
 
   it { NestedInsanity["pipetree"].inspect.must_equal %{[>operation.new,>Rescue:10,>rescue_test.rb:22,<rescue_test.rb:23]} }
@@ -120,7 +120,7 @@ class RescueTest < Minitest::Spec
     step Rescue( RecordNotFound, handler: :rollback! ) {
       step Wrap ->(*, &block) { Sequel.transaction do block.call end } {
         step Model( Song, :find )
-        step ->(options) { options["model"].lock! } # lock the model.
+        step ->(options, *) { options["model"].lock! } # lock the model.
         step Contract::Build( constant: MyContract )
         step Contract::Validate( )
         step Contract::Persist( method: :sync )
@@ -134,7 +134,7 @@ class RescueTest < Minitest::Spec
       #~ex end
     end
 
-    def error!(options)
+    def error!(options, *)
       #~ex
       options["err"] = true
       #~ex end
@@ -148,7 +148,7 @@ class RescueTest < Minitest::Spec
     it { assert_raises(RuntimeError) { Create.( id: "RuntimeError!" ) } }
     it do
       Create.( id: 1, title: "Pie" )
-      Sequel.result.first.must_equal Pipetree::Railway::Right
+      Sequel.result.first.must_be_kind_of Trailblazer::Operation::Railway::End::Success
     end
   end
 end

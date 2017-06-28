@@ -31,7 +31,7 @@ class DocsNestedOperationTest < Minitest::Spec
   end
   #:update end
 
-  puts Update["pipetree"].inspect(style: :rows)
+  # puts Update["pipetree"].inspect(style: :rows)
 
   #-
   # Edit allows grabbing model and contract

@@ -35,7 +35,7 @@ class Trailblazer::Operation
       def self.call_builder(options, flow_options, builder:raise, constant:raise, name:raise)
         builder_options = Trailblazer::Context( options, constant: constant, name: name ) # options.merge( .. )
 
-        Trailblazer::Args::KW(builder).(builder_options, flow_options)
+        Trailblazer::Option::KW(builder).(builder_options, flow_options)
       end
     end
 
