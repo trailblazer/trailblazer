@@ -19,4 +19,4 @@ gem "trailblazer-operation", path: "../operation"
 
 gem "minitest-line"
 
-gem "trailblazer-circuit", path: "../circuit"
+gem "trailblazer-circuit", path: "../trailblazer-circuit"
