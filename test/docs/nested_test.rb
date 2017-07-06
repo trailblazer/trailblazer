@@ -74,16 +74,16 @@ class DocsNestedOperationTest < Minitest::Spec
   #---
   #- shared data
   class B < Trailblazer::Operation
-    success ->(options) { options["can.B.see.it?"] = options["this.should.not.be.visible.in.B"] }
-    success ->(options) { options["can.B.see.current_user?"] = options["current_user"] }
-    success ->(options) { options["can.B.see.params?"] = options["params"] }
-    success ->(options) { options["can.B.see.A.class.data?"] = options["A.class.data"] }
+    success ->(options, **) { options["can.B.see.it?"] = options["this.should.not.be.visible.in.B"] }
+    success ->(options, **) { options["can.B.see.current_user?"] = options["current_user"] }
+    success ->(options, **) { options["can.B.see.params?"] = options["params"] }
+    success ->(options, **) { options["can.B.see.A.class.data?"] = options["A.class.data"] }
   end
 
   class A < Trailblazer::Operation
     self["A.class.data"] = true
 
-    success ->(options) { options["this.should.not.be.visible.in.B"] = true }
+    success ->(options, **) { options["this.should.not.be.visible.in.B"] = true }
     step Nested( B )
   end
 
@@ -106,7 +106,7 @@ class DocsNestedOperationTest < Minitest::Spec
   class C < Trailblazer::Operation
     self["C.class.data"] = true
 
-    success ->(options) { options["this.should.not.be.visible.in.B"] = true }
+    success ->(options, **) { options["this.should.not.be.visible.in.B"] = true }
 
     step Nested( B, input: ->(options, runtime_data:, mutable_data:, **) {
       runtime_data.merge( "this.should.not.be.visible.in.B" => mutable_data["this.should.not.be.visible.in.B"] )
@@ -128,7 +128,7 @@ class NestedInput < Minitest::Spec
 
   #:input-pi
   class MultiplyByPi < Trailblazer::Operation
-    step ->(options) { options["pi_constant"] = 3.14159 }
+    step ->(options, **) { options["pi_constant"] = 3.14159 }
     step Nested( Multiplier, input: ->(options, mutable_data:, runtime_data:, **) do
       { "y" => mutable_data["pi_constant"],
         "x" => runtime_data["x"] }
@@ -164,7 +164,7 @@ class NestedInputCallable < Minitest::Spec
 
   #:input-callable-op
   class MultiplyByPi < Trailblazer::Operation
-    step ->(options) { options["pi_constant"] = 3.14159 }
+    step ->(options, **) { options["pi_constant"] = 3.14159 }
     step Nested( Multiplier, input: MyInput )
   end
   #:input-callable-op end
@@ -202,13 +202,13 @@ end
 class NestedClassLevelTest < Minitest::Spec
   #:class-level
   class New < Trailblazer::Operation
-    step ->(options) { options["class"] = true }, before: "operation.new"
-    step ->(options) { options["x"] = true }
+    step ->(options, **) { options["class"] = true }#, before: "operation.new"
+    step ->(options, **) { options["x"] = true }
   end
 
   class Create < Trailblazer::Operation
     step Nested( New )
-    step ->(options) { options["y"] = true }
+    step ->(options, **) { options["y"] = true }
   end
   #:class-level end
 
@@ -223,15 +223,15 @@ class NestedWithCallableTest < Minitest::Spec
 
   class X < Trailblazer::Operation
     step ->(options, params:, **) { options["params.original"] = params }
-    step ->(options) { options["x"] = true }
+    step ->(options, **) { options["x"] = true }
   end
 
   class Y < Trailblazer::Operation
-    step ->(options) { options["y"] = true }
+    step ->(options, **) { options["y"] = true }
   end
 
   class A < Trailblazer::Operation
-    step ->(options) { options["z"] = true }
+    step ->(options, **) { options["z"] = true }
     step Nested( ->(options, *) { options["class"] } )
   end
 

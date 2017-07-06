@@ -28,18 +28,27 @@ class Trailblazer::Operation
       invoker            = Caller.new(step) if is_nestable_object.(step)
 
       options_for_nested = Options.new
-      options_for_nested = Options::Dynamic.new(input) if input
+      options_for_nested = Options::Dynamic.new(input) if input # FIXME: they need to have symbol keys!!!!
 
       options_for_composer = Options::Output.new
       options_for_composer = Options::Output::Dynamic.new(output) if output
 
-      # This lambda is the strut added on the track, executed at runtime.
-      ->(operation, options) do
-        result = invoker.(operation, options, options_for_nested.(operation, options)) # TODO: what about containers?
+      # This lambda is the task added to the circuit, executed at runtime.
+      ->(direction, options, flow_options) do
+        operation = flow_options[:exec_context]
+
+        result = invoker.(operation, options, options_for_nested.(operation, options), flow_options) # TODO: what about containers?
 
         options_for_composer.(operation, options, result).each { |k,v| options[k] = v }
 
-        result.success? # DISCUSS: what if we could simply return the result object here?
+        direction = result[0]
+        [
+        direction.kind_of?(Railway::End::Success) ? # FIXME: redundant logic from Railway::call.
+          Trailblazer::Circuit::Right : Trailblazer::Circuit::Left,
+        # result.success? # DISCUSS: what if we could simply return the result object here?
+         options,
+         flow_options
+        ]
       end
     end
 
@@ -49,16 +58,21 @@ class Trailblazer::Operation
     end
 
     # Is executed at runtime and calls the nested operation.
+# FIXME: this can be removed once this is really just a Circuit::Nested() with a incoming and outgoing options mapper.
     class Caller
       include Element
 
-      def call(input, options, options_for_nested)
-        call_nested(nested(input, options), options_for_nested)
+      def call(input, options, options_for_nested, flow_options)
+        call_nested(nested(input, options), options_for_nested, flow_options)
       end
 
     private
-      def call_nested(operation, options)
-        operation._call(options)
+      def call_nested(operation_class, options, flow_options)
+        # FIXME: this is what happens in Skill::call.
+        _options = Trailblazer::Skill.new options, operation_class.skills
+
+        # puts "@@@@@ #{options.keys.inspect}"
+        operation_class.__call__(operation_class["__activity__"][:Start], _options, flow_options) # FIXME: redundant with Wrap, consolidate!
       end
 
       def nested(*); @wrapped end
@@ -76,7 +90,10 @@ class Trailblazer::Operation
       include Element
 
       # Per default, only runtime data for nested operation.
-      def call(input, options)
+      def call(operation, options)
+        # this must return a Skill.
+        # Trailblazer::Skill::KeywordHash options.to_runtime_data[0]
+
         options.to_runtime_data[0]
       end
 
@@ -84,6 +101,7 @@ class Trailblazer::Operation
         include Element::Dynamic
 
         def call(operation, options)
+          # Trailblazer::Skill::KeywordHash @wrapped.(operation, options, runtime_data: options.to_runtime_data[0], mutable_data: options.to_mutable_data )
           @wrapped.(operation, options, runtime_data: options.to_runtime_data[0], mutable_data: options.to_mutable_data )
         end
       end
@@ -96,7 +114,12 @@ class Trailblazer::Operation
         end
 
         def mutable_data_for(result)
-          result.instance_variable_get(:@data).to_mutable_data
+          result = result[1]
+
+          puts "@@@@@ #{result.inspect}"
+
+
+          result.to_mutable_data
         end
 
         class Dynamic < Output
