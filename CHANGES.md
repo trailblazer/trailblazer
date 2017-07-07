@@ -1,3 +1,13 @@
+# 2.0.7
+
+* Allow to use any method with the Model macro, e.g.
+        ```ruby
+        step Model( Comment, :[])
+        ```
+    will now invoke `Comment[ params[:id] ]`, which makes using Sequel
+    a breeze.
+
+
 # 2.0.6
 
 * Fix what we broke in 2.0.5, where `Wrap` would always use the current operation subclass and not the empty `Trailblazer::Operation`. Thanks to @mensfeld.
