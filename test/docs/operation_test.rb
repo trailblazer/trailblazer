@@ -11,7 +11,7 @@ class DocsOperationExampleTest < Minitest::Spec
     step     Model( Song, :new )
     step     :assign_current_user!
     # ..
-    def assign_current_user!(options)
+    def assign_current_user!(options, **)
       options["model"].created_by = options["current_user"]
     end
   end
@@ -47,11 +47,11 @@ class DocsOperationExampleTest < Minitest::Spec
     failure  :log_error!
     step     Contract::Persist(  )
 
-    def log_error!(options)
+    def log_error!(options, **)
       # ..
     end
 
-    def assign_current_user!(options)
+    def assign_current_user!(options, **)
       options["model"].created_by =
         options["current_user"]
     end
@@ -194,11 +194,11 @@ class DocsOperationAPIExampleTest < Minitest::Spec
     failure :log_error!
     step    Contract::Persist()
 
-    def log_error!(options)
+    def log_error!(options, **)
       # ..
     end
 
-    def assign_current_user!(options)
+    def assign_current_user!(options, **)
       options["model"].created_by =
         options["current_user"]
     end
@@ -227,7 +227,7 @@ class DocsOperationInheritanceTest < Minitest::Spec
   end
   #:inh-new end
 
-  puts New["pipetree"].inspect(style: :row)
+  puts Trailblazer::Operation::Inspect.(New, style: :row)
 =begin
   #:inh-new-pipe
    0 =======================>>operation.new
@@ -243,7 +243,7 @@ class DocsOperationInheritanceTest < Minitest::Spec
   end
   #:inh-create end
 
-  puts Create["pipetree"].inspect(style: :row)
+  puts Trailblazer::Operation::Inspect.(Create, style: :row)
 =begin
   #:inh-create-pipe
    0 =======================>>operation.new
@@ -279,7 +279,7 @@ class DocsOperationInheritanceTest < Minitest::Spec
   end
   #:override-new end
 
-  puts Song::New["pipetree"].inspect(style: :row)
+  puts Trailblazer::Operation::Inspect.(Song::New, style: :row)
 =begin
   #:override-pipe
   Song::New["pipetree"].inspect(style: :row)
@@ -309,7 +309,7 @@ class DocsOperationStepOptionsTest < Minitest::Spec
     end
     #:name-auto end
 
-    puts New["pipetree"].inspect(style: :row)
+    puts Trailblazer::Operation::Inspect.(New, style: :row)
 =begin
   #:name-auto-pipe
    0 =======================>>operation.new
@@ -323,7 +323,7 @@ class DocsOperationStepOptionsTest < Minitest::Spec
     end
     #:replace-inh end
 
-    puts Update["pipetree"].inspect(style: :row)
+    puts Trailblazer::Operation::Inspect.(Update, style: :row)
 =begin
   #:replace-inh-pipe
    0 =======================>>operation.new
@@ -361,7 +361,7 @@ class DocsOperationStepOptionsTest < Minitest::Spec
     end
     #:name-manu end
 
-    puts New["pipetree"].inspect(style: :row)
+    puts Trailblazer::Operation::Inspect.(New, style: :row)
 =begin
   #:name-manu-pipe
    0 =======================>>operation.new
@@ -380,7 +380,7 @@ class DocsOperationStepOptionsTest < Minitest::Spec
     end
     #:pos-before end
 
-    puts New["pipetree"].inspect(style: :row)
+    puts Trailblazer::Operation::Inspect.(New, style: :row)
 =begin
   #:pos-before-pipe
    0 =======================>>operation.new
@@ -391,11 +391,11 @@ class DocsOperationStepOptionsTest < Minitest::Spec
 
     #:pos-inh
     class Create < New
-      step :policy!, after: "operation.new"
+      step :policy!, before: "model.build"
     end
     #:pos-inh end
 
-    puts Create["pipetree"].inspect(style: :row)
+    puts Trailblazer::Operation::Inspect.(Create, style: :row)
 =begin
   #:pos-inh-pipe
    0 =======================>>operation.new

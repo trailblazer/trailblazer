@@ -1,3 +1,6 @@
+# when __call__ing a nested op, in 2.0 the call would create a new skill with Skill(incoming_options, self.skills)
+# we now have to create this manually.  maybe this should be done in __call__ ?
+
 class Trailblazer::Operation
   def self.Nested(callable, input:nil, output:nil)
     step = Nested.for(callable, input, output)
@@ -68,11 +71,7 @@ class Trailblazer::Operation
 
     private
       def call_nested(operation_class, options, flow_options)
-        # FIXME: this is what happens in Skill::call.
-        _options = Trailblazer::Skill.new options, operation_class.skills
-
-        # puts "@@@@@ #{options.keys.inspect}"
-        operation_class.__call__(operation_class["__activity__"][:Start], _options, flow_options) # FIXME: redundant with Wrap, consolidate!
+        operation_class.__call__(operation_class["__activity__"][:Start], options, flow_options) # FIXME: redundant with Wrap, consolidate!
       end
 
       def nested(*); @wrapped end
@@ -80,8 +79,8 @@ class Trailblazer::Operation
       class Dynamic < Caller
         include Element::Dynamic
 
-        def nested(input, options)
-          @wrapped.(input, options)
+        def nested(operation, options)
+          @wrapped.(options, exec_context: operation) # FIXME: should we just pass-through flow_options here?
         end
       end
     end
@@ -94,7 +93,9 @@ class Trailblazer::Operation
         # this must return a Skill.
         # Trailblazer::Skill::KeywordHash options.to_runtime_data[0]
 
-        options.to_runtime_data[0]
+        # DISCUSS: are we doing the right thing here?
+        # options.to_runtime_data[0]
+        options
       end
 
       class Dynamic
@@ -115,9 +116,6 @@ class Trailblazer::Operation
 
         def mutable_data_for(result)
           result = result[1]
-
-          puts "@@@@@ #{result.inspect}"
-
 
           result.to_mutable_data
         end

@@ -14,9 +14,9 @@ class PersistTest < Minitest::Spec
     step Model( Song, :new )
     step Contract::Build()
     step Contract::Validate()
-    failure ->(options) { options["1. fail"] = "Validate" }
+    failure ->(options, **) { options["1. fail"] = "Validate" }
     step Contract::Persist()
-    failure ->(options) { options["2. fail"] = "Persist" }
+    failure ->(options, **) { options["2. fail"] = "Persist" }
   end
 
   it { Create.(title: "In Recital")["model"].title.must_equal "In Recital" }

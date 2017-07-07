@@ -46,6 +46,11 @@ class DocsNestedOperationTest < Minitest::Spec
     result["contract.default"].model.must_equal result["model"]
   end
 
+it "what" do
+  dir, result, _ = Edit.__call__(nil, {"params" => {id: 1} }, {})
+  result["model"].inspect.must_equal ""
+end
+
   #-
   # Update also allows grabbing model and contract
   it do
