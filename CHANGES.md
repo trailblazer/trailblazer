@@ -1,11 +1,12 @@
 # 2.0.7
 
 * Allow to use any method with the Model macro, e.g.
+
         ```ruby
         step Model( Comment, :[])
         ```
-    will now invoke `Comment[ params[:id] ]`, which makes using Sequel
-    a breeze.
+
+  will now invoke `Comment[ params[:id] ]`, which makes using Sequel a breeze.
 
 
 # 2.0.6
