@@ -26,20 +26,27 @@ class Trailblazer::Operation
         action      = options["model.action"] || :new
         model_class = options["model.class"]
 
-        send("#{action}!", model_class, params)
+        action = :pass_through unless [:new, :find_by, :find].include?(action)
+
+        send("#{action}!", model_class, params, options["model.action"])
       end
 
-      def new!(model_class, params)
+      def new!(model_class, params, *)
         model_class.new
       end
 
-      def find!(model_class, params)
+      def find!(model_class, params, *)
         model_class.find(params[:id])
       end
 
       # Doesn't throw an exception and will return false to divert to Left.
-      def find_by!(model_class, params)
+      def find_by!(model_class, params, *)
         model_class.find_by(id: params[:id])
+      end
+
+      # Call any method on the model class and pass :id.
+      def pass_through!(model_class, params, action)
+        model_class.send(action, params[:id])
       end
 
     private

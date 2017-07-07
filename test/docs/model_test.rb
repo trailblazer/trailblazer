@@ -5,6 +5,10 @@ class DocsModelTest < Minitest::Spec
     def self.find_by(id:nil)
       id.nil? ? nil : new(id)
     end
+
+    def self.[](id)
+      id.nil? ? nil : new(id+99)
+    end
   end
 
   #:op
@@ -46,7 +50,26 @@ class DocsModelTest < Minitest::Spec
     result.success? #=> false
     #:update-fail end
 
-    result["model"].must_equal nil
+    result["model"].must_be_nil
     result.success?.must_equal false
+  end
+
+  #:show
+  class Show < Trailblazer::Operation
+    step Model( Song, :[] )
+    # ..
+  end
+  #:show end
+
+  it do
+    result = Show.({ id: 1 })
+
+    #:show-ok
+    result = Show.({ id: 1 })
+    result["model"] #=> #<struct Song id=1, title="Roxanne">
+    #:show-ok end
+
+    result.success?.must_equal true
+    result["model"].inspect.must_equal %{#<struct DocsModelTest::Song id=100, title=nil>}
   end
 end
