@@ -60,7 +60,7 @@ class DocsRepresenterExplicitTest < Minitest::Spec
   it do
   #:render
   result = Create.({}, "document" => '{"id": 1}')
-  json   = result["representer.default.class"].new(result["model"]).to_json
+  json   = result["representer.contract.default.class"].new(result["model"]).to_json
   json #=> '{"id":1}'
   #:render end
   json.must_equal '{"id":1}'
@@ -83,7 +83,7 @@ class DocsRepresenterExplicitTest < Minitest::Spec
   #:di-call
   result = Create.({},
     "document" => '<body><id>1</id></body>',
-    "representer.default.class" => MyXMLRepresenter # injection
+    "representer.contract.default.class" => MyXMLRepresenter # injection
   )
   #:di-call end
     result.inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterExplicitTest::Song id="1", title=nil>] >}
@@ -113,7 +113,7 @@ class DocsRepresenterDITest < Minitest::Spec
 
   let (:json) { MultiJson.dump(id: 1) }
   it { Create.({}, "document" => json,
-    "representer.default.class" => MyRepresenter).inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterDITest::Song id=1, title=nil>] >} }
+    "representer.contract.default.class" => MyRepresenter).inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterDITest::Song id=1, title=nil>] >} }
 end
 
 #---
