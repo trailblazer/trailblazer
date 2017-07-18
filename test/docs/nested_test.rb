@@ -46,9 +46,10 @@ class DocsNestedOperationTest < Minitest::Spec
     result["contract.default"].model.must_equal result["model"]
   end
 
+# test Edit circuit-level.
 it "what" do
   dir, result, _ = Edit.__call__(nil, {"params" => {id: 1} }, {})
-  result["model"].inspect.must_equal ""
+  result["model"].inspect.must_equal %{#<struct DocsNestedOperationTest::Song id=1, title=\"Bristol\">}
 end
 
   #-
@@ -93,7 +94,7 @@ end
   end
 
   # mutual data from A doesn't bleed into B.
-  it { A.()["can.B.see.it?"].must_equal nil }
+  it { A.()["can.B.see.it?"].must_be_nil }
   it { A.()["this.should.not.be.visible.in.B"].must_equal true }
   # runtime dependencies are visible in B.
   it { A.({}, "current_user" => Module)["can.B.see.current_user?"].must_equal Module }

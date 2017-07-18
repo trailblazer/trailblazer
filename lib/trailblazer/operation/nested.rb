@@ -94,7 +94,14 @@ class Trailblazer::Operation
         # Trailblazer::Skill::KeywordHash options.to_runtime_data[0]
 
         # DISCUSS: are we doing the right thing here?
-        # options.to_runtime_data[0]
+
+        _org = nil
+        options.Build do |original, mutable|
+          _org = original
+        end
+        return _org
+
+        return options.to_runtime_data #[0]
         options
       end
 
@@ -103,7 +110,10 @@ class Trailblazer::Operation
 
         def call(operation, options)
           # Trailblazer::Skill::KeywordHash @wrapped.(operation, options, runtime_data: options.to_runtime_data[0], mutable_data: options.to_mutable_data )
-          @wrapped.(operation, options, runtime_data: options.to_runtime_data[0], mutable_data: options.to_mutable_data )
+          original, mutable = options.decompose
+
+puts "@@@@@ #{options.inspect}"
+          @wrapped.( options, runtime_data: original, mutable_data: mutable )
         end
       end
 
@@ -117,7 +127,12 @@ class Trailblazer::Operation
         def mutable_data_for(result)
           result = result[1]
 
-          result.to_mutable_data
+          # result.to_mutable_data
+_mutable = nil
+          result.Build do |original, mutable|
+            _mutable = mutable
+          end
+          return _mutable
         end
 
         class Dynamic < Output
