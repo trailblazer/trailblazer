@@ -33,9 +33,23 @@ class Trailblazer::Operation
       end
 
       def self.call_builder(options, flow_options, builder:raise, constant:raise, name:raise)
-        builder_options = Trailblazer::Context( options, constant: constant, name: name ) # options.merge( .. )
+        # builder_options = Trailblazer::Context( options, constant: constant, name: name ) # options.merge( .. )
 
-        Trailblazer::Option::KW(builder).(builder_options, flow_options)
+        # Trailblazer::Option::KW(builder).(builder_options, flow_options)
+
+
+
+
+
+
+
+
+        # FIXME: almost identical with Option::KW.
+        # FIXME: see Nested::Options::Dynamic, the same shit
+          Trailblazer::Option(builder).( options, options.to_hash.merge(
+            constant: constant,
+            name: name
+          ), flow_options )
       end
     end
 

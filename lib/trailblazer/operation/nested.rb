@@ -1,6 +1,9 @@
 # when __call__ing a nested op, in 2.0 the call would create a new skill with Skill(incoming_options, self.skills)
 # we now have to create this manually.  maybe this should be done in __call__ ?
 
+
+# per default, everything we pass into a circuit is immutable. it's the ops/act's job to allow writing (via a Context)
+
 class Trailblazer::Operation
   def self.Nested(callable, input:nil, output:nil)
     step = Nested.for(callable, input, output)
@@ -97,14 +100,9 @@ class Trailblazer::Operation
 
         # DISCUSS: are we doing the right thing here?
 
-        _org = nil
-        options.Build do |original, mutable|
-          _org = original
-        end
-        return _org
+        original, mutable = options.decompose
 
-        return options.to_runtime_data #[0]
-        options
+        original
       end
 
       # TODO: rename Context::Hash::Immutable
@@ -143,7 +141,10 @@ class Trailblazer::Operation
 
           # DISCUSS: how to allow tmp injections?
           # FIXME: almost identical with Option::KW.
-          @wrapped.( options, **options.to_hash.merge( runtime_data: Immutable.new(original), mutable_data: Immutable.new(mutable) ) )
+          @wrapped.( options, **options.to_hash.merge(
+            runtime_data: Immutable.new(original),
+            mutable_data: Immutable.new(mutable)
+          ) )
         end
       end
 
