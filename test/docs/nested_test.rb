@@ -136,6 +136,9 @@ class NestedInput < Minitest::Spec
   class MultiplyByPi < Trailblazer::Operation
     step ->(options, **) { options["pi_constant"] = 3.14159 }
     step Nested( Multiplier, input: ->(options, mutable_data:, runtime_data:, **) do
+
+      puts "@@@@@ #{runtime_data.inspect}"
+
       { "y" => mutable_data["pi_constant"],
         "x" => runtime_data["x"] }
     end )

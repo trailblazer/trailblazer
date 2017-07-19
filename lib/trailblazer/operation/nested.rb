@@ -85,6 +85,8 @@ class Trailblazer::Operation
       end
     end
 
+    # Ingoing options when calling a nested task.
+    # @note This will be replaced with an ingoing options mapping in the TaskWrap in TRB 2.2.
     class Options
       include Element
 
@@ -106,17 +108,20 @@ class Trailblazer::Operation
       end
 
       class Dynamic
-        include Element::Dynamic
+        include Element#::Dynamic
 
         def call(operation, options)
           # Trailblazer::Skill::KeywordHash @wrapped.(operation, options, runtime_data: options.to_runtime_data[0], mutable_data: options.to_mutable_data )
           original, mutable = options.decompose
 
-puts "@@@@@ #{options.inspect}"
-          @wrapped.( options, runtime_data: original, mutable_data: mutable )
+          # DISCUSS: how to allow tmp injections?
+          # FIXME: almost identical with Option::KW.
+          @wrapped.( options, **options.to_hash.merge( runtime_data: original, mutable_data: mutable ) )
         end
       end
 
+      # Outgoing options, the returned options set when calling a nested task.
+      # @note This will be replaced with an outgoing options mapping in the TaskWrap in TRB 2.2.
       class Output
         include Element
 
@@ -125,21 +130,18 @@ puts "@@@@@ #{options.inspect}"
         end
 
         def mutable_data_for(result)
-          result = result[1]
+          options = result[1]
 
-          # result.to_mutable_data
-_mutable = nil
-          result.Build do |original, mutable|
-            _mutable = mutable
-          end
-          return _mutable
+          original, mutable = options.decompose
+
+          mutable
         end
 
         class Dynamic < Output
-          include Element::Dynamic
+          include Element#::Dynamic
 
           def call(input, options, result)
-            @wrapped.(input, options, mutable_data: mutable_data_for(result))
+            @wrapped.( options, mutable_data: mutable_data_for(result))
           end
         end
       end
