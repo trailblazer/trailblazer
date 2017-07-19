@@ -107,6 +107,33 @@ class Trailblazer::Operation
         options
       end
 
+      # TODO: rename Context::Hash::Immutable
+      class Immutable
+        def initialize(hash)
+          @hash = hash
+        end
+
+        def [](key)
+          @hash[key]
+        end
+
+        def to_hash # DISCUSS: where do we call this?
+          @hash.to_hash # FIXME: should we do this?
+        end
+
+        def key?(key)
+          @hash.key?(key)
+        end
+
+        def merge(hash)
+          Immutable.new Trailblazer::Skill.new(hash, @hash) # DISCUSS: shouldn't a Skill be immutable per default? :D
+        end
+
+        # DISCUSS: raise in #[]=
+        # each
+        # TODO: Skill could inherit
+      end
+
       class Dynamic
         include Element#::Dynamic
 
@@ -116,7 +143,7 @@ class Trailblazer::Operation
 
           # DISCUSS: how to allow tmp injections?
           # FIXME: almost identical with Option::KW.
-          @wrapped.( options, **options.to_hash.merge( runtime_data: original, mutable_data: mutable ) )
+          @wrapped.( options, **options.to_hash.merge( runtime_data: Immutable.new(original), mutable_data: Immutable.new(mutable) ) )
         end
       end
 
