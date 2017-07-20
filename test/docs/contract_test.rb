@@ -467,7 +467,7 @@ class DocContractBuilderTest < Minitest::Spec
 
     step Model( Song, :new )
     #:builder-proc
-    step Contract::Build( builder: ->(options, constant:, model:, **) {
+    step Contract::Build( builder: ->(options, constant:raise, model:raise, **) {
       constant.new(model, current_user: options["current_user"])
     })
     #:builder-proc end

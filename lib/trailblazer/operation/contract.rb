@@ -46,10 +46,12 @@ class Trailblazer::Operation
 
         # FIXME: almost identical with Option::KW.
         # FIXME: see Nested::Options::Dynamic, the same shit
-          Trailblazer::Option(builder).( options, options.to_hash.merge(
-            constant: constant,
-            name: name
-          ), flow_options )
+        tmp_options =  options.to_hash.merge(
+          constant: constant,
+          name:     name
+        )
+
+        Trailblazer::Option(builder).( options, tmp_options, flow_options )
       end
     end
 
