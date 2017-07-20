@@ -124,7 +124,7 @@ class Trailblazer::Operation
         end
 
         def merge(hash)
-          Immutable.new Trailblazer::Skill.new(hash, @hash) # DISCUSS: shouldn't a Skill be immutable per default? :D
+          Immutable.new Trailblazer::Context::ContainerChain.new([hash, @hash]) # DISCUSS: shouldn't a Skill be immutable per default? :D
         end
 
         # DISCUSS: raise in #[]=
