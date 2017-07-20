@@ -12,7 +12,7 @@ class Trailblazer::Operation
         return Validate::Call(name: name, representer: representer, params_path: params_path)
       end
 
-      extract_validate = Class.new(Trailblazer::Operation) do # TODO: use Base so compat works.
+      extract_validate = Class.new(Nested.operation_class) do # TODO: use Base so compat works.
         step Validate::Extract(key: key, params_path: params_path)
         step Validate::Call(name: name, representer: representer, params_path: params_path)
       end # TODO: use Activity with ::task/

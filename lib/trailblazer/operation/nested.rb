@@ -60,7 +60,11 @@ class Trailblazer::Operation
 
     def self.nestable_object?(object)
       # interestingly, with < we get a weird nil exception. bug in Ruby?
-      object.is_a?(Class) && object <= Trailblazer::Operation
+      object.is_a?(Class) && object <= operation_class
+    end
+
+    def self.operation_class
+      Trailblazer::Operation
     end
 
     # Is executed at runtime and calls the nested operation.
@@ -105,6 +109,7 @@ class Trailblazer::Operation
         original
       end
 
+      # FIXME
       # TODO: rename Context::Hash::Immutable
       class Immutable
         def initialize(hash)
