@@ -1,21 +1,26 @@
 class Trailblazer::Operation
   # TODO: make Wrap::Subprocess not binary but actually wire its ends via the circuit.
   def self.Wrap(user_wrap, &block)
-    # TODO: immutable API for creating operations. Operation.build(step .. , step ..)
-    operation_class = Class.new( Nested.operation_class ) # usually resolves to Trailblazer::Operation.
-    operation_class.instance_exec(&block) # evaluate the wrapped operation code.
-
-    step = Wrap.Task(user_wrap, operation_class) # FIXME: must return Nested
+    operation_class = Wrap.build_wrapped_activity(block)
+    step            = Wrap.build_task(user_wrap, operation_class) # FIXME: must return Nested
 
     [ step, {}, {} ]
   end
 
   module Wrap
-    def self.Task(user_wrap, operation_class)
+    def self.build_wrapped_activity(block) # DISCUSS: this should be an activity at some point.
+      # TODO: immutable API for creating operations. Operation.build(step .. , step ..)
+      operation_class = Class.new( Nested.operation_class ) # Usually resolves to Trailblazer::Operation.
+      operation_class.instance_exec(&block)                 # Evaluate the wrapped operation code (step definitions).
+      operation_class
+    end
+
+    def self.build_task(user_wrap, operation_class)
       ->(direction, options, flow_options) {
 
         # This block is passed to the user's wrap. It's invoked when the user_wrap calls `yield`.
         # @return {Task interface}
+          # TODO: this must simply be the activity/operation class which can be `call`ed. (Nested)
         default_block = ->{ # runs the Wrap'ped operation_class.
           _options, _flow_options = Railway::TaskWrap.arguments_for_call(operation_class, direction, options, flow_options)
 
