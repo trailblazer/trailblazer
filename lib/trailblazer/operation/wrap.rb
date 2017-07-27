@@ -1,10 +1,8 @@
 class Trailblazer::Operation
-  Base = self # TODO: we won't need this with 3.0.
-
   # TODO: make Wrap::Subprocess not binary but actually wire its ends via the circuit.
   def self.Wrap(user_wrap, &block)
     # TODO: immutable API for creating operations. Operation.build(step .. , step ..)
-    operation_class = Class.new(Base)
+    operation_class = Class.new( Nested.operation_class ) # usually resolves to Trailblazer::Operation.
     operation_class.instance_exec(&block) # evaluate the wrapped operation code.
 
     step = Wrap.Task(user_wrap, operation_class) # FIXME: must return Nested
