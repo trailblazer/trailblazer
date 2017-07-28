@@ -29,9 +29,15 @@ class Trailblazer::Operation
     # Please note that the instance_variable_get are here on purpose since the
     # superinternal API is not entirely decided, yet.
     # @api private
-    def self.for(step, input, output, is_nestable_object=method(:nestable_object?)) # DISCUSS: use builders here?
-      invoker            = Caller::Dynamic.new(step)
-      invoker            = Caller.new(step) if is_nestable_object.(step)
+    def self.for(nested_operation, input, output, is_nestable_object=method(:nestable_object?)) # DISCUSS: use builders here?
+      # this calls the actual nested_operation.
+      unless is_nestable_object.(nested_operation)
+        nested_operation = Caller::Dynamic.new(nested_operation)
+      end
+
+      activity_caller    = Trailblazer::Circuit::Nested(nested_operation) do |activity:nil, start_at:nil, args:nil, **|
+        activity.__call__(start_at, *args)
+      end
 
       options_for_nested = Options.new
       options_for_nested = Options::Dynamic.new(input) if input # FIXME: they need to have symbol keys!!!!
@@ -43,7 +49,9 @@ class Trailblazer::Operation
       ->(direction, options, flow_options) do
         operation = flow_options[:exec_context]
 
-        result = invoker.(operation, options, options_for_nested.(operation, options), flow_options) # TODO: what about containers?
+        options_for_nested = options_for_nested.(operation, options)
+
+        result = activity_caller.(operation, options, options_for_nested, flow_options) # TODO: what about containers?
 
         options_for_composer.(operation, options, result).each { |k,v| options[k] = v }
 
