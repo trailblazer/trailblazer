@@ -6,9 +6,9 @@
 
 class Trailblazer::Operation
   def self.Nested(callable, input:nil, output:nil)
-    step = Nested.for(callable, input, output)
+    task = Nested.for(callable, input, output)
 
-    [ step, { name: "Nested(#{callable})" } ]
+    [ task, { name: "Nested(#{callable})" }, {} ]
   end
 
   # WARNING: this is experimental API, but it will end up with something like that.
@@ -30,39 +30,36 @@ class Trailblazer::Operation
     # superinternal API is not entirely decided, yet.
     # @api private
     def self.for(nested_operation, input, output, is_nestable_object=method(:nestable_object?)) # DISCUSS: use builders here?
-      # this calls the actual nested_operation.
-      unless is_nestable_object.(nested_operation)
-        nested_operation = Caller::Dynamic.new(nested_operation)
-      end
-
-      activity_caller    = Trailblazer::Circuit::Nested(nested_operation) do |activity:nil, start_at:nil, args:nil, **|
-        activity.__call__(start_at, *args)
-      end
-
+      # TODO: this will be done via incoming/outgoing contracts.
       options_for_nested = Options.new
       options_for_nested = Options::Dynamic.new(input) if input # FIXME: they need to have symbol keys!!!!
 
       options_for_composer = Options::Output.new
       options_for_composer = Options::Output::Dynamic.new(output) if output
 
-      # This lambda is the task added to the circuit, executed at runtime.
-      ->(direction, options, flow_options) do
+
+
+
+      # this calls the actual nested_operation.
+      unless is_nestable_object.(nested_operation)
+        nested_operation = DynamicNested.new(nested_operation)
+      end
+
+
+
+      Trailblazer::Circuit::Nested(nested_operation, nil) do |activity:nil, start_at:nil, args:nil, **|
+        options, flow_options = args
+
         operation = flow_options[:exec_context]
 
-        options_for_nested = options_for_nested.(operation, options)
+        options_for_nested = options_for_nested.(operation, options) # discuss: why do we need the operation here at all?
 
-        result = activity_caller.(operation, options, options_for_nested, flow_options) # TODO: what about containers?
 
-        options_for_composer.(operation, options, result).each { |k,v| options[k] = v }
+        direction, options, flow_options = activity.__call__(start_at, *args)
 
-        direction = result[0]
-        [
-        direction.kind_of?(Railway::End::Success) ? # FIXME: redundant logic from Railway::call.
-          Trailblazer::Circuit::Right : Trailblazer::Circuit::Left,
-        # result.success? # DISCUSS: what if we could simply return the result object here?
-         options,
-         flow_options
-        ]
+        # options_for_composer.(operation, options, result).each { |k,v| options[k] = v }
+
+        [ direction, options, flow_options ]
       end
     end
 
@@ -75,28 +72,13 @@ class Trailblazer::Operation
       Trailblazer::Operation
     end
 
-    # Is executed at runtime and calls the nested operation.
-# FIXME: this can be removed once this is really just a Circuit::Nested() with a incoming and outgoing options mapper.
-    class Caller
+    private
+
+    class DynamicNested
       include Element
 
-      def call(input, options, options_for_nested, flow_options)
-        call_nested(nested(input, options), options_for_nested, flow_options)
-      end
-
-    private
-      def call_nested(operation_class, options, flow_options)
-        operation_class.__call__(operation_class["__activity__"][:Start], options, flow_options) # FIXME: redundant with Wrap, consolidate!
-      end
-
-      def nested(*); @wrapped end
-
-      class Dynamic < Caller
-        include Element::Dynamic
-
-        def nested(operation, options)
-          @wrapped.(options, exec_context: operation) # FIXME: should we just pass-through flow_options here?
-        end
+      def __call__(direction, options, flow_options)
+        @wrapped.(options, flow_options).__call__(direction, options, flow_options)
       end
     end
 
