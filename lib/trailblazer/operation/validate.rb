@@ -15,21 +15,9 @@ class Trailblazer::Operation
       extract_validate = Class.new(Nested.operation_class) do # TODO: use Base so compat works.
         step Validate::Extract(key: key, params_path: params_path)
         step Validate::Call(name: name, representer: representer, params_path: params_path)
-      end # TODO: use Activity with ::task/
+      end
 
-      # task = Trailblazer::Operation::Nested( extract_validate["__activity__"] ) # FIXME
-      __task = Trailblazer::Circuit::Nested( extract_validate["__activity__"] ) # FIXME
-      # FIXME: map end properly to another task.
-      task = ->(*args) {
-        direction, options, flow_options = __task.(*args)
-        [
-          direction.is_a?(Railway::End::Failure) ? Trailblazer::Circuit::Left : Trailblazer::Circuit::Right, # TODO: merge with Wrap.
-          options,
-          flow_options
-        ]
-      }
-
-      [ task, { name: "contract.#{name}.validate" }, {} ]
+      Trailblazer::Operation::Nested( extract_validate, name: "contract.#{name}.validate" )
     end
 
     module Validate
@@ -60,6 +48,8 @@ class Trailblazer::Operation
       def self.validate!(options, name:nil, representer:false, from: "document", params_path:nil)
         path     = "contract.#{name}"
         contract = options[path]
+
+        puts "@@!!!!!@@@ #{options.inspect}"
 
         # this is for 1.1-style compatibility and should be removed once we have Deserializer in place:
         options["result.#{path}"] = result =
