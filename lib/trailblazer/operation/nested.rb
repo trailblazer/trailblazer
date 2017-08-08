@@ -8,7 +8,15 @@ class Trailblazer::Operation
   def self.Nested(callable, input:nil, output:nil)
     task = Nested.for(callable, input, output)
 
-    [ task, { name: "Nested(#{callable})" }, {} ]
+    if Nested.nestable_object?( callable  ) # FIXME: COMPAT, defaults for dynamics.
+      raise callable["__activity__"].to_fields[1].inspect
+
+      connections = callable["__activity__"].events.end.collect { |name, event| [event, [:End, name]] } # [ [End::PassFast, [:End, :pass_fast]],   [End::Left, [:End, :left]] ]
+    else
+      connections = []
+    end
+
+    [ task, { name: "Nested(#{callable})" }, {}, { connections: connections } ]
   end
 
   # WARNING: this is experimental API, but it will end up with something like that.
@@ -46,7 +54,9 @@ class Trailblazer::Operation
       end
 
 
-
+      # The returned {Nested} instance is a valid circuit element and will be `call`ed in the circuit.
+      # It simply returns the nested activity's direction.
+      # The actual wiring - where to go with that, is up to the Nested() macro.
       Trailblazer::Circuit::Nested(nested_operation, nil) do |activity:nil, start_at:nil, args:nil, **|
         options, flow_options = args
 
