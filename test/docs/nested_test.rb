@@ -26,7 +26,10 @@ class DocsNestedOperationTest < Minitest::Spec
   #:update
   class Update < Trailblazer::Operation
     step Nested( Edit )
+    # step Nested( Edit )
+    # step ->(options, **) { puts options }
     step Contract::Validate()
+
     step Contract::Persist( method: :sync )
   end
   #:update end
@@ -48,7 +51,7 @@ class DocsNestedOperationTest < Minitest::Spec
 
 # test Edit circuit-level.
 it "what" do
-  dir, result, _ = Edit.__call__(nil, {"params" => {id: 1} }, {})
+  dir, result, _ = Edit.__call__(Edit.instance_variable_get(:@start), {"params" => {id: 1} }, {})
   result["model"].inspect.must_equal %{#<struct DocsNestedOperationTest::Song id=1, title=\"Bristol\">}
 end
 
@@ -295,7 +298,7 @@ class NestedWithCallableTest < Minitest::Spec
     step Nested( :build! )
 
     def build!(options, current_user:nil, **)
-      current_user.admin? ? Create::Admin : Create::NeedsModeration
+        current_user.admin? ? Create::Admin : Create::NeedsModeration
     end
   end
   #:method end

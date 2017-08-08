@@ -5,18 +5,24 @@
 # per default, everything we pass into a circuit is immutable. it's the ops/act's job to allow writing (via a Context)
 
 class Trailblazer::Operation
-  def self.Nested(callable, input:nil, output:nil)
+  def self.Nested(callable, input:nil, output:nil, name: "Nested(#{callable})")
     task = Nested.for(callable, input, output)
 
-    if Nested.nestable_object?( callable  ) # FIXME: COMPAT, defaults for dynamics.
-      raise callable["__activity__"].to_fields[1].inspect
+    activity_outputs = if Nested.nestable_object?( callable  ) # FIXME: COMPAT, defaults for dynamics.
+      # TODO: introduce Activity interface (for introspection, events, etc)
+      end_events = callable["__activity__"].to_fields[1]
 
-      connections = callable["__activity__"].events.end.collect { |name, event| [event, [:End, name]] } # [ [End::PassFast, [:End, :pass_fast]],   [End::Left, [:End, :left]] ]
+      Hash[
+        end_events.collect do |evt|
+          _name = evt.instance_variable_get(:@name)
+          [ evt, { role: _name } ] # this is a wild guess, e.g. PassFast => { role: :pass_fast }
+        end
+      ]
     else
-      connections = []
+      {}
     end
 
-    [ task, { name: "Nested(#{callable})" }, {}, { connections: connections } ]
+    [ task, { name: name }, {}, activity_outputs ]
   end
 
   # WARNING: this is experimental API, but it will end up with something like that.
@@ -46,26 +52,21 @@ class Trailblazer::Operation
       options_for_composer = Options::Output::Dynamic.new(output) if output
 
 
-
-
-      # this calls the actual nested_operation.
-      unless is_nestable_object.(nested_operation)
-        nested_operation = DynamicNested.new(nested_operation)
-      end
-
+      nested_activity = is_nestable_object.(nested_operation) ? nested_operation : DynamicNested.new(nested_operation)
 
       # The returned {Nested} instance is a valid circuit element and will be `call`ed in the circuit.
       # It simply returns the nested activity's direction.
       # The actual wiring - where to go with that, is up to the Nested() macro.
-      Trailblazer::Circuit::Nested(nested_operation, nil) do |activity:nil, start_at:nil, args:nil, **|
+      puts "@@@@@ #{nested_activity.inspect}"
+      Trailblazer::Circuit::Nested(nested_activity, nil) do |activity:nil, start_at:, args:raise, **|
         options, flow_options = args
 
         operation = flow_options[:exec_context]
 
-        options_for_nested = options_for_nested.(operation, options) # discuss: why do we need the operation here at all?
+        _options_for_nested = options_for_nested.(operation, options) # discuss: why do we need the operation here at all?
 
-
-        direction, options, flow_options = activity.__call__(start_at, *args)
+        puts "N@@@@@ #{activity} #{_options_for_nested}"
+        direction, options, flow_options = activity.__call__( activity.instance_variable_get(:@start), _options_for_nested, flow_options )
 
         # options_for_composer.(operation, options, result).each { |k,v| options[k] = v }
 
@@ -85,10 +86,14 @@ class Trailblazer::Operation
     private
 
     class DynamicNested
-      include Element
+      include Element::Dynamic
 
       def __call__(direction, options, flow_options)
-        @wrapped.(options, flow_options).__call__(direction, options, flow_options)
+        # puts "~~~@@@@@ #{options.inspect}"
+        operation = @wrapped.(options, flow_options)
+
+        direction ||= operation.instance_variable_get(:@start)
+        operation.__call__(direction, options, flow_options)
       end
     end
 
@@ -107,34 +112,8 @@ class Trailblazer::Operation
         original, mutable = options.decompose
 
         original
-      end
 
-      # FIXME
-      # TODO: rename Context::Hash::Immutable
-      class Immutable
-        def initialize(hash)
-          @hash = hash
-        end
-
-        def [](key)
-          @hash[key]
-        end
-
-        def to_hash # DISCUSS: where do we call this?
-          @hash.to_hash # FIXME: should we do this?
-        end
-
-        def key?(key)
-          @hash.key?(key)
-        end
-
-        def merge(hash)
-          Immutable.new Trailblazer::Context::ContainerChain.new([hash, @hash]) # DISCUSS: shouldn't a Skill be immutable per default? :D
-        end
-
-        # DISCUSS: raise in #[]=
-        # each
-        # TODO: Skill could inherit
+        Trailblazer::Context::Immutable.new(Trailblazer::Context(original))
       end
 
       class Dynamic
@@ -147,8 +126,8 @@ class Trailblazer::Operation
           # DISCUSS: how to allow tmp injections?
           # FIXME: almost identical with Option::KW.
           @wrapped.( options, **options.to_hash.merge(
-            runtime_data: Immutable.new(original),
-            mutable_data: Immutable.new(mutable)
+            runtime_data: Context::Immutable.new(original),
+            mutable_data: Context::Immutable.new(mutable)
           ) )
         end
       end
