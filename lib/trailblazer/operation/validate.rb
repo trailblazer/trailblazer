@@ -17,7 +17,7 @@ class Trailblazer::Operation
         step Validate::Call(name: name, representer: representer, params_path: params_path)
       end
 
-      Trailblazer::Operation::Nested( extract_validate, name: "contract.#{name}.validate" )
+      Nested.operation_class.Nested( extract_validate, name: "contract.#{name}.validate" )
     end
 
     module Validate
