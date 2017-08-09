@@ -27,7 +27,7 @@ class DocsNestedOperationTest < Minitest::Spec
   class Update < Trailblazer::Operation
     step Nested( Edit )
     # step Nested( Edit )
-    # step ->(options, **) { puts options }
+    # step ->(options, **) { puts options.keys.inspect }
     step Contract::Validate()
 
     step Contract::Persist( method: :sync )
@@ -49,14 +49,14 @@ class DocsNestedOperationTest < Minitest::Spec
     result["contract.default"].model.must_equal result["model"]
   end
 
-# test Edit circuit-level.
-it "what" do
+#- test Edit circuit-level.
+it do
   dir, result, _ = Edit.__call__(Edit.instance_variable_get(:@start), {"params" => {id: 1} }, {})
   result["model"].inspect.must_equal %{#<struct DocsNestedOperationTest::Song id=1, title=\"Bristol\">}
 end
 
   #-
-  # Update also allows grabbing model and contract
+  # Update also allows grabbing Edit/model and Edit/contract
   it do
   #:update-call
   result = Update.(id: 1, title: "Call It A Night")
@@ -83,22 +83,51 @@ end
   #---
   #- shared data
   class B < Trailblazer::Operation
-    success ->(options, **) { options["can.B.see.it?"] = options["this.should.not.be.visible.in.B"] }
-    success ->(options, **) { options["can.B.see.current_user?"] = options["current_user"] }
-    success ->(options, **) { options["can.B.see.params?"] = options["params"] }
-    success ->(options, **) { options["can.B.see.A.class.data?"] = options["A.class.data"] }
+    pass ->(options, **) { options["can.B.see.A.mutable.data?"]             = options["mutable.data.from.A"] }
+    pass ->(options, **) { options["can.B.see.current_user?"]   = options["current_user"] }
+    pass ->(options, **) { options["can.B.see.params?"]         = options["params"] }
+    pass ->(options, **) { options["can.B.see.A.class.data?"]   = options["A.class.data"] }
+    pass ->(options, **) { options["can.B.see.container.data?"] = options["some.container.data"] }
+    pass ->(options, **) { options["mutable.data.from.B"] = "from B!" }
   end
 
   class A < Trailblazer::Operation
-    self["A.class.data"] = true
+    self["A.class.data"] = "yes"                                   # class data on A
 
-    success ->(options, **) { options["this.should.not.be.visible.in.B"] = true }
+    pass ->(options, **) { options["mutable.data.from.A"] = "from A!" } # mutable data on A
     step Nested( B )
+    pass ->(options, **) { options["can.A.see.B.mutable.data?"] = options["mutable.data.from.B"] }
   end
 
+  #- default behavior: share everything.
+  # no containers
+  # no runtime data
+  # no params
+  it do
+    result = A.()
+    # everything from A visible
+    result["A.class.data"].       must_equal "yes"
+    result["mutable.data.from.A"].must_equal "from A!"
+
+    # B can see everything
+    result["can.B.see.A.mutable.data?"].must_equal "from A!"
+    result["can.B.see.current_user?"].must_be_nil
+    result["can.B.see.params?"].must_equal({})
+    result["can.B.see.A.class.data?"].must_equal "yes"
+    result["can.B.see.container.data?"].must_be_nil
+
+    result["can.A.see.B.mutable.data?"].must_equal "from B!"
+  end
+
+
+
+
+
+
+
   # mutual data from A doesn't bleed into B.
-  it { A.()["can.B.see.it?"].must_be_nil }
-  it { A.()["this.should.not.be.visible.in.B"].must_equal true }
+  it { A.()["can.B.see.A.mutable.data?"].must_be_nil }
+  it { A.()["mutable.data.from.A"].must_equal true }
   # runtime dependencies are visible in B.
   it { A.({}, "current_user" => Module)["can.B.see.current_user?"].must_equal Module }
   it { A.({ a: 1 })["can.B.see.params?"].must_equal({ a: 1 }) }
@@ -115,15 +144,15 @@ end
   class C < Trailblazer::Operation
     self["C.class.data"] = true
 
-    success ->(options, **) { options["this.should.not.be.visible.in.B"] = true }
+    success ->(options, **) { options["mutable.data.from.A"] = true }
 
     step Nested( B, input: ->(options, runtime_data:, mutable_data:, **) {
-      runtime_data.merge( "this.should.not.be.visible.in.B" => mutable_data["this.should.not.be.visible.in.B"] )
+      runtime_data.merge( "mutable.data.from.A" => mutable_data["mutable.data.from.A"] )
     } )
   end
 
-  it { C.()["can.B.see.it?"].must_equal true }
-  it { C.()["this.should.not.be.visible.in.B"].must_equal true } # this IS visible since we use :input!
+  it { C.()["can.B.see.A.mutable.data?"].must_equal true }
+  it { C.()["mutable.data.from.A"].must_equal true } # this IS visible since we use :input!
   it { C.({}, "current_user" => Module)["can.B.see.current_user?"].must_equal Module }
   it { C.()["can.B.see.A.class.data?"].must_equal nil }
 end
@@ -163,8 +192,6 @@ class NestedInputCallable < Minitest::Spec
 
   #:input-callable
   class MyInput
-    extend Uber::Callable
-
     def self.call(options, mutable_data:, runtime_data:, **)
       {
         "y" => mutable_data["pi_constant"],

@@ -45,11 +45,11 @@ class Trailblazer::Operation
     # @api private
     def self.for(nested_operation, input, output, is_nestable_object=method(:nestable_object?)) # DISCUSS: use builders here?
       # TODO: this will be done via incoming/outgoing contracts.
-      options_for_nested = Options.new
-      options_for_nested = Options::Dynamic.new(input) if input # FIXME: they need to have symbol keys!!!!
+      options_for_nested = Input.new
+      options_for_nested = Input::Dynamic.new(input) if input # FIXME: they need to have symbol keys!!!!
 
-      options_for_composer = Options::Output.new
-      options_for_composer = Options::Output::Dynamic.new(output) if output
+      options_for_composer = Input::Output.new
+      options_for_composer = Input::Output::Dynamic.new(output) if output
 
 
       nested_activity = is_nestable_object.(nested_operation) ? nested_operation : DynamicNested.new(nested_operation)
@@ -57,17 +57,20 @@ class Trailblazer::Operation
       # The returned {Nested} instance is a valid circuit element and will be `call`ed in the circuit.
       # It simply returns the nested activity's direction.
       # The actual wiring - where to go with that, is up to the Nested() macro.
-      puts "@@@@@ #{nested_activity.inspect}"
+      # puts "@@@@@ #{nested_activity.inspect}"
       Trailblazer::Circuit::Nested(nested_activity, nil) do |activity:nil, start_at:, args:raise, **|
         options, flow_options = args
 
         operation = flow_options[:exec_context]
 
-        _options_for_nested = options_for_nested.(operation, options) # discuss: why do we need the operation here at all?
+        # _options_for_nested = options_for_nested.(operation, options) # discuss: why do we need the operation here at all?
+        _options_for_nested = options
 
-        puts "N@@@@@ #{activity} #{_options_for_nested}"
+        # puts "N@@@@@ #{activity} #{_options_for_nested.keys.inspect}"
+        # puts "@@@@@> #{_options_for_nested["contract.default.class"].inspect}"
         direction, options, flow_options = activity.__call__( activity.instance_variable_get(:@start), _options_for_nested, flow_options )
 
+        # puts "@@@@@after #{options.keys.inspect}"
         # options_for_composer.(operation, options, result).each { |k,v| options[k] = v }
 
         [ direction, options, flow_options ]
@@ -99,21 +102,29 @@ class Trailblazer::Operation
 
     # Ingoing options when calling a nested task.
     # @note This will be replaced with an ingoing options mapping in the TaskWrap in TRB 2.2.
-    class Options
+    class Input
       include Element
 
-      # Per default, only runtime data for nested operation.
-      def call(operation, options)
-        # this must return a Skill.
-        # Trailblazer::Skill::KeywordHash options.to_runtime_data[0]
+      def call(context, options)
+        options
+      end
 
-        # DISCUSS: are we doing the right thing here?
+      class RuntimeOnly
+        include Element
 
-        original, mutable = options.decompose
+        # Per default, only runtime data for nested operation.
+        def call(operation, options)
+          # this must return a Skill.
+          # Trailblazer::Skill::KeywordHash options.to_runtime_data[0]
 
-        original
+          # DISCUSS: are we doing the right thing here?
 
-        Trailblazer::Context::Immutable.new(Trailblazer::Context(original))
+          original, mutable = options.decompose
+
+          original
+
+          Trailblazer::Context::Immutable.new(Trailblazer::Context(original))
+        end
       end
 
       class Dynamic
@@ -126,8 +137,8 @@ class Trailblazer::Operation
           # DISCUSS: how to allow tmp injections?
           # FIXME: almost identical with Option::KW.
           @wrapped.( options, **options.to_hash.merge(
-            runtime_data: Context::Immutable.new(original),
-            mutable_data: Context::Immutable.new(mutable)
+            runtime_data: Trailblazer::Context::Immutable.new(original),
+            mutable_data: Trailblazer::Context::Immutable.new(mutable)
           ) )
         end
       end
