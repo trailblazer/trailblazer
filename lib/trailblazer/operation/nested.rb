@@ -42,11 +42,11 @@ class Trailblazer::Operation
     # @api private
     def self.for(nested_operation, input, output, is_nestable_object=method(:nestable_object?)) # DISCUSS: use builders here?
       # TODO: this will be done via incoming/outgoing contracts.
-      options_for_nested = Input.new
-      options_for_nested = Input::Dynamic.new(input) if input # FIXME: they need to have symbol keys!!!!
+      # options_for_nested = Input.new
+      # options_for_nested = Input::Dynamic.new(input) if input # FIXME: they need to have symbol keys!!!!
 
-      options_for_composer = Input::Output.new
-      options_for_composer = Input::Output::Dynamic.new(output) if output
+      # options_for_composer = Input::Output.new
+      # options_for_composer = Input::Output::Dynamic.new(output) if output
 
 
       nested_activity = is_nestable_object.(nested_operation) ? nested_operation : NonActivity.new(nested_operation)

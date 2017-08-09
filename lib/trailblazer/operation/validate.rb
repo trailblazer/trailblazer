@@ -49,8 +49,6 @@ class Trailblazer::Operation
         path     = "contract.#{name}"
         contract = options[path]
 
-        puts "@@!!!!!@@@ #{options.inspect}"
-
         # this is for 1.1-style compatibility and should be removed once we have Deserializer in place:
         options["result.#{path}"] = result =
           if representer
