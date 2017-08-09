@@ -1,5 +1,8 @@
 # 2.1
 
+* Nested
+  if Nested( Edit ), outputs will automatically be connected, see editor.
+
 * `operation.new` step removed.
 * Undocumented step behavior removed. You can't write to `self` anymore.
 

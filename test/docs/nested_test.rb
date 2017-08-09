@@ -83,12 +83,12 @@ end
   #---
   #- shared data
   class B < Trailblazer::Operation
-    pass ->(options, **) { options["can.B.see.A.mutable.data?"]             = options["mutable.data.from.A"] }
+    pass ->(options, **) { options["can.B.see.A.mutable.data?"] = options["mutable.data.from.A"] }
     pass ->(options, **) { options["can.B.see.current_user?"]   = options["current_user"] }
     pass ->(options, **) { options["can.B.see.params?"]         = options["params"] }
     pass ->(options, **) { options["can.B.see.A.class.data?"]   = options["A.class.data"] }
     pass ->(options, **) { options["can.B.see.container.data?"] = options["some.container.data"] }
-    pass ->(options, **) { options["mutable.data.from.B"] = "from B!" }
+    pass ->(options, **) { options["mutable.data.from.B"]       = "from B!" }
   end
 
   class A < Trailblazer::Operation
@@ -99,6 +99,7 @@ end
     pass ->(options, **) { options["can.A.see.B.mutable.data?"] = options["mutable.data.from.B"] }
   end
 
+  #---
   #- default behavior: share everything.
   # no containers
   # no runtime data
@@ -119,9 +120,57 @@ end
     result["can.A.see.B.mutable.data?"].must_equal "from B!"
   end
 
+  #---
+  #- Nested::NonActivity
+  #- Nested( ->{} )
+  class AlmostB < Trailblazer::Operation
+    step ->(options, **) { options["can.B.see.A.mutable.data?"] = options["mutable.data.from.A"] }
+    pass ->(options, **) { options["mutable.data.from.B"]       = "from AlmostB!" }
+  end
 
+  class AWithNonActivity < Trailblazer::Operation
+    self["A.class.data"] = "yes"                                   # class data on A
 
+    Decider = ->(options, use_class:raise, **) { use_class }
 
+    pass ->(options, **) { options["mutable.data.from.A"] = "from A!" } # mutable data on A
+    step Nested( Decider )
+    pass ->(options, **) { options["can.A.see.B.mutable.data?"] = options["mutable.data.from.B"] }
+  end
+
+  # call A with NonActivity and invoke B
+  it do
+    result = AWithNonActivity.({}, use_class: B)
+    # everything from A visible
+    result["A.class.data"].       must_equal "yes"
+    result["mutable.data.from.A"].must_equal "from A!"
+
+    # B can see everything
+    result["can.B.see.A.mutable.data?"].must_equal "from A!"
+    result["can.B.see.current_user?"].must_be_nil
+    result["can.B.see.params?"].must_equal({})
+    result["can.B.see.A.class.data?"].must_equal "yes"
+    result["can.B.see.container.data?"].must_be_nil
+
+    result["can.A.see.B.mutable.data?"].must_equal "from B!"
+  end
+
+  # call A with NonActivity and invoke AlmostB
+  it do
+    result = AWithNonActivity.({}, use_class: AlmostB)
+    # everything from A visible
+    result["A.class.data"].       must_equal "yes"
+    result["mutable.data.from.A"].must_equal "from A!"
+
+    # B can see everything
+    result["can.B.see.A.mutable.data?"].must_equal "from A!"
+    result["can.B.see.current_user?"].must_be_nil
+    result["can.B.see.params?"].must_be_nil
+    result["can.B.see.A.class.data?"].must_be_nil
+    result["can.B.see.container.data?"].must_be_nil
+
+    result["can.A.see.B.mutable.data?"].must_equal "from AlmostB!"
+  end
 
 
 
@@ -259,24 +308,6 @@ end
 # Nested( ->{} )
 class NestedWithCallableTest < Minitest::Spec
   Song = Struct.new(:id, :title)
-
-  class X < Trailblazer::Operation
-    step ->(options, params:, **) { options["params.original"] = params }
-    step ->(options, **) { options["x"] = true }
-  end
-
-  class Y < Trailblazer::Operation
-    step ->(options, **) { options["y"] = true }
-  end
-
-  class A < Trailblazer::Operation
-    step ->(options, **) { options["z"] = true }
-    step Nested( ->(options, *) { options["class"] } )
-  end
-
-  it { A.({ a: 1 }, "class" => X).inspect("x", "y", "z", "params.original").must_equal "<Result:true [true, nil, true, {:a=>1}] >" }
-  it { A.({}, "class" => Y).inspect("x", "y", "z").must_equal "<Result:true [nil, true, true] >" }
-  # it { Create.({}).inspect("x", "y", "z").must_equal "<Result:true [nil, true, true] >" }
 
   class Song
     module Contract

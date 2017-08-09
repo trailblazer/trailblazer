@@ -6,21 +6,18 @@
 
 class Trailblazer::Operation
   def self.Nested(callable, input:nil, output:nil, name: "Nested(#{callable})")
-    task = Nested.for(callable, input, output)
+    task, activity = Nested.for(callable, input, output)
 
-    activity_outputs = if Nested.nestable_object?( callable  ) # FIXME: COMPAT, defaults for dynamics.
+    end_events = activity["__activity__"].to_fields[1]
+
       # TODO: introduce Activity interface (for introspection, events, etc)
-      end_events = callable["__activity__"].to_fields[1]
-
+    activity_outputs =
       Hash[
         end_events.collect do |evt|
           _name = evt.instance_variable_get(:@name)
           [ evt, { role: _name } ] # this is a wild guess, e.g. PassFast => { role: :pass_fast }
         end
       ]
-    else
-      {}
-    end
 
     [ task, { name: name }, {}, activity_outputs ]
   end
@@ -52,29 +49,15 @@ class Trailblazer::Operation
       options_for_composer = Input::Output::Dynamic.new(output) if output
 
 
-      nested_activity = is_nestable_object.(nested_operation) ? nested_operation : DynamicNested.new(nested_operation)
+      nested_activity = is_nestable_object.(nested_operation) ? nested_operation : NonActivity.new(nested_operation)
 
       # The returned {Nested} instance is a valid circuit element and will be `call`ed in the circuit.
       # It simply returns the nested activity's direction.
       # The actual wiring - where to go with that, is up to the Nested() macro.
       # puts "@@@@@ #{nested_activity.inspect}"
-      Trailblazer::Circuit::Nested(nested_activity, nil) do |activity:nil, start_at:, args:raise, **|
-        options, flow_options = args
-
-        operation = flow_options[:exec_context]
-
-        # _options_for_nested = options_for_nested.(operation, options) # discuss: why do we need the operation here at all?
-        _options_for_nested = options
-
-        # puts "N@@@@@ #{activity} #{_options_for_nested.keys.inspect}"
-        # puts "@@@@@> #{_options_for_nested["contract.default.class"].inspect}"
-        direction, options, flow_options = activity.__call__( activity.instance_variable_get(:@start), _options_for_nested, flow_options )
-
-        # puts "@@@@@after #{options.keys.inspect}"
-        # options_for_composer.(operation, options, result).each { |k,v| options[k] = v }
-
-        [ direction, options, flow_options ]
-      end
+      return Trailblazer::Circuit::Nested(nested_activity, nil) do |activity:nil, start_at:nil, args:raise, **|
+        activity.__call__( activity.instance_variable_get(:@start), *args )
+      end, nested_activity
     end
 
     def self.nestable_object?(object)
@@ -88,15 +71,39 @@ class Trailblazer::Operation
 
     private
 
-    class DynamicNested
+    # For dynamic Nested's that do not expose an Activity interface.
+    # Since we do not know its outputs, we have to map them to :success and :failure, only.
+    #
+    # This is what {Nested} in 2.0 used to do, where the outcome could only be true/false (or success/failure).
+    class NonActivity
       include Element::Dynamic
 
-      def __call__(direction, options, flow_options)
-        # puts "~~~@@@@@ #{options.inspect}"
-        operation = @wrapped.(options, flow_options)
+      def initialize(*)
+        super
 
-        direction ||= operation.instance_variable_get(:@start)
-        operation.__call__(direction, options, flow_options)
+        @end_events = [ Railway::End::Success.new(:success), Railway::End::Failure.new(:failure) ]
+      end
+
+      def __call__(direction, options, flow_options)
+        activity = @wrapped.(options, flow_options) # evaluate the option to get the actual "object" to call.
+
+        direction ||= activity.instance_variable_get(:@start) # FIXME. we're assuming the object is an Activity.
+
+        direction, options, flow_options = activity.__call__(direction, options, flow_options)
+
+        # Translate the genuine nested direction to the generic NonActivity end.
+        # Note that here we lose information about what specific event was emitted.
+        [
+          direction.kind_of?(Railway::End::Success) ? @end_events[0] : @end_events[1],
+          options,
+          flow_options
+        ]
+      end
+
+      def [](name)
+        raise "this is not a real activity and my api sucks!" unless name == "__activity__"
+
+        Struct.new(:to_fields).new( [nil, @end_events ] ) # FIXME: jeez what am i doing?
       end
     end
 
