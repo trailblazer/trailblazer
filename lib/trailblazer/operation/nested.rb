@@ -91,7 +91,7 @@ class Trailblazer::Operation
 
         direction, options, flow_options = activity.__call__(direction, options, flow_options)
 
-        # Translate the genuine nested direction to the generic NonActivity end.
+        # Translate the genuine nested direction to the generic NonActivity end (success/failure, only).
         # Note that here we lose information about what specific event was emitted.
         [
           direction.kind_of?(Railway::End::Success) ? @end_events[0] : @end_events[1],

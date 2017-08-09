@@ -124,6 +124,7 @@ end
   #- Nested::NonActivity
   #- Nested( ->{} )
   class AlmostB < Trailblazer::Operation
+    step ->(options, is_successful:raise, **) { is_successful } # {AlmostB} fails if {is_successful} isn't true.
     step ->(options, **) { options["can.B.see.A.mutable.data?"] = options["mutable.data.from.A"] }
     pass ->(options, **) { options["mutable.data.from.B"]       = "from AlmostB!" }
   end
@@ -153,11 +154,14 @@ end
     result["can.B.see.container.data?"].must_be_nil
 
     result["can.A.see.B.mutable.data?"].must_equal "from B!"
+
+    result[:is_successful].must_be_nil
+    result.success?.must_equal true # B was successful, so A is successful.
   end
 
   # call A with NonActivity and invoke AlmostB
   it do
-    result = AWithNonActivity.({}, use_class: AlmostB)
+    result = AWithNonActivity.({}, use_class: AlmostB, is_successful: true)
     # everything from A visible
     result["A.class.data"].       must_equal "yes"
     result["mutable.data.from.A"].must_equal "from A!"
@@ -170,7 +174,35 @@ end
     result["can.B.see.container.data?"].must_be_nil
 
     result["can.A.see.B.mutable.data?"].must_equal "from AlmostB!"
+
+    result[:is_successful].must_equal true
+    result.success?.must_equal true # AlmostB was successful, so A is successful.
   end
+
+  # call A with NonActivity and invoke AlmostB, but unsuccessfully.
+  it do
+    result = AWithNonActivity.({}, use_class: AlmostB, is_successful: false)
+    # everything from A visible
+    result["A.class.data"].       must_equal "yes"
+    result["mutable.data.from.A"].must_equal "from A!"
+
+    # B can see everything
+    result["can.B.see.A.mutable.data?"].must_be_nil
+    result["can.B.see.current_user?"].must_be_nil
+    result["can.B.see.params?"].must_be_nil
+    result["can.B.see.A.class.data?"].must_be_nil
+    result["can.B.see.container.data?"].must_be_nil
+
+    result["can.A.see.B.mutable.data?"].must_be_nil
+
+    result[:is_successful].must_equal false
+    result.success?.must_equal false # AlmostB was successful, so A is successful.
+  end
+
+
+
+
+
 
 
 
