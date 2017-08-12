@@ -6,9 +6,9 @@
 
 class Trailblazer::Operation
   def self.Nested(callable, input:nil, output:nil, name: "Nested(#{callable})")
-    task, activity = Nested.for(callable, input, output)
+    task, operation = Nested.for(callable, input, output)
 
-    end_events = activity["__activity__"].to_fields[1]
+    end_events = operation.end_events
 
       # TODO: introduce Activity interface (for introspection, events, etc)
     activity_outputs =
@@ -55,8 +55,8 @@ class Trailblazer::Operation
       # It simply returns the nested activity's direction.
       # The actual wiring - where to go with that, is up to the Nested() macro.
       # puts "@@@@@ #{nested_activity.inspect}"
-      return Trailblazer::Circuit::Nested(nested_activity, nil) do |activity:nil, start_at:nil, args:raise, **|
-        activity.__call__( activity.instance_variable_get(:@start), *args )
+      return Trailblazer::Circuit::Nested(nested_activity, nil) do |activity:raise, start_at:nil, args:raise, **|
+        activity.__call__( start_at, *args )
       end, nested_activity
     end
 
@@ -71,7 +71,7 @@ class Trailblazer::Operation
 
     private
 
-    # For dynamic Nested's that do not expose an Activity interface.
+    # For dynamic `Nested`s that do not expose an {Activity} interface.
     # Since we do not know its outputs, we have to map them to :success and :failure, only.
     #
     # This is what {Nested} in 2.0 used to do, where the outcome could only be true/false (or success/failure).
@@ -80,9 +80,10 @@ class Trailblazer::Operation
 
       def initialize(*)
         super
-
         @end_events = [ Railway::End::Success.new(:success), Railway::End::Failure.new(:failure) ]
       end
+
+      attr_reader :end_events
 
       def __call__(direction, options, flow_options)
         activity = @wrapped.(options, flow_options) # evaluate the option to get the actual "object" to call.
@@ -94,16 +95,10 @@ class Trailblazer::Operation
         # Translate the genuine nested direction to the generic NonActivity end (success/failure, only).
         # Note that here we lose information about what specific event was emitted.
         [
-          direction.kind_of?(Railway::End::Success) ? @end_events[0] : @end_events[1],
+          direction.kind_of?(Railway::End::Success) ? end_events[0] : end_events[1],
           options,
           flow_options
         ]
-      end
-
-      def [](name)
-        raise "this is not a real activity and my api sucks!" unless name == "__activity__"
-
-        Struct.new(:to_fields).new( [nil, @end_events ] ) # FIXME: jeez what am i doing?
       end
     end
 

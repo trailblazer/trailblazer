@@ -27,7 +27,7 @@ class Trailblazer::Operation
           # here, an exception could happen. they are usually caught in the user_wrap.
           # we need to run Activity#call here so the original __call__ doesn't override :exec_context. this will be fixed
           # with call being a circuit itself.
-          operation_class["__activity__"].( operation_class["__activity__"][:Start], _options, _flow_options )
+          operation_class["__activity__"].( nil, _options, _flow_options )
         }
 
         # direction, options, flow_options = user_wrap.(options, flow_options[:exec_context], operation_class, &default_block )
