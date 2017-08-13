@@ -28,7 +28,7 @@ class Trailblazer::Operation
           options[params_path] = key ? options["params"][key] : options["params"]
         end
 
-        task = Trailblazer::Circuit::Task::Binary( step )
+        task = Trailblazer::Activity::Task::Binary( step )
 
         [ task, { name: params_path }, {} ]
       end
@@ -39,7 +39,7 @@ class Trailblazer::Operation
           validate!(options, name: name, representer: options["representer.#{name}.class"], params_path: params_path)
         }
 
-        task = Trailblazer::Circuit::Task::Binary( step )
+        task = Trailblazer::Activity::Task::Binary( step )
         # Pipetree::Step.new( step, "representer.#{name}.class" => representer ) # FIXME!
 
         [ task, { name: "contract.#{name}.call" }, {} ]

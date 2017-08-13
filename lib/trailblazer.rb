@@ -1,7 +1,9 @@
-require "trailblazer/operation"
-
-require "trailblazer/dsl"
 require "trailblazer/version"
+
+require "trailblazer/operation"
+require "trailblazer/dsl"
+
+require "trailblazer/task"
 
 require "trailblazer/operation/deprecations"
 

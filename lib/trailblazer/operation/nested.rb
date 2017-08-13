@@ -6,7 +6,7 @@
 
 class Trailblazer::Operation
   def self.Nested(callable, input:nil, output:nil, name: "Nested(#{callable})")
-    task, operation = Nested.for(callable, input, output)
+    task, operation = Nested.build(callable, input, output)
 
     end_events = operation.end_events
 
@@ -40,7 +40,7 @@ class Trailblazer::Operation
     # Please note that the instance_variable_get are here on purpose since the
     # superinternal API is not entirely decided, yet.
     # @api private
-    def self.for(nested_operation, input, output, is_nestable_object=method(:nestable_object?)) # DISCUSS: use builders here?
+    def self.build(nested_operation, input, output, is_nestable_object=method(:nestable_object?)) # DISCUSS: use builders here?
       # TODO: this will be done via incoming/outgoing contracts.
       # options_for_nested = Input.new
       # options_for_nested = Input::Dynamic.new(input) if input # FIXME: they need to have symbol keys!!!!
