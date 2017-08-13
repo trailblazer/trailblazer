@@ -32,7 +32,7 @@ class Trailblazer::Operation
 
 
       # task           = Railway::TaskBuilder.( step )
-      task = Trailblazer::Circuit::Task::Binary( step ) # maps step return value to Left/Right.
+    task = Trailblazer::Activity::Task::Binary( step ) # maps step return value to Left/Right.
 
       runner_options = {
         alteration: TaskWrap::Injection::SetDefaults(

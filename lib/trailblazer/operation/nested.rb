@@ -8,6 +8,8 @@ class Trailblazer::Operation
   def self.Nested(callable, input:nil, output:nil, name: "Nested(#{callable})")
     task, operation = Nested.build(callable, input, output)
 
+    # @needs operation#end_events
+
     end_events = operation.end_events
 
       # TODO: introduce Activity interface (for introspection, events, etc)
@@ -37,6 +39,9 @@ class Trailblazer::Operation
   end
 
   module Nested
+    module Nestable
+    end
+
     # Please note that the instance_variable_get are here on purpose since the
     # superinternal API is not entirely decided, yet.
     # @api private
@@ -62,7 +67,7 @@ class Trailblazer::Operation
 
     def self.nestable_object?(object)
       # interestingly, with < we get a weird nil exception. bug in Ruby?
-      object.is_a?(Class) && object <= operation_class
+      object.is_a?(Nestable) || object.is_a?(Class) && object <= operation_class
     end
 
     def self.operation_class

@@ -1,5 +1,7 @@
 require "test_helper"
 
+# TODO: consume End signal from wrapped
+
 class WrapTest < Minitest::Spec
   Song = Struct.new(:id, :title) do
     def self.find(id)
@@ -140,8 +142,6 @@ class WrapTest < Minitest::Spec
 
   #:callable-t
   class MyTransaction
-    extend Uber::Callable
-
     def self.call(options, *)
       Sequel.transaction { yield } # yield runs the nested pipe.
       # return value decides about left or right track!
@@ -180,6 +180,21 @@ class WrapTest < Minitest::Spec
   #:sequel-transaction-callable end
 
     it { Create.( title: "Pie" ).inspect("model", "x", "err").must_equal %{<Result:true [#<struct WrapTest::Song id=nil, title=\"Pie\">, nil, nil] >} }
+  end
+
+  class WrapWithMethodTest < Minitest::Spec
+    class Create < Trailblazer::Operation
+      step Model( Song, :new )
+      step Wrap ->(options, *, &block) { block.call } {
+        step :check_model!
+
+        def check_model!(options, model:, **)
+          options["x"] = model
+        end
+      }
+    end
+
+    it { Create.() }
   end
 end
 

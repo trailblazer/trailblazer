@@ -79,43 +79,6 @@ end
   it do
     Update.(id: 2).inspect("model").must_equal %{<Result:false [nil] >}
   end
-
-
-
-
-
-
-
-  # mutual data from A doesn't bleed into B.
-  it { A.()["can.B.see.A.mutable.data?"].must_be_nil }
-  it { A.()["mutable.data.from.A"].must_equal true }
-  # runtime dependencies are visible in B.
-  it { A.({}, "current_user" => Module)["can.B.see.current_user?"].must_equal Module }
-  it { A.({ a: 1 })["can.B.see.params?"].must_equal({ a: 1 }) }
-  # class data from A doesn't bleed into B.
-  it { A.()["can.B.see.A.class.data?"].must_equal nil }
-
-
-  # cr_result = Create.({}, "result" => result)
-  # puts cr_result["model"]
-  # puts cr_result["contract.default"]
-
-  #---
-  #- Nested( .., input: )
-  class C < Trailblazer::Operation
-    self["C.class.data"] = true
-
-    success ->(options, **) { options["mutable.data.from.A"] = true }
-
-    step Nested( B, input: ->(options, runtime_data:, mutable_data:, **) {
-      runtime_data.merge( "mutable.data.from.A" => mutable_data["mutable.data.from.A"] )
-    } )
-  end
-
-  it { C.()["can.B.see.A.mutable.data?"].must_equal true }
-  it { C.()["mutable.data.from.A"].must_equal true } # this IS visible since we use :input!
-  it { C.({}, "current_user" => Module)["can.B.see.current_user?"].must_equal Module }
-  it { C.()["can.B.see.A.class.data?"].must_equal nil }
 end
 
 class NestedInput < Minitest::Spec
