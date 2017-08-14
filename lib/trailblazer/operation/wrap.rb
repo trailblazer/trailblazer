@@ -22,11 +22,7 @@ class Trailblazer::Operation
         block_calling_wrapped = -> {
           args = Railway::TaskWrap.arguments_for_call(@activity, direction, options, flow_options)
 
-          # puts "x@@@@@ #{args[1][:exec_context].inspect}"
-
-          @activity["__activity__"].( direction, *args ).tap do |res|
-            puts "x@@@@@ #{res[2][:exec_context].inspect}"
-          end
+          @activity["__activity__"].( direction, *args )
         }
 
 

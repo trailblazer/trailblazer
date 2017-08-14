@@ -2,6 +2,8 @@
 
 * Nested
   if Nested( Edit ), outputs will automatically be connected, see editor.
+* Wrap
+  dropped the `pipe` option.
 
 * `operation.new` step removed.
 * Undocumented step behavior removed. You can't write to `self` anymore.
