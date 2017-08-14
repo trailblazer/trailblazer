@@ -33,14 +33,13 @@ class Trailblazer::Operation
         #  2. false
         #  3. true or something else, but not the Task interface (when rescue isn't needed)
 
-
-
-
         # legacy outcome.
         # FIXME: we return some "older version" of options here!
         # FIXME: make sure end_events[1] is the Failure end!
         return  end_events[1], options, flow_options if false === returned
 
+
+        # TODO: test a proper return in the user_block!!!
 
         returned # let's hope returned is one of activity's Ends.
       end
