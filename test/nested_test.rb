@@ -1,5 +1,8 @@
 require "test_helper"
 
+# exec_context nach Nested
+
+
 class NestedTest < Minitest::Spec
   #---
   #- shared data
@@ -193,4 +196,24 @@ class NestedTest < Minitest::Spec
     result[:is_successful].must_be_nil
     result.success?.must_equal true # B was successful, so A is successful.
   end
+
+
+  #---
+  #- :exec_context
+  class Create < Trailblazer::Operation
+    class Edit < Trailblazer::Operation
+      step :c!
+
+      def c!(options, **); options[:c] = 1 end
+    end
+
+    step :a!
+    step Nested( Edit )
+    step :b!
+
+    def a!(options, **); options[:a] = 2 end
+    def b!(options, **); options[:b] = 3 end
+  end
+
+  it { Create.().inspect(:a, :b, :c).must_equal %{<Result:true [2, 3, 1] >} }
 end
