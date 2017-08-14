@@ -188,10 +188,11 @@ class WrapTest < Minitest::Spec
       step Wrap ->(options, *, &block) { block.call } {
         step :check_model!
 
-        def check_model!(options, model:, **)
-          options["x"] = model
-        end
       }
+
+      def check_model!(options, model:, **)
+        options["x"] = model
+      end
     end
 
     it { Create.() }
