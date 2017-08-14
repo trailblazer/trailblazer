@@ -71,19 +71,6 @@ class WrapTest < Minitest::Spec
     it { Create.({}, "yield?" => true).inspect("x").must_equal %{<Result:true [true] >} }
   end
 
-  #---
-  #- arguments for Wrap
-  #   ->(options, operation, operation_class, &block)
-  #
-  #  THOSE WILL SOON BE DEPRECATED AND REMOVED.
-  class Update < Trailblazer::Operation
-    step Wrap ->(options, operation, pipe, &block) { options["additional_args_soon_deprecated"] = [operation.class, pipe["__sequence__"].size]; block.call } {
-      step ->(options, **) { options["x"] = true }
-    }
-  end
-
-  it { Update.().inspect("x", "additional_args_soon_deprecated").must_equal %{<Result:true [true, [WrapTest::Update, 1]] >} }
-
   class WrapExampleProcTest < Minitest::Spec
     module Sequel
       def self.transaction
