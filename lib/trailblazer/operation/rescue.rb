@@ -13,9 +13,9 @@ class Trailblazer::Operation
       end
     }
 
-    step, _ = Wrap(rescue_block, &block)
-
-    [ step, name: "Rescue:#{block.source_location.last}" ]
+    Wrap(rescue_block, &block)
+    # FIXME: name
+    # [ step, name: "Rescue:#{block.source_location.last}" ]
   end
 end
 
