@@ -4,11 +4,11 @@ class Trailblazer::Operation
     handler    = Trailblazer::Option(handler)
 
     # This block is evaluated by {Wrap} which currently expects a binary return type.
-    rescue_block = ->(options, operation, *, &nested_activity) {
+    rescue_block = ->(options, flow_options, *, &nested_activity) {
       begin
         nested_activity.call
       rescue *exceptions => exception
-        handler.call(exception, options, exec_context: operation) # FIXME: when there's an error here, it shows the wrong exception!
+        handler.call(exception, options, flow_options) # FIXME: when there's an error here, it shows the wrong exception!
         false
       end
     }
