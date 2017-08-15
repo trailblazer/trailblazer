@@ -1,3 +1,5 @@
+require "trailblazer/operation/nested"
+
 class Trailblazer::Operation
   # TODO: make Wrap::Subprocess not binary but actually wire its ends via the circuit.
 
