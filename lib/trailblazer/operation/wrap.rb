@@ -1,12 +1,16 @@
 require "trailblazer/operation/nested"
 
 class Trailblazer::Operation
-  # TODO: make Wrap::Subprocess not binary but actually wire its ends via the circuit.
+
+  # false is automatically connected to End.failure.
 
   def self.Wrap(user_wrap, &block)
     operation_class = Wrap.build_wrapped_activity(block)
 
-    Nested( Wrap::Wrapped.new(operation_class, user_wrap) )
+    callable, options, runner_options, end_events = Nested( Wrap::Wrapped.new(operation_class, user_wrap) )
+
+    # connect `false` as an end event, when an exception stopped the wrap, for example.
+    return callable, options, runner_options, end_events.merge( false => { role: :failure } ) # TODO: Nested could have a better API and do the "merge" for us!
   end
 
   module Wrap
@@ -35,7 +39,7 @@ class Trailblazer::Operation
         }
 
 
-        returned = @user_wrap.( options, flow_options[:exec_context], &block_calling_wrapped )
+        returned = @user_wrap.( options, flow_options, &block_calling_wrapped )
 
         # returned could be
         #  1. the 1..>=3 Task interface result
@@ -43,12 +47,8 @@ class Trailblazer::Operation
         #  3. true or something else, but not the Task interface (when rescue isn't needed)
 
         # legacy outcome.
-        # FIXME: we return some "older version" of options here!
-        # FIXME: make sure end_events[1] is the Failure end!
-        return  end_events[1], options, flow_options if false === returned
-
-
-        # TODO: test a proper return in the user_block!!!
+        # FIXME: we *might* return some "older version" of options here!
+        return false, options, flow_options if returned === false
 
         returned # let's hope returned is one of activity's Ends.
       end

@@ -3,7 +3,8 @@
 * Nested
   if Nested( Edit ), outputs will automatically be connected, see editor.
 * Wrap
-  dropped the `pipe` option.
+  dropped the `pipe` option. This is now `options, flow_options, *`
+  `false` is now automatically connected to End.failure.
 
 * `operation.new` step removed.
 * Undocumented step behavior removed. You can't write to `self` anymore.

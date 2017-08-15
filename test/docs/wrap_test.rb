@@ -9,6 +9,31 @@ class WrapTest < Minitest::Spec
     end
   end
 
+  class DirectWiringTest < Minitest::Spec
+    class Create < Trailblazer::Operation
+      class MyContract < Reform::Form
+        property :title
+      end
+
+      step Wrap ->(options, *args, &block) {
+        begin
+          block.call
+        rescue => exception
+          options["result.model.find"] = "argh! because #{exception.class}"
+          [ false, options, *args ]
+        end } {
+        step ->(options, **) { options["x"] = true }
+        step Model( Song, :find )
+        step Contract::Build( constant: MyContract )
+      }
+      step Contract::Validate()
+      step Contract::Persist( method: :sync )
+    end
+
+    it { Create.( id: 1, title: "Prodigal Son" ).inspect("x", "model").must_equal %{<Result:true [true, #<struct WrapTest::Song id=1, title=\"Prodigal Son\">] >} }
+    it { Create.().inspect("x", "model").must_equal %{<Result:false [true, nil] >} }
+  end
+
   class Create < Trailblazer::Operation
     class MyContract < Reform::Form
       property :title
