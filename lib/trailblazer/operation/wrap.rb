@@ -8,6 +8,13 @@ class Trailblazer::Operation
   end
 
   module Wrap
+    def self.build_wrapped_activity(block) # DISCUSS: this should be an activity at some point.
+      # TODO: immutable API for creating operations. Operation.build(step .. , step ..)
+      operation_class = Class.new( Nested.operation_class ) # Usually resolves to Trailblazer::Operation.
+      operation_class.instance_exec(&block)                 # Evaluate the wrapped operation code (step definitions)
+      operation_class
+    end
+
     # behaves like an operation so it plays with Nested and simply calls the operation in the user-provided block.
     class Wrapped #< Trailblazer::Operation # FIXME: the inheritance is only to satisfy Nested( Wrapped.new )
       include Nested::Nestable
@@ -47,14 +54,6 @@ class Trailblazer::Operation
       def end_events
         @activity.end_events # FIXME: we don't map false, yet
       end
-    end
-
-    def self.build_wrapped_activity(block) # DISCUSS: this should be an activity at some point.
-      # TODO: immutable API for creating operations. Operation.build(step .. , step ..)
-      operation_class = Class.new( Nested.operation_class ) # Usually resolves to Trailblazer::Operation.
-      operation_class.instance_exec(&block)                 # Evaluate the wrapped operation code (step definitions)
-
-      operation_class
     end
   end # Wrap
 end
