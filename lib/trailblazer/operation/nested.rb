@@ -93,8 +93,6 @@ class Trailblazer::Operation
       def __call__(direction, options, flow_options)
         activity = @wrapped.(options, flow_options) # evaluate the option to get the actual "object" to call.
 
-        direction ||= activity.instance_variable_get(:@start) # FIXME. we're assuming the object is an Activity.
-
         direction, options, flow_options = activity.__call__(direction, options, flow_options)
 
         # Translate the genuine nested direction to the generic NonActivity end (success/failure, only).
