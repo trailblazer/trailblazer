@@ -162,23 +162,6 @@ class NestedOutput < Minitest::Spec
   end
 end
 
-class NestedClassLevelTest < Minitest::Spec
-  #:class-level
-  class New < Trailblazer::Operation
-    step ->(options, **) { options["class"] = true }#, before: "operation.new"
-    step ->(options, **) { options["x"] = true }
-  end
-
-  class Create < Trailblazer::Operation
-    step Nested( New )
-    step ->(options, **) { options["y"] = true }
-  end
-  #:class-level end
-
-  it { Create.().inspect("x", "y").must_equal %{<Result:true [true, true] >} }
-  it { Create.(); Create["class"].must_equal nil }
-end
-
 #---
 # Nested( ->{} )
 class NestedWithCallableTest < Minitest::Spec
