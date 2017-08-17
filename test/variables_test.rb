@@ -45,11 +45,27 @@ class VariablesTest < Minitest::Spec
     end
   end
 
+  # it do
+  #   result = ProtectedOrganization.({}, "public_opinion" => "Freedom!")
+
+  #   result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours").
+  #     must_equal %{<Result:true ["Freedom!", "Bla", "Psst!", "FREEDOM!", nil, nil] >}
+  # end
+
+
+  class EncryptedOrganization < ProtectedOrganization
+    def input!(options, **)
+      # public_data.merge(  )
+      puts "merge #{ options}"
+      options.merge( "secret" => options["secret"]+"XxX" )
+    end
+  end
+
   it do
-    result = OpenOrganization.({}, "public_opinion" => "Freedom!")
+    result = EncryptedOrganization.({}, "public_opinion" => "Freedom!")
 
     result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours").
-      must_equal %{<Result:true ["Freedom!", "Bla", "Psst!", "FREEDOM!", "XxX", nil] >}
+      must_equal %{<Result:true ["Freedom!", "Bla", "Psst!", "FREEDOM!", "Psst!XxX", "BlaBla"] >}
   end
 
   # def assert_almost_b(result, is_successful:raise)

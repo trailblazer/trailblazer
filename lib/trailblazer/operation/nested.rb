@@ -6,6 +6,8 @@
 
 class Trailblazer::Operation
   def self.Nested(callable, input:nil, output:nil, name: "Nested(#{callable})")
+    task_wrap_wirings = []
+
     task, operation = Nested.build(callable, input, output)
 
     # @needs operation#end_events
@@ -21,7 +23,24 @@ class Trailblazer::Operation
         end
       ]
 
-    [ task, { name: name }, {}, activity_outputs ]
+
+      # TODO: move this to the generic step DSL
+    # options_for_nested = Input.new
+    # options_for_nested = Input::Dynamic.new(input) if input # FIXME: they need to have symbol keys!!!!
+    if input
+      # Default {Output} copies the mutable data from the nested activity into the original.
+      output_task = Nested::Output.new( Nested::Output::CopyMutableToOriginal )
+
+      input_task = Nested::Input::Dynamic.new(input)
+      task_wrap_wirings << [ :insert_before!, "task_wrap.call_task", node: [ input_task, id: ".input" ], incoming: Proc.new{true}, outgoing: [Trailblazer::Circuit::Right, {}] ]
+
+      # FIXME: always add the decomposer:
+      task_wrap_wirings << [ :insert_before!, [:End, :default], node: [ output_task, id: ".output" ], incoming: Proc.new{true}, outgoing: [Trailblazer::Circuit::Right, {}] ]
+    end
+
+
+
+    [ task, { name: name }, { alteration: task_wrap_wirings }, activity_outputs ]
   end
 
   # WARNING: this is experimental API, but it will end up with something like that.
@@ -47,9 +66,7 @@ class Trailblazer::Operation
     # @api private
     def self.build(nested_operation, input, output, is_nestable_object=method(:nestable_object?)) # DISCUSS: use builders here?
       # TODO: this will be done via incoming/outgoing contracts.
-      # options_for_nested = Input.new
-      # options_for_nested = Input::Dynamic.new(input) if input # FIXME: they need to have symbol keys!!!!
-
+      #
       # options_for_composer = Input::Output.new
       # options_for_composer = Input::Output::Dynamic.new(output) if output
 
@@ -110,34 +127,19 @@ class Trailblazer::Operation
     class Input
       include Element
 
-      def call(context, options)
-        options
-      end
-
-      class RuntimeOnly
-        include Element
-
-        # Per default, only runtime data for nested operation.
-        def call(operation, options)
-          # this must return a Skill.
-          # Trailblazer::Skill::KeywordHash options.to_runtime_data[0]
-
-          # DISCUSS: are we doing the right thing here?
-
-          original, mutable = options.decompose
-
-          original
-
-          Trailblazer::Context::Immutable.new(Trailblazer::Context(original))
-        end
-      end
-
       class Dynamic
-        include Element#::Dynamic
+        include Element::Dynamic
 
-        def call(operation, options)
+        def call(direction, options, flow_options, task_conf, original_flow_options)
           # Trailblazer::Skill::KeywordHash @wrapped.(operation, options, runtime_data: options.to_runtime_data[0], mutable_data: options.to_mutable_data )
-          original, mutable = options.decompose
+          # original, mutable = options.decompose
+
+          # raise mutable.keys.inspect
+          # FIXME: almost identical with Option::KW.
+          input_ctx = @wrapped.( options, original_flow_options )
+          puts "  input_ctx #{input_ctx}"
+
+          return direction, input_ctx, flow_options, task_conf.merge( original_context: options ), original_flow_options
 
           # DISCUSS: how to allow tmp injections?
           # FIXME: almost identical with Option::KW.
@@ -150,27 +152,27 @@ class Trailblazer::Operation
 
       # Outgoing options, the returned options set when calling a nested task.
       # @note This will be replaced with an outgoing options mapping in the TaskWrap in TRB 2.2.
-      class Output
-        include Element
+    end
 
-        def call(input, options, result)
-          mutable_data_for(result).each { |k,v| options[k] = v }
-        end
+    class Output
+      def initialize(strategy)
+        @strategy = strategy
+      end
 
-        def mutable_data_for(result)
-          options = result[1]
+      def call(direction, options, flow_options, task_conf, *args)
+        return direction, @strategy.( task_conf[:original_context], options ), flow_options, task_conf, *args
+      end
 
-          original, mutable = options.decompose
+      # Strategy
+      class CopyMutableToOriginal
+        # @param original Context
+        # @param options  Context The object returned from a (nested) {Activity}.
+        def self.call(original, options)
+          _, mutable = options.decompose
 
-          mutable
-        end
+          mutable.each { |k,v| original[k] = v }
 
-        class Dynamic < Output
-          include Element#::Dynamic
-
-          def call(input, options, result)
-            @wrapped.( options, mutable_data: mutable_data_for(result))
-          end
+          original
         end
       end
     end
