@@ -69,15 +69,13 @@ class VariablesTest < Minitest::Spec
       must_equal %{<Result:true ["Freedom!", "Bla", "Psst!", "FREEDOM!", 0, 0.0] >}
   end
 
-
+  #---
+  #- new ctx
   class EncryptedOrganization < ConsideringButOpenOrganization
     def input!(options, **)
       options.merge( "secret" => options["secret"]+"XxX" )
     end
   end
-
-
-  # TODO write to options and get error
 
   it do
     result = EncryptedOrganization.({}, "public_opinion" => "Freedom!")
@@ -86,4 +84,36 @@ class VariablesTest < Minitest::Spec
       must_equal %{<Result:true ["Freedom!", "Bla", "Psst!", "FREEDOM!", "Psst!XxX", "BlaBla"] >}
   end
 
+  # TODO write to options and get error
+
+  #---
+  #- simply passes on the context
+  class DiscreetOrganization < Trailblazer::Operation
+    step ->(options, **) { options["rumours"] = "Bla" }
+    step ->(options, **) { options["secret"]  = "Psst!" }
+
+    step Nested( Whistleblower, input: :input!, output: :output! )
+
+    step ->(options, **) { options["org.rumours"] = options["edward.rumours"] } # what can we see from Edward?
+    step ->(options, **) { options["org.secret"]  = options["edward.secret"] }  # what can we see from Edward?
+
+    def input!(options, **)
+      options
+    end
+
+    def output!(options, **)
+      {
+        "out.keys"    => options.keys,
+        "out.rumours" => options["edward.rumours"].slice(0..2),
+        "out.secret"  => options["edward.secret"].reverse,
+      }
+    end
+  end
+
+  it do
+    result = DiscreetOrganization.({}, "public_opinion" => "Freedom!")
+
+    result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours", "out.keys", "out.rumours", "out.secret").
+      must_equal %{<Result:false [\"Freedom!\", \"Bla\", \"Psst!\", nil, nil, nil, [\"edward.public_opinion\", \"edward.secret\", \"edward.rumours\"], \"Bla\", \"!tssP\"] >}
+  end
 end

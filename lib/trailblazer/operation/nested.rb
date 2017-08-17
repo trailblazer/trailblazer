@@ -24,17 +24,27 @@ class Trailblazer::Operation
       ]
 
 
+    default_output_filter = ->(options, *) { mutable = options }
+
       # TODO: move this to the generic step DSL
     # options_for_nested = Input.new
     # options_for_nested = Input::Dynamic.new(input) if input # FIXME: they need to have symbol keys!!!!
     if input
       # Default {Output} copies the mutable data from the nested activity into the original.
-      output_task = Nested::Output.new( Nested::Output::CopyMutableToOriginal )
+      output_task = Nested::Output.new( Nested::Output::CopyMutableToOriginal, default_output_filter )
 
-      input_task = Nested::Input::Dynamic.new(input)
+      input_task = Nested::Input.new(input)
       task_wrap_wirings << [ :insert_before!, "task_wrap.call_task", node: [ input_task, id: ".input" ], incoming: Proc.new{true}, outgoing: [Trailblazer::Circuit::Right, {}] ]
 
       # FIXME: always add the decomposer:
+      # task_wrap_wirings << [ :insert_before!, [:End, :default], node: [ output_task, id: ".output" ], incoming: Proc.new{true}, outgoing: [Trailblazer::Circuit::Right, {}] ]
+
+      output ||= default_output_filter
+    end
+
+    if output
+      output_task = Nested::Output.new( Nested::Output::CopyMutableToOriginal, output )
+
       task_wrap_wirings << [ :insert_before!, [:End, :default], node: [ output_task, id: ".output" ], incoming: Proc.new{true}, outgoing: [Trailblazer::Circuit::Right, {}] ]
     end
 
@@ -45,11 +55,6 @@ class Trailblazer::Operation
 
   # WARNING: this is experimental API, but it will end up with something like that.
   module Element
-    # DISCUSS: add builders here.
-    def initialize(wrapped=nil)
-      @wrapped = wrapped
-    end
-
     module Dynamic
       def initialize(wrapped)
         @wrapped = Trailblazer::Option::KW(wrapped)
@@ -125,51 +130,48 @@ class Trailblazer::Operation
     # Ingoing options when calling a nested task.
     # @note This will be replaced with an ingoing options mapping in the TaskWrap in TRB 2.2.
     class Input
-      include Element
+      include Element::Dynamic
 
-      class Dynamic
-        include Element::Dynamic
+      def call(direction, options, flow_options, task_conf, original_flow_options)
+        # Trailblazer::Skill::KeywordHash @wrapped.(operation, options, runtime_data: options.to_runtime_data[0], mutable_data: options.to_mutable_data )
+        # original, mutable = options.decompose
 
-        def call(direction, options, flow_options, task_conf, original_flow_options)
-          # Trailblazer::Skill::KeywordHash @wrapped.(operation, options, runtime_data: options.to_runtime_data[0], mutable_data: options.to_mutable_data )
-          # original, mutable = options.decompose
+        # raise mutable.keys.inspect
+        # FIXME: almost identical with Option::KW.
+        input_ctx = @wrapped.( options, original_flow_options )
+        puts "  input_ctx #{input_ctx}"
 
-          # raise mutable.keys.inspect
-          # FIXME: almost identical with Option::KW.
-          input_ctx = @wrapped.( options, original_flow_options )
-          puts "  input_ctx #{input_ctx}"
+        return direction, input_ctx, flow_options, task_conf.merge( original_context: options ), original_flow_options
 
-          return direction, input_ctx, flow_options, task_conf.merge( original_context: options ), original_flow_options
-
-          # DISCUSS: how to allow tmp injections?
-          # FIXME: almost identical with Option::KW.
-          @wrapped.( options, **options.to_hash.merge(
-            runtime_data: Trailblazer::Context::Immutable.new(original),
-            mutable_data: Trailblazer::Context::Immutable.new(mutable)
-          ) )
-        end
+        # DISCUSS: how to allow tmp injections?
+        # FIXME: almost identical with Option::KW.
+        @wrapped.( options, **options.to_hash.merge(
+          runtime_data: Trailblazer::Context::Immutable.new(original),
+          mutable_data: Trailblazer::Context::Immutable.new(mutable)
+        ) )
       end
-
-      # Outgoing options, the returned options set when calling a nested task.
-      # @note This will be replaced with an outgoing options mapping in the TaskWrap in TRB 2.2.
     end
 
     class Output
-      def initialize(strategy)
+      def initialize(strategy, filter)
+        @filter   = Trailblazer::Option(filter)
         @strategy = strategy
       end
 
       def call(direction, options, flow_options, task_conf, *args)
-        return direction, @strategy.( task_conf[:original_context], options ), flow_options, task_conf, *args
+        original, options_for_filter = options.decompose
+
+        output = @filter.(options_for_filter, **flow_options)       # this hash will get merged into options, per default.
+        ctx    = @strategy.( task_conf[:original_context], output ) # here, we compute the "new" options {Context}.
+
+        return direction, ctx, flow_options, task_conf, *args       # and then pass on the "new" context.
       end
 
-      # Strategy
+      # "merge" Strategy
       class CopyMutableToOriginal
         # @param original Context
         # @param options  Context The object returned from a (nested) {Activity}.
-        def self.call(original, options)
-          _, mutable = options.decompose
-
+        def self.call(original, mutable)
           mutable.each { |k,v| original[k] = v }
 
           original
