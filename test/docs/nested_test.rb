@@ -91,12 +91,10 @@ class NestedInput < Minitest::Spec
   #:input-pi
   class MultiplyByPi < Trailblazer::Operation
     step ->(options, **) { options["pi_constant"] = 3.14159 }
-    step Nested( Multiplier, input: ->(options, mutable_data:, runtime_data:, **) do
-
-      puts "@@@@@ #{runtime_data.inspect}"
-
-      { "y" => mutable_data["pi_constant"],
-        "x" => runtime_data["x"] }
+    step Nested( Multiplier, input: ->(options, **) do
+      { "y" => options["pi_constant"],
+        "x" => options["x"]
+      }
     end )
   end
   #:input-pi end
@@ -116,10 +114,10 @@ class NestedInputCallable < Minitest::Spec
 
   #:input-callable
   class MyInput
-    def self.call(options, mutable_data:, runtime_data:, **)
+    def self.call(options, **)
       {
-        "y" => mutable_data["pi_constant"],
-        "x" => runtime_data["x"]
+        "y" => options["pi_constant"],
+        "x" => options["x"]
       }
     end
   end
@@ -142,10 +140,10 @@ class NestedOutput < Minitest::Spec
 
   #:output
   class Update < Trailblazer::Operation
-    step Nested( Edit, output: ->(options, mutable_data:, **) do
+    step Nested( Edit, output: ->(options, **) do
       {
-        "contract.my" => mutable_data["contract.default"],
-        "model"       => mutable_data["model"]
+        "contract.my" => options["contract.default"],
+        "model"       => options["model"]
       }
     end )
     step Contract::Validate( name: "my" )

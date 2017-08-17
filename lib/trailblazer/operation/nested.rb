@@ -19,25 +19,22 @@ module Trailblazer
           end
         ]
 
-
+      default_input_filter  = ->(options, *) { ctx = options }
       default_output_filter = ->(options, *) { mutable = options }
 
         # TODO: move this to the generic step DSL
-      # options_for_nested = Input.new
-      # options_for_nested = Input::Dynamic.new(input) if input # FIXME: they need to have symbol keys!!!!
-      if input
+      if input || output
+
+        input  ||= default_input_filter
+        output ||= default_output_filter
+
         input_task = Activity::Input.new(input, nil)
         task_wrap_wirings << [ :insert_before!, "task_wrap.call_task", node: [ input_task, id: ".input" ], incoming: Proc.new{true}, outgoing: [Trailblazer::Circuit::Right, {}] ]
 
-        output ||= default_output_filter
-      end
-
-        # Default {Output} copies the mutable data from the nested activity into the original.
-      if output
         output_task = Activity::Output.new( output, Activity::Output::CopyMutableToOriginal )
-
         task_wrap_wirings << [ :insert_before!, [:End, :default], node: [ output_task, id: ".output" ], incoming: Proc.new{true}, outgoing: [Trailblazer::Circuit::Right, {}] ]
       end
+        # Default {Output} copies the mutable data from the nested activity into the original.
 
       [ task, { name: name }, { alteration: task_wrap_wirings }, activity_outputs ]
     end
