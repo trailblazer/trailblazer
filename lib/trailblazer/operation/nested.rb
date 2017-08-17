@@ -30,10 +30,7 @@ class Trailblazer::Operation
     # options_for_nested = Input.new
     # options_for_nested = Input::Dynamic.new(input) if input # FIXME: they need to have symbol keys!!!!
     if input
-      # Default {Output} copies the mutable data from the nested activity into the original.
-      output_task = Nested::Output.new( Nested::Output::CopyMutableToOriginal, default_output_filter )
-
-      input_task = Nested::Input.new(input)
+      input_task = Nested::Input.new(input, nil)
       task_wrap_wirings << [ :insert_before!, "task_wrap.call_task", node: [ input_task, id: ".input" ], incoming: Proc.new{true}, outgoing: [Trailblazer::Circuit::Right, {}] ]
 
       # FIXME: always add the decomposer:
@@ -42,8 +39,9 @@ class Trailblazer::Operation
       output ||= default_output_filter
     end
 
+      # Default {Output} copies the mutable data from the nested activity into the original.
     if output
-      output_task = Nested::Output.new( Nested::Output::CopyMutableToOriginal, output )
+      output_task = Nested::Output.new( output, Nested::Output::CopyMutableToOriginal )
 
       task_wrap_wirings << [ :insert_before!, [:End, :default], node: [ output_task, id: ".output" ], incoming: Proc.new{true}, outgoing: [Trailblazer::Circuit::Right, {}] ]
     end
@@ -51,15 +49,6 @@ class Trailblazer::Operation
 
 
     [ task, { name: name }, { alteration: task_wrap_wirings }, activity_outputs ]
-  end
-
-  # WARNING: this is experimental API, but it will end up with something like that.
-  module Element
-    module Dynamic
-      def initialize(wrapped)
-        @wrapped = Trailblazer::Option::KW(wrapped)
-      end
-    end
   end
 
   module Nested
@@ -103,10 +92,8 @@ class Trailblazer::Operation
     #
     # This is what {Nested} in 2.0 used to do, where the outcome could only be true/false (or success/failure).
     class NonActivity
-      include Element::Dynamic
-
-      def initialize(*)
-        super
+      def initialize(wrapped)
+        @wrapped = Trailblazer::Option::KW(wrapped)
         @end_events = [ Railway::End::Success.new(:success), Railway::End::Failure.new(:failure) ]
       end
 
@@ -130,34 +117,23 @@ class Trailblazer::Operation
     # Ingoing options when calling a nested task.
     # @note This will be replaced with an ingoing options mapping in the TaskWrap in TRB 2.2.
     class Input
-      include Element::Dynamic
-
-      def call(direction, options, flow_options, task_conf, original_flow_options)
-        # Trailblazer::Skill::KeywordHash @wrapped.(operation, options, runtime_data: options.to_runtime_data[0], mutable_data: options.to_mutable_data )
-        # original, mutable = options.decompose
-
-        # raise mutable.keys.inspect
-        # FIXME: almost identical with Option::KW.
-        input_ctx = @wrapped.( options, original_flow_options )
-        puts "  input_ctx #{input_ctx}"
-
-        return direction, input_ctx, flow_options, task_conf.merge( original_context: options ), original_flow_options
-
-        # DISCUSS: how to allow tmp injections?
-        # FIXME: almost identical with Option::KW.
-        @wrapped.( options, **options.to_hash.merge(
-          runtime_data: Trailblazer::Context::Immutable.new(original),
-          mutable_data: Trailblazer::Context::Immutable.new(mutable)
-        ) )
-      end
-    end
-
-    class Output
-      def initialize(strategy, filter)
+      def initialize(filter, strategy)
         @filter   = Trailblazer::Option(filter)
         @strategy = strategy
       end
 
+      def call(direction, options, flow_options, task_conf, original_flow_options)
+        # Trailblazer::Skill::KeywordHash @wrapped.(operation, options, runtime_data: options.to_runtime_data[0], mutable_data: options.to_mutable_data )
+        # FIXME: almost identical with Option::KW.
+        input_ctx = @filter.( options, original_flow_options )
+
+        # TODO: is Context of hash?
+
+        return direction, input_ctx, flow_options, task_conf.merge( original_context: options ), original_flow_options
+      end
+    end
+
+    class Output < Input
       def call(direction, options, flow_options, task_conf, *args)
         original, options_for_filter = options.decompose
 
