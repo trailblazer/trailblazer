@@ -101,7 +101,7 @@ class DocsFailFastMethodTest < Minitest::Spec
 
   #:ffmeth
   class Update < Trailblazer::Operation
-    step :filter_params!         # emits fail_fast!
+    step :filter_params!,         fast_track: true # emits fail_fast!
     step Model( Song, :find_by )
     failure :handle_fail!
 
@@ -139,7 +139,7 @@ class DocsPassFastMethodTest < Minitest::Spec
   #:pfmeth
   class Create < Trailblazer::Operation
     step Model( Song, :new )
-    step :empty_model!                           # emits pass_fast!
+    step :empty_model!,         fast_track: true  # emits pass_fast!
     step Contract::Build( constant: MyContract )
     # ..
 
