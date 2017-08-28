@@ -7,10 +7,15 @@ class Trailblazer::Operation
   def self.Wrap(user_wrap, &block)
     operation_class = Wrap.build_wrapped_activity(block)
 
-    callable, options, runner_options, end_events = Nested( Wrap::Wrapped.new(operation_class, user_wrap) )
+    macro_options = Nested( Wrap::Wrapped.new(operation_class, user_wrap) )
 
     # connect `false` as an end event, when an exception stopped the wrap, for example.
-    return callable, options, runner_options, end_events.merge( false => { role: :failure } ) # TODO: Nested could have a better API and do the "merge" for us!
+
+    macro_options.merge(
+      outputs:        macro_options[:outputs].merge( false => { role: :failure } )
+    )
+
+    # TODO: Nested could have a better API and do the "merge" for us!
   end
 
   module Wrap

@@ -32,11 +32,11 @@ module Trailblazer
         task_wrap_wirings << [ :insert_before!, "task_wrap.call_task", node: [ input_task, id: ".input" ], incoming: Proc.new{true}, outgoing: [Trailblazer::Circuit::Right, {}] ]
 
         output_task = Activity::Output.new( output, Activity::Output::CopyMutableToOriginal )
-        task_wrap_wirings << [ :insert_before!, [:End, :default], node: [ output_task, id: ".output" ], incoming: Proc.new{true}, outgoing: [Trailblazer::Circuit::Right, {}] ]
+        task_wrap_wirings << [ :insert_before!, "End.default", node: [ output_task, id: ".output" ], incoming: Proc.new{true}, outgoing: [Trailblazer::Circuit::Right, {}] ]
       end
         # Default {Output} copies the mutable data from the nested activity into the original.
 
-      [ task, { name: name }, { alteration: task_wrap_wirings }, activity_outputs ]
+      { task: task, node_data: { id: name }, runner_options: { alteration: task_wrap_wirings }, outputs: activity_outputs }
     end
 
     # @private

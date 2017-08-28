@@ -43,7 +43,7 @@ class Trailblazer::Operation
 
       # step = Pipetree::Step.new(step, path => condition)
 
-      [ task, { name: path }, runner_options ]
+      { task: task, node_data: { id: path }, runner_options: runner_options }
     end
   end
 end

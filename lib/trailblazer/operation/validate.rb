@@ -30,7 +30,7 @@ class Trailblazer::Operation
 
         task = Trailblazer::Activity::Task::Binary( step )
 
-        [ task, { name: params_path }, {} ]
+        { task: task, node_data: { id: params_path } }
       end
 
       # Macro: Validates contract `:name`.
@@ -42,7 +42,7 @@ class Trailblazer::Operation
         task = Trailblazer::Activity::Task::Binary( step )
         # Pipetree::Step.new( step, "representer.#{name}.class" => representer ) # FIXME!
 
-        [ task, { name: "contract.#{name}.call" }, {} ]
+        { task: task, node_data: { id: "contract.#{name}.call" } }
       end
 
       def self.validate!(options, name:nil, representer:false, from: "document", params_path:nil)

@@ -12,7 +12,7 @@ class Trailblazer::Operation
       )
     }
 
-    [ task, { name: "model.build" }, runner_options ]
+    { task: task, node_data: { id: "model.build" }, runner_options: runner_options }
   end
 
   module Model
