@@ -8,8 +8,6 @@ Reform::Form.class_eval do
   include Reform::Form::ActiveModel::Validations
 end
 
-require "trailblazer/operation/callback"
-
 module Mock
   class Result
     def initialize(bool); @bool = bool end

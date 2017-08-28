@@ -20,6 +20,7 @@
 
 * self[] removed
 * Fixed `Guard` where procs could receive one argument, only. Guards follow the step interface: `Policy::Guard( ->(options, **) { .. } )
+* Removed `Operation::Callback` which was a poor idea and luckily no one was using it.
 
 TODO:
 document Task API and define step API
