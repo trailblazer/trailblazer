@@ -6,23 +6,12 @@ module Trailblazer
 
       task, operation = Nested.build(callable, input, output)
 
-      # @needs operation#end_events
-
-      end_events = operation.end_events
-
-        # TODO: introduce Activity interface (for introspection, events, etc)
-      activity_outputs =
-        ::Hash[
-          end_events.collect do |evt|
-            _name = evt.instance_variable_get(:@name)
-            [ evt, { role: _name } ] # this is a wild guess, e.g. PassFast => { role: :pass_fast }
-          end
-        ]
+      # @needs operation#outputs
 
       default_input_filter  = ->(options, *) { ctx = options }
       default_output_filter = ->(options, *) { mutable = options }
 
-        # TODO: move this to the generic step DSL
+      # TODO: move this to the generic step DSL
       if input || output
 
         input  ||= default_input_filter
@@ -36,7 +25,7 @@ module Trailblazer
       end
         # Default {Output} copies the mutable data from the nested activity into the original.
 
-      { task: task, node_data: { id: name }, runner_options: { alteration: task_wrap_wirings }, outputs: activity_outputs }
+      { task: task, node_data: { id: name }, runner_options: { alteration: task_wrap_wirings }, outputs: operation.outputs }
     end
 
     # @private
@@ -72,11 +61,14 @@ module Trailblazer
       # This is what {Nested} in 2.0 used to do, where the outcome could only be true/false (or success/failure).
       class Dynamic
         def initialize(wrapped)
-          @wrapped    = Trailblazer::Option::KW(wrapped)
-          @end_events = [ Railway::End::Success.new(:success), Railway::End::Failure.new(:failure) ]
+          @wrapped = Trailblazer::Option::KW(wrapped)
+          @outputs = {
+            Railway::End::Success.new(:success) => { role: :success },
+            Railway::End::Failure.new(:failure) => { role: :failure },
+          }
         end
 
-        attr_reader :end_events
+        attr_reader :outputs
 
         def __call__(direction, options, flow_options)
           activity = @wrapped.(options, flow_options) # evaluate the option to get the actual "object" to call.
@@ -86,7 +78,7 @@ module Trailblazer
           # Translate the genuine nested direction to the generic Dynamic end (success/failure, only).
           # Note that here we lose information about what specific event was emitted.
           [
-            direction.kind_of?(Railway::End::Success) ? end_events[0] : end_events[1],
+            direction.kind_of?(Railway::End::Success) ? @outputs.keys[0] : @outputs.keys[1],
             options,
             flow_options
           ]

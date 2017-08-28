@@ -58,8 +58,8 @@ class Trailblazer::Operation
         returned # let's hope returned is one of activity's Ends.
       end
 
-      def end_events
-        @activity.end_events # FIXME: we don't map false, yet
+      def outputs
+        @activity.outputs # FIXME: we don't map false, yet
       end
     end
   end # Wrap
