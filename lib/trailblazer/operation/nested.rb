@@ -39,9 +39,7 @@ module Trailblazer
         # The returned {Nested} instance is a valid circuit element and will be `call`ed in the circuit.
         # It simply returns the nested activity's direction.
         # The actual wiring - where to go with that, is up to the Nested() macro.
-        return Trailblazer::Activity::Nested(nested_activity, nil) do |activity:raise, start_at:nil, args:raise, **|
-          activity.__call__( start_at, *args )
-        end, nested_activity
+        return Trailblazer::Activity::Nested(nested_activity, call: :__call__), nested_activity
       end
 
       def self.nestable_object?(object)
