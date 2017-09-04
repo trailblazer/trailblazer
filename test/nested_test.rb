@@ -217,3 +217,59 @@ class NestedTest < Minitest::Spec
 
   it { Create.().inspect(:a, :b, :c).must_equal %{<Result:true [2, 3, 1] >} }
 end
+
+class NestedWithFastTrackTest < Minitest::Spec
+  module Steps
+    def b(options, a:, **)
+      options["b"] = a+1
+    end
+
+    def f
+      options["f"] = 3
+    end
+  end
+
+  class Edit < Trailblazer::Operation
+    pass :a, pass_fast: true
+
+    def a(options, **)
+      options["a"] = 1
+    end
+  end
+
+  class Update < Trailblazer::Operation
+    step Nested( Edit )
+    step :b
+    fail :f
+
+    include Steps
+  end
+
+  # from Nested straight to End.pass_fast.
+  it { Update.({}).inspect("a", "b", "f").must_equal %{<Result:true [1, nil, nil] >} }
+
+  #- Nested, pass_fast: true
+  class Upsert < Trailblazer::Operation
+    step Nested( Edit ), pass_fast: true
+    step :b
+    fail :f
+
+    include Steps
+  end
+
+  # from Nested straight to End.pass_fast.
+  it { Upsert.({}).inspect("a", "b", "f").must_equal %{<Result:true [1, nil, nil] >} }
+
+  #- mapping
+  #- Nested, :pass_fast => :failure
+  class Upsala < Trailblazer::Operation
+    step Nested( Edit ), connect_to: DSL::Merge( pass_fast: "End.failure" )
+    step :b
+    fail :f
+
+    include Steps
+  end
+
+  # from Nested straight to End.pass_fast.
+  it { Upsala.({}).inspect("a", "b", "f").must_equal %{<Result:false [1, nil, nil] >} }
+end

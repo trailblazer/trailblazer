@@ -37,8 +37,8 @@ module Trailblazer
         nested_activity = is_nestable_object.(nested_operation) ? nested_operation : Dynamic.new(nested_operation)
 
         # The returned {Nested} instance is a valid circuit element and will be `call`ed in the circuit.
-        # It simply returns the nested activity's direction.
-        # The actual wiring - where to go with that, is up to the Nested() macro.
+        # It simply returns the nested activity's `signal,options,flow_options` return set.
+        # The actual wiring - where to go with that - is done by the step DSL.
         return Trailblazer::Activity::Nested(nested_activity, call: :__call__), nested_activity
       end
 
