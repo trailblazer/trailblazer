@@ -224,7 +224,7 @@ class NestedWithFastTrackTest < Minitest::Spec
       options["b"] = a+1
     end
 
-    def f
+    def f(options, **)
       options["f"] = 3
     end
   end
@@ -271,5 +271,5 @@ class NestedWithFastTrackTest < Minitest::Spec
   end
 
   # from Nested straight to End.pass_fast.
-  it { Upsala.({}).inspect("a", "b", "f").must_equal %{<Result:false [1, nil, nil] >} }
+  it { Upsala.({}).inspect("a", "b", "c", "f").must_equal %{<Result:false [1, nil, nil, 3] >} }
 end
