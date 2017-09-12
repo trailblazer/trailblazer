@@ -250,7 +250,7 @@ class NestedWithFastTrackTest < Minitest::Spec
 
   #- Nested, pass_fast: true
   class Upsert < Trailblazer::Operation
-    step Nested( Edit ), pass_fast: true
+    step Nested( Edit ), pass_fast: true # this option is unnecessary.
     step :b
     fail :f
 
@@ -263,7 +263,7 @@ class NestedWithFastTrackTest < Minitest::Spec
   #- mapping
   #- Nested, :pass_fast => :failure
   class Upsala < Trailblazer::Operation
-    step Nested( Edit ), connect_to: DSL::Merge( pass_fast: "End.failure" )
+    step Nested( Edit ), connect_to: Merge( pass_fast: "End.failure" )
     step :b
     fail :f
 
