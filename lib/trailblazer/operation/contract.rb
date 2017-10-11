@@ -9,7 +9,7 @@
 class Trailblazer::Operation
   module Contract
     def self.Build(name: "default", constant: nil, builder: nil)
-      step = ->(direction, options, flow_options) { Build.(options, flow_options, name: name, constant: constant, builder: builder) }
+      step = ->((options, flow_options), *) { Build.(options, flow_options, name: name, constant: constant, builder: builder) }
 
       task = Trailblazer::Activity::Task::Binary( step )
 

@@ -36,11 +36,11 @@ class Trailblazer::Operation
       end
 
       # The __call__ method is invoked by Nested.
-      def __call__(direction, options, flow_options)
+      def __call__((options, flow_options), **circuit_options)
         block_calling_wrapped = -> {
-          args = Railway::TaskWrap.arguments_for_call(@activity, direction, options, flow_options)
+          args, new_circuit_options = Railway::TaskWrap.arguments_for_call(@activity, [options, flow_options], **circuit_options)
 
-          @activity["__activity__"].( direction, *args )
+          @activity["__activity__"].( args, circuit_options.merge( new_circuit_options ) ) # FIXME: arguments_for_call don't return the full circuit_options, :exec_context gets lost.
         }
 
 
@@ -53,7 +53,7 @@ class Trailblazer::Operation
 
         # legacy outcome.
         # FIXME: we *might* return some "older version" of options here!
-        return false, options, flow_options if returned === false
+        return false, [options, flow_options] if returned === false
 
         returned # let's hope returned is one of activity's Ends.
       end

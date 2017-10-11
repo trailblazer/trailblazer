@@ -24,7 +24,7 @@ class Trailblazer::Operation
       # Macro: extract the contract's input from params by reading `:key`.
       def self.Extract(key:nil, params_path:nil)
         # TODO: introduce nested pipes and pass composed input instead.
-        step = ->(directon, options, flow_options) do
+        step = ->( (options, flow_options), **circuit_options ) do
           options[params_path] = key ? options["params"][key] : options["params"]
         end
 
@@ -35,7 +35,7 @@ class Trailblazer::Operation
 
       # Macro: Validates contract `:name`.
       def self.Call(name:"default", representer:false, params_path:nil)
-        step = ->(direction, options, flow_options) {
+        step = ->( (options, flow_options), **circuit_options ) {
           validate!(options, name: name, representer: options["representer.#{name}.class"], params_path: params_path)
         }
 

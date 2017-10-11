@@ -11,8 +11,8 @@ module Trailblazer
       # Returns task to call the proc with (options, flow_options), omitting `direction`.
       # When called, the task always returns a direction signal.
       def self.Binary(step, on_true=Circuit::Right, on_false=Circuit::Left)
-        ->(direction, *args) do # Activity/Task interface.
-          [ step.(direction, *args) ? on_true : on_false, *args ] # <=> Activity/Task interface
+        ->(*args) do # Activity/Task interface.
+          [ step.(*args) ? on_true : on_false, *args ] # <=> Activity/Task interface
         end
       end
     end

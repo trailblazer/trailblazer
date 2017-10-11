@@ -39,7 +39,7 @@ module Trailblazer
         # The returned {Nested} instance is a valid circuit element and will be `call`ed in the circuit.
         # It simply returns the nested activity's `signal,options,flow_options` return set.
         # The actual wiring - where to go with that - is done by the step DSL.
-        return Trailblazer::Activity::Nested(nested_activity, call: :__call__), nested_activity
+        return Trailblazer::Activity::Subprocess(nested_activity, call: :__call__), nested_activity
       end
 
       def self.nestable_object?(object)
@@ -68,17 +68,16 @@ module Trailblazer
 
         attr_reader :outputs
 
-        def __call__(direction, options, flow_options)
-          activity = @wrapped.(options, flow_options) # evaluate the option to get the actual "object" to call.
+        def __call__( (options, flow_options), **circuit_options )
+          activity = @wrapped.(options, circuit_options) # evaluate the option to get the actual "object" to call.
 
-          direction, options, flow_options = activity.__call__(direction, options, flow_options)
+          signal, args = activity.__call__( [options, flow_options], **circuit_options )
 
-          # Translate the genuine nested direction to the generic Dynamic end (success/failure, only).
+          # Translate the genuine nested signal to the generic Dynamic end (success/failure, only).
           # Note that here we lose information about what specific event was emitted.
           [
-            direction.kind_of?(Railway::End::Success) ? @outputs.keys[0] : @outputs.keys[1],
-            options,
-            flow_options
+            signal.kind_of?(Railway::End::Success) ? @outputs.keys[0] : @outputs.keys[1],
+            args
           ]
         end
       end
