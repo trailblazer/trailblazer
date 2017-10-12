@@ -44,7 +44,7 @@ class Trailblazer::Operation
         }
 
 
-        returned = @user_wrap.( options, flow_options, &block_calling_wrapped )
+        returned = @user_wrap.( options, flow_options, **circuit_options, &block_calling_wrapped )
 
         # returned could be
         #  1. the 1..>=3 Task interface result
