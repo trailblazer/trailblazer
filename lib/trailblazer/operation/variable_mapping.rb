@@ -26,39 +26,46 @@ module Trailblazer
         input_ctx = Trailblazer.Context({}, input_ctx) unless input_ctx.instance_of?(Trailblazer::Context)
         puts "-- input: #{input_ctx.object_id}"
 
-        wrap_ctx = wrap_ctx.merge( vm_original_args: original_args, vm_input_ctx: input_ctx ) # remember our context.
+        wrap_ctx = wrap_ctx.merge( vm_original_args: original_args )
 
         return Circuit::Right, [wrap_ctx, [[input_ctx, original_flow_options], original_circuit_options]]
       end
     end
 
     class Output < Input
-      def call((wrap_ctx, returned_args), **)
+      def call((wrap_ctx, original_args), **)
 
-        (returned_ctx, returned_flow_options), returned_circuit_options = wrap_ctx[:result_args]
+
+        (original_ctx, original_flow_options), original_circuit_options = original_args
+
+
+        puts "&&&°°°° #{original_circuit_options.keys}"
+
+        # (returned_ctx, returned_flow_options), returned_circuit_options = wrap_ctx[:result_args]
+returned_ctx, _ = wrap_ctx[:result_args] # DISCUSS.
 
         # returned_ctx is the Context object from the nested operation. In <=2.1, this might be a completely different one
         # than "ours" we created in Input. We now need to compile a list of all added values. This is time-intensive and should
         # be optimized by removing as many Context creations as possible (e.g. the one adding self[] stuff in Operation.__call__).
         puts "-- output: #{returned_ctx.object_id}"
 
-        begin
-          puts "@@@@@__x #{returned_ctx.class}"
-          returned_ctx, mutable_data = returned_ctx.decompose
-          p mutable_data
-        end while returned_ctx != wrap_ctx[:vm_input_ctx]
+        _, mutable_data = returned_ctx.decompose
 
-        output = @filter.(returned_ctx, **returned_flow_options)       # this hash will get merged into options, per default.
-
- p output.keys
- raise
-        # original, options_for_filter = options.decompose
+        # begin
+        #   puts "@@@@@__x #{returned_ctx.class}"
+        #   p mutable_data
+        # end while returned_ctx != wrap_ctx[:vm_input_ctx]
+        output = @filter.(mutable_data, **original_circuit_options)       # this hash will get merged into options, per default.
 
         (original_ctx, _), _ = wrap_ctx[:vm_original_args]
 
         ctx = @strategy.( original_ctx, output ) # here, we compute the "new" options {Context}.
 
-        return Circuit::Right, [wrap_ctx, [[ctx, returned_flow_options], returned_circuit_options]]       # and then pass on the "new" context.
+        # wrap_ctx = wrap_ctx.merge( result_args: [ctx, returned_flow_options] ) # FIXME: this is wrong
+        # raise wrap_ctx[:result_args][0].inspect
+        wrap_ctx[:result_args][0] = ctx # FIXME: vomit
+
+        return Circuit::Right, [wrap_ctx, *original_args]       # and then pass on the "new" context.
       end
 
       # "merge" Strategy
@@ -66,7 +73,10 @@ module Trailblazer
         # @param original Context
         # @param options  Context The object returned from a (nested) {Activity}.
         def self.call(original, mutable)
-          mutable.each { |k,v| original[k] = v }
+          mutable.each { |k,v|
+
+puts "@@@@@ #{k.inspect} ===> #{v}"
+            original[k] = v }
 
           original
         end

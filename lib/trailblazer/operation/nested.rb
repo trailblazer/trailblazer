@@ -9,12 +9,7 @@ module Trailblazer
       # @needs operation#outputs
 
       default_input_filter  = ->(options, *) { ctx = options }
-      default_output_filter = ->(options, *) {
-
-        # p options
-       options.decompose.last
-       options
-       } # DISCUSS: per default, grab them
+      default_output_filter = ->(options, *) { options }
 
       # TODO: move this to the generic step DSL
       if input || output
