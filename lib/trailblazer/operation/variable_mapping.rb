@@ -73,10 +73,7 @@ returned_ctx, _ = wrap_ctx[:result_args] # DISCUSS.
         # @param original Context
         # @param options  Context The object returned from a (nested) {Activity}.
         def self.call(original, mutable)
-          mutable.each { |k,v|
-
-puts "@@@@@ #{k.inspect} ===> #{v}"
-            original[k] = v }
+          mutable.each { |k,v| original[k] = v }
 
           original
         end
