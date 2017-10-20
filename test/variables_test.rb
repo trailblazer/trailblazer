@@ -116,4 +116,10 @@ class VariablesTest < Minitest::Spec
     result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours", "out.keys", "out.rumours", "out.secret").
       must_equal %{<Result:false [\"Freedom!\", \"Bla\", \"Psst!\", nil, nil, nil, [\"edward.public_opinion\", \"edward.secret\", \"edward.rumours\"], \"Bla\", \"!tssP\"] >}
   end
+
+  it "with tracing" do
+    result = DiscreetOrganization.trace({}, "public_opinion" => "Freedom!")
+
+    result.wtf
+  end
 end

@@ -32,6 +32,7 @@ module Trailblazer
     end
 
     class Output < Input
+      # Runs the user filter and replaces the ctx in `wrap_ctx[:result_args]` with the filtered one.
       def call((wrap_ctx, original_args), **circuit_options)
         (original_ctx, original_flow_options), original_circuit_options = original_args
 
