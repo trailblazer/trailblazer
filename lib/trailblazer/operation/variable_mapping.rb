@@ -12,60 +12,47 @@ module Trailblazer
 
       # `original_args` are the actual args passed to the wrapped task: [ [options, ..], circuit_options ]
       #
-      def call((wrap_ctx, original_args), **)
-        # Trailblazer::Skill::KeywordHash @wrapped.(operation, options, runtime_data: options.to_runtime_data[0], mutable_data: options.to_mutable_data )
-        # FIXME: almost identical with Option::KW.
-
+      def call((wrap_ctx, original_args), **circuit_options)
+        # decompose the original_args since we want to modify them.
         (original_ctx, original_flow_options), original_circuit_options = original_args
 
         # let user compute new ctx for the wrapped task.
         input_ctx = @filter.( original_ctx, original_circuit_options )
 
+        # TODO: make this unnecessary.
         # wrap user's hash in Context if it's not one, already (in case user used options.merge).
         # DISCUSS: should we restrict user to .merge and options.Context?
         input_ctx = Trailblazer.Context({}, input_ctx) unless input_ctx.instance_of?(Trailblazer::Context)
-        puts "-- input: #{input_ctx.object_id}"
 
         wrap_ctx = wrap_ctx.merge( vm_original_args: original_args )
 
-        return Circuit::Right, [wrap_ctx, [[input_ctx, original_flow_options], original_circuit_options]]
+        # instead of the original Context, pass on the filtered `input_ctx` in the wrap.
+        return Circuit::Right, [ wrap_ctx, [[input_ctx, original_flow_options], original_circuit_options] ]
       end
     end
 
     class Output < Input
-      def call((wrap_ctx, original_args), **)
-
-
+      def call((wrap_ctx, original_args), **circuit_options)
         (original_ctx, original_flow_options), original_circuit_options = original_args
 
-
-        puts "&&&°°°° #{original_circuit_options.keys}"
-
-        # (returned_ctx, returned_flow_options), returned_circuit_options = wrap_ctx[:result_args]
-returned_ctx, _ = wrap_ctx[:result_args] # DISCUSS.
+        returned_ctx, _ = wrap_ctx[:result_args] # this is the context returned from `call`ing the task.
 
         # returned_ctx is the Context object from the nested operation. In <=2.1, this might be a completely different one
         # than "ours" we created in Input. We now need to compile a list of all added values. This is time-intensive and should
         # be optimized by removing as many Context creations as possible (e.g. the one adding self[] stuff in Operation.__call__).
-        puts "-- output: #{returned_ctx.object_id}"
+        _, mutable_data = returned_ctx.decompose # FIXME: this is a weak assumption. What if the task returns a deeply nested Context?
 
-        _, mutable_data = returned_ctx.decompose
+        # let user compute the output.
+        output = @filter.(mutable_data, **original_circuit_options)
 
-        # begin
-        #   puts "@@@@@__x #{returned_ctx.class}"
-        #   p mutable_data
-        # end while returned_ctx != wrap_ctx[:vm_input_ctx]
-        output = @filter.(mutable_data, **original_circuit_options)       # this hash will get merged into options, per default.
+        original_ctx = wrap_ctx[:vm_original_args][0][0]
 
-        (original_ctx, _), _ = wrap_ctx[:vm_original_args]
+        new_ctx = @strategy.( original_ctx, output ) # here, we compute the "new" options {Context}.
 
-        ctx = @strategy.( original_ctx, output ) # here, we compute the "new" options {Context}.
+        wrap_ctx = wrap_ctx.merge( result_args: [new_ctx, original_flow_options] )
 
-        # wrap_ctx = wrap_ctx.merge( result_args: [ctx, returned_flow_options] ) # FIXME: this is wrong
-        # raise wrap_ctx[:result_args][0].inspect
-        wrap_ctx[:result_args][0] = ctx # FIXME: vomit
-
-        return Circuit::Right, [wrap_ctx, *original_args]       # and then pass on the "new" context.
+        # and then pass on the "new" context.
+        return Circuit::Right, [ wrap_ctx, original_args ]
       end
 
       # "merge" Strategy

@@ -16,6 +16,7 @@ end
 Benchmark.ips do |x|
   x.report("decompose") { a(*arg) }
   x.report("positional") { b(*arg) }
+  x.compare!
 end
 
 #  decompose      5.646M (± 3.1%) i/s -     28.294M in   5.015759s
