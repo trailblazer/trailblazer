@@ -9,7 +9,7 @@
 class Trailblazer::Operation
   module Contract
     def self.Build(name: "default", constant: nil, builder: nil)
-      step = ->((options, flow_options), *) { Build.(options, flow_options, name: name, constant: constant, builder: builder) }
+      step = ->((options, flow_options), **circuit_options) { Build.(options, circuit_options, name: name, constant: constant, builder: builder) }
 
       task = Trailblazer::Activity::Task::Binary( step )
 
@@ -18,7 +18,7 @@ class Trailblazer::Operation
 
     module Build
       # Build contract at runtime.
-      def self.call(options, flow_options, name: "default", constant: nil, builder: nil)
+      def self.call(options, circuit_options, name: "default", constant: nil, builder: nil)
         # TODO: we could probably clean this up a bit at some point.
         contract_class = constant || options["contract.#{name}.class"] # DISCUSS: Injection possible here?
         model          = options["model"]
@@ -26,16 +26,16 @@ class Trailblazer::Operation
 
         options[name] =
           if builder
-            call_builder( options, flow_options, builder: builder, constant: contract_class, name: name )
+            call_builder( options, circuit_options, builder: builder, constant: contract_class, name: name )
           else
             contract_class.new(model)
           end
       end
 
-      def self.call_builder(options, flow_options, builder:raise, constant:raise, name:raise)
+      def self.call_builder(options, circuit_options, builder:raise, constant:raise, name:raise)
         # builder_options = Trailblazer::Context( options, constant: constant, name: name ) # options.merge( .. )
 
-        # Trailblazer::Option::KW(builder).(builder_options, flow_options)
+        # Trailblazer::Option::KW(builder).(builder_options, circuit_options)
 
 
 
@@ -51,7 +51,7 @@ class Trailblazer::Operation
           name:     name
         )
 
-        Trailblazer::Option(builder).( options, tmp_options, flow_options )
+        Trailblazer::Option(builder).( options, tmp_options, circuit_options )
       end
     end
 
