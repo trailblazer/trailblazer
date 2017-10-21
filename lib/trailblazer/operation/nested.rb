@@ -17,10 +17,10 @@ module Trailblazer
         input  ||= default_input_filter
         output ||= default_output_filter
 
-        input_task = Activity::Input.new(input, nil)
+        input_task = Activity::Wrap::Input.new(input)
         task_wrap_wirings << [ :insert_before!, "task_wrap.call_task", node: [ input_task, id: ".input" ], incoming: Proc.new{true}, outgoing: [Trailblazer::Circuit::Right, {}] ]
 
-        output_task = Activity::Output.new( output, Activity::Output::CopyMutableToOriginal )
+        output_task = Activity::Wrap::Output.new(output)
         task_wrap_wirings << [ :insert_before!, "End.default", node: [ output_task, id: ".output" ], incoming: Proc.new{true}, outgoing: [Trailblazer::Circuit::Right, {}] ]
       end
         # Default {Output} copies the mutable data from the nested activity into the original.

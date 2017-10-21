@@ -7,7 +7,6 @@ require "trailblazer/task"
 
 require "trailblazer/operation/deprecations"
 
-require "trailblazer/operation/variable_mapping"
 require "trailblazer/operation/model"
 require "trailblazer/operation/contract"
 require "trailblazer/operation/validate"
