@@ -19,4 +19,6 @@ gem "trailblazer-operation", path: "../operation"
 
 gem "minitest-line"
 
-# gem "trailblazer-activity", path: "../trailblazer-circuit"
+gem "trailblazer-activity", path: "../trailblazer-circuit"
+
+gem "benchmark-ips"

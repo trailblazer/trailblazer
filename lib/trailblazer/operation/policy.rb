@@ -10,9 +10,9 @@ class Trailblazer::Operation
 
       # incoming low-level {Task API}.
       # outgoing Task::Binary API.
-      def call((options, flow_options), *circuit_options)
+      def call((options, flow_options), **circuit_options)
         condition = options[ @path ] # this allows dependency injection.
-        result    = condition.( [options, flow_options], *circuit_options )
+        result    = condition.( [options, flow_options], **circuit_options )
 
         options["policy.#{@name}"]        = result["policy"] # assign the policy as a skill.
         options["result.policy.#{@name}"] = result
@@ -33,7 +33,7 @@ class Trailblazer::Operation
       task = Eval.new( name: name, path: path )
 
       runner_options = {
-        alteration: TaskWrap::Injection::SetDefaults(
+        alteration: Trailblazer::Activity::Wrap::Inject::Defaults(
           path => condition
         )
       }

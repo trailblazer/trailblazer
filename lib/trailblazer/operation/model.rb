@@ -1,12 +1,12 @@
 class Trailblazer::Operation
   def self.Model(model_class, action=nil)
-    step = Model.for(model_class, action)
+    step = Model.step(model_class, action)
 
     # step = Pipetree::Step.new(step, "model.class" => model_class, "model.action" => action)
-    task           = Railway::TaskBuilder.( step )
+    task = Railway::TaskBuilder.( step )
 
     runner_options = {
-      alteration: TaskWrap::Injection::SetDefaults(
+      alteration: Trailblazer::Activity::Wrap::Inject::Defaults(
         "model.class"  => model_class,
         "model.action" => action
       )
@@ -16,7 +16,7 @@ class Trailblazer::Operation
   end
 
   module Model
-    def self.for(model_class, action)
+    def self.step(model_class, action)
       builder = Model::Builder.new
 
       ->(options, **) do
