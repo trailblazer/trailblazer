@@ -1,31 +1,28 @@
 class Trailblazer::Operation
   def self.Model(model_class, action=nil)
-    step = Model.step(model_class, action)
-
     # step = Pipetree::Step.new(step, "model.class" => model_class, "model.action" => action)
-    task = Railway::TaskBuilder.( step )
+
+    task = Railway::TaskBuilder.( Model.new )
 
     runner_options = {
-      alteration: Trailblazer::Activity::Wrap::Inject::Defaults(
+      merge: Wrap::Inject::Defaults(
         "model.class"  => model_class,
         "model.action" => action
       )
     }
 
-    { task: task, node_data: { id: "model.build" }, runner_options: runner_options }
+    { task: task, id: "model.build", runner_options: runner_options }
   end
 
-  module Model
-    def self.step(model_class, action)
+  class Model
+    def call(options, params:,  **)
       builder = Model::Builder.new
 
-      ->(options, **) do
-        options["model"] = model = builder.(options, options["params"])
+      options["model"] = model = builder.(options, params)
 
-        options["result.model"] = result = Result.new(!model.nil?, {})
+      options["result.model"] = result = Result.new(!model.nil?, {})
 
-        result.success?
-      end
+      result.success?
     end
 
     class Builder

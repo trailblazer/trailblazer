@@ -9,7 +9,7 @@ class ModelTest < Minitest::Spec
   #---
   # use Model semantics, no customizations.
   class Create < Trailblazer::Operation
-    step Model Song, :new
+    step Model( Song, :new )
   end
 
   # :new new.
