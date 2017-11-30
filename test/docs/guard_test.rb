@@ -153,7 +153,7 @@ class DocsGuardPositionTest < Minitest::Spec
   it { Trailblazer::Operation::Inspect.(Create).must_equal %{[>policy.default.eval,>model!]} }
   it do
     #:before-pipe
-      puts Create["pipetree"].inspect(style: :rows) #=>
+      Trailblazer::Operation::Inspect.(Create, style: :rows) #=>
        # 0 ========================>operation.new
        # 1 ==================>policy.default.eval
        # 2 ===============================>model!
