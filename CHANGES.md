@@ -1,5 +1,7 @@
 # 2.1
 
+* Macros now always have to provide an `:id`. This was a bit fuzzy in 2.0.
+
 * Nested
   if Nested( Edit ), outputs will automatically be connected, see editor.
 * Wrap
