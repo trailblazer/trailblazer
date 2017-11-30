@@ -13,7 +13,7 @@ class Trailblazer::Operation
 
       task = Trailblazer::Activity::Task::Binary( step )
 
-      { task: task, node_data: { id: "contract.build" } }
+      { task: task, id: "contract.build" }
     end
 
     module Build

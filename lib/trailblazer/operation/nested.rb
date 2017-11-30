@@ -1,7 +1,7 @@
 # per default, everything we pass into a circuit is immutable. it's the ops/act's job to allow writing (via a Context)
 module Trailblazer
   class Operation
-    def self.Nested(callable, input:nil, output:nil, name: "Nested(#{callable})")
+    def self.Nested(callable, input:nil, output:nil, id: "Nested(#{callable})")
       task_wrap_wirings = []
 
       task, operation = Nested.build(callable, input, output)
@@ -29,7 +29,7 @@ module Trailblazer
       end
         # Default {Output} copies the mutable data from the nested activity into the original.
 
-      { task: task, id: name, runner_options: { merge: task_wrap_extensions }, plus_poles: Activity::Magnetic::DSL::PlusPoles.from_outputs(operation.outputs) }
+      { task: task, id: id, runner_options: { merge: task_wrap_extensions }, plus_poles: Activity::Magnetic::DSL::PlusPoles.from_outputs(operation.outputs) }
     end
 
     # @private
@@ -47,6 +47,8 @@ module Trailblazer
       end
 
       def self.nestable_object?(object)
+        return true if object.kind_of?(Struct) # FIXME! omg
+
         # interestingly, with < we get a weird nil exception. bug in Ruby?
         object.is_a?(Nestable) || object.is_a?(Class) && object <= operation_class
       end

@@ -7,46 +7,55 @@ class Trailblazer::Operation
     def self.Validate(skip_extract: false, name: "default", representer: false, key: nil) # DISCUSS: should we introduce something like Validate::Deserializer?
       params_path = "contract.#{name}.params" # extract_params! save extracted params here.
 
+      extract  = Validate::Extract.new( key: key, params_path: params_path ).freeze
+      validate = Validate.new( name: name, representer: representer, params_path: params_path ).freeze
+
       # Return the Validate::Call task if the first step, the params extraction, is not desired.
       if skip_extract || representer
-        return Validate::Call(name: name, representer: representer, params_path: params_path)
+        return { task: Trailblazer::Activity::Task::Binary( validate ), id: "contract.#{name}.call" }
       end
 
-      extract_validate = Class.new(Nested.operation_class) do # TODO: use Base so compat works.
-        step Validate::Extract(key: key, params_path: params_path)
-        step Validate::Call(name: name, representer: representer, params_path: params_path)
+
+      # Build a simple Railway {Activity} for the internal flow.
+      process, outputs = Trailblazer::Activity::Magnetic::Builder::Railway.build do
+        step Trailblazer::Activity::Task::Binary( extract ),  id: params_path
+        step Trailblazer::Activity::Task::Binary( validate ), id: "contract.#{name}.call"
       end
 
-      Nested.operation_class.Nested( extract_validate, name: "contract.#{name}.validate" )
+      # FIXME: make Activity.build(builder: Railway) do end an <Activity> ?
+      fake_extract_validate_activity = Struct.new(:process, :outputs) do
+        def __call__(*args)
+          process.call(*args)
+        end
+      end.new(process, outputs)
+
+
+      Nested.operation_class.Nested( fake_extract_validate_activity, id: "contract.#{name}.validate" )
     end
 
-    module Validate
-      # Macro: extract the contract's input from params by reading `:key`.
-      def self.Extract(key:nil, params_path:nil)
-        # TODO: introduce nested pipes and pass composed input instead.
-        step = ->( (options, flow_options), **circuit_options ) do
-          options[params_path] = key ? options["params"][key] : options["params"]
+    class Validate
+      # Task: extract the contract's input from params by reading `:key`.
+      class Extract
+        def initialize(key:nil, params_path:nil)
+          @key, @params_path = key, params_path
         end
 
-        task = Trailblazer::Activity::Task::Binary( step )
-
-        { task: task, node_data: { id: params_path } }
+        def call( (options, flow_options), **circuit_options )
+          options[@params_path] = @key ? options["params"][@key] : options["params"]
+        end
       end
 
-      # Macro: Validates contract `:name`.
-      def self.Call(name:"default", representer:false, params_path:nil)
-        step = ->( (options, flow_options), **circuit_options ) {
-          validate!(options, name: name, representer: options["representer.#{name}.class"], params_path: params_path)
-        }
-
-        task = Trailblazer::Activity::Task::Binary( step )
-        # Pipetree::Step.new( step, "representer.#{name}.class" => representer ) # FIXME!
-
-        { task: task, node_data: { id: "contract.#{name}.call" } }
+      def initialize(name:"default", representer:false, params_path:nil)
+        @name, @representer, @params_path = name, representer, params_path
       end
 
-      def self.validate!(options, name:nil, representer:false, from: "document", params_path:nil)
-        path     = "contract.#{name}"
+      # Task: Validates contract `:name`.
+      def call( (options, flow_options), **circuit_options )
+        validate!( options, representer: options["representer.#{@name}.class"], params_path: @params_path )
+      end
+
+      def validate!(options, representer:false, from: "document", params_path:nil)
+        path     = "contract.#{@name}"
         contract = options[path]
 
         # this is for 1.1-style compatibility and should be removed once we have Deserializer in place:

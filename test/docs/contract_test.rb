@@ -400,7 +400,7 @@ class DryValidationContractTest < Minitest::Spec
       required(:id).filled
     end)
 
-    step Contract::Validate( name: "params" ), prepend: true
+    step Contract::Validate( name: "params" )#, prepend: true
     #~more
     #~more end
   end
@@ -422,7 +422,7 @@ class DryExplicitSchemaTest < Minitest::Spec
     extend Contract::DSL
     contract "params", MySchema
 
-    step Contract::Validate( name: "params" ), prepend: true
+    step Contract::Validate( name: "params" )#, prepend: true
   end
   #:dry-schema-expl end
 end

@@ -6,7 +6,7 @@ class Trailblazer::Operation
 
       task = Railway::TaskBuilder.( step )
 
-      { task: task, node_data: { id: "persist.save" } }
+      { task: task, id: "persist.save" }
     end
   end
 end
