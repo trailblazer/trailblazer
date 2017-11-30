@@ -262,14 +262,30 @@ class NestedWithFastTrackTest < Minitest::Spec
 
   #- mapping
   #- Nested, :pass_fast => :failure
-  class Upsala < Trailblazer::Operation
-    step Nested( Edit ), connect_to: Merge( pass_fast: "End.failure" )
-    step :b
-    fail :f
+  it "attaches :pass_fast => :failure" do
+    op = Class.new(Trailblazer::Operation) do
+      step Nested( Edit ), Output(:pass_fast) => :failure
+      step :b
+      fail :f
 
-    include Steps
+      include Steps
+    end
+
+    # from Nested to :failure track.
+    op.({}).inspect("a", "b", "c", "f").must_equal %{<Result:false [1, nil, nil, 3] >}
   end
 
-  # from Nested straight to End.pass_fast.
-  it { Upsala.({}).inspect("a", "b", "c", "f").must_equal %{<Result:false [1, nil, nil, 3] >} }
+
+  it "goes straigt to End.failure" do
+    op = Class.new(Trailblazer::Operation) do
+      step Nested( Edit ), Output(:pass_fast) => "End.failure"
+      step :b
+      fail :f
+
+      include Steps
+    end
+
+    # from Nested straight to End.failure, no fail step will be visited.
+    op.({}).inspect("a", "b", "c", "f").must_equal %{<Result:false [1, nil, nil, nil] >}
+  end
 end

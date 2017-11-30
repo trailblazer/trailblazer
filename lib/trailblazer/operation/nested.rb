@@ -12,20 +12,24 @@ module Trailblazer
       default_output_filter = ->(options, *) { options }
 
       # TODO: move this to the generic step DSL
+      task_wrap_extensions = []
+
       if input || output
 
         input  ||= default_input_filter
         output ||= default_output_filter
 
-        input_task = Activity::Wrap::Input.new(input)
-        task_wrap_wirings << [ :insert_before!, "task_wrap.call_task", node: [ input_task, id: ".input" ], incoming: Proc.new{true}, outgoing: [Trailblazer::Circuit::Right, {}] ]
-
+        input_task  = Activity::Wrap::Input.new(input)
         output_task = Activity::Wrap::Output.new(output)
-        task_wrap_wirings << [ :insert_before!, "End.default", node: [ output_task, id: ".output" ], incoming: Proc.new{true}, outgoing: [Trailblazer::Circuit::Right, {}] ]
+
+        task_wrap_extensions = Activity::Magnetic::Builder::Path.plan do
+          task input_task,  id: ".input",  before: "task_wrap.call_task"
+          task output_task, id: ".output", before: "End.default", group: :end # DISCUSS: position
+        end
       end
         # Default {Output} copies the mutable data from the nested activity into the original.
 
-      { task: task, node_data: { id: name }, runner_options: { alteration: task_wrap_wirings }, outputs: operation.outputs }
+      { task: task, id: name, runner_options: { merge: task_wrap_extensions }, plus_poles: Activity::Magnetic::DSL::PlusPoles.from_outputs(operation.outputs) }
     end
 
     # @private
