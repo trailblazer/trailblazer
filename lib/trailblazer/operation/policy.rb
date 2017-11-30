@@ -20,7 +20,7 @@ class Trailblazer::Operation
         # flow control
         signal = result.success? ? Trailblazer::Circuit::Right : Trailblazer::Circuit::Left # since we & this, it's only executed OnRight and the return boolean decides the direction, input is passed straight through.
 
-        [ signal, [options, flow_options] ]
+        return signal, [ options, flow_options ]
       end
     end
 
@@ -33,12 +33,12 @@ class Trailblazer::Operation
       task = Eval.new( name: name, path: path )
 
       runner_options = {
-        alteration: Trailblazer::Activity::Wrap::Inject::Defaults(
+        merge: Trailblazer::Operation::Wrap::Inject::Defaults(
           path => condition
         )
       }
 
-      { task: task, node_data: { id: path }, runner_options: runner_options }
+      { task: task, id: path, runner_options: runner_options }
     end
   end
 end

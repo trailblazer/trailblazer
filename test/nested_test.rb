@@ -275,7 +275,6 @@ class NestedWithFastTrackTest < Minitest::Spec
     op.({}).inspect("a", "b", "c", "f").must_equal %{<Result:false [1, nil, nil, 3] >}
   end
 
-
   it "goes straigt to End.failure" do
     op = Class.new(Trailblazer::Operation) do
       step Nested( Edit ), Output(:pass_fast) => "End.failure"
