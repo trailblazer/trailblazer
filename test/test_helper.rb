@@ -24,3 +24,5 @@ module Test
   end
   ReturnResult = ->(last, input, options) { input }
 end
+
+require "pp"
