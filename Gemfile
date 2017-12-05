@@ -28,4 +28,5 @@ gem "dry-validation"
 
 gem "minitest-line"
 
+gem "rubocop", require: false
 # gem "uber", path: "../uber"

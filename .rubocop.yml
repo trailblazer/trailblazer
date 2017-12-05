@@ -1,0 +1,18 @@
+inherit_from: .rubocop_todo.yml
+
+# Trailblazer uses constant named methods for macros.
+# Ignore the false positives in these files.
+Naming/MethodName:
+  Exclude:
+    - 'test/docs/macro_test.rb'
+    - 'lib/trailblazer/operation/model.rb'
+    - 'lib/trailblazer/operation/contract.rb'
+    - 'lib/trailblazer/operation/auto_inject.rb'
+    - 'lib/trailblazer/operation/wrap.rb'
+    - 'lib/trailblazer/operation/validate.rb'
+    - 'lib/trailblazer/operation/pundit.rb'
+    - 'lib/trailblazer/operation/persist.rb'
+    - 'lib/trailblazer/operation/rescue.rb'
+    - 'lib/trailblazer/operation/callback.rb'
+    - 'lib/trailblazer/operation/nested.rb'
+    - 'lib/trailblazer/operation/guard.rb'
