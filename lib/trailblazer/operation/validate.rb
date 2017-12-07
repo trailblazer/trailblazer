@@ -17,20 +17,14 @@ class Trailblazer::Operation
 
 
       # Build a simple Railway {Activity} for the internal flow.
-      process, outputs = Trailblazer::Activity::Magnetic::Builder::Railway.build do
+      activity = Trailblazer::Activity::Railway.build do # FIXME: make Activity.build(builder: Railway) do end an <Activity>
         step Trailblazer::Activity::Task::Binary( extract ),  id: params_path
         step Trailblazer::Activity::Task::Binary( validate ), id: "contract.#{name}.call"
       end
 
-      # FIXME: make Activity.build(builder: Railway) do end an <Activity> ?
-      fake_extract_validate_activity = Struct.new(:process, :outputs) do
-        def __call__(*args)
-          process.call(*args)
-        end
-      end.new(process, outputs)
-
-
-      Nested.operation_class.Nested( fake_extract_validate_activity, id: "contract.#{name}.validate" )
+      # DISCUSS: use Nested here?
+      # Nested.operation_class.Nested( activity, id: "contract.#{name}.validate" )
+      { task: activity, id: "contract.#{name}.validate", plus_poles: Trailblazer::Activity::Magnetic::DSL::PlusPoles.from_outputs(activity.outputs) }
     end
 
     class Validate

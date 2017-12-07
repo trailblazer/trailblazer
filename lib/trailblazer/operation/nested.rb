@@ -3,7 +3,6 @@ module Trailblazer
   class Operation
     def self.Nested(callable, input:nil, output:nil, id: "Nested(#{callable})")
       task_wrap_wirings = []
-
       task, operation = Nested.build(callable, input, output)
 
       # @needs operation#outputs
@@ -47,8 +46,9 @@ module Trailblazer
       end
 
       def self.nestable_object?(object)
-        return true if object.kind_of?(Struct) # FIXME! omg
+        return true if object.is_a?(Trailblazer::Activity::Interface)
 
+        # FIXME: remove that
         # interestingly, with < we get a weird nil exception. bug in Ruby?
         object.is_a?(Nestable) || object.is_a?(Class) && object <= operation_class
       end

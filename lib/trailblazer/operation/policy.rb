@@ -18,7 +18,7 @@ class Trailblazer::Operation
         options["result.policy.#{@name}"] = result
 
         # flow control
-        signal = result.success? ? Trailblazer::Circuit::Right : Trailblazer::Circuit::Left # since we & this, it's only executed OnRight and the return boolean decides the direction, input is passed straight through.
+        signal = result.success? ? Trailblazer::Activity::Right : Trailblazer::Activity::Left # since we & this, it's only executed OnRight and the return boolean decides the direction, input is passed straight through.
 
         return signal, [ options, flow_options ]
       end
