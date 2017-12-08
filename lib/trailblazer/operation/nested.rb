@@ -46,6 +46,10 @@ module Trailblazer
         object.is_a?( Trailblazer::Activity::Interface )
       end
 
+      def self.operation_class
+        Operation
+      end
+
       private
 
       # For dynamic `Nested`s that do not expose an {Activity} interface.
