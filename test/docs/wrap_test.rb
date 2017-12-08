@@ -15,23 +15,26 @@ class WrapTest < Minitest::Spec
         property :title
       end
 
-      step Wrap ->(options, *args, &block) {
+      step( Wrap( ->(options, *args, &block) {
         begin
           block.call
         rescue => exception
           options["result.model.find"] = "argh! because #{exception.class}"
-          [ false, options, *args ]
-        end } {
+          [ Railway.fail_fast!, options, *args ]
+        end }) {
         step ->(options, **) { options["x"] = true }
         step Model( Song, :find )
         step Contract::Build( constant: MyContract )
-      }
+      }.merge(fast_track: true))
       step Contract::Validate()
       step Contract::Persist( method: :sync )
     end
 
     it { Create.( id: 1, title: "Prodigal Son" ).inspect("x", "model").must_equal %{<Result:true [true, #<struct WrapTest::Song id=1, title=\"Prodigal Son\">] >} }
-    it { Create.().inspect("x", "model").must_equal %{<Result:false [true, nil] >} }
+
+    it "goes directly from Wrap to End.fail_fast" do
+      Create.().inspect("x", "model", "result.model.find").must_equal %{<Result:false [true, nil, "argh! because RuntimeError"] >}
+    end
   end
 
   class Create < Trailblazer::Operation
