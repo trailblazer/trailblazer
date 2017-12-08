@@ -56,6 +56,10 @@ class Trailblazer::Operation
     end
 
     module DSL
+      def self.extended(extender)
+        extender.extend(ClassDependencies)
+        warn "[Trailblazer] Using `contract do...end` is deprecated. Please use a form class and the Builder( constant: <Form> ) option."
+      end
       # This is the class level DSL method.
       #   Op.contract #=> returns contract class
       #   Op.contract do .. end # defines contract
