@@ -26,3 +26,5 @@ module Test
 end
 
 require "pp"
+
+Minitest::Spec::Operation = Trailblazer::Operation
