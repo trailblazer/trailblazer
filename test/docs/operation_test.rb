@@ -33,16 +33,14 @@ class DocsOperationExampleTest < Minitest::Spec
 
   #:op
   class Song::Create < Trailblazer::Operation
-    extend Contract::DSL
-
-    contract do
+    class Form < Reform::Form
       property :title
       validates :title, presence: true
     end
 
     step     Model( Song, :new )
     step     :assign_current_user!
-    step     Contract::Build()
+    step     Contract::Build( constant: Form )
     step     Contract::Validate( )
     failure  :log_error!
     step     Contract::Persist(  )
@@ -133,6 +131,7 @@ class DocsDependencyTest < Minitest::Spec
 
   #:dep-op
   class Song::Create < Trailblazer::Operation
+    extend ClassDependencies
     self["my.model.class"] = Song
 
     #~dep-pipe
@@ -355,7 +354,7 @@ class DocsOperationStepOptionsTest < Minitest::Spec
   class ManualNameTest < Minitest::Spec
     #:name-manu
     class New < Trailblazer::Operation
-      step Model( Song, :new ), name: "build.song.model"
+      step(Model( Song, :new ), {name: "build.song.model"})
       step :validate_params!,   name: "my.params.validate"
       # ..
     end

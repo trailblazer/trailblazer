@@ -7,6 +7,7 @@ class DocsContractOverviewTest < Minitest::Spec
   # app/concepts/song/create.rb
   class Create < Trailblazer::Operation
     #~bla
+    extend ClassDependencies
     extend Contract::DSL
 
     contract do
@@ -130,6 +131,7 @@ class DocsContractSeparateKeyTest < Minitest::Spec
   Song = Struct.new(:id, :title)
   #:key-extr
   class Create < Trailblazer::Operation
+    extend ClassDependencies
     extend Contract::DSL
 
     contract do
@@ -359,6 +361,7 @@ class DryValidationContractTest < Minitest::Spec
   #:dry-schema
   require "dry/validation"
   class Create < Trailblazer::Operation
+    extend ClassDependencies
     extend Contract::DSL
 
     # contract to verify params formally.
@@ -394,6 +397,7 @@ class DryValidationContractTest < Minitest::Spec
   #:dry-schema-first
   require "dry/validation"
   class Delete < Trailblazer::Operation
+    extend ClassDependencies
     extend Contract::DSL
 
     contract "params", (Dry::Validation.Schema do
@@ -419,6 +423,7 @@ class DryExplicitSchemaTest < Minitest::Spec
   #:dry-schema-expl
   # app/concepts/comment/delete.rb
   class Delete < Trailblazer::Operation
+    extend ClassDependencies
     extend Contract::DSL
     contract "params", MySchema
 
@@ -433,6 +438,7 @@ class DocContractBuilderTest < Minitest::Spec
   #- builder:
   #:builder-option
   class Create < Trailblazer::Operation
+    extend ClassDependencies
     extend Contract::DSL
 
     contract do
@@ -457,6 +463,7 @@ class DocContractBuilderTest < Minitest::Spec
 
   #- proc
   class Update < Trailblazer::Operation
+    extend ClassDependencies
     extend Contract::DSL
 
     contract do
@@ -484,6 +491,7 @@ class DocContractTest < Minitest::Spec
   #---
   # with contract block, and inheritance, the old way.
   class Block < Trailblazer::Operation
+    extend ClassDependencies
     extend Contract::DSL
     contract do
       property :title
