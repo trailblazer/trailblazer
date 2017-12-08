@@ -7,13 +7,12 @@ module Trailblazer
 
       # @needs operation#outputs
 
-      default_input_filter  = ->(options, *) { ctx = options }
-      default_output_filter = ->(options, *) { options }
-
       # TODO: move this to the generic step DSL
       task_wrap_extensions = []
 
       if input || output
+        default_input_filter  = ->(options, *) { ctx = options }
+        default_output_filter = ->(options, *) { options }
 
         input  ||= default_input_filter
         output ||= default_output_filter

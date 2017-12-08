@@ -52,7 +52,7 @@ class DocsNestedOperationTest < Minitest::Spec
 
 #- test Edit circuit-level.
 it do
-  signal, (result, _) = Edit.__call__( [{"params" => {id: 1} }, {}] )
+  signal, (result, _) = Edit.__call__( [Trailblazer::Context( "params" => {id: 1} ), {}] )
   result["model"].inspect.must_equal %{#<struct DocsNestedOperationTest::Song id=1, title=\"Bristol\">}
 end
 
