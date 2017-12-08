@@ -33,28 +33,17 @@ module Trailblazer
 
     # @private
     module Nested
-      module Nestable
-      end
-
-      def self.build(nested_operation, input, output, is_nestable_object=method(:nestable_object?)) # DISCUSS: use builders here?
-        nested_activity = is_nestable_object.(nested_operation) ? nested_operation : Dynamic.new(nested_operation)
+      def self.build(nested_operation, input, output) # DISCUSS: use builders here?
+        return dynamic = Dynamic.new(nested_operation), dynamic unless nestable_object?(nested_operation)
 
         # The returned {Nested} instance is a valid circuit element and will be `call`ed in the circuit.
         # It simply returns the nested activity's `signal,options,flow_options` return set.
         # The actual wiring - where to go with that - is done by the step DSL.
-        return Trailblazer::Activity::Subprocess(nested_activity, call: :__call__), nested_activity
+        return Trailblazer::Activity::Subprocess(nested_operation, call: :__call__), nested_operation
       end
 
       def self.nestable_object?(object)
-        return true if object.is_a?(Trailblazer::Activity::Interface)
-
-        # FIXME: remove that
-        # interestingly, with < we get a weird nil exception. bug in Ruby?
-        object.is_a?(Nestable) || object.is_a?(Class) && object <= operation_class
-      end
-
-      def self.operation_class
-        Trailblazer::Operation
+        object.is_a?( Trailblazer::Activity::Interface )
       end
 
       private
@@ -67,14 +56,14 @@ module Trailblazer
         def initialize(wrapped)
           @wrapped = Trailblazer::Option::KW(wrapped)
           @outputs = {
-            Railway::End::Success.new(:success) => { role: :success },
-            Railway::End::Failure.new(:failure) => { role: :failure },
+            :success => Activity::Output( Railway::End::Success.new(:success), :success ),
+            :failure => Activity::Output( Railway::End::Failure.new(:failure), :failure ),
           }
         end
 
         attr_reader :outputs
 
-        def __call__( (options, flow_options), **circuit_options )
+        def call( (options, flow_options), **circuit_options )
           activity = @wrapped.(options, circuit_options) # evaluate the option to get the actual "object" to call.
 
           signal, args = activity.__call__( [options, flow_options], **circuit_options )
@@ -82,7 +71,7 @@ module Trailblazer
           # Translate the genuine nested signal to the generic Dynamic end (success/failure, only).
           # Note that here we lose information about what specific event was emitted.
           [
-            signal.kind_of?(Railway::End::Success) ? @outputs.keys[0] : @outputs.keys[1],
+            signal.kind_of?(Railway::End::Success) ? @outputs[:success].signal : @outputs[:failure].signal,
             args
           ]
         end

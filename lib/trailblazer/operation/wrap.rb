@@ -28,7 +28,7 @@ class Trailblazer::Operation
 
     # behaves like an operation so it plays with Nested and simply calls the operation in the user-provided block.
     class Wrapped #< Trailblazer::Operation # FIXME: the inheritance is only to satisfy Nested( Wrapped.new )
-      include Nested::Nestable
+      include Trailblazer::Activity::Interface
 
       def initialize(activity, user_wrap)
         @activity   = activity
