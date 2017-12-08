@@ -11,6 +11,7 @@ class DocsNestedOperationTest < Minitest::Spec
   #- nested operations
   #:edit
   class Edit < Trailblazer::Operation
+    extend ClassDependencies
     extend Contract::DSL
 
     contract do

@@ -23,7 +23,7 @@ module Trailblazer
 
         task_wrap_extensions = Activity::Magnetic::Builder::Path.plan do
           task input_task,  id: ".input",  before: "task_wrap.call_task"
-          task output_task, id: ".output", before: "End.default", group: :end # DISCUSS: position
+          task output_task, id: ".output", before: "End.success", group: :end # DISCUSS: position
         end
       end
         # Default {Output} copies the mutable data from the nested activity into the original.
