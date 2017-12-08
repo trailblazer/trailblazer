@@ -152,7 +152,8 @@ class NestedOutput < Minitest::Spec
   end
   #:output end
 
-  it { Update.( id: 1, title: "Call It A Night" ).inspect("model", "contract.default").must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title=\"Call It A Night\">, nil] >} }
+  it { Update.( id: 1, title: "Call It A Night" ).inspect("model", "contract.default").
+      must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title=\"Call It A Night\">, nil] >} }
 
   it do
     result = Update.( id: 1, title: "Call It A Night" )
@@ -257,5 +258,5 @@ class NestedNameTest < Minitest::Spec
     # ...
   end
 
-  it { Create["pipetree"].inspect.must_equal %{[>operation.new,>Nested(NestedNameTest::Create::Present)]} }
+  it { Operation::Inspect.(Create).must_equal %{[>Nested(NestedNameTest::Create::Present)]} }
 end

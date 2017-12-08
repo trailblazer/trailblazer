@@ -18,12 +18,12 @@ module Trailblazer
         input  ||= default_input_filter
         output ||= default_output_filter
 
-        input_task  = Activity::Wrap::Input.new(input)
-        output_task = Activity::Wrap::Output.new(output)
+        input_filter  = Activity::Wrap::Input.new(input)
+        output_filter = Activity::Wrap::Output.new(output)
 
         task_wrap_extensions = Activity::Magnetic::Builder::Path.plan do
-          task input_task,  id: ".input",  before: "task_wrap.call_task"
-          task output_task, id: ".output", before: "End.success", group: :end # DISCUSS: position
+          task input_filter,  id: ".input",  before: "task_wrap.call_task"
+          task output_filter, id: ".output", before: "End.success", group: :end # DISCUSS: position
         end
       end
         # Default {Output} copies the mutable data from the nested activity into the original.
