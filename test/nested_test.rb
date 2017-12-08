@@ -15,6 +15,7 @@ class NestedTest < Minitest::Spec
   end
 
   class A < Trailblazer::Operation
+    extend ClassDependencies
     self["A.class.data"] = "yes"                                   # class data on A
 
     pass ->(options, **) { options["mutable.data.from.A"] = "from A!" } # mutable data on A
@@ -53,6 +54,7 @@ class NestedTest < Minitest::Spec
 
   #- Nested( ->{} )
   class SomeNestedWithProc < Trailblazer::Operation
+    extend ClassDependencies
     self["A.class.data"] = "yes"                                   # class data on A
 
     Decider = ->(options, use_class:raise, **) { use_class }
@@ -64,6 +66,7 @@ class NestedTest < Minitest::Spec
 
   #- Nested( Callable )
   class SomeNestedWithCallable < Trailblazer::Operation
+    extend ClassDependencies
     self["A.class.data"] = "yes"                                   # class data on A
 
     class Decider
@@ -79,6 +82,7 @@ class NestedTest < Minitest::Spec
 
   #- Nested( :method )
   class SomeNestedWithMethod < Trailblazer::Operation
+    extend ClassDependencies
     self["A.class.data"] = "yes"                                   # class data on A
 
     def decider(options, use_class:raise, **)
