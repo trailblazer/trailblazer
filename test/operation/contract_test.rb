@@ -1,14 +1,14 @@
 require "test_helper"
 
-class ContractExtractMacroTest < Minitest::Spec
-  class Create < Trailblazer::Operation
-    step Contract::Validate::Extract( key: "song", params_path: "x" )
-  end
+# class ContractExtractMacroTest < Minitest::Spec
+#   class Create < Trailblazer::Operation
+#     step Contract::Validate::Extract( key: "song", params_path: "x" )
+#   end
 
-  it { Trailblazer::Operation::Inspect.(Create).must_equal %{[>x]} }
-  it { Create.({}).inspect("x").must_equal %{<Result:false [nil] >} }
-  it { Create.({ "song" => Object }).inspect("x").must_equal %{<Result:true [Object] >} }
-end
+#   it { Trailblazer::Operation::Inspect.(Create).must_equal %{[>x]} }
+#   it { Create.({}).inspect("x").must_equal %{<Result:false [nil] >} }
+#   it { Create.({ "song" => Object }).inspect("x").must_equal %{<Result:true [Object] >} }
+# end
 
 class ContractTest < Minitest::Spec
   Song = Struct.new(:title)
@@ -135,14 +135,13 @@ class ValidateTest < Minitest::Spec
   #---
   # Contract::Validate[]
   class Update < Trailblazer::Operation
-    extend Contract::DSL
-    contract do
+    class Form < Reform::Form
       property :title
       validates :title, presence: true
     end
 
-    step Model( Song, :new ) # FIXME.
-    step Contract::Build()
+    step Model( Song, :new )
+    step Contract::Build( constant: Form )
     step Contract::Validate() # generic validate call for you.
 
     # include Procedural::Validate
@@ -168,14 +167,13 @@ class ValidateTest < Minitest::Spec
   #---
   # Contract::Validate[key: :song]
   class Upsert < Trailblazer::Operation
-    extend Contract::DSL
-    contract do
+    class Form < Reform::Form
       property :title
       validates :title, presence: true
     end
 
     step Model( Song, :new ) # FIXME.
-    step Contract::Build()
+    step Contract::Build( constant: Form )
     step Contract::Validate( key: :song) # generic validate call for you.
     # ->(*) { validate(options["params"][:song]) } # <-- TODO
     step Contract::Persist( method: :sync )
