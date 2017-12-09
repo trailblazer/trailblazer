@@ -51,7 +51,7 @@ class DocsNestedOperationTest < Minitest::Spec
 
   it "provides all steps for Introspect" do
      Trailblazer::Activity::Trace.compute_debug( Edit ).values.must_equal [{:id=>"model.build"}, {:id=>"contract.build"}]
-    Trailblazer::Activity::Trace.compute_debug( Update ).values.must_equal [{:id=>"Nested(DocsNestedOperationTest::Edit)"}, {:id=>"contract.default.validate"}, {:id=>"persist.save"}, {:id=>"contract.default.params"}, {:id=>"contract.default.call"}]
+    Trailblazer::Activity::Trace.compute_debug( Update ).values.must_equal [{:id=>"Nested(DocsNestedOperationTest::Edit)"}, {:id=>"contract.default.validate"}, {:id=>"persist.save"}, {:id=>"model.build"}, {:id=>"contract.build"}, {:id=>"contract.default.params"}, {:id=>"contract.default.call"}]
   end
 
 #- test Edit circuit-level.

@@ -146,10 +146,10 @@ the scoping.
 |-- set.secret
 |-- Nested(VariablesTest::Whistleblower)
 |   |-- #<Trailblazer::Activity::Start:>
-|   |-- <Railway::Task{#<Proc:@test/variables_test.rb: (lambda)>}>
-|   |-- <Railway::Task{#<Proc:@test/variables_test.rb: (lambda)>}>
-|   |-- <Railway::Task{#<Proc:@test/variables_test.rb: (lambda)>}>
-|   |-- <Railway::Task{#<Proc:@test/variables_test.rb: (lambda)>}>
+|   |-- edward.public_opinion
+|   |-- edward.secret
+|   |-- edward.test
+|   |-- edward.read.public_knowledge
 |   `-- #<Trailblazer::Operation::Railway::End::Success:>
 |-- read.edward.rumours
 |-- read.edward.secret
