@@ -9,8 +9,11 @@ class VariablesTest < Minitest::Spec
     pass ->(options, **)                  { options["edward.public_knowledge"] = options["public_knowledge"] }
   end
 
-  #---
-  #- everything public. options is simply passed on.
+=begin
+  Everything public. options are simply passed on.
+
+  Both Org and Edward write and read from the same Context instance.
+=end
   class OpenOrganization < Trailblazer::Operation
     step ->(options, **) { options["rumours"] = "Bla" }
     step ->(options, **) { options["secret"]  = "Psst!" }
@@ -22,10 +25,10 @@ class VariablesTest < Minitest::Spec
   end
 
   it do
-    result = OpenOrganization.({}, "public_opinion" => "Freedom!")
+    result = OpenOrganization.({}, "public_opinion" => "Freedom!", "public_knowledge" => true)
 
-    result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours").
-      must_equal %{<Result:true ["Freedom!", "Bla", "Psst!", "FREEDOM!", "Psst!", "BlaBla"] >}
+    result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours", "edward.public_knowledge").
+      must_equal %{<Result:true ["Freedom!", "Bla", "Psst!", "FREEDOM!", "Psst!", "BlaBla", true] >}
   end
 
   #---
@@ -100,8 +103,10 @@ the scoping.
 
   # TODO write to options and get error
 
-  #---
-  #- simply passes on the context
+=begin
+  Simply passes on the context to Edward, but applies an :output filter,
+  so that Org can't see several nested values such as "edward.public_knowledge".
+=end
   class DiscreetOrganization < Trailblazer::Operation
     step ->(options, **) { options["rumours"] = "Bla" }
     step ->(options, **) { options["secret"]  = "Psst!" }
@@ -125,15 +130,26 @@ the scoping.
   end
 
   it do
-    result = DiscreetOrganization.({}, "public_opinion" => "Freedom!")
+    result = DiscreetOrganization.({}, "public_opinion" => "Freedom!", "public_knowledge" => true)
 
-    result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours", "out.keys", "out.rumours", "out.secret").
-      must_equal %{<Result:false [\"Freedom!\", \"Bla\", \"Psst!\", nil, nil, nil, [\"edward.public_opinion\", \"edward.secret\", \"edward.rumours\", \"edward.public_knowledge\"], \"Bla\", \"!tssP\"] >}
+    result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours", "out.keys", "out.rumours", "out.secret", "public_knowledge", "edward.public_knowledge").
+      must_equal %{<Result:false [\"Freedom!\", \"Bla\", \"Psst!\", nil, nil, nil, [\"edward.public_opinion\", \"edward.secret\", \"edward.rumours\", \"edward.public_knowledge\"], \"Bla\", \"!tssP\", true, nil] >}
   end
 
   it "with tracing" do
     result = DiscreetOrganization.trace({}, "public_opinion" => "Freedom!")
 
-    result.wtf
+    result.wtf?.gsub(/0x\w+/, "").gsub(/\d+/, "").must_equal %{|-- #<Trailblazer::Activity::Start:>
+|-- #<Proc:@test/variables_test.rb: (lambda)>
+|-- #<Proc:@test/variables_test.rb: (lambda)>
+|-- Nested(VariablesTest::Whistleblower)
+|   |-- #<Trailblazer::Activity::Start:>
+|   |-- <Railway::Task{#<Proc:@test/variables_test.rb: (lambda)>}>
+|   |-- <Railway::Task{#<Proc:@test/variables_test.rb: (lambda)>}>
+|   |-- <Railway::Task{#<Proc:@test/variables_test.rb: (lambda)>}>
+|   |-- <Railway::Task{#<Proc:@test/variables_test.rb: (lambda)>}>
+|   `-- #<Trailblazer::Operation::Railway::End::Success:>
+|-- #<Proc:@test/variables_test.rb: (lambda)>
+`-- #<Trailblazer::Operation::Railway::End::Failure:>}
   end
 end
