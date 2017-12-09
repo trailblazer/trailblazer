@@ -62,10 +62,10 @@ class DocsModelTest < Minitest::Spec
   #:show end
 
   it do
-    result = Show.({ id: 1 })
+    result = Show.("params" => { id: 1 })
 
     #:show-ok
-    result = Show.({ id: 1 })
+    result = Show.("params" => { id: 1 })
     result["model"] #=> #<struct Song id=1, title="Roxanne">
     #:show-ok end
 
