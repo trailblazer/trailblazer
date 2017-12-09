@@ -49,7 +49,7 @@ class DocsContractOverviewTest < Minitest::Spec
   #- result
   it do
     #:result
-    result = Create.({ length: "A" })
+    result = Create.("params" => { length: "A" })
 
     result["result.contract.default"].success?        #=> false
     result["result.contract.default"].errors          #=> Errors object
@@ -154,8 +154,8 @@ class DocsContractSeparateKeyTest < Minitest::Spec
   end
   #:key-extr end
 
-  it { Create.({ }).inspect("model").must_equal %{<Result:false [#<struct DocsContractSeparateKeyTest::Song id=nil, title=nil>] >} }
-  it { Create.({"evergreen" => { title: "SVG" }}).inspect("model").must_equal %{<Result:true [#<struct DocsContractSeparateKeyTest::Song id=nil, title="SVG">] >} }
+  it { Create.("params" => { }).inspect("model").must_equal %{<Result:false [#<struct DocsContractSeparateKeyTest::Song id=nil, title=nil>] >} }
+  it { Create.("params" => {"evergreen" => { title: "SVG" }}).inspect("model").must_equal %{<Result:true [#<struct DocsContractSeparateKeyTest::Song id=nil, title="SVG">] >} }
 end
 
 #---
@@ -189,18 +189,18 @@ class ContractConstantTest < Minitest::Spec
   end
   #:constant end
 
-  it { Song::Create.({ title: "A" }).inspect("model").must_equal %{<Result:false [#<struct ContractConstantTest::Song title=nil, length=nil>] >} }
-  it { Song::Create.({ title: "Anthony's Song", length: 12 }).inspect("model").must_equal %{<Result:true [#<struct ContractConstantTest::Song title="Anthony's Song", length=12>] >} }
+  it { Song::Create.("params" => { title: "A" }).inspect("model").must_equal %{<Result:false [#<struct ContractConstantTest::Song title=nil, length=nil>] >} }
+  it { Song::Create.("params" => { title: "Anthony's Song", length: 12 }).inspect("model").must_equal %{<Result:true [#<struct ContractConstantTest::Song title="Anthony's Song", length=12>] >} }
   it do
     #:constant-result
-    result = Song::Create.( title: "A" )
+    result = Song::Create.("params" => { title: "A" })
     result.success? #=> false
     result["contract.default"].errors.messages
       #=> {:title=>["is too short (minimum is 2 characters)"], :length=>["is not a number"]}
     #:constant-result end
 
     #:constant-result-true
-    result = Song::Create.( title: "Rising Force", length: 13 )
+    result = Song::Create.("params" => { title: "Rising Force", length: 13 })
     result.success? #=> true
     result["model"] #=> #<Song title="Rising Force", length=13>
     #:constant-result-true end
@@ -215,11 +215,11 @@ class ContractConstantTest < Minitest::Spec
   end
   #:constant-new end
 
-  it { Song::New.().inspect("model").must_equal %{<Result:true [#<struct ContractConstantTest::Song title=nil, length=nil>] >} }
-  it { Song::New.()["contract.default"].model.inspect.must_equal %{#<struct ContractConstantTest::Song title=nil, length=nil>} }
+  it { Song::New.("params" => {}).inspect("model").must_equal %{<Result:true [#<struct ContractConstantTest::Song title=nil, length=nil>] >} }
+  it { Song::New.("params" => {})["contract.default"].model.inspect.must_equal %{#<struct ContractConstantTest::Song title=nil, length=nil>} }
   it do
     #:constant-new-result
-    result = Song::New.()
+    result = Song::New.("params" => {})
     result["model"] #=> #<struct Song title=nil, length=nil>
     result["contract.default"]
       #=> #<Song::Contract::Create model=#<struct Song title=nil, length=nil>>
@@ -235,22 +235,22 @@ class ContractConstantTest < Minitest::Spec
   end
   #:validate-only end
 
-  it { Song::ValidateOnly.().inspect("model").must_equal %{<Result:false [#<struct ContractConstantTest::Song title=nil, length=nil>] >} }
+  it { Song::ValidateOnly.("params" => {}).inspect("model").must_equal %{<Result:false [#<struct ContractConstantTest::Song title=nil, length=nil>] >} }
   it do
-    result = Song::ValidateOnly.({ title: "Rising Forse", length: 13 })
+    result = Song::ValidateOnly.("params" => { title: "Rising Forse", length: 13 })
     result.inspect("model").must_equal %{<Result:true [#<struct ContractConstantTest::Song title=nil, length=nil>] >}
   end
 
   it do
     #:validate-only-result-false
-    result = Song::ValidateOnly.({}) # empty params
+    result = Song::ValidateOnly.("params" => {}) # empty params
     result.success? #=> false
     #:validate-only-result-false end
   end
 
   it do
     #:validate-only-result
-    result = Song::ValidateOnly.({ title: "Rising Force", length: 13 })
+    result = Song::ValidateOnly.("params" => { title: "Rising Force", length: 13 })
 
     result.success? #=> true
     result["model"] #=> #<struct Song title=nil, length=nil>
@@ -277,16 +277,16 @@ class DocsContractKeyTest < Minitest::Spec
   end
   #:key end
 
-  it { Song::Create.({}).inspect("model", "result.contract.default.extract").must_equal %{<Result:false [#<struct DocsContractKeyTest::Song title=nil, length=nil>, nil] >} }
-  it { Song::Create.({"song" => { title: "SVG", length: 13 }}).inspect("model").must_equal %{<Result:true [#<struct DocsContractKeyTest::Song title=\"SVG\", length=13>] >} }
+  it { Song::Create.("params" => {}).inspect("model", "result.contract.default.extract").must_equal %{<Result:false [#<struct DocsContractKeyTest::Song title=nil, length=nil>, nil] >} }
+  it { Song::Create.("params" => {"song" => { title: "SVG", length: 13 }}).inspect("model").must_equal %{<Result:true [#<struct DocsContractKeyTest::Song title=\"SVG\", length=13>] >} }
   it do
     #:key-res
-    result = Song::Create.({ "song" => { title: "Rising Force", length: 13 } })
+    result = Song::Create.("params" => { "song" => { title: "Rising Force", length: 13 } })
     result.success? #=> true
     #:key-res end
 
     #:key-res-false
-    result = Song::Create.({ title: "Rising Force", length: 13 })
+    result = Song::Create.("params" => { title: "Rising Force", length: 13 })
     result.success? #=> false
     #:key-res-false end
   end
@@ -309,12 +309,12 @@ class ContractNamedConstantTest < Minitest::Spec
   end
   #:constant-name end
 
-  it { Song::Create.({ title: "A" }).inspect("model").must_equal %{<Result:false [#<struct ContractNamedConstantTest::Song title=nil, length=nil>] >} }
-  it { Song::Create.({ title: "Anthony's Song", length: 13 }).inspect("model").must_equal %{<Result:true [#<struct ContractNamedConstantTest::Song title="Anthony's Song", length=13>] >} }
+  it { Song::Create.("params" => { title: "A" }).inspect("model").must_equal %{<Result:false [#<struct ContractNamedConstantTest::Song title=nil, length=nil>] >} }
+  it { Song::Create.("params" => { title: "Anthony's Song", length: 13 }).inspect("model").must_equal %{<Result:true [#<struct ContractNamedConstantTest::Song title="Anthony's Song", length=13>] >} }
 
   it do
     #:name-res
-    result = Song::Create.({ title: "A" })
+    result = Song::Create.("params" => { title: "A" })
     result["contract.form"].errors.messages #=> {:title=>["is too short (minimum is 2 ch...
     #:name-res end
   end
@@ -343,13 +343,13 @@ class ContractInjectConstantTest < Minitest::Spec
   it do
   #:di-contract-call
   Create.(
-    { title: "Anthony's Song" },
+    "params" => { title: "Anthony's Song" },
     "contract.default.class" => MyContract
   )
   #:di-contract-call end
   end
-  it { Create.({ title: "A" }, "contract.default.class" => MyContract).inspect("model").must_equal %{<Result:false [#<struct ContractInjectConstantTest::Song id=nil, title=nil>] >} }
-  it { Create.({ title: "Anthony's Song" }, "contract.default.class" => MyContract).inspect("model").must_equal %{<Result:true [#<struct ContractInjectConstantTest::Song id=nil, title="Anthony's Song">] >} }
+  it { Create.("params" => { title: "A" }, "contract.default.class" => MyContract).inspect("model").must_equal %{<Result:false [#<struct ContractInjectConstantTest::Song id=nil, title=nil>] >} }
+  it { Create.("params" => { title: "Anthony's Song" }, "contract.default.class" => MyContract).inspect("model").must_equal %{<Result:true [#<struct ContractInjectConstantTest::Song id=nil, title="Anthony's Song">] >} }
 end
 
 class DryValidationContractTest < Minitest::Spec
@@ -388,11 +388,11 @@ class DryValidationContractTest < Minitest::Spec
 
   puts "@@@@@ #{Trailblazer::Operation::Inspect.(Create, style: :rows)}"
 
-  it { Create.({}).inspect("model", "result.contract.params").must_equal %{<Result:false [nil, #<Dry::Validation::Result output={} errors={:id=>[\"is missing\"]}>] >} }
-  it { Create.({ id: 1 }).inspect("model", "result.contract.params").must_equal %{<Result:false [#<struct DryValidationContractTest::Song id=nil, title=nil>, #<Dry::Validation::Result output={:id=>1} errors={}>] >} }
-  # it { Create.({ id: 1, title: "" }).inspect("model", "result.contract.form").must_equal %{<Result:false [#<struct DryValidationContractTest::Song id=nil, title=nil>] >} }
-  it { Create.({ id: 1, title: "" }).inspect("model").must_equal %{<Result:false [#<struct DryValidationContractTest::Song id=nil, title=nil>] >} }
-  it { Create.({ id: 1, title: "Yo" }).inspect("model").must_equal %{<Result:true [#<struct DryValidationContractTest::Song id=nil, title="Yo">] >} }
+  it { Create.("params" => {}).inspect("model", "result.contract.params").must_equal %{<Result:false [nil, #<Dry::Validation::Result output={} errors={:id=>[\"is missing\"]}>] >} }
+  it { Create.("params" => { id: 1 }).inspect("model", "result.contract.params").must_equal %{<Result:false [#<struct DryValidationContractTest::Song id=nil, title=nil>, #<Dry::Validation::Result output={:id=>1} errors={}>] >} }
+  # it { Create.("params" => { id: 1, title: "" }).inspect("model", "result.contract.form").must_equal %{<Result:false [#<struct DryValidationContractTest::Song id=nil, title=nil>] >} }
+  it { Create.("params" => { id: 1, title: "" }).inspect("model").must_equal %{<Result:false [#<struct DryValidationContractTest::Song id=nil, title=nil>] >} }
+  it { Create.("params" => { id: 1, title: "Yo" }).inspect("model").must_equal %{<Result:true [#<struct DryValidationContractTest::Song id=nil, title="Yo">] >} }
 
   #:dry-schema-first
   require "dry/validation"
@@ -458,8 +458,8 @@ class DocContractBuilderTest < Minitest::Spec
   end
   #:builder-option end
 
-  it { Create.({}).inspect("model").must_equal %{<Result:false [#<struct DocContractBuilderTest::Song id=nil, title=nil>] >} }
-  it { Create.({ title: 1}, "current_user" => Module).inspect("model").must_equal %{<Result:true [#<struct DocContractBuilderTest::Song id=nil, title=1>] >} }
+  it { Create.("params" => {}).inspect("model").must_equal %{<Result:false [#<struct DocContractBuilderTest::Song id=nil, title=nil>] >} }
+  it { Create.("params" => { title: 1}, "current_user" => Module).inspect("model").must_equal %{<Result:true [#<struct DocContractBuilderTest::Song id=nil, title=1>] >} }
 
   #- proc
   class Update < Trailblazer::Operation
@@ -482,8 +482,8 @@ class DocContractBuilderTest < Minitest::Spec
     step Contract::Persist( method: :sync )
   end
 
-  it { Update.({}).inspect("model").must_equal %{<Result:false [#<struct DocContractBuilderTest::Song id=nil, title=nil>] >} }
-  it { Update.({ title: 1}, "current_user" => Module).inspect("model").must_equal %{<Result:true [#<struct DocContractBuilderTest::Song id=nil, title=1>] >} }
+  it { Update.("params" => {}).inspect("model").must_equal %{<Result:false [#<struct DocContractBuilderTest::Song id=nil, title=nil>] >} }
+  it { Update.("params" => { title: 1}, "current_user" => Module).inspect("model").must_equal %{<Result:true [#<struct DocContractBuilderTest::Song id=nil, title=1>] >} }
 end
 
 class DocContractTest < Minitest::Spec
@@ -503,8 +503,8 @@ class DocContractTest < Minitest::Spec
     step Contract::Persist( method: :sync )
   end
 
-  it { Block.({}).inspect("model").must_equal %{<Result:true [#<struct DocContractTest::Song id=nil, title=nil>] >} }
-  it { Block.({ id:1, title: "Fame" }).inspect("model").must_equal %{<Result:true [#<struct DocContractTest::Song id=nil, title="Fame">] >} }
+  it { Block.("params" => {}).inspect("model").must_equal %{<Result:true [#<struct DocContractTest::Song id=nil, title=nil>] >} }
+  it { Block.("params" => { id:1, title: "Fame" }).inspect("model").must_equal %{<Result:true [#<struct DocContractTest::Song id=nil, title="Fame">] >} }
 
   class Breach < Block
     contract do
@@ -512,7 +512,7 @@ class DocContractTest < Minitest::Spec
     end
   end
 
-  it { Breach.({ id:1, title: "Fame" }).inspect("model").must_equal %{<Result:true [#<struct DocContractTest::Song id=1, title="Fame">] >} }
+  it { Breach.("params" => { id:1, title: "Fame" }).inspect("model").must_equal %{<Result:true [#<struct DocContractTest::Song id=1, title="Fame">] >} }
 
   #-
   # with constant.
@@ -524,7 +524,7 @@ class DocContractTest < Minitest::Spec
     contract MyContract
   end
 
-  it { Break.({ id:1, title: "Fame" }).inspect("model").must_equal %{<Result:true [#<struct DocContractTest::Song id=1, title=nil>] >} }
+  it { Break.("params" => { id:1, title: "Fame" }).inspect("model").must_equal %{<Result:true [#<struct DocContractTest::Song id=1, title=nil>] >} }
 end
 
 

@@ -3,10 +3,10 @@ require "test_helper"
 class VariablesTest < Minitest::Spec
   # Nested op copies values and modifies/amplifies some of them.
   class Whistleblower < Trailblazer::Operation
-    step ->(options, public_opinion:, **) { options["edward.public_opinion"] = public_opinion.upcase }
-    step ->(options, secret:, **)         { options["edward.secret"]         = secret }
-    step ->(options, rumours:, **)        { rumours.nil? ? rumours : options["edward.rumours"] = rumours*2 }
-    pass ->(options, **)                  { options["edward.public_knowledge"] = options["public_knowledge"] }
+    step ->(options, public_opinion:, **) { options["edward.public_opinion"] = public_opinion.upcase }        , id: "edward.public_opinion"
+    step ->(options, secret:, **)         { options["edward.secret"]         = secret }                       , id: "edward.secret"
+    step ->(options, rumours:, **)        { rumours.nil? ? rumours : options["edward.rumours"] = rumours*2 }  , id: "edward.test"
+    pass ->(options, **)                  { options["edward.public_knowledge"] = options["public_knowledge"] }, id: "edward.read.public_knowledge"
   end
 
 =begin
@@ -25,7 +25,7 @@ class VariablesTest < Minitest::Spec
   end
 
   it do
-    result = OpenOrganization.({}, "public_opinion" => "Freedom!", "public_knowledge" => true)
+    result = OpenOrganization.("public_opinion" => "Freedom!", "public_knowledge" => true)
 
     result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours", "edward.public_knowledge").
       must_equal %{<Result:true ["Freedom!", "Bla", "Psst!", "FREEDOM!", "Psst!", "BlaBla", true] >}
@@ -48,7 +48,7 @@ class VariablesTest < Minitest::Spec
   end
 
   it do
-    result = ConsideringButOpenOrganization.({}, "public_opinion" => "Freedom!")
+    result = ConsideringButOpenOrganization.("public_opinion" => "Freedom!")
 
     result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours").
       must_equal %{<Result:true ["Freedom!", "Bla", "Psst!", "FREEDOM!", "Psst!", "BlaBla"] >}
@@ -95,7 +95,7 @@ the scoping.
 
   it do
     skip "no options.merge until we know we actually need it"
-    result = EncryptedOrganization.({}, "public_opinion" => "Freedom!")
+    result = EncryptedOrganization.("public_opinion" => "Freedom!")
 
     result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours").
       must_equal %{<Result:true ["Freedom!", "Bla", "Psst!", "FREEDOM!", "Psst!XxX", "BlaBla"] >}
@@ -105,16 +105,18 @@ the scoping.
 
 =begin
   Simply passes on the context to Edward, but applies an :output filter,
-  so that Org can't see several nested values such as "edward.public_knowledge".
+  so that Org can't see several nested values such as "edward.public_knowledge"
+  or "edward.rumours" (see steps in #read-section).
 =end
   class DiscreetOrganization < Trailblazer::Operation
-    step ->(options, **) { options["rumours"] = "Bla" }
-    step ->(options, **) { options["secret"]  = "Psst!" }
+    step ->(options, **) { options["rumours"] = "Bla" },    id: "set.rumours"
+    step ->(options, **) { options["secret"]  = "Psst!" },   id: "set.secret"
 
     step Nested( Whistleblower, input: :input!, output: :output! )
 
-    step ->(options, **) { options["org.rumours"] = options["edward.rumours"] } # what can we see from Edward?
-    step ->(options, **) { options["org.secret"]  = options["edward.secret"] }  # what can we see from Edward?
+    #read-section
+    pass ->(options, **) { options["org.rumours"] = options["edward.rumours"] }, id: "read.edward.rumours" # what can we see from Edward?
+    step ->(options, **) { options["org.secret"]  = options["edward.secret"] },  id: "read.edward.secret"  # what can we see from Edward?
 
     def input!(options, **)
       options
@@ -130,18 +132,18 @@ the scoping.
   end
 
   it do
-    result = DiscreetOrganization.({}, "public_opinion" => "Freedom!", "public_knowledge" => true)
+    result = DiscreetOrganization.("public_opinion" => "Freedom!", "public_knowledge" => true)
 
-    result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours", "out.keys", "out.rumours", "out.secret", "public_knowledge", "edward.public_knowledge").
-      must_equal %{<Result:false [\"Freedom!\", \"Bla\", \"Psst!\", nil, nil, nil, [\"edward.public_opinion\", \"edward.secret\", \"edward.rumours\", \"edward.public_knowledge\"], \"Bla\", \"!tssP\", true, nil] >}
+    result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours", "out.keys", "out.rumours", "out.secret", "org.rumours", "org.secret", "public_knowledge", "edward.public_knowledge").
+      must_equal %{<Result:false [\"Freedom!\", \"Bla\", \"Psst!\", nil, nil, nil, [\"edward.public_opinion\", \"edward.secret\", \"edward.rumours\", \"edward.public_knowledge\"], \"Bla\", \"!tssP\", nil, nil, true, nil] >}
   end
 
   it "with tracing" do
-    result = DiscreetOrganization.trace({}, "public_opinion" => "Freedom!")
+    result = DiscreetOrganization.trace("public_opinion" => "Freedom!")
 
     result.wtf?.gsub(/0x\w+/, "").gsub(/\d+/, "").must_equal %{|-- #<Trailblazer::Activity::Start:>
-|-- #<Proc:@test/variables_test.rb: (lambda)>
-|-- #<Proc:@test/variables_test.rb: (lambda)>
+|-- set.rumours
+|-- set.secret
 |-- Nested(VariablesTest::Whistleblower)
 |   |-- #<Trailblazer::Activity::Start:>
 |   |-- <Railway::Task{#<Proc:@test/variables_test.rb: (lambda)>}>
@@ -149,7 +151,8 @@ the scoping.
 |   |-- <Railway::Task{#<Proc:@test/variables_test.rb: (lambda)>}>
 |   |-- <Railway::Task{#<Proc:@test/variables_test.rb: (lambda)>}>
 |   `-- #<Trailblazer::Operation::Railway::End::Success:>
-|-- #<Proc:@test/variables_test.rb: (lambda)>
+|-- read.edward.rumours
+|-- read.edward.secret
 `-- #<Trailblazer::Operation::Railway::End::Failure:>}
   end
 end

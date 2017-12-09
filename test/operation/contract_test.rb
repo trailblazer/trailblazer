@@ -150,7 +150,7 @@ class ValidateTest < Minitest::Spec
 
   # success
   it do
-    result = Update.(title: "SVG")
+    result = Update.("params" => {title: "SVG"})
     result.success?.must_equal true
     result["result.contract.default"].success?.must_equal true
     result["result.contract.default"].errors.messages.must_equal({})
@@ -158,7 +158,7 @@ class ValidateTest < Minitest::Spec
 
   # failure
   it do
-    result = Update.(title: nil)
+    result = Update.("params" => {title: nil})
     result.success?.must_equal false
     result["result.contract.default"].success?.must_equal false
     result["result.contract.default"].errors.messages.must_equal({:title=>["can't be blank"]})
@@ -180,16 +180,16 @@ class ValidateTest < Minitest::Spec
   end
 
   # success
-  it { Upsert.(song: { title: "SVG" }).success?.must_equal true }
+  it { Upsert.("params" => {song: { title: "SVG" }}).success?.must_equal true }
   # failure
-  it { Upsert.(song: { title: nil }).success?.must_equal false }
+  it { Upsert.("params" => {song: { title: nil }}).success?.must_equal false }
   # key not found
-  it { Upsert.().success?.must_equal false }
+  it { Upsert.("params" => {}).success?.must_equal false }
 
   #---
   # contract.default.params gets set (TODO: change in 2.1)
-  it { Upsert.(song: { title: "SVG" })["params"].must_equal({:song=>{:title=>"SVG"}}) }
-  it { Upsert.(song: { title: "SVG" })["contract.default.params"].must_equal({:title=>"SVG"}) }
+  it { Upsert.("params" => {song: { title: "SVG" }})["params"].must_equal({:song=>{:title=>"SVG"}}) }
+  it { Upsert.("params" => {song: { title: "SVG" }})["contract.default.params"].must_equal({:title=>"SVG"}) }
 
   #---
   #- inheritance
@@ -204,7 +204,7 @@ class ValidateTest < Minitest::Spec
   end
 
   it { Trailblazer::Operation::Inspect.(NewHit).must_equal %{[>model.build,>contract.build,>contract.default.validate,>persist.save]} }
-  it { NewHit.(:hit => { title: "Hooray For Me" }).inspect("model").must_equal %{<Result:true [#<struct ContractTest::Song title=\"Hooray For Me\">] >} }
+  it { NewHit.("params" => {:hit => { title: "Hooray For Me" }}).inspect("model").must_equal %{<Result:true [#<struct ContractTest::Song title=\"Hooray For Me\">] >} }
 end
 
 # #---

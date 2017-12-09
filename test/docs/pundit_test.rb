@@ -30,12 +30,12 @@ class DocsPunditProcTest < Minitest::Spec
   #:pundit end
 
   it { Trailblazer::Operation::Inspect.(Create).must_equal %{[>model.build,>policy.default.eval]} }
-  it { Create.({}, "current_user" => Module).inspect("model").must_equal %{<Result:true [#<struct DocsPunditProcTest::Song id=nil>] >} }
-  it { Create.({}                          ).inspect("model").must_equal %{<Result:false [#<struct DocsPunditProcTest::Song id=nil>] >} }
+  it { Create.("params" => {}, "current_user" => Module).inspect("model").must_equal %{<Result:true [#<struct DocsPunditProcTest::Song id=nil>] >} }
+  it { Create.("params" => {}                          ).inspect("model").must_equal %{<Result:false [#<struct DocsPunditProcTest::Song id=nil>] >} }
 
   it do
   #:pundit-result
-  result = Create.({}, "current_user" => Module)
+  result = Create.("params" => {}, "current_user" => Module)
   result["result.policy.default"].success? #=> true
   result["result.policy.default"]["policy"] #=> #<MyPolicy ...>
   #:pundit-result end
@@ -50,8 +50,8 @@ class DocsPunditProcTest < Minitest::Spec
   end
 
   it { Trailblazer::Operation::Inspect.(New).must_equal %{[>model.build,>policy.default.eval]} }
-  it { New.({}, "current_user" => Class ).inspect("model").must_equal %{<Result:true [#<struct DocsPunditProcTest::Song id=nil>] >} }
-  it { New.({}, "current_user" => nil ).inspect("model").must_equal %{<Result:false [#<struct DocsPunditProcTest::Song id=nil>] >} }
+  it { New.("params" => {}, "current_user" => Class ).inspect("model").must_equal %{<Result:true [#<struct DocsPunditProcTest::Song id=nil>] >} }
+  it { New.("params" => {}, "current_user" => nil ).inspect("model").must_equal %{<Result:false [#<struct DocsPunditProcTest::Song id=nil>] >} }
 
   #---
   #- override with :name
@@ -65,9 +65,9 @@ class DocsPunditProcTest < Minitest::Spec
   end
 
   it { Trailblazer::Operation::Inspect.(Edit).must_equal %{[>policy.first.eval,>policy.second.eval]} }
-  it { Edit.({}, "current_user" => Class).inspect("model").must_equal %{<Result:false [nil] >} }
+  it { Edit.("params" => {}, "current_user" => Class).inspect("model").must_equal %{<Result:false [nil] >} }
   it { Trailblazer::Operation::Inspect.(Update).must_equal %{[>policy.first.eval,>policy.second.eval]} }
-  it { Update.({}, "current_user" => Class).inspect("model").must_equal %{<Result:true [nil] >} }
+  it { Update.("params" => {}, "current_user" => Class).inspect("model").must_equal %{<Result:true [nil] >} }
 
   #---
   # dependency injection
@@ -80,7 +80,7 @@ class DocsPunditProcTest < Minitest::Spec
   it {
     result =
   #:di-call
-  Create.({},
+  Create.("params" => {},
     "current_user"        => Module,
     "policy.default.eval" => Trailblazer::Operation::Policy::Pundit.build(AnotherPolicy, :create?)
   )
@@ -103,7 +103,7 @@ class PunditWithNameTest < Minitest::Spec
 
   it {
   #:name-call
-  result = Create.({}, "current_user" => Module)
+  result = Create.("params" => {}, "current_user" => Module)
   result["result.policy.after_model"].success? #=> true
   #:name-call end
     result["result.policy.after_model"].success?.must_equal true }
@@ -123,8 +123,8 @@ end
 #   #:class-level end
 
 #   it { Create.(); Create["result.policy"].must_equal nil }
-#   it { Create.({}, "current_user" => Module)["x"].must_equal true }
-#   it { Create.({}                          )["x"].must_equal nil }
+#   it { Create.("params" => {}, "current_user" => Module)["x"].must_equal true }
+#   it { Create.("params" => {}                          )["x"].must_equal nil }
 # end
 
 

@@ -5,7 +5,7 @@ require "test_helper"
 class DocsGuardProcTest < Minitest::Spec
   #:proc
   class Create < Trailblazer::Operation
-    step Policy::Guard( ->(options, params:, **) { params[:pass] } )
+    step Policy::Guard( ->(options, pass:, **) { pass } )
     #~pipeonly
     step :process
 
@@ -39,8 +39,8 @@ class DocsGuardTest < Minitest::Spec
   class MyGuard
     include Uber::Callable
 
-    def call(options, params:, **)
-      params[:pass]
+    def call(options, pass:, **)
+      pass
     end
   end
   #:callable end
@@ -69,8 +69,8 @@ class DocsGuardMethodTest < Minitest::Spec
   class Create < Trailblazer::Operation
     step Policy::Guard( :pass? )
 
-    def pass?(options, params:, **)
-      params[:pass]
+    def pass?(options, pass:, **)
+      pass
     end
     #~pipe-onlyy
     step :process
@@ -96,12 +96,12 @@ class DocsGuardNamedTest < Minitest::Spec
   end
   #:name end
 
-  it { Create.({}, "current_user" => nil   )["result.policy.user"].success?.must_equal false }
-  it { Create.({}, "current_user" => Module)["result.policy.user"].success?.must_equal true }
+  it { Create.("current_user" => nil   )["result.policy.user"].success?.must_equal false }
+  it { Create.("current_user" => Module)["result.policy.user"].success?.must_equal true }
 
   it {
   #:name-result
-  result = Create.({}, "current_user" => true)
+  result = Create.("current_user" => true)
   result["result.policy.user"].success? #=> true
   #:name-result end
   }
@@ -116,7 +116,7 @@ class DocsGuardInjectionTest < Minitest::Spec
   end
   #:di-op end
 
-  it { Create.({}, "current_user" => Module).inspect("").must_equal %{<Result:true [nil] >} }
+  it { Create.("current_user" => Module).inspect("").must_equal %{<Result:true [nil] >} }
   it {
     result =
   #:di-call
@@ -136,7 +136,7 @@ class DocsGuardMissingKeywordTest < Minitest::Spec
   end
 
   it { assert_raises(ArgumentError) { Create.() } }
-  it { Create.({}, "current_user" => Module).success?.must_equal true }
+  it { Create.("current_user" => Module).success?.must_equal true }
 end
 
 #---

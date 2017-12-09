@@ -20,3 +20,5 @@ gem "trailblazer-operation", path: "../operation"
 gem "minitest-line"
 
 gem "trailblazer-activity", path: "../trailblazer-circuit"
+
+gem "trailblazer-context", path: "../trailblazer-context"

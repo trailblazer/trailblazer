@@ -29,7 +29,7 @@ class NestedTest < Minitest::Spec
   # no runtime data
   # no params
   it do
-    result = A.()
+    result = A.("params" => {})
     # everything from A visible
     result["A.class.data"].       must_equal "yes"
     result["mutable.data.from.A"].must_equal "from A!"
@@ -98,39 +98,39 @@ class NestedTest < Minitest::Spec
   #- test callable
   # B with Callable, successful
   it do
-    result = SomeNestedWithCallable.({}, use_class: B)
+    result = SomeNestedWithCallable.("params" => {}, use_class: B)
     assert_b(result, is_successful: "whatever")
   end
 
   # AlmostB with Callable, successful
   it do
-    result = SomeNestedWithCallable.({}, use_class: AlmostB, is_successful: true)
+    result = SomeNestedWithCallable.("params" => {}, use_class: AlmostB, is_successful: true)
     assert_almost_b(result, is_successful: true)
   end
 
   # AlmostB with Callable, failure
   it do
-    result = SomeNestedWithCallable.({}, use_class: AlmostB, is_successful: false)
+    result = SomeNestedWithCallable.("params" => {}, use_class: AlmostB, is_successful: false)
     assert_almost_b(result, is_successful: false)
   end
 
   #- test proc
   # B with proc, successful
   it do
-    result = SomeNestedWithProc.({}, use_class: B)
+    result = SomeNestedWithProc.("params" => {}, use_class: B)
     assert_b(result, is_successful: "whatever")
   end
 
   # AlmostB with proc, successful
   it do
-    result = SomeNestedWithProc.({}, use_class: AlmostB, is_successful: true)
+    result = SomeNestedWithProc.("params" => {}, use_class: AlmostB, is_successful: true)
 
     assert_almost_b(result, is_successful: true)
   end
 
   # AlmostB with proc, failure.
   it do
-    result = SomeNestedWithProc.({}, use_class: AlmostB, is_successful: false)
+    result = SomeNestedWithProc.("params" => {}, use_class: AlmostB, is_successful: false)
 
     assert_almost_b(result, is_successful: false)
   end
@@ -138,20 +138,20 @@ class NestedTest < Minitest::Spec
   #- test :method
   # B with method, successful
   it do
-    result = SomeNestedWithMethod.({}, use_class: B)
+    result = SomeNestedWithMethod.("params" => {}, use_class: B)
     assert_b(result, is_successful: "whatever")
   end
 
   # AlmostB with method, successful
   it do
-    result = SomeNestedWithMethod.({}, use_class: AlmostB, is_successful: true)
+    result = SomeNestedWithMethod.("params" => {}, use_class: AlmostB, is_successful: true)
 
     assert_almost_b(result, is_successful: true)
   end
 
   # AlmostB with method, failure.
   it do
-    result = SomeNestedWithMethod.({}, use_class: AlmostB, is_successful: false)
+    result = SomeNestedWithMethod.("params" => {}, use_class: AlmostB, is_successful: false)
 
     assert_almost_b(result, is_successful: false)
   end
