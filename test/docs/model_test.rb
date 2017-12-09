@@ -20,7 +20,7 @@ class DocsModelTest < Minitest::Spec
 
   it do
     #:create
-    result = Create.({})
+    result = Create.("params" => {})
     result["model"] #=> #<struct Song id=nil, title=nil>
     #:create end
 
@@ -36,7 +36,7 @@ class DocsModelTest < Minitest::Spec
 
   it do
     #:update-ok
-    result = Update.({ id: 1 })
+    result = Update.("params" => { id: 1 })
     result["model"] #=> #<struct Song id=1, title="Roxanne">
     #:update-ok end
 
@@ -45,7 +45,7 @@ class DocsModelTest < Minitest::Spec
 
   it do
     #:update-fail
-    result = Update.({})
+    result = Update.("params" => {})
     result["model"] #=> nil
     result.success? #=> false
     #:update-fail end

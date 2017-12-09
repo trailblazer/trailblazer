@@ -28,7 +28,7 @@ class DocsMacroTest < Minitest::Spec
   end
 =end
 
-  it { Create["pipetree"].inspect.must_equal %{[>operation.new,>my_policy.manager]} }
+  it { Operation::Inspect.(Create).must_equal %{[>my_policy.manager]} }
 end
 
 # injectable option

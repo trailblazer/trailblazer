@@ -8,9 +8,6 @@ Reform::Form.class_eval do
   include Reform::Form::ActiveModel::Validations
 end
 
-require "trailblazer/operation/callback"
-require "trailblazer/operation/procedural/validate"
-
 module Mock
   class Result
     def initialize(bool); @bool = bool end
@@ -27,3 +24,7 @@ module Test
   end
   ReturnResult = ->(last, input, options) { input }
 end
+
+require "pp"
+
+Minitest::Spec::Operation = Trailblazer::Operation

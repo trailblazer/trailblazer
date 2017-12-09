@@ -8,15 +8,19 @@ class Trailblazer::Operation
         @path = path
       end
 
-      def call(input, options)
-        condition = options[@path] # this allows dependency injection.
-        result    = condition.(input, options)
+      # incoming low-level {Task API}.
+      # outgoing Task::Binary API.
+      def call((options, flow_options), **circuit_options)
+        condition = options[ @path ] # this allows dependency injection.
+        result    = condition.( [options, flow_options], **circuit_options )
 
         options["policy.#{@name}"]        = result["policy"] # assign the policy as a skill.
         options["result.policy.#{@name}"] = result
 
         # flow control
-        result.success? # since we & this, it's only executed OnRight and the return boolean decides the direction, input is passed straight through.
+        signal = result.success? ? Trailblazer::Activity::Right : Trailblazer::Activity::Left # since we & this, it's only executed OnRight and the return boolean decides the direction, input is passed straight through.
+
+        return signal, [ options, flow_options ]
       end
     end
 
@@ -26,10 +30,15 @@ class Trailblazer::Operation
       name = options[:name]
       path = "policy.#{name}.eval"
 
-      step = Eval.new( name: name, path: path )
-      step = Pipetree::Step.new(step, path => condition)
+      task = Eval.new( name: name, path: path )
 
-      [ step, name: path ]
+      runner_options = {
+        merge: Trailblazer::Operation::Wrap::Inject::Defaults(
+          path => condition
+        )
+      }
+
+      { task: task, id: path, runner_options: runner_options }
     end
   end
 end

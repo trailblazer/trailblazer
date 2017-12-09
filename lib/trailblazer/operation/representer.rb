@@ -12,6 +12,11 @@ class Trailblazer::Operation
     end
 
     module DSL
+      def self.extended(extender)
+        extender.extend(ClassDependencies)
+        warn "[Trailblazer] Using `representer do...end` is deprecated. Please use a dedicated representer class."
+      end
+
       def representer(name=:default, constant=nil, &block)
         heritage.record(:representer, name, constant, &block)
 

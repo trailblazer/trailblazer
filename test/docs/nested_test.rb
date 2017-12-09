@@ -11,6 +11,7 @@ class DocsNestedOperationTest < Minitest::Spec
   #- nested operations
   #:edit
   class Edit < Trailblazer::Operation
+    extend ClassDependencies
     extend Contract::DSL
 
     contract do
@@ -26,18 +27,20 @@ class DocsNestedOperationTest < Minitest::Spec
   #:update
   class Update < Trailblazer::Operation
     step Nested( Edit )
+    # step ->(options, **) { puts options.keys.inspect }
     step Contract::Validate()
+
     step Contract::Persist( method: :sync )
   end
   #:update end
 
-  puts Update["pipetree"].inspect(style: :rows)
+  # puts Update["pipetree"].inspect(style: :rows)
 
   #-
   # Edit allows grabbing model and contract
   it do
   #:edit-call
-  result = Edit.(id: 1)
+  result = Edit.("params" => {id: 1})
 
   result["model"]            #=> #<Song id=1, title=\"Bristol\">
   result["contract.default"] #=> #<Reform::Form ..>
@@ -46,11 +49,22 @@ class DocsNestedOperationTest < Minitest::Spec
     result["contract.default"].model.must_equal result["model"]
   end
 
+  it "provides all steps for Introspect" do
+     Trailblazer::Activity::Trace.compute_debug( Edit ).values.must_equal [{:id=>"model.build"}, {:id=>"contract.build"}]
+    Trailblazer::Activity::Trace.compute_debug( Update ).values.must_equal [{:id=>"Nested(DocsNestedOperationTest::Edit)"}, {:id=>"contract.default.validate"}, {:id=>"persist.save"}, {:id=>"model.build"}, {:id=>"contract.build"}, {:id=>"contract.default.params"}, {:id=>"contract.default.call"}]
+  end
+
+#- test Edit circuit-level.
+it do
+  signal, (result, _) = Edit.__call__( [Trailblazer::Context( "params" => {id: 1} ), {}] )
+  result["model"].inspect.must_equal %{#<struct DocsNestedOperationTest::Song id=1, title=\"Bristol\">}
+end
+
   #-
-  # Update also allows grabbing model and contract
+  # Update also allows grabbing Edit/model and Edit/contract
   it do
   #:update-call
-  result = Update.(id: 1, title: "Call It A Night")
+  result = Update.("params" => {id: 1, title: "Call It A Night"})
 
   result["model"]            #=> #<Song id=1 , title=\"Call It A Night\">
   result["contract.default"] #=> #<Reform::Form ..>
@@ -62,61 +76,14 @@ class DocsNestedOperationTest < Minitest::Spec
   #-
   # Edit is successful.
   it do
-    result = Update.({ id: 1, title: "Miami" }, "current_user" => Module)
+    result = Update.("params" => { id: 1, title: "Miami" }, "current_user" => Module)
     result.inspect("model").must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title="Miami">] >}
   end
 
   # Edit fails
   it do
-    Update.(id: 2).inspect("model").must_equal %{<Result:false [nil] >}
+    Update.("params" => {id: 2}).inspect("model").must_equal %{<Result:false [nil] >}
   end
-
-  #---
-  #- shared data
-  class B < Trailblazer::Operation
-    success ->(options) { options["can.B.see.it?"] = options["this.should.not.be.visible.in.B"] }
-    success ->(options) { options["can.B.see.current_user?"] = options["current_user"] }
-    success ->(options) { options["can.B.see.params?"] = options["params"] }
-    success ->(options) { options["can.B.see.A.class.data?"] = options["A.class.data"] }
-  end
-
-  class A < Trailblazer::Operation
-    self["A.class.data"] = true
-
-    success ->(options) { options["this.should.not.be.visible.in.B"] = true }
-    step Nested( B )
-  end
-
-  # mutual data from A doesn't bleed into B.
-  it { A.()["can.B.see.it?"].must_equal nil }
-  it { A.()["this.should.not.be.visible.in.B"].must_equal true }
-  # runtime dependencies are visible in B.
-  it { A.({}, "current_user" => Module)["can.B.see.current_user?"].must_equal Module }
-  it { A.({ a: 1 })["can.B.see.params?"].must_equal({ a: 1 }) }
-  # class data from A doesn't bleed into B.
-  it { A.()["can.B.see.A.class.data?"].must_equal nil }
-
-
-  # cr_result = Create.({}, "result" => result)
-  # puts cr_result["model"]
-  # puts cr_result["contract.default"]
-
-  #---
-  #- Nested( .., input: )
-  class C < Trailblazer::Operation
-    self["C.class.data"] = true
-
-    success ->(options) { options["this.should.not.be.visible.in.B"] = true }
-
-    step Nested( B, input: ->(options, runtime_data:, mutable_data:, **) {
-      runtime_data.merge( "this.should.not.be.visible.in.B" => mutable_data["this.should.not.be.visible.in.B"] )
-    } )
-  end
-
-  it { C.()["can.B.see.it?"].must_equal true }
-  it { C.()["this.should.not.be.visible.in.B"].must_equal true } # this IS visible since we use :input!
-  it { C.({}, "current_user" => Module)["can.B.see.current_user?"].must_equal Module }
-  it { C.()["can.B.see.A.class.data?"].must_equal nil }
 end
 
 class NestedInput < Minitest::Spec
@@ -128,19 +95,20 @@ class NestedInput < Minitest::Spec
 
   #:input-pi
   class MultiplyByPi < Trailblazer::Operation
-    step ->(options) { options["pi_constant"] = 3.14159 }
-    step Nested( Multiplier, input: ->(options, mutable_data:, runtime_data:, **) do
-      { "y" => mutable_data["pi_constant"],
-        "x" => runtime_data["x"] }
+    step ->(options, **) { options["pi_constant"] = 3.14159 }
+    step Nested( Multiplier, input: ->(options, **) do
+      { "y" => options["pi_constant"],
+        "x" => options["x"]
+      }
     end )
   end
   #:input-pi end
 
-  it { MultiplyByPi.({}, "x" => 9).inspect("product").must_equal %{<Result:true [28.27431] >} }
+  it { MultiplyByPi.("x" => 9).inspect("product").must_equal %{<Result:true [28.27431] >} }
 
   it do
     #:input-result
-    result = MultiplyByPi.({}, "x" => 9)
+    result = MultiplyByPi.("x" => 9)
     result["product"] #=> [28.27431]
     #:input-result end
   end
@@ -151,12 +119,10 @@ class NestedInputCallable < Minitest::Spec
 
   #:input-callable
   class MyInput
-    extend Uber::Callable
-
-    def self.call(options, mutable_data:, runtime_data:, **)
+    def self.call(options, **)
       {
-        "y" => mutable_data["pi_constant"],
-        "x" => runtime_data["x"]
+        "y" => options["pi_constant"],
+        "x" => options["x"]
       }
     end
   end
@@ -164,12 +130,12 @@ class NestedInputCallable < Minitest::Spec
 
   #:input-callable-op
   class MultiplyByPi < Trailblazer::Operation
-    step ->(options) { options["pi_constant"] = 3.14159 }
+    step ->(options, **) { options["pi_constant"] = 3.14159 }
     step Nested( Multiplier, input: MyInput )
   end
   #:input-callable-op end
 
-  it { MultiplyByPi.({}, "x" => 9).inspect("product").must_equal %{<Result:true [28.27431] >} }
+  it { MultiplyByPi.("x" => 9).inspect("product").must_equal %{<Result:true [28.27431] >} }
 end
 
 #---
@@ -179,10 +145,10 @@ class NestedOutput < Minitest::Spec
 
   #:output
   class Update < Trailblazer::Operation
-    step Nested( Edit, output: ->(options, mutable_data:, **) do
+    step Nested( Edit, output: ->(options, **) do
       {
-        "contract.my" => mutable_data["contract.default"],
-        "model"       => mutable_data["model"]
+        "contract.my" => options["contract.default"],
+        "model"       => options["model"]
       }
     end )
     step Contract::Validate( name: "my" )
@@ -190,54 +156,20 @@ class NestedOutput < Minitest::Spec
   end
   #:output end
 
-  it { Update.( id: 1, title: "Call It A Night" ).inspect("model", "contract.default").must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title=\"Call It A Night\">, nil] >} }
+  it { Update.( "params" => {id: 1, title: "Call It A Night"} ).inspect("model", "contract.default").
+      must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title=\"Call It A Night\">, nil] >} }
 
   it do
-    result = Update.( id: 1, title: "Call It A Night" )
+    result = Update.( "params" => {id: 1, title: "Call It A Night"} )
 
     result["model"]            #=> #<Song id=1 , title=\"Call It A Night\">
   end
-end
-
-class NestedClassLevelTest < Minitest::Spec
-  #:class-level
-  class New < Trailblazer::Operation
-    step ->(options) { options["class"] = true }, before: "operation.new"
-    step ->(options) { options["x"] = true }
-  end
-
-  class Create < Trailblazer::Operation
-    step Nested( New )
-    step ->(options) { options["y"] = true }
-  end
-  #:class-level end
-
-  it { Create.().inspect("x", "y").must_equal %{<Result:true [true, true] >} }
-  it { Create.(); Create["class"].must_equal nil }
 end
 
 #---
 # Nested( ->{} )
 class NestedWithCallableTest < Minitest::Spec
   Song = Struct.new(:id, :title)
-
-  class X < Trailblazer::Operation
-    step ->(options, params:, **) { options["params.original"] = params }
-    step ->(options) { options["x"] = true }
-  end
-
-  class Y < Trailblazer::Operation
-    step ->(options) { options["y"] = true }
-  end
-
-  class A < Trailblazer::Operation
-    step ->(options) { options["z"] = true }
-    step Nested( ->(options, *) { options["class"] } )
-  end
-
-  it { A.({ a: 1 }, "class" => X).inspect("x", "y", "z", "params.original").must_equal "<Result:true [true, nil, true, {:a=>1}] >" }
-  it { A.({}, "class" => Y).inspect("x", "y", "z").must_equal "<Result:true [nil, true, true] >" }
-  # it { Create.({}).inspect("x", "y", "z").must_equal "<Result:true [nil, true, true] >" }
 
   class Song
     module Contract
@@ -277,8 +209,8 @@ class NestedWithCallableTest < Minitest::Spec
   let (:admin) { User.new(true) }
   let (:anonymous) { User.new(false) }
 
-  it { Create.({}, "current_user" => anonymous).inspect("x").must_equal %{<Result:true [true] >} }
-  it { Create.({}, "current_user" => admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
+  it { Create.("params" => {}, "current_user" => anonymous).inspect("x").must_equal %{<Result:true [true] >} }
+  it { Create.("params" => {}, "current_user" => admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
 
   #---
   #:method
@@ -286,13 +218,13 @@ class NestedWithCallableTest < Minitest::Spec
     step Nested( :build! )
 
     def build!(options, current_user:nil, **)
-      current_user.admin? ? Create::Admin : Create::NeedsModeration
+        current_user.admin? ? Create::Admin : Create::NeedsModeration
     end
   end
   #:method end
 
-  it { Update.({}, "current_user" => anonymous).inspect("x").must_equal %{<Result:true [true] >} }
-  it { Update.({}, "current_user" => admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
+  it { Update.("params" => {}, "current_user" => anonymous).inspect("x").must_equal %{<Result:true [true] >} }
+  it { Update.("params" => {}, "current_user" => admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
 
   #---
   #:callable-builder
@@ -312,8 +244,8 @@ class NestedWithCallableTest < Minitest::Spec
   end
   #:callable end
 
-  it { Delete.({}, "current_user" => anonymous).inspect("x").must_equal %{<Result:true [true] >} }
-  it { Delete.({}, "current_user" => admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
+  it { Delete.("params" => {}, "current_user" => anonymous).inspect("x").must_equal %{<Result:true [true] >} }
+  it { Delete.("params" => {}, "current_user" => admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
 end
 
 # builder: Nested + deviate to left if nil / skip_track if true
@@ -330,5 +262,5 @@ class NestedNameTest < Minitest::Spec
     # ...
   end
 
-  it { Create["pipetree"].inspect.must_equal %{[>operation.new,>Nested(NestedNameTest::Create::Present)]} }
+  it { Operation::Inspect.(Create).must_equal %{[>>Nested(NestedNameTest::Create::Present)]} }
 end

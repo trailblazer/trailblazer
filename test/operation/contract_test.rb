@@ -1,62 +1,14 @@
 require "test_helper"
 
-class ContractExtractMacroTest < Minitest::Spec
-  class Create < Trailblazer::Operation
-    step Contract::Validate::Extract( key: "song", params_path: "x" )
-  end
+# class ContractExtractMacroTest < Minitest::Spec
+#   class Create < Trailblazer::Operation
+#     step Contract::Validate::Extract( key: "song", params_path: "x" )
+#   end
 
-  it { Create["pipetree"].inspect.must_equal %{[>operation.new,>x]} }
-  it { Create.({}).inspect("x").must_equal %{<Result:false [nil] >} }
-  it { Create.({ "song" => Object }).inspect("x").must_equal %{<Result:true [Object] >} }
-end
-
-
-
-      require "dry/validation"
-
-class DryValidationTest < Minitest::Spec
-  class Create < Trailblazer::Operation
-    extend Contract::DSL
-
-    contract "params", (Dry::Validation.Schema do
-      required(:id).filled
-    end)
-    # self["contract.params"] = Dry::Validation.Schema do
-    #   required(:id).filled
-    # end
-
-    step :process
-
-    include Procedural::Validate
-
-    def process(options)
-      validate(options["params"], contract: self["contract.params"], path: "contract.params") { |f| puts f.inspect }
-    end
-  end
-
-  #- result object, contract
-  # success
-  it { Create.(id: 1)["result.contract.params"].success?.must_equal true }
-  it { Create.(id: 1)["result.contract.params"].errors.must_equal({}) }
-  # failure
-  it { Create.(id: nil)["result.contract.params"].success?.must_equal false }
-  it { Create.(id: nil)["result.contract.params"].errors.must_equal({:id=>["must be filled"]}) }
-
-  #---
-  # with Contract::Validate, but before op even gets instantiated.
-  class Update < Trailblazer::Operation #["contract"]
-    extend Contract::DSL
-
-    contract "params", (Dry::Validation.Schema do
-      required(:id).filled
-    end)
-
-    step ->(options) { options["contract.params"].(options["params"]).success? }, before: "operation.new"
-  end
-
-  it { Update.( id: 1 ).success?.must_equal true }
-  it { Update.( ).success?.must_equal false }
-end
+#   it { Trailblazer::Operation::Inspect.(Create).must_equal %{[>x]} }
+#   it { Create.({}).inspect("x").must_equal %{<Result:false [nil] >} }
+#   it { Create.({ "song" => Object }).inspect("x").must_equal %{<Result:true [Object] >} }
+# end
 
 class ContractTest < Minitest::Spec
   Song = Struct.new(:title)
@@ -70,35 +22,6 @@ class ContractTest < Minitest::Spec
 #       @inspect
 #     end
 #   end
-
-  #---
-  # contract do..end (without constant)
-  #- explicit validate call
-  describe "contract do .. end" do
-    class Index < Trailblazer::Operation
-      extend Contract::DSL
-
-      contract do
-        property :title
-      end
-
-      success ->(options) { options["model"] = Song.new }
-      # step Model( Song, :new )
-      step Contract::Build()
-      step :process
-
-      include Procedural::Validate
-      # TODO: get model automatically in validate!
-
-      def process(options)
-        # validate(params, model: Song.new) { |f| self["x"] = f.to_nested_hash }
-        validate(options["params"]) { |f| self["x"] = f.to_nested_hash }
-      end
-    end
-
-    # will create a Reform::Form for us.
-    it { Index.(title: "Falling Down")["x"].must_equal({"title"=>"Falling Down"}) }
-  end
 
 #   # TODO: in all step tests.
 #   describe "dependency injection" do
@@ -208,69 +131,17 @@ class ContractTest < Minitest::Spec
 #---
 #- validate
 class ValidateTest < Minitest::Spec
-  class Create < Trailblazer::Operation
-    extend Contract::DSL
-    contract do
-      property :title
-      validates :title, presence: true
-    end
-
-
-    include Procedural::Validate
-    def process(options)
-      if validate(options["params"])
-        self["x"] = "works!"
-        true
-      else
-        self["x"] = "try again"
-        false
-      end
-    end
-
-    step Model( Song, :new ) # FIXME.
-    step Contract::Build()
-    step :process
-  end
-
-  # validate returns the #validate result
-  it do
-    Create.(title: nil)["x"].must_equal "try again"
-    Create.(title: nil).success?.must_equal false
-  end
-  it { Create.(title: "SVG")["x"].must_equal "works!" }
-  it { Create.(title: "SVG").success?.must_equal true }
-
-  # result object from validation.
-  #- result object, contract
-  it { Create.(title: 1)["result.contract.default"].success?.must_equal true }
-  it { Create.(title: 1)["result.contract.default"].errors.messages.must_equal({}) } # FIXME: change API with Fran.
-  it { Create.(title: nil)["result.contract.default"].success?.must_equal false }
-  it { Create.(title: nil)["result.contract.default"].errors.messages.must_equal({:title=>["can't be blank"]}) } # FIXME: change API with Fran.
-#   #---
-#   # validate with block returns result.
-#   class Update < Trailblazer::Operation
-#     include Contract::Explicit
-#     contract Form
-
-#     def process(params)
-#       self["x"] = validate(params) { }
-#     end
-#   end
-
-#   it { Update.(false)["x"].must_equal false}
-#   it { Update.(true)["x"]. must_equal true}
 
   #---
   # Contract::Validate[]
   class Update < Trailblazer::Operation
-    extend Contract::DSL
-    contract do
+    class Form < Reform::Form
       property :title
       validates :title, presence: true
     end
 
-    step Model( Song, :new ) # FIXME.
-    step Contract::Build()
+    step Model( Song, :new )
+    step Contract::Build( constant: Form )
     step Contract::Validate() # generic validate call for you.
 
     # include Procedural::Validate
@@ -279,7 +150,7 @@ class ValidateTest < Minitest::Spec
 
   # success
   it do
-    result = Update.(title: "SVG")
+    result = Update.("params" => {title: "SVG"})
     result.success?.must_equal true
     result["result.contract.default"].success?.must_equal true
     result["result.contract.default"].errors.messages.must_equal({})
@@ -287,7 +158,7 @@ class ValidateTest < Minitest::Spec
 
   # failure
   it do
-    result = Update.(title: nil)
+    result = Update.("params" => {title: nil})
     result.success?.must_equal false
     result["result.contract.default"].success?.must_equal false
     result["result.contract.default"].errors.messages.must_equal({:title=>["can't be blank"]})
@@ -296,45 +167,44 @@ class ValidateTest < Minitest::Spec
   #---
   # Contract::Validate[key: :song]
   class Upsert < Trailblazer::Operation
-    extend Contract::DSL
-    contract do
+    class Form < Reform::Form
       property :title
       validates :title, presence: true
     end
 
     step Model( Song, :new ) # FIXME.
-    step Contract::Build()
+    step Contract::Build( constant: Form )
     step Contract::Validate( key: :song) # generic validate call for you.
     # ->(*) { validate(options["params"][:song]) } # <-- TODO
     step Contract::Persist( method: :sync )
   end
 
   # success
-  it { Upsert.(song: { title: "SVG" }).success?.must_equal true }
+  it { Upsert.("params" => {song: { title: "SVG" }}).success?.must_equal true }
   # failure
-  it { Upsert.(song: { title: nil }).success?.must_equal false }
+  it { Upsert.("params" => {song: { title: nil }}).success?.must_equal false }
   # key not found
-  it { Upsert.().success?.must_equal false }
+  it { Upsert.("params" => {}).success?.must_equal false }
 
   #---
   # contract.default.params gets set (TODO: change in 2.1)
-  it { Upsert.(song: { title: "SVG" })["params"].must_equal({:song=>{:title=>"SVG"}}) }
-  it { Upsert.(song: { title: "SVG" })["contract.default.params"].must_equal({:title=>"SVG"}) }
+  it { Upsert.("params" => {song: { title: "SVG" }})["params"].must_equal({:song=>{:title=>"SVG"}}) }
+  it { Upsert.("params" => {song: { title: "SVG" }})["contract.default.params"].must_equal({:title=>"SVG"}) }
 
   #---
   #- inheritance
   class New < Upsert
   end
 
-  it { New["pipetree"].inspect.must_equal %{[>operation.new,>model.build,>contract.build,>contract.default.validate,>persist.save]} }
+  it { Trailblazer::Operation::Inspect.(New).must_equal %{[>model.build,>contract.build,>contract.default.validate,>persist.save]} }
 
   #- overwriting Validate
   class NewHit < Upsert
     step Contract::Validate( key: :hit ), override: true
   end
 
-  it { NewHit["pipetree"].inspect.must_equal %{[>operation.new,>model.build,>contract.build,>contract.default.validate,>persist.save]} }
-  it { NewHit.(:hit => { title: "Hooray For Me" }).inspect("model").must_equal %{<Result:true [#<struct ContractTest::Song title=\"Hooray For Me\">] >} }
+  it { Trailblazer::Operation::Inspect.(NewHit).must_equal %{[>model.build,>contract.build,>contract.default.validate,>persist.save]} }
+  it { NewHit.("params" => {:hit => { title: "Hooray For Me" }}).inspect("model").must_equal %{<Result:true [#<struct ContractTest::Song title=\"Hooray For Me\">] >} }
 end
 
 # #---

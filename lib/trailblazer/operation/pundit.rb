@@ -1,7 +1,7 @@
 class Trailblazer::Operation
   module Policy
     def self.Pundit(policy_class, action, name: :default)
-      Policy.step(Pundit.build(policy_class, action), name: name)
+      Policy.step( Pundit.build(policy_class, action), name: name )
     end
 
     module Pundit
@@ -16,7 +16,7 @@ class Trailblazer::Operation
         end
 
         # Instantiate the actual policy object, and call it.
-        def call(input, options)
+        def call((options), *)
           policy = build_policy(options)          # this translates to Pundit interface.
           result!(policy.send(@action), policy)
         end

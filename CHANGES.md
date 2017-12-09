@@ -1,3 +1,34 @@
+# 2.1
+
+* Macros now always have to provide an `:id`. This was a bit fuzzy in 2.0.
+
+* Nested
+  if Nested( Edit ), outputs will automatically be connected, see editor.
+* Wrap
+  dropped the `pipe` option. This is now `options, flow_options, *`
+  `false` is now automatically connected to End.failure.
+
+* `operation.new` step removed.
+* Undocumented step behavior removed. You can't write to `self` anymore.
+
+        ```ruby
+        step :process
+        def process(*)
+          self["x"] = true
+        end
+        ```
+
+    Always write to `options`.
+
+* self[] removed
+* Fixed `Guard` where procs could receive one argument, only. Guards follow the step interface: `Policy::Guard( ->(options, **) { .. } )
+* Removed `Operation::Callback` which was a poor idea and luckily no one was using it.
+
+TODO:
+document Task API and define step API
+deprecate step->(options) ?
+injectable, per-operation step arguments strategy?
+
 # 2.0.7
 
 * Allow to use any method with the Model macro, e.g.
@@ -7,7 +38,6 @@
     ```
 
   will now invoke `Comment[ params[:id] ]`, which makes using Sequel a breeze.
-
 
 # 2.0.6
 
