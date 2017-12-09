@@ -45,7 +45,11 @@ class Trailblazer::Operation
 
       # Task: Validates contract `:name`.
       def call( (options, flow_options), **circuit_options )
-        validate!( options, representer: options["representer.#{@name}.class"], params_path: @params_path )
+        validate!(
+          options,
+          representer: options["representer.#{@name}.class"] ||= @representer, # FIXME: maybe @representer should use DI.
+          params_path: @params_path
+        )
       end
 
       def validate!(options, representer:false, from: "document", params_path:nil)

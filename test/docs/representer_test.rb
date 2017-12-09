@@ -20,7 +20,7 @@ class DocsRepresenterInferTest < Minitest::Spec
   #:infer end
 
   let (:json) { MultiJson.dump(id: 1) }
-  it { Create.({}, "document" => json).inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterInferTest::Song id=1, title=nil>] >} }
+  it { Create.( params: {}, "document" => json ).inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterInferTest::Song id=1, title=nil>] >} }
 end
 
 #---
@@ -59,7 +59,7 @@ class DocsRepresenterExplicitTest < Minitest::Spec
   #- render
   it do
   #:render
-  result = Create.({}, "document" => '{"id": 1}')
+  result = Create.( params: {}, "document" => '{"id": 1}' )
   json   = result["representer.default.class"].new(result["model"]).to_json
   json #=> '{"id":1}'
   #:render end
