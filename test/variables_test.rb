@@ -71,6 +71,15 @@ class VariablesTest < Minitest::Spec
 
   #---
   #- new ctx
+=begin
+:input produces a differing value for an existing key "secret"
+this should only be visible in the nested activity, and the original
+"secret" must be what it was before (unless :output would change that.)
+
+NOTE: i decided it's better to not even allow Context#merge because it
+defeats the idea of hiding information via :input and overcomplicates
+the scoping.
+=end
   class EncryptedOrganization < ConsideringButOpenOrganization
     def input!(options, **)
       options.merge( "secret" => options["secret"]+"XxX" )
@@ -78,6 +87,7 @@ class VariablesTest < Minitest::Spec
   end
 
   it do
+    skip "no options.merge until we know we actually need it"
     result = EncryptedOrganization.({}, "public_opinion" => "Freedom!")
 
     result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours").
