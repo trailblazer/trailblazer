@@ -6,6 +6,7 @@ class VariablesTest < Minitest::Spec
     step ->(options, public_opinion:, **) { options["edward.public_opinion"] = public_opinion.upcase }
     step ->(options, secret:, **)         { options["edward.secret"]         = secret }
     step ->(options, rumours:, **)        { rumours.nil? ? rumours : options["edward.rumours"] = rumours*2 }
+    pass ->(options, **)                  { options["edward.public_knowledge"] = options["public_knowledge"] }
   end
 
   #---
@@ -50,8 +51,11 @@ class VariablesTest < Minitest::Spec
       must_equal %{<Result:true ["Freedom!", "Bla", "Psst!", "FREEDOM!", "Psst!", "BlaBla"] >}
   end
 
-  #---
-  #- explicitely pass allowed variables, only.
+=begin
+  Explicitely passes allowed variables, only.
+
+  Edward can only read those three variables and can't see "public_knowledge" or others.
+=end
   class ProtectedOrganization < ConsideringButOpenOrganization
     def input!(options, **)
       {
@@ -63,10 +67,10 @@ class VariablesTest < Minitest::Spec
   end
 
   it do
-    result = ProtectedOrganization.({}, "public_opinion" => "Freedom!")
+    result = ProtectedOrganization.( {}, "public_opinion" => "Freedom!", "public_knowledge" => true )
 
-    result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours").
-      must_equal %{<Result:true ["Freedom!", "Bla", "Psst!", "FREEDOM!", 0, 0.0] >}
+    result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours", "edward.public_knowledge").
+      must_equal %{<Result:true ["Freedom!", "Bla", "Psst!", "FREEDOM!", 0, 0.0, nil] >}
   end
 
   #---
@@ -124,7 +128,7 @@ the scoping.
     result = DiscreetOrganization.({}, "public_opinion" => "Freedom!")
 
     result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours", "out.keys", "out.rumours", "out.secret").
-      must_equal %{<Result:false [\"Freedom!\", \"Bla\", \"Psst!\", nil, nil, nil, [\"edward.public_opinion\", \"edward.secret\", \"edward.rumours\"], \"Bla\", \"!tssP\"] >}
+      must_equal %{<Result:false [\"Freedom!\", \"Bla\", \"Psst!\", nil, nil, nil, [\"edward.public_opinion\", \"edward.secret\", \"edward.rumours\", \"edward.public_knowledge\"], \"Bla\", \"!tssP\"] >}
   end
 
   it "with tracing" do
