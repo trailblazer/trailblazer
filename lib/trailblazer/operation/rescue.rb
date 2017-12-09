@@ -16,7 +16,7 @@ class Trailblazer::Operation
       end
     }
 
-    Wrap(rescue_block, &block)
+    Wrap(rescue_block, id: "Rescue(#{rand(100)})", &block)
     # FIXME: name
     # [ step, name: "Rescue:#{block.source_location.last}" ]
   end

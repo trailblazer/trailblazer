@@ -2,13 +2,13 @@ class Trailblazer::Operation
 
   # false is automatically connected to End.failure.
 
-  def self.Wrap(user_wrap, &block)
+  def self.Wrap(user_wrap, id: "Wrap/#{rand(100)}", &block)
     operation_class = Wrap.Operation(block)
     wrapped         = Wrap::Wrapped.new(operation_class, user_wrap)
 
     # connect `false` as an end event, when an exception stopped the wrap, for example.
 
-    { task: wrapped, id: "Wrapped/__fixme__", plus_poles: Trailblazer::Activity::Magnetic::DSL::PlusPoles.from_outputs(operation_class.outputs) }
+    { task: wrapped, id: id, plus_poles: Trailblazer::Activity::Magnetic::DSL::PlusPoles.from_outputs(operation_class.outputs) }
     # TODO: Nested could have a better API and do the "merge" for us!
   end
 

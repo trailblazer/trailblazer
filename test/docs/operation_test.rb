@@ -289,7 +289,7 @@ class DocsOperationInheritanceTest < Minitest::Spec
 =end
 
   it do
-    Song::New["pipetree"].inspect.must_equal %{[>operation.new,>model.build,>contract.build]}
+    Trailblazer::Operation::Inspect.(Song::New).must_equal %{[>model.build,>contract.build]}
     Song::New.("params" => {}).inspect("model").must_equal %{<Result:true [#<struct DocsOperationInheritanceTest::Song id=nil, title=nil, created_by=nil>] >}
   end
 end
