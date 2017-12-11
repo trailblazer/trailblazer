@@ -59,6 +59,19 @@ class DocsContractOverviewTest < Minitest::Spec
     result["result.contract.default"].success?.must_equal false
     result["result.contract.default"].errors.messages.must_equal ({:title=>["can't be blank"], :length=>["is not a number"]})
   end
+
+  it "shows 2-level tracing" do
+    result = Create.trace("params" => { length: "A" })
+    result.wtf.gsub(/0x\w+/, "").must_equal %{|-- #<Trailblazer::Activity::Start:>
+|-- model.build
+|-- contract.build
+|-- contract.default.validate
+|   |-- #<Trailblazer::Activity::Start:>
+|   |-- contract.default.params_extract
+|   |-- contract.default.call
+|   `-- #<Trailblazer::Activity::End:>
+`-- #<Trailblazer::Operation::Railway::End::Failure:>}
+  end
 end
 
 class DocsContractNameTest < Minitest::Spec

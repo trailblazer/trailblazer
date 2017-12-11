@@ -141,7 +141,7 @@ the scoping.
   it "with tracing" do
     result = DiscreetOrganization.trace("public_opinion" => "Freedom!")
 
-    result.wtf?.gsub(/0x\w+/, "").gsub(/\d+/, "").must_equal %{|-- #<Trailblazer::Activity::Start:>
+    result.wtf.gsub(/0x\w+/, "").gsub(/\d+/, "").must_equal %{|-- #<Trailblazer::Activity::Start:>
 |-- set.rumours
 |-- set.secret
 |-- Nested(VariablesTest::Whistleblower)

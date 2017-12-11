@@ -18,7 +18,7 @@ class Trailblazer::Operation
 
       # Build a simple Railway {Activity} for the internal flow.
       activity = Trailblazer::Activity::Railway.build do # FIXME: make Activity.build(builder: Railway) do end an <Activity>
-        step Trailblazer::Activity::Task::Binary( extract ),  id: params_path
+        step Trailblazer::Activity::Task::Binary( extract ),  id: "#{params_path}_extract"
         step Trailblazer::Activity::Task::Binary( validate ), id: "contract.#{name}.call"
       end
 
