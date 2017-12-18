@@ -40,13 +40,13 @@ class DocsNestedOperationTest < Minitest::Spec
   # Edit allows grabbing model and contract
   it do
   #:edit-call
-  result = Edit.("params" => {id: 1})
+  result = Edit.(params: {id: 1})
 
-  result["model"]            #=> #<Song id=1, title=\"Bristol\">
+  result[:model]            #=> #<Song id=1, title=\"Bristol\">
   result["contract.default"] #=> #<Reform::Form ..>
   #:edit-call end
-    result.inspect("model").must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title=\"Bristol\">] >}
-    result["contract.default"].model.must_equal result["model"]
+    result.inspect(:model).must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title=\"Bristol\">] >}
+    result["contract.default"].model.must_equal result[:model]
   end
 
   it "provides all steps for Introspect" do
@@ -56,33 +56,33 @@ class DocsNestedOperationTest < Minitest::Spec
 
 #- test Edit circuit-level.
 it do
-  signal, (result, _) = Edit.__call__( [Trailblazer::Context( "params" => {id: 1} ), {}] )
-  result["model"].inspect.must_equal %{#<struct DocsNestedOperationTest::Song id=1, title=\"Bristol\">}
+  signal, (result, _) = Edit.__call__( [Trailblazer::Context( params: {id: 1} ), {}] )
+  result[:model].inspect.must_equal %{#<struct DocsNestedOperationTest::Song id=1, title=\"Bristol\">}
 end
 
   #-
   # Update also allows grabbing Edit/model and Edit/contract
   it do
   #:update-call
-  result = Update.("params" => {id: 1, title: "Call It A Night"})
+  result = Update.(params: {id: 1, title: "Call It A Night"})
 
-  result["model"]            #=> #<Song id=1 , title=\"Call It A Night\">
+  result[:model]            #=> #<Song id=1 , title=\"Call It A Night\">
   result["contract.default"] #=> #<Reform::Form ..>
   #:update-call end
-    result.inspect("model").must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title=\"Call It A Night\">] >}
-    result["contract.default"].model.must_equal result["model"]
+    result.inspect(:model).must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title=\"Call It A Night\">] >}
+    result["contract.default"].model.must_equal result[:model]
   end
 
   #-
   # Edit is successful.
   it do
-    result = Update.("params" => { id: 1, title: "Miami" }, "current_user" => Module)
-    result.inspect("model").must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title="Miami">] >}
+    result = Update.(params: { id: 1, title: "Miami" }, current_user: Module)
+    result.inspect(:model).must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title="Miami">] >}
   end
 
   # Edit fails
   it do
-    Update.("params" => {id: 2}).inspect("model").must_equal %{<Result:false [nil] >}
+    Update.(params: {id: 2}).inspect(:model).must_equal %{<Result:false [nil] >}
   end
 end
 
@@ -148,7 +148,7 @@ class NestedOutput < Minitest::Spec
     step Nested( Edit, output: ->(options, **) do
       {
         "contract.my" => options["contract.default"],
-        "model"       => options["model"]
+        model:           options[:model]
       }
     end )
     step Contract::Validate( name: "my" )
@@ -156,13 +156,13 @@ class NestedOutput < Minitest::Spec
   end
   #:output end
 
-  it { Update.( "params" => {id: 1, title: "Call It A Night"} ).inspect("model", "contract.default").
+  it { Update.( params: {id: 1, title: "Call It A Night"} ).inspect(:model, "contract.default").
       must_equal %{<Result:true [#<struct DocsNestedOperationTest::Song id=1, title=\"Call It A Night\">, nil] >} }
 
   it do
-    result = Update.( "params" => {id: 1, title: "Call It A Night"} )
+    result = Update.( params: {id: 1, title: "Call It A Night"} )
 
-    result["model"]            #=> #<Song id=1 , title=\"Call It A Night\">
+    result[:model]            #=> #<Song id=1 , title=\"Call It A Night\">
   end
 end
 
@@ -209,8 +209,8 @@ class NestedWithCallableTest < Minitest::Spec
   let (:admin) { User.new(true) }
   let (:anonymous) { User.new(false) }
 
-  it { Create.("params" => {}, "current_user" => anonymous).inspect("x").must_equal %{<Result:true [true] >} }
-  it { Create.("params" => {}, "current_user" => admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
+  it { Create.(params: {}, current_user: anonymous).inspect("x").must_equal %{<Result:true [true] >} }
+  it { Create.(params: {}, current_user: admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
 
   #---
   #:method
@@ -223,8 +223,8 @@ class NestedWithCallableTest < Minitest::Spec
   end
   #:method end
 
-  it { Update.("params" => {}, "current_user" => anonymous).inspect("x").must_equal %{<Result:true [true] >} }
-  it { Update.("params" => {}, "current_user" => admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
+  it { Update.(params: {}, current_user: anonymous).inspect("x").must_equal %{<Result:true [true] >} }
+  it { Update.(params: {}, current_user: admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
 
   #---
   #:callable-builder
@@ -244,8 +244,8 @@ class NestedWithCallableTest < Minitest::Spec
   end
   #:callable end
 
-  it { Delete.("params" => {}, "current_user" => anonymous).inspect("x").must_equal %{<Result:true [true] >} }
-  it { Delete.("params" => {}, "current_user" => admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
+  it { Delete.(params: {}, current_user: anonymous).inspect("x").must_equal %{<Result:true [true] >} }
+  it { Delete.(params: {}, current_user: admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
 end
 
 # builder: Nested + deviate to left if nil / skip_track if true

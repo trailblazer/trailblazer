@@ -28,7 +28,7 @@ class DocsTraceTest < Minitest::Spec
 
   it do
     #:trace
-    result = Create::Present.trace( "params" => params, current_user: current_user )
+    result = Create::Present.trace( params: params, current_user: current_user )
     puts result.wtf?
 
     # =>
@@ -46,7 +46,7 @@ class DocsTraceTest < Minitest::Spec
 
   it do
     #:trace-cpx
-    result = Create.trace( "params" => params, current_user: current_user )
+    result = Create.trace( params: params, current_user: current_user )
     puts result.wtf?
 
     # =>

@@ -35,7 +35,7 @@ class Trailblazer::Operation
         end
 
         def call( (options, flow_options), **circuit_options )
-          options[@params_path] = @key ? options["params"][@key] : options["params"]
+          options[@params_path] = @key ? options[:params][@key] : options[:params]
         end
       end
 
@@ -52,14 +52,14 @@ class Trailblazer::Operation
         )
       end
 
-      def validate!(options, representer:false, from: "document", params_path:nil)
+      def validate!(options, representer:false, from: :document, params_path:nil)
         path     = "contract.#{@name}"
         contract = options[path]
 
         # this is for 1.1-style compatibility and should be removed once we have Deserializer in place:
         options["result.#{path}"] = result =
           if representer
-            # use "document" as the body and let the representer deserialize to the contract.
+            # use :document as the body and let the representer deserialize to the contract.
             # this will be simplified once we have Deserializer.
             # translates to contract.("{document: bla}") { MyRepresenter.new(contract).from_json .. }
             contract.(options[from]) { |document| representer.new(contract).parse(document) }

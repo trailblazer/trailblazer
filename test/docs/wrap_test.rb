@@ -30,10 +30,10 @@ class WrapTest < Minitest::Spec
       step Contract::Persist( method: :sync )
     end
 
-    it { Create.( "params" => {id: 1, title: "Prodigal Son"} ).inspect("x", "model").must_equal %{<Result:true [true, #<struct WrapTest::Song id=1, title=\"Prodigal Son\">] >} }
+    it { Create.( params: {id: 1, title: "Prodigal Son"} ).inspect("x", :model).must_equal %{<Result:true [true, #<struct WrapTest::Song id=1, title=\"Prodigal Son\">] >} }
 
     it "goes directly from Wrap to End.fail_fast" do
-      Create.("params" => {}).inspect("x", "model", "result.model.find").must_equal %{<Result:false [true, nil, "argh! because RuntimeError"] >}
+      Create.(params: {}).inspect("x", :model, "result.model.find").must_equal %{<Result:false [true, nil, "argh! because RuntimeError"] >}
     end
   end
 
@@ -56,8 +56,8 @@ class WrapTest < Minitest::Spec
     step Contract::Persist( method: :sync )
   end
 
-  it { Create.( "params" => {id: 1, title: "Prodigal Son"} )["contract.default"].model.inspect.must_equal %{#<struct WrapTest::Song id=1, title="Prodigal Son">} }
-  it { Create.( "params" => {id: nil }).inspect("result.model.find").must_equal %{<Result:false [\"argh! because RuntimeError\"] >} }
+  it { Create.( params: {id: 1, title: "Prodigal Son"} )["contract.default"].model.inspect.must_equal %{#<struct WrapTest::Song id=1, title="Prodigal Son">} }
+  it { Create.( params: {id: nil }).inspect("result.model.find").must_equal %{<Result:false [\"argh! because RuntimeError\"] >} }
 
   #-
   # Wrap return
@@ -73,7 +73,7 @@ class WrapTest < Minitest::Spec
       end
     end
 
-    it { Create.("params" => {}).inspect("x").must_equal %{<Result:false [nil] >} }
+    it { Create.(params: {}).inspect("x").must_equal %{<Result:false [nil] >} }
     # returns falsey means deviate to left.
     it { Create.("yield?" => true).inspect("x").must_equal %{<Result:true [true] >} }
   end
@@ -94,7 +94,7 @@ class WrapTest < Minitest::Spec
       }
     end
 
-    it { Create.("params" => {}).inspect("x").must_equal %{<Result:false [nil] >} }
+    it { Create.(params: {}).inspect("x").must_equal %{<Result:false [nil] >} }
     # returns falsey means deviate to left.
     it { Create.("yield?" => true).inspect("x").must_equal %{<Result:true [true] >} }
   end
@@ -141,7 +141,7 @@ class WrapTest < Minitest::Spec
   end
   #:sequel-transaction end
 
-    it { Create.( "params" => {title: "Pie"} ).inspect("model", "x", "err").must_equal %{<Result:true [#<struct WrapTest::Song id=nil, title=\"Pie\">, nil, nil] >} }
+    it { Create.( params: {title: "Pie"} ).inspect(:model, "x", "err").must_equal %{<Result:true [#<struct WrapTest::Song id=nil, title=\"Pie\">, nil, nil] >} }
   end
 
   class WrapExampleCallableTest < Minitest::Spec
@@ -194,7 +194,7 @@ class WrapTest < Minitest::Spec
   end
   #:sequel-transaction-callable end
 
-    it { Create.( "params" => {title: "Pie"} ).inspect("model", "x", "err").must_equal %{<Result:true [#<struct WrapTest::Song id=nil, title=\"Pie\">, nil, nil] >} }
+    it { Create.( params: {title: "Pie"} ).inspect(:model, "x", "err").must_equal %{<Result:true [#<struct WrapTest::Song id=nil, title=\"Pie\">, nil, nil] >} }
   end
 
   class WrapWithMethodTest < Minitest::Spec
@@ -210,7 +210,7 @@ class WrapTest < Minitest::Spec
       end
     end
 
-    it { Create.("params" => {}) }
+    it { Create.(params: {}) }
   end
 end
 

@@ -18,7 +18,7 @@ class Trailblazer::Operation
     def call(options, params:,  **)
       builder = Model::Builder.new
 
-      options["model"] = model = builder.(options, params)
+      options[:model] = model = builder.(options, params)
 
       options["result.model"] = result = Result.new(!model.nil?, {})
 

@@ -24,10 +24,10 @@ class DocsFailFastOptionTest < Minitest::Spec
   end
   #:ffopt end
 
-  it { Update.("params" => {id: 1}).inspect("result.model.song", "contract.default").must_equal %{<Result:false [\"Something went wrong with ID 1!\", nil] >} }
+  it { Update.(params: {id: 1}).inspect("result.model.song", "contract.default").must_equal %{<Result:false [\"Something went wrong with ID 1!\", nil] >} }
   it do
   #:ffopt-res
-    result = Update.("params" => {id: 1})
+    result = Update.(params: {id: 1})
     result["result.model.song"] #=> "Something went wrong with ID 1!"
   #:ffopt-res end
   end
@@ -50,11 +50,11 @@ class DocsFailFastOptionWithStepTest < Minitest::Spec
   end
   #:ffopt-step end
 
-  it { Update.("params" => { id: nil }).inspect("model").must_equal %{<Result:false [nil] >} }
-  it { Update.("params" => { id: 1 }).inspect("model").must_equal %{<Result:true [Object] >} }
+  it { Update.(params: { id: nil }).inspect(:model).must_equal %{<Result:false [nil] >} }
+  it { Update.(params: { id: 1 }).inspect(:model).must_equal %{<Result:true [Object] >} }
   it do
   #:ffopt-step-res
-    result = Update.("params" => { id: nil })
+    result = Update.(params: { id: nil })
 
     result.failure? #=> true
     result["model"] #=> nil
@@ -85,10 +85,10 @@ class DocsPassFastWithStepOptionTest < Minitest::Spec
   end
   #:pfopt-step end
 
-  it { Update.("params" => {id: 1}).inspect("result.model.song", "contract.default").must_equal %{<Result:false [\"Something went wrong with ID 1!\", nil] >} }
+  it { Update.(params: {id: 1}).inspect("result.model.song", "contract.default").must_equal %{<Result:false [\"Something went wrong with ID 1!\", nil] >} }
   it do
   #:pfopt-step-res
-    result = Update.("params" => {id: 1})
+    result = Update.(params: {id: 1})
     result["result.model.song"] #=> "Something went wrong with ID 1!"
   #:pfopt-step-res end
   end
@@ -118,10 +118,10 @@ class DocsFailFastMethodTest < Minitest::Spec
   end
   #:ffmeth end
 
-  it { Update.("params" => {}).inspect("result.params", "my.status").must_equal %{<Result:false [\"No ID in params!\", nil] >} }
+  it { Update.(params: {}).inspect("result.params", "my.status").must_equal %{<Result:false [\"No ID in params!\", nil] >} }
   it do
   #:ffmeth-res
-    result = Update.("params" => {id: 1})
+    result = Update.(params: {id: 1})
     result["result.params"] #=> "No ID in params!"
     result["my.status"]     #=> nil
   #:ffmeth-res end
@@ -151,10 +151,10 @@ class DocsPassFastMethodTest < Minitest::Spec
   end
   #:pfmeth end
 
-  it { Create.("params" => { title: "Tyrant"}, "is_empty" => true).inspect("model").must_equal %{<Result:true [#<struct DocsPassFastMethodTest::Song id=nil, title=nil>] >} }
+  it { Create.(params: { title: "Tyrant"}, "is_empty" => true).inspect(:model).must_equal %{<Result:true [#<struct DocsPassFastMethodTest::Song id=nil, title=nil>] >} }
   it do
   #:pfmeth-res
-    result = Create.("params" => {}, "is_empty" => true)
+    result = Create.(params: {}, "is_empty" => true)
     result["model"] #=> #<Song id=nil, title=nil>
   #:pfmeth-res end
   end

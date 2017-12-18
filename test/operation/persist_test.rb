@@ -26,13 +26,13 @@ class PersistTest < Minitest::Spec
     fail Fail2
   end
 
-  it { Create.("params" => {title: "In Recital"})["model"].title.must_equal "In Recital" }
-  it { Create.("params" => {title: "In Recital"})["model"].saved.must_equal true }
+  it { Create.(params: {title: "In Recital"})[:model].title.must_equal "In Recital" }
+  it { Create.(params: {title: "In Recital"})[:model].saved.must_equal true }
   # failure
   it do
-    result = Create.("params" => {title: "Fail!"})
-    result["model"].saved.must_be_nil
-    result["model"].title.must_equal "Fail!"
+    result = Create.(params: {title: "Fail!"})
+    result[:model].saved.must_be_nil
+    result[:model].title.must_equal "Fail!"
     result["2. fail"].must_equal "Persist"
     result.success?.must_equal false
   end

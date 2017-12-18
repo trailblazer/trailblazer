@@ -66,8 +66,8 @@ class RescueTest < Minitest::Spec
   end
   #:simple end
 
-  it { Create.( "params" => {id: 1, title: "Prodigal Son"} )["contract.default"].model.inspect.must_equal %{#<struct RescueTest::Song id=1, title="Prodigal Son">} }
-  it { Create.( "params" => {id: nil} ).inspect("model").must_equal %{<Result:false [nil] >} }
+  it { Create.( params: {id: 1, title: "Prodigal Son"} )["contract.default"].model.inspect.must_equal %{#<struct RescueTest::Song id=1, title="Prodigal Son">} }
+  it { Create.( params: {id: nil} ).inspect(:model).must_equal %{<Result:false [nil] >} }
 
   #-
   # Rescue ExceptionClass, handler: ->(*) { }
@@ -91,10 +91,10 @@ class RescueTest < Minitest::Spec
   end
   #:name end
 
-    it { Create.( "params" => {id: 1, title: "Prodigal Son"} )["contract.default"].model.inspect.must_equal %{#<struct RescueTest::Song id=1, title="Prodigal Son">} }
-    it { Create.( "params" => {id: 1, title: "Prodigal Son"} ).inspect("x").must_equal %{<Result:true [nil] >} }
-    it { Create.( "params" => {id: nil} ).inspect("model", "x").must_equal %{<Result:false [nil, RescueTest::RecordNotFound] >} }
-    it { assert_raises(RuntimeError) { Create.( "params" => {id: "RuntimeError!"} ) } }
+    it { Create.( params: {id: 1, title: "Prodigal Son"} )["contract.default"].model.inspect.must_equal %{#<struct RescueTest::Song id=1, title="Prodigal Son">} }
+    it { Create.( params: {id: 1, title: "Prodigal Son"} ).inspect("x").must_equal %{<Result:true [nil] >} }
+    it { Create.( params: {id: nil} ).inspect(:model, "x").must_equal %{<Result:false [nil, RescueTest::RecordNotFound] >} }
+    it { assert_raises(RuntimeError) { Create.( params: {id: "RuntimeError!"} ) } }
   end
 
 
@@ -120,7 +120,7 @@ class RescueTest < Minitest::Spec
     step Rescue( RecordNotFound, handler: :rollback! ) {
       step Wrap ->(*, &block) { Sequel.transaction do block.call end } {
         step Model( Song, :find )
-        step ->(options, *) { options["model"].lock! } # lock the model.
+        step ->(options, *) { options[:model].lock! } # lock the model.
         step Contract::Build( constant: MyContract )
         step Contract::Validate( )
         step Contract::Persist( method: :sync )
@@ -142,12 +142,12 @@ class RescueTest < Minitest::Spec
   end
   #:example end
 
-    it { Create.( "params" => {id: 1, title: "Pie"} ).inspect("model", "x", "err").must_equal %{<Result:true [#<struct RescueTest::Song id=1, title=\"Pie\">, nil, nil] >} }
+    it { Create.( params: {id: 1, title: "Pie"} ).inspect(:model, "x", "err").must_equal %{<Result:true [#<struct RescueTest::Song id=1, title=\"Pie\">, nil, nil] >} }
     # raise exceptions in Model:
-    it { Create.( "params" => {id: nil} ).inspect("model", "x").must_equal %{<Result:false [nil, RescueTest::RecordNotFound] >} }
-    it { assert_raises(RuntimeError) { Create.( "params" => {id: "RuntimeError!"} ) } }
+    it { Create.( params: {id: nil} ).inspect(:model, "x").must_equal %{<Result:false [nil, RescueTest::RecordNotFound] >} }
+    it { assert_raises(RuntimeError) { Create.( params: {id: "RuntimeError!"} ) } }
     it do
-      Create.( "params" => {id: 1, title: "Pie"} )
+      Create.( params: {id: 1, title: "Pie"} )
       Sequel.result.first.must_be_kind_of Trailblazer::Operation::Railway::End::Success
     end
   end

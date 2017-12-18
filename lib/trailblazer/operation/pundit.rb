@@ -23,7 +23,7 @@ class Trailblazer::Operation
 
       private
         def build_policy(options)
-          @policy_class.new(options["current_user"], options["model"])
+          @policy_class.new(options[:current_user], options[:model])
         end
 
         def result!(success, policy)

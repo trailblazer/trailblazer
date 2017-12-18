@@ -21,7 +21,7 @@ class Trailblazer::Operation
       def self.call(options, circuit_options, name: "default", constant: nil, builder: nil)
         # TODO: we could probably clean this up a bit at some point.
         contract_class = constant || options["contract.#{name}.class"] # DISCUSS: Injection possible here?
-        model          = options["model"]
+        model          = options[:model]
         name           = "contract.#{name}"
 
         options[name] =

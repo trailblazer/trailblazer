@@ -12,7 +12,7 @@ class DocsOperationExampleTest < Minitest::Spec
     step     :assign_current_user!
     # ..
     def assign_current_user!(options, **)
-      options["model"].created_by = options["current_user"]
+      options[:model].created_by = options[:current_user]
     end
   end
   #:invocation-dep end
@@ -20,16 +20,16 @@ class DocsOperationExampleTest < Minitest::Spec
   it do
     current_user = User.new("Ema")
   #:invocation-dep-call
-  result = Create.( "params" => { title: "Roxanne" }, "current_user" => current_user )
+  result = Create.( params: { title: "Roxanne" }, :current_user => current_user )
   #:invocation-dep-call end
 
   #:invocation-dep-res
-  result["current_user"] #=> #<User name="Ema">
-  result["model"]        #=> #<Song id=nil, title=nil, created_by=#<User name="Ema">>
+  result[:current_user] #=> #<User name="Ema">
+  result[:model]        #=> #<Song id=nil, title=nil, created_by=#<User name="Ema">>
   #:invocation-dep-res end
   end
 
-  it { Create.("params" => { title: "Roxanne" }, "current_user" => Module).inspect("model").must_equal %{<Result:true [#<struct DocsOperationExampleTest::Song id=nil, title=nil, created_by=Module>] >} }
+  it { Create.(params: { title: "Roxanne" }, :current_user => Module).inspect(:model).must_equal %{<Result:true [#<struct DocsOperationExampleTest::Song id=nil, title=nil, created_by=Module>] >} }
 
   #:op
   class Song::Create < Trailblazer::Operation
@@ -50,14 +50,14 @@ class DocsOperationExampleTest < Minitest::Spec
     end
 
     def assign_current_user!(options, **)
-      options["model"].created_by =
-        options["current_user"]
+      options[:model].created_by =
+        options[:current_user]
     end
   end
   #:op end
 
-  it { Song::Create.("params" => { }).inspect("model").must_equal %{<Result:false [#<struct DocsOperationExampleTest::Song id=nil, title=nil, created_by=nil>] >} }
-  it { Song::Create.("params" => { title: "Nothin'" }, "current_user"=>Module).inspect("model").must_equal %{<Result:true [#<struct DocsOperationExampleTest::Song id=nil, title="Nothin'", created_by=Module>] >} }
+  it { Song::Create.(params: { }).inspect(:model).must_equal %{<Result:false [#<struct DocsOperationExampleTest::Song id=nil, title=nil, created_by=nil>] >} }
+  it { Song::Create.(params: { title: "Nothin'" }, :current_user=>Module).inspect(:model).must_equal %{<Result:true [#<struct DocsOperationExampleTest::Song id=nil, title="Nothin'", created_by=Module>] >} }
 end
 
 class DndTest < Minitest::Spec
@@ -81,8 +81,8 @@ class DocsResultTest < Minitest::Spec
     step     :validate!
 
     def model!(options, current_user:, **)
-      options["model"] = Song.new
-      options["model"].created_by = current_user
+      options[:model] = Song.new
+      options[:model].created_by = current_user
     end
 
     def assign!(*, params:, model:, **)
@@ -100,13 +100,13 @@ class DocsResultTest < Minitest::Spec
   it do
     current_user = Struct.new(:email).new("nick@trailblazer.to")
   #:step-res
-  result = Song::Create.("params" => { title: "Roxanne" }, "current_user" => current_user)
+  result = Song::Create.(params: { title: "Roxanne" }, :current_user => current_user)
 
-  result["model"] #=> #<Song title="Roxanne", "created_by"=<User ...>
+  result[:model] #=> #<Song title="Roxanne", "created_by"=<User ...>
   result["result.validate"] #=> true
   #:step-res end
 
-    result.inspect("current_user", "model").must_equal %{<Result:true [#<struct email=\"nick@trailblazer.to\">, #<struct DocsResultTest::Song id=nil, title="Roxanne", created_by=#<struct email=\"nick@trailblazer.to\">>] >}
+    result.inspect(:current_user, :model).must_equal %{<Result:true [#<struct email=\"nick@trailblazer.to\">, #<struct DocsResultTest::Song id=nil, title="Roxanne", created_by=#<struct email=\"nick@trailblazer.to\">>] >}
 
   #:step-binary
   result.success? #=> true
@@ -114,11 +114,11 @@ class DocsResultTest < Minitest::Spec
   #:step-binary end
 
   #:step-dep
-  result["current_user"] #=> <User ...>
+  result[:current_user] #=> <User ...>
   #:step-dep end
 
   #:step-inspect
-  result.inspect("current_user", "model") #=> "<Result:true [#<User email=\"nick@tra... "
+  result.inspect(:current_user, :model) #=> "<Result:true [#<User email=\"nick@tra... "
   #:step-inspect end
   end
 end
@@ -198,14 +198,14 @@ class DocsOperationAPIExampleTest < Minitest::Spec
     end
 
     def assign_current_user!(options, **)
-      options["model"].created_by =
-        options["current_user"]
+      options[:model].created_by =
+        options[:current_user]
     end
   end
   #:op-api end
 
-  it { Song::Create.("params" => {}).inspect("model").must_equal %{<Result:false [#<struct DocsOperationAPIExampleTest::Song id=nil, title=nil, created_by=nil>] >} }
-  it { Song::Create.("params" => { title: "Nothin'" }, "current_user"=>Module).inspect("model").must_equal %{<Result:true [#<struct DocsOperationAPIExampleTest::Song id=nil, title="Nothin'", created_by=Module>] >} }
+  it { Song::Create.(params: {}).inspect(:model).must_equal %{<Result:false [#<struct DocsOperationAPIExampleTest::Song id=nil, title=nil, created_by=nil>] >} }
+  it { Song::Create.(params: { title: "Nothin'" }, :current_user=>Module).inspect(:model).must_equal %{<Result:true [#<struct DocsOperationAPIExampleTest::Song id=nil, title="Nothin'", created_by=Module>] >} }
 end
 
 
@@ -290,7 +290,7 @@ class DocsOperationInheritanceTest < Minitest::Spec
 
   it do
     Trailblazer::Operation::Inspect.(Song::New).must_equal %{[>model.build,>contract.build]}
-    Song::New.("params" => {}).inspect("model").must_equal %{<Result:true [#<struct DocsOperationInheritanceTest::Song id=nil, title=nil, created_by=nil>] >}
+    Song::New.(params: {}).inspect(:model).must_equal %{<Result:true [#<struct DocsOperationInheritanceTest::Song id=nil, title=nil, created_by=nil>] >}
   end
 end
 
@@ -330,7 +330,7 @@ class DocsOperationStepOptionsTest < Minitest::Spec
   #:replace-inh-pipe end
 =end
 
-    it { Update.("params" => {}).inspect("model").must_equal %{<Result:false [nil] >} }
+    it { Update.(params: {}).inspect(:model).must_equal %{<Result:false [nil] >} }
 
 
 #     #:delete-inh
@@ -348,7 +348,7 @@ class DocsOperationStepOptionsTest < Minitest::Spec
 #   #:delete-inh-pipe end
 # =end
 
-#     it { Noop.({}).inspect("model").must_equal %{<Result:false [nil] >} }
+#     it { Noop.({}).inspect(:model).must_equal %{<Result:false [nil] >} }
   end
 
   class ManualNameTest < Minitest::Spec
