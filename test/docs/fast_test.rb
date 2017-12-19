@@ -224,6 +224,60 @@ class FastTrackWithNestedTest < Minitest::Spec
     result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:false [true, true, true, true, nil] >}
     result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Failure
   end
+
+  module Rewire
+    module Memo; end
+
+    #:ft-rewire
+    class Memo::Create < Trailblazer::Operation
+      step :validate
+      step Nested( Lib::Authenticate ), Output(:fail_fast) => :failure
+      step :create_model
+      step :save
+      #~ignrw
+      def validate(options, v:true, **);     options[:v] = true; v; end
+      def create_model(options, c:true, **); options[:c] = true; c; end
+      def save(options, s:true, **);         options[:s] = true; s; end
+      #~ignrw end
+    end
+    #:ft-rewire end
+  end
+
+  it "everything goes :success ===> End.success" do
+    result = Rewire::Memo::Create.()
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:true [true, true, true, true, true] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Success
+  end
+
+  it "validate => failure ===> End.failure" do
+    result = Rewire::Memo::Create.(v: false)
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:false [true, nil, nil, nil, nil] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Failure
+  end
+
+  # this is the only test differing.
+  it "verify_input? => fail_fast ===> End.failure" do
+    result = Rewire::Memo::Create.(w: false)
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:false [true, true, nil, nil, nil] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Failure
+  end
+
+  it "user_ok? => fail ===> End.failure" do
+    result = Rewire::Memo::Create.(u: false)
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:false [true, true, true, nil, nil] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Failure
+  end
+
+  it "create_model? => fail ===> End.failure" do
+    result = Rewire::Memo::Create.(c: false)
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:false [true, true, true, true, nil] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Failure
+  end
 end
 
 # fail!
