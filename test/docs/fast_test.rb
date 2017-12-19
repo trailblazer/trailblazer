@@ -160,5 +160,71 @@ class DocsPassFastMethodTest < Minitest::Spec
   end
 end
 
+
+class FastTrackWithNestedTest < Minitest::Spec
+  module Lib; end
+  module Memo; end
+
+  #:ft-nested
+  class Lib::Authenticate < Trailblazer::Operation
+    step :verify_input, fail_fast: true
+    step :user_ok?
+    #~ign
+    def verify_input(options, w:true, **); options[:w] = true; w; end
+    def user_ok?(options, u:true, **);     options[:u] = true; u; end
+    #~ign end
+  end
+  #:ft-nested end
+
+  #:ft-create
+  class Memo::Create < Trailblazer::Operation
+    step :validate
+    step Nested( Lib::Authenticate ) # fail_fast goes to End.fail_fast
+    step :create_model
+    step :save
+    #~igncr
+    def validate(options, v:true, **);     options[:v] = true; v; end
+    def create_model(options, c:true, **); options[:c] = true; c; end
+    def save(options, s:true, **);         options[:s] = true; s; end
+    #~igncr end
+  end
+  #:ft-create end
+
+  it "everything goes :success ===> End.success" do
+    result = Memo::Create.()
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:true [true, true, true, true, true] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Success
+  end
+
+  it "validate => failure ===> End.failure" do
+    result = Memo::Create.(v: false)
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:false [true, nil, nil, nil, nil] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Failure
+  end
+
+  it "verify_input? => fail_fast ===> End.fail_fast" do
+    result = Memo::Create.(w: false)
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:false [true, true, nil, nil, nil] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::FailFast
+  end
+
+  it "user_ok? => fail ===> End.failure" do
+    result = Memo::Create.(u: false)
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:false [true, true, true, nil, nil] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Failure
+  end
+
+  it "create_model? => fail ===> End.failure" do
+    result = Memo::Create.(c: false)
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:false [true, true, true, true, nil] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Failure
+  end
+end
+
 # fail!
 # pass!
