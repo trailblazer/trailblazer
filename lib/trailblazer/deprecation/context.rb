@@ -2,14 +2,14 @@ module Trailblazer
   module Deprecation
     class ContextWithIndifferentAccess < Trailblazer::Context
       def [](key)
-        return super unless Operation::PublicCall.deprecatable?(key)
-        key, _ = Operation::PublicCall.deprecate_string(key, nil)
+        return super unless Trailblazer::Operation::PublicCall.deprecatable?(key)
+        key, _ = Trailblazer::Operation::PublicCall.deprecate_string(key, nil)
         super(key)
       end
 
       def []=(key, value)
-        return super unless Operation::PublicCall.deprecatable?(key)
-        key, _ = Operation::PublicCall.deprecate_string(key, nil)
+        return super unless Trailblazer::Operation::PublicCall.deprecatable?(key)
+        key, _ = Trailblazer::Operation::PublicCall.deprecate_string(key, nil)
         super(key, value)
       end
     end
