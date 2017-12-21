@@ -6,7 +6,9 @@ _Trailblazer provides new high-level abstractions for Ruby frameworks. It gently
 [![TRB Newsletter](https://img.shields.io/badge/TRB-newsletter-lightgrey.svg)](http://trailblazer.to/newsletter/)
 [![Gem Version](https://badge.fury.io/rb/trailblazer.svg)](http://badge.fury.io/rb/trailblazer)
 
-**This document discusses Trailblazer 2.0. The [1.x documentation is here](http://trailblazer.to/gems/operation/1.1/).**
+**This document discusses Trailblazer 2.1.** An overview about the additions are [on our website](http://trailblazer.to/blog/2017-12-trailblazer-2-1-what-you-need-to-know.html).
+
+The [1.x documentation is here](http://trailblazer.to/gems/operation/1.1/).
 
 ## Trailblazer In A Nutshell
 

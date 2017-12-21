@@ -1,0 +1,33 @@
+
+__call__
+  :params => {}
+  :current_user => ,
+  "contract.default.class" =>
+
+
+
+
+
+skills = Skill(container, container)
+skill[:a]
+  READ-ONLY
+
+ctx = Context(skills)   => Context.new(Skill.new {}, skills)
+ctx[:a] => <skill>
+ctx[:a]= 1
+ctx.merge => new Context
+
+ctx.to_hash
+
+
+
+step(Context options, **)
+
+
+input(Context options, **, Hash::Immutable mutable:, Skill runtime:)
+
+
+
+Hash::Immutable
+
+Skills < Hash::Immutable

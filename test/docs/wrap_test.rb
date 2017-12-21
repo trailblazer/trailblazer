@@ -1,9 +1,39 @@
 require "test_helper"
 
+# TODO: consume End signal from wrapped
+
 class WrapTest < Minitest::Spec
   Song = Struct.new(:id, :title) do
     def self.find(id)
       id.nil? ? raise : new(id)
+    end
+  end
+
+  class DirectWiringTest < Minitest::Spec
+    class Create < Trailblazer::Operation
+      class MyContract < Reform::Form
+        property :title
+      end
+
+      step( Wrap( ->(options, *args, &block) {
+        begin
+          block.call
+        rescue => exception
+          options["result.model.find"] = "argh! because #{exception.class}"
+          [ Railway.fail_fast!, options, *args ]
+        end }) {
+        step ->(options, **) { options["x"] = true }
+        step Model( Song, :find )
+        step Contract::Build( constant: MyContract )
+      }.merge(fast_track: true))
+      step Contract::Validate()
+      step Contract::Persist( method: :sync )
+    end
+
+    it { Create.( params: {id: 1, title: "Prodigal Son"} ).inspect("x", :model).must_equal %{<Result:true [true, #<struct WrapTest::Song id=1, title=\"Prodigal Son\">] >} }
+
+    it "goes directly from Wrap to End.fail_fast" do
+      Create.(params: {}).inspect("x", :model, "result.model.find").must_equal %{<Result:false [true, nil, "argh! because RuntimeError"] >}
     end
   end
 
@@ -26,26 +56,26 @@ class WrapTest < Minitest::Spec
     step Contract::Persist( method: :sync )
   end
 
-  it { Create.( id: 1, title: "Prodigal Son" )["contract.default"].model.inspect.must_equal %{#<struct WrapTest::Song id=1, title="Prodigal Son">} }
-  it { Create.( id: nil ).inspect("result.model.find").must_equal %{<Result:false [\"argh! because RuntimeError\"] >} }
+  it { Create.( params: {id: 1, title: "Prodigal Son"} )["contract.default"].model.inspect.must_equal %{#<struct WrapTest::Song id=1, title="Prodigal Son">} }
+  it { Create.( params: {id: nil }).inspect("result.model.find").must_equal %{<Result:false [\"argh! because RuntimeError\"] >} }
 
   #-
   # Wrap return
   class WrapReturnTest < Minitest::Spec
     class Create < Trailblazer::Operation
       step Wrap ->(options, *, &block) { options["yield?"] ? block.call : false } {
-        step ->(options) { options["x"] = true }
+        step ->(options, **) { options["x"] = true }
         success :noop!
         # ...
       }
 
-      def noop!(options)
+      def noop!(options, **)
       end
     end
 
-    it { Create.().inspect("x").must_equal %{<Result:false [nil] >} }
+    it { Create.(params: {}).inspect("x").must_equal %{<Result:false [nil] >} }
     # returns falsey means deviate to left.
-    it { Create.({}, "yield?" => true).inspect("x").must_equal %{<Result:true [true] >} }
+    it { Create.("yield?" => true).inspect("x").must_equal %{<Result:true [true] >} }
   end
 
   class WrapWithCallableTest < Minitest::Spec
@@ -59,26 +89,15 @@ class WrapTest < Minitest::Spec
 
     class Create < Trailblazer::Operation
       step Wrap( MyWrapper ) {
-        step ->(options) { options["x"] = true }
+        step ->(options, **) { options["x"] = true }
         # ...
       }
     end
 
-    it { Create.().inspect("x").must_equal %{<Result:false [nil] >} }
+    it { Create.(params: {}).inspect("x").must_equal %{<Result:false [nil] >} }
     # returns falsey means deviate to left.
-    it { Create.({}, "yield?" => true).inspect("x").must_equal %{<Result:true [true] >} }
+    it { Create.("yield?" => true).inspect("x").must_equal %{<Result:true [true] >} }
   end
-
-  #-
-  # arguments for Wrap
-  class Update < Trailblazer::Operation
-    step Wrap ->(options, operation, pipe, &block) { operation["yield?"] ? block.call : false } {
-      step ->(options) { options["x"] = true }
-    }
-  end
-
-  it { Update.().inspect("x").must_equal %{<Result:false [nil] >} }
-  it { Update.({}, "yield?" => true).inspect("x").must_equal %{<Result:true [true] >} }
 
   class WrapExampleProcTest < Minitest::Spec
     module Sequel
@@ -115,14 +134,14 @@ class WrapTest < Minitest::Spec
       # handle errors after the wrap
     end
 
-    def notify!(options)
+    def notify!(options, **)
       MyNotifier.mail
     end
     #~wrap-only end
   end
   #:sequel-transaction end
 
-    it { Create.( title: "Pie" ).inspect("model", "x", "err").must_equal %{<Result:true [#<struct WrapTest::Song id=nil, title=\"Pie\">, nil, nil] >} }
+    it { Create.( params: {title: "Pie"} ).inspect(:model, "x", "err").must_equal %{<Result:true [#<struct WrapTest::Song id=nil, title=\"Pie\">, nil, nil] >} }
   end
 
   class WrapExampleCallableTest < Minitest::Spec
@@ -138,8 +157,6 @@ class WrapTest < Minitest::Spec
 
   #:callable-t
   class MyTransaction
-    extend Uber::Callable
-
     def self.call(options, *)
       Sequel.transaction { yield } # yield runs the nested pipe.
       # return value decides about left or right track!
@@ -170,14 +187,30 @@ class WrapTest < Minitest::Spec
       # handle errors after the wrap
     end
 
-    def notify!(options)
+    def notify!(options, **)
       MyNotifier.mail # send emails, because success...
     end
     #~wrap-onlyy end
   end
   #:sequel-transaction-callable end
 
-    it { Create.( title: "Pie" ).inspect("model", "x", "err").must_equal %{<Result:true [#<struct WrapTest::Song id=nil, title=\"Pie\">, nil, nil] >} }
+    it { Create.( params: {title: "Pie"} ).inspect(:model, "x", "err").must_equal %{<Result:true [#<struct WrapTest::Song id=nil, title=\"Pie\">, nil, nil] >} }
+  end
+
+  class WrapWithMethodTest < Minitest::Spec
+    class Create < Trailblazer::Operation
+      step Model( Song, :new )
+      step Wrap ->(options, *, &block) { block.call } {
+        step :check_model!
+
+      }
+
+      def check_model!(options, model:, **)
+        options["x"] = model
+      end
+    end
+
+    it { Create.(params: {}) }
   end
 end
 

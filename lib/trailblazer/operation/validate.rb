@@ -1,58 +1,65 @@
 class Trailblazer::Operation
   module Contract
-    Railway = Pipetree::Railway
-
     # result.contract = {..}
     # result.contract.errors = {..}
     # Deviate to left track if optional key is not found in params.
     # Deviate to left if validation result falsey.
-    def self.Validate(skip_extract:false, name: "default", representer:false, key: nil) # DISCUSS: should we introduce something like Validate::Deserializer?
+    def self.Validate(skip_extract: false, name: "default", representer: false, key: nil) # DISCUSS: should we introduce something like Validate::Deserializer?
       params_path = "contract.#{name}.params" # extract_params! save extracted params here.
 
-      return Validate::Call(name: name, representer: representer, params_path: params_path) if skip_extract || representer
+      extract  = Validate::Extract.new( key: key, params_path: params_path ).freeze
+      validate = Validate.new( name: name, representer: representer, params_path: params_path ).freeze
 
-      extract_step,  extract_options  = Validate::Extract(key: key, params_path: params_path)
-      validate_step, validate_options = Validate::Call(name: name, representer: representer, params_path: params_path)
+      # Return the Validate::Call task if the first step, the params extraction, is not desired.
+      if skip_extract || representer
+        return { task: Trailblazer::Activity::Task::Binary( validate ), id: "contract.#{name}.call" }
+      end
 
-      pipe = Railway.new # TODO: make nested pipes simpler.
-        .add(Railway::Right, Railway.&(extract_step),  extract_options)
-        .add(Railway::Right, Railway.&(validate_step), validate_options)
 
-      step = ->(input, options) { pipe.(input, options).first <= Railway::Right }
+      # Build a simple Railway {Activity} for the internal flow.
+      activity = Trailblazer::Activity::Railway.build do # FIXME: make Activity.build(builder: Railway) do end an <Activity>
+        step Trailblazer::Activity::Task::Binary( extract ),  id: "#{params_path}_extract"
+        step Trailblazer::Activity::Task::Binary( validate ), id: "contract.#{name}.call"
+      end
 
-      [step, name: "contract.#{name}.validate"]
+      # DISCUSS: use Nested here?
+      # Nested.operation_class.Nested( activity, id: "contract.#{name}.validate" )
+      { task: activity, id: "contract.#{name}.validate", plus_poles: Trailblazer::Activity::Magnetic::DSL::PlusPoles.from_outputs(activity.outputs) }
     end
 
-    module Validate
-      # Macro: extract the contract's input from params by reading `:key`.
-      def self.Extract(key:nil, params_path:nil)
-        # TODO: introduce nested pipes and pass composed input instead.
-        step = ->(input, options) do
-          options[params_path] = key ? options["params"][key] : options["params"]
+    class Validate
+      # Task: extract the contract's input from params by reading `:key`.
+      class Extract
+        def initialize(key:nil, params_path:nil)
+          @key, @params_path = key, params_path
         end
 
-        [ step, name: params_path ]
+        def call( (options, flow_options), **circuit_options )
+          options[@params_path] = @key ? options[:params][@key] : options[:params]
+        end
       end
 
-      # Macro: Validates contract `:name`.
-      def self.Call(name:"default", representer:false, params_path:nil)
-        step = ->(input, options) {
-          validate!(options, name: name, representer: options["representer.#{name}.class"], params_path: params_path)
-        }
-
-        step = Pipetree::Step.new( step, "representer.#{name}.class" => representer )
-
-        [ step, name: "contract.#{name}.call" ]
+      def initialize(name:"default", representer:false, params_path:nil)
+        @name, @representer, @params_path = name, representer, params_path
       end
 
-      def self.validate!(options, name:nil, representer:false, from: "document", params_path:nil)
-        path     = "contract.#{name}"
+      # Task: Validates contract `:name`.
+      def call( (options, flow_options), **circuit_options )
+        validate!(
+          options,
+          representer: options["representer.#{@name}.class"] ||= @representer, # FIXME: maybe @representer should use DI.
+          params_path: @params_path
+        )
+      end
+
+      def validate!(options, representer:false, from: :document, params_path:nil)
+        path     = "contract.#{@name}"
         contract = options[path]
 
         # this is for 1.1-style compatibility and should be removed once we have Deserializer in place:
         options["result.#{path}"] = result =
           if representer
-            # use "document" as the body and let the representer deserialize to the contract.
+            # use :document as the body and let the representer deserialize to the contract.
             # this will be simplified once we have Deserializer.
             # translates to contract.("{document: bla}") { MyRepresenter.new(contract).from_json .. }
             contract.(options[from]) { |document| representer.new(contract).parse(document) }

@@ -1,113 +1,84 @@
-class Trailblazer::Operation
-  def self.Nested(callable, input:nil, output:nil)
-    step = Nested.for(callable, input, output)
+# per default, everything we pass into a circuit is immutable. it's the ops/act's job to allow writing (via a Context)
+module Trailblazer
+  class Operation
+    def self.Nested(callable, input:nil, output:nil, id: "Nested(#{callable})")
+      task_wrap_wirings = []
+      task, operation = Nested.build(callable, input, output)
 
-    [ step, { name: "Nested(#{callable})" } ]
-  end
+      # @needs operation#outputs
 
-  # WARNING: this is experimental API, but it will end up with something like that.
-  module Element
-    # DISCUSS: add builders here.
-    def initialize(wrapped=nil)
-      @wrapped = wrapped
-    end
+      # TODO: move this to the generic step DSL
+      task_wrap_extensions = []
 
-    module Dynamic
-      def initialize(wrapped)
-        @wrapped = Option::KW.(wrapped)
-      end
-    end
-  end
+      if input || output
+        default_input_filter  = ->(options, *) { ctx = options }
+        default_output_filter = ->(options, *) { options }
 
-  module Nested
-    # Please note that the instance_variable_get are here on purpose since the
-    # superinternal API is not entirely decided, yet.
-    # @api private
-    def self.for(step, input, output, is_nestable_object=method(:nestable_object?)) # DISCUSS: use builders here?
-      invoker            = Caller::Dynamic.new(step)
-      invoker            = Caller.new(step) if is_nestable_object.(step)
+        input  ||= default_input_filter
+        output ||= default_output_filter
 
-      options_for_nested = Options.new
-      options_for_nested = Options::Dynamic.new(input) if input
+        input_filter  = Activity::Wrap::Input.new(input)
+        output_filter = Activity::Wrap::Output.new(output)
 
-      options_for_composer = Options::Output.new
-      options_for_composer = Options::Output::Dynamic.new(output) if output
-
-      # This lambda is the strut added on the track, executed at runtime.
-      ->(operation, options) do
-        result = invoker.(operation, options, options_for_nested.(operation, options)) # TODO: what about containers?
-
-        options_for_composer.(operation, options, result).each { |k,v| options[k] = v }
-
-        result.success? # DISCUSS: what if we could simply return the result object here?
-      end
-    end
-
-    def self.nestable_object?(object)
-      # interestingly, with < we get a weird nil exception. bug in Ruby?
-      object.is_a?(Class) && object <= Trailblazer::Operation
-    end
-
-    # Is executed at runtime and calls the nested operation.
-    class Caller
-      include Element
-
-      def call(input, options, options_for_nested)
-        call_nested(nested(input, options), options_for_nested)
-      end
-
-    private
-      def call_nested(operation, options)
-        operation._call(options)
-      end
-
-      def nested(*); @wrapped end
-
-      class Dynamic < Caller
-        include Element::Dynamic
-
-        def nested(input, options)
-          @wrapped.(input, options)
+        task_wrap_extensions = Activity::Magnetic::Builder::Path.plan do
+          task input_filter,  id: ".input",  before: "task_wrap.call_task"
+          task output_filter, id: ".output", before: "End.success", group: :end # DISCUSS: position
         end
       end
+        # Default {Output} copies the mutable data from the nested activity into the original.
+
+      { task: task, id: id, runner_options: { merge: task_wrap_extensions }, plus_poles: Activity::Magnetic::DSL::PlusPoles.from_outputs(operation.outputs) }
     end
 
-    class Options
-      include Element
+    # @private
+    module Nested
+      def self.build(nested_operation, input, output) # DISCUSS: use builders here?
+        return dynamic = Dynamic.new(nested_operation), dynamic unless nestable_object?(nested_operation)
 
-      # Per default, only runtime data for nested operation.
-      def call(input, options)
-        options.to_runtime_data[0]
+        # The returned {Nested} instance is a valid circuit element and will be `call`ed in the circuit.
+        # It simply returns the nested activity's `signal,options,flow_options` return set.
+        # The actual wiring - where to go with that - is done by the step DSL.
+        return Trailblazer::Activity::Subprocess(nested_operation, call: :__call__), nested_operation
       end
 
+      def self.nestable_object?(object)
+        object.is_a?( Trailblazer::Activity::Interface )
+      end
+
+      def self.operation_class
+        Operation
+      end
+
+      private
+
+      # For dynamic `Nested`s that do not expose an {Activity} interface.
+      # Since we do not know its outputs, we have to map them to :success and :failure, only.
+      #
+      # This is what {Nested} in 2.0 used to do, where the outcome could only be true/false (or success/failure).
       class Dynamic
-        include Element::Dynamic
-
-        def call(operation, options)
-          @wrapped.(operation, options, runtime_data: options.to_runtime_data[0], mutable_data: options.to_mutable_data )
-        end
-      end
-
-      class Output
-        include Element
-
-        def call(input, options, result)
-          mutable_data_for(result).each { |k,v| options[k] = v }
+        def initialize(wrapped)
+          @wrapped = Trailblazer::Option::KW(wrapped)
+          @outputs = {
+            :success => Activity::Output( Railway::End::Success.new(:success), :success ),
+            :failure => Activity::Output( Railway::End::Failure.new(:failure), :failure ),
+          }
         end
 
-        def mutable_data_for(result)
-          result.instance_variable_get(:@data).to_mutable_data
-        end
+        attr_reader :outputs
 
-        class Dynamic < Output
-          include Element::Dynamic
+        def call( (options, flow_options), **circuit_options )
+          activity = @wrapped.(options, circuit_options) # evaluate the option to get the actual "object" to call.
 
-          def call(input, options, result)
-            @wrapped.(input, options, mutable_data: mutable_data_for(result))
-          end
+          signal, args = activity.__call__( [options, flow_options], **circuit_options )
+
+          # Translate the genuine nested signal to the generic Dynamic end (success/failure, only).
+          # Note that here we lose information about what specific event was emitted.
+          [
+            signal.kind_of?(Railway::End::Success) ? @outputs[:success].signal : @outputs[:failure].signal,
+            args
+          ]
         end
       end
     end
-  end
+  end # Operation
 end
-

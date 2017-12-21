@@ -6,26 +6,33 @@ class PersistTest < Minitest::Spec
   end
 
   class Create < Trailblazer::Operation
-    extend Contract::DSL
-    contract do
+    class Form < Reform::Form
       property :title
     end
 
+    class Fail1
+      def self.call(options, **); options["1. fail"] = "Validate" end
+    end
+
+    class Fail2
+      def self.call(options, **); options["2. fail"] = "Persist" end
+    end
+
     step Model( Song, :new )
-    step Contract::Build()
+    step Contract::Build( constant: Form )
     step Contract::Validate()
-    failure ->(options) { options["1. fail"] = "Validate" }
+    fail Fail1
     step Contract::Persist()
-    failure ->(options) { options["2. fail"] = "Persist" }
+    fail Fail2
   end
 
-  it { Create.(title: "In Recital")["model"].title.must_equal "In Recital" }
-  it { Create.(title: "In Recital")["model"].saved.must_equal true }
+  it { Create.(params: {title: "In Recital"})[:model].title.must_equal "In Recital" }
+  it { Create.(params: {title: "In Recital"})[:model].saved.must_equal true }
   # failure
   it do
-    result = Create.(title: "Fail!")
-    result["model"].saved.must_equal nil
-    result["model"].title.must_equal "Fail!"
+    result = Create.(params: {title: "Fail!"})
+    result[:model].saved.must_be_nil
+    result[:model].title.must_equal "Fail!"
     result["2. fail"].must_equal "Persist"
     result.success?.must_equal false
   end
@@ -35,7 +42,7 @@ class PersistTest < Minitest::Spec
   class Update < Create
   end
 
-  it { Update["pipetree"].inspect.must_equal %{[>operation.new,>model.build,>contract.build,>contract.default.validate,<persist_test.rb:17,>persist.save,<persist_test.rb:19]} }
+  it { Operation::Inspect.( Update ).must_equal %{[>model.build,>contract.build,>contract.default.validate,<<PersistTest::Create::Fail1,>persist.save,<<PersistTest::Create::Fail2]} }
 
   #---
   it do

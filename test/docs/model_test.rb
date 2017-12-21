@@ -20,11 +20,11 @@ class DocsModelTest < Minitest::Spec
 
   it do
     #:create
-    result = Create.({})
-    result["model"] #=> #<struct Song id=nil, title=nil>
+    result = Create.(params: {})
+    result[:model] #=> #<struct Song id=nil, title=nil>
     #:create end
 
-    result["model"].inspect.must_equal %{#<struct DocsModelTest::Song id=nil, title=nil>}
+    result[:model].inspect.must_equal %{#<struct DocsModelTest::Song id=nil, title=nil>}
   end
 
   #:update
@@ -36,21 +36,21 @@ class DocsModelTest < Minitest::Spec
 
   it do
     #:update-ok
-    result = Update.({ id: 1 })
-    result["model"] #=> #<struct Song id=1, title="Roxanne">
+    result = Update.(params: { id: 1 })
+    result[:model] #=> #<struct Song id=1, title="Roxanne">
     #:update-ok end
 
-    result["model"].inspect.must_equal %{#<struct DocsModelTest::Song id=1, title=nil>}
+    result[:model].inspect.must_equal %{#<struct DocsModelTest::Song id=1, title=nil>}
   end
 
   it do
     #:update-fail
-    result = Update.({})
-    result["model"] #=> nil
+    result = Update.(params: {})
+    result[:model] #=> nil
     result.success? #=> false
     #:update-fail end
 
-    result["model"].must_be_nil
+    result[:model].must_be_nil
     result.success?.must_equal false
   end
 
@@ -62,14 +62,14 @@ class DocsModelTest < Minitest::Spec
   #:show end
 
   it do
-    result = Show.({ id: 1 })
+    result = Show.(params: { id: 1 })
 
     #:show-ok
-    result = Show.({ id: 1 })
-    result["model"] #=> #<struct Song id=1, title="Roxanne">
+    result = Show.(params: { id: 1 })
+    result[:model] #=> #<struct Song id=1, title="Roxanne">
     #:show-ok end
 
     result.success?.must_equal true
-    result["model"].inspect.must_equal %{#<struct DocsModelTest::Song id=100, title=nil>}
+    result[:model].inspect.must_equal %{#<struct DocsModelTest::Song id=100, title=nil>}
   end
 end

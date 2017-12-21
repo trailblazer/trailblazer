@@ -20,7 +20,7 @@ class DocsRepresenterInferTest < Minitest::Spec
   #:infer end
 
   let (:json) { MultiJson.dump(id: 1) }
-  it { Create.({}, "document" => json).inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterInferTest::Song id=1, title=nil>] >} }
+  it { Create.( params: {}, document: json ).inspect(:model).must_equal %{<Result:true [#<struct DocsRepresenterInferTest::Song id=1, title=nil>] >} }
 end
 
 #---
@@ -49,18 +49,18 @@ class DocsRepresenterExplicitTest < Minitest::Spec
   #:explicit-op end
 
   let (:json) { MultiJson.dump(id: 1) }
-  it { Create.({}, "document" => json).inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterExplicitTest::Song id=1, title=nil>] >} }
+  it { Create.(params: {}, document: json).inspect(:model).must_equal %{<Result:true [#<struct DocsRepresenterExplicitTest::Song id=1, title=nil>] >} }
   it do
   #:explicit-call
-  Create.({}, "document" => '{"id": 1}')
+  Create.(params: {}, document: '{"id": 1}')
   #:explicit-call end
   end
 
   #- render
   it do
   #:render
-  result = Create.({}, "document" => '{"id": 1}')
-  json   = result["representer.default.class"].new(result["model"]).to_json
+  result = Create.( params: {}, document: '{"id": 1}' )
+  json   = result["representer.default.class"].new(result[:model]).to_json
   json #=> '{"id":1}'
   #:render end
   json.must_equal '{"id":1}'
@@ -81,12 +81,12 @@ class DocsRepresenterExplicitTest < Minitest::Spec
   let (:xml) { %{<body><id>1</id></body>} }
   it do
   #:di-call
-  result = Create.({},
-    "document" => '<body><id>1</id></body>',
+  result = Create.(params: {},
+    document: '<body><id>1</id></body>',
     "representer.default.class" => MyXMLRepresenter # injection
   )
   #:di-call end
-    result.inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterExplicitTest::Song id="1", title=nil>] >}
+    result.inspect(:model).must_equal %{<Result:true [#<struct DocsRepresenterExplicitTest::Song id="1", title=nil>] >}
   end
 end
 
@@ -112,8 +112,8 @@ class DocsRepresenterDITest < Minitest::Spec
   end
 
   let (:json) { MultiJson.dump(id: 1) }
-  it { Create.({}, "document" => json,
-    "representer.default.class" => MyRepresenter).inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterDITest::Song id=1, title=nil>] >} }
+  it { Create.(params: {}, document: json,
+    "representer.default.class" => MyRepresenter).inspect(:model).must_equal %{<Result:true [#<struct DocsRepresenterDITest::Song id=1, title=nil>] >} }
 end
 
 #---
@@ -141,7 +141,7 @@ class DocsRepresenterInlineTest < Minitest::Spec
   #:inline end
 
   let (:json) { MultiJson.dump(id: 1) }
-  it { Create.({}, "document" => json).inspect("model").must_equal %{<Result:true [#<struct DocsRepresenterInlineTest::Song id=1, title=nil>] >} }
+  it { Create.(params: {}, document: json).inspect(:model).must_equal %{<Result:true [#<struct DocsRepresenterInlineTest::Song id=1, title=nil>] >} }
 end
 
 #---
@@ -163,8 +163,8 @@ class DocsRepresenterManualRenderTest < Minitest::Spec
   end
 
   it do
-    result =Show.({ id: 1 })
-    json = result["representer.default.class"].new(result["model"]).to_json
+    result =Show.(params: { id: 1 })
+    json = result["representer.default.class"].new(result[:model]).to_json
     json.must_equal %{{"id":1}}
   end
 end
@@ -236,19 +236,19 @@ class DocsRepresenterFullExampleTest < Minitest::Spec
   #:full end
 
   it do
-    result =Create.({}, "document" => '{"title": "Tested"}')
+    result =Create.(params: {}, document: '{"title": "Tested"}')
 
-    json = result["representer.render.class"].new(result["model"]).to_json
+    json = result["representer.render.class"].new(result[:model]).to_json
 
     json.must_equal %{{"id":1,"title":"Tested","_links":{"self":{"href":"/songs/1"}}}}
 
 
   #:full-call
   def create
-    result = Create.(params, "document" => request.body.read)
+    result = Create.(params, document: request.body.read)
 
     if result.success?
-      result["representer.render.class"].new(result["model"]).to_json
+      result["representer.render.class"].new(result[:model]).to_json
     else
       result["representer.errors.class"].new(result["result.contract.default"]).to_json
     end
@@ -257,7 +257,7 @@ class DocsRepresenterFullExampleTest < Minitest::Spec
   end
 
   it do
-    result =Create.({}, "document" => '{"title": ""}')
+    result =Create.(params: {}, document: '{"title": ""}')
 
     if result.failure?
        json = result["representer.errors.class"].new(result["result.contract.default"]).to_json

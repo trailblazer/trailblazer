@@ -8,8 +8,7 @@ Reform::Form.class_eval do
   include Reform::Form::ActiveModel::Validations
 end
 
-require "trailblazer/operation/callback"
-require "trailblazer/operation/procedural/validate"
+# require "trailblazer/deprecation/context.rb"
 
 module Mock
   class Result
@@ -27,3 +26,7 @@ module Test
   end
   ReturnResult = ->(last, input, options) { input }
 end
+
+require "pp"
+
+Minitest::Spec::Operation = Trailblazer::Operation

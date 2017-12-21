@@ -56,7 +56,7 @@ class DslContractTest < MiniTest::Spec
   # UT: subclasses contract.
   it { Update["contract.default.class"].superclass.must_equal Update::IdContract }
   # IT: only knows `id`.
-  it { Update.(id: 1, title: "Coaster")["model"].inspect.must_equal %{#<OpenStruct id=1>} }
+  it { Update.(params: {id: 1, title: "Coaster"})[:model].inspect.must_equal %{#<OpenStruct id=1>} }
 
   # Op::contract with inheritance
   # no ::contract call.
@@ -67,7 +67,7 @@ class DslContractTest < MiniTest::Spec
   it { Upgrade["contract.default.class"].superclass.must_equal Update::IdContract }
   it { Upgrade["contract.default.class"].wont_equal Update["contract.default.class"] }
   # IT: only knows `id`.
-  it { Upgrade.(id: 1, title: "Coaster")["model"].inspect.must_equal %{#<OpenStruct id=1>} }
+  it { Upgrade.(params: {id: 1, title: "Coaster"})[:model].inspect.must_equal %{#<OpenStruct id=1>} }
 
   # ::contract B overrides old A contract.
   # this makes sure when calling contract(Constant), the old class gets wiped and is replaced with the new constant.
@@ -82,7 +82,7 @@ class DslContractTest < MiniTest::Spec
   # UT: subclasses contract.
   it { Upsert["contract.default.class"].superclass.must_equal Upsert::TitleContract }
   # IT: only knows `title`.
-  it { Upsert.(id: 1, title: "Coaster")["model"].inspect.must_equal %{#<OpenStruct title="Coaster">} }
+  it { Upsert.(params: {id: 1, title: "Coaster"})[:model].inspect.must_equal %{#<OpenStruct title="Coaster">} }
 
   # ::contract B do ..end overrides and extends new.
   # using a constant will wipe out the existing class.
@@ -95,7 +95,7 @@ class DslContractTest < MiniTest::Spec
   # UT: subclasses contract.
   it { Upside["contract.default.class"].superclass.must_equal Upsert::TitleContract }
   # IT: only knows `title`.
-  it { Upside.(id: 1, title: "Coaster")["model"].inspect.must_equal %{#<OpenStruct title="Coaster", id=1>} }
+  it { Upside.(params: {id: 1, title: "Coaster"})[:model].inspect.must_equal %{#<OpenStruct title="Coaster", id=1>} }
 
 
 
@@ -113,7 +113,7 @@ class DslContractTest < MiniTest::Spec
   # UT: contract path is "contract.default.class"
   it { Delete["contract.default.class"].definitions.keys.must_equal ["title"] }
   # IT: knows `title`.
-  it { Delete.(id: 1, title: "Coaster")["model"].inspect.must_equal %{#<OpenStruct title=\"Coaster\">} }
+  it { Delete.(params: {id: 1, title: "Coaster"})[:model].inspect.must_equal %{#<OpenStruct title=\"Coaster\">} }
 
   class Wipe < Trailblazer::Operation
     extend Contract::DSL
@@ -138,7 +138,7 @@ class DslContractTest < MiniTest::Spec
   end
 
   # IT: knows `title` and `id`, since contracts get merged.
-  it { Remove.(id: 1, title: "Coaster")["model"].inspect.must_equal %{#<OpenStruct title=\"Coaster\", id=1>} }
+  it { Remove.(params: {id: 1, title: "Coaster"})[:model].inspect.must_equal %{#<OpenStruct title=\"Coaster\", id=1>} }
 
 
 
@@ -212,7 +212,7 @@ class DslContractTest < MiniTest::Spec
       include Call
     end
 
-    it { OpWithExternalContract.("songTitle"=> "Monsterparty")["contract.default"].songTitle.must_equal "Monsterparty" }
+    it { OpWithExternalContract.(params: {"songTitle"=> "Monsterparty"})["contract.default"].songTitle.must_equal "Monsterparty" }
   end
 
   describe "Op.contract CommentForm do .. end" do
@@ -236,14 +236,14 @@ class DslContractTest < MiniTest::Spec
 
     # this operation copies DifferentSongForm and shouldn't have `genre`.
     it do
-      contract = OpNotExtendingContract.("songTitle"=>"Monsterparty", "genre"=>"Punk")["contract.default"]
+      contract = OpNotExtendingContract.(params: {"songTitle"=>"Monsterparty", "genre"=>"Punk"})["contract.default"]
       contract.songTitle.must_equal "Monsterparty"
       assert_raises(NoMethodError) { contract.genre }
     end
 
     # this operation copies DifferentSongForm and extends it with the property `genre`.
     it do
-      contract = OpExtendingContract.("songTitle"=>"Monsterparty", "genre"=>"Punk")["contract.default"]
+      contract = OpExtendingContract.(params: {"songTitle"=>"Monsterparty", "genre"=>"Punk"})["contract.default"]
       contract.songTitle.must_equal "Monsterparty"
       contract.genre.must_equal "Punk"
     end

@@ -8,33 +8,33 @@ class NestedRescueTest < Minitest::Spec
 
   class NestedInsanity < Trailblazer::Operation
     step Rescue {
-      step ->(options) { options["a"] = true }
+      step ->(options, **) { options["a"] = true }
       step Rescue {
-        step ->(options) { options["y"] = true }
-        success ->(options) { raise Y if options["raise-y"] }
-        step ->(options) { options["z"] = true }
+        step ->(options, **) { options["y"] = true }
+        success ->(options, **) { raise Y if options["raise-y"] }
+        step ->(options, **) { options["z"] = true }
       }
-      step ->(options) { options["b"] = true }
-      success ->(options) { raise A if options["raise-a"] }
-      step ->(options) { options["c"] = true }
-      failure ->(options) { options["inner-err"] = true }
+      step ->(options, **) { options["b"] = true }
+      success ->(options, **) { raise A if options["raise-a"] }
+      step ->(options, **) { options["c"] = true }
+      failure ->(options, **) { options["inner-err"] = true }
     }
-    step ->(options) { options["e"] = true }
-    failure ->(options) { options["outer-err"] = true }
+    step ->(options, **) { options["e"] = true }, name: "nested/e"
+    failure ->(options, **) { options["outer-err"] = true }, name: "nested/failure"
   end
 
-  it { NestedInsanity["pipetree"].inspect.must_equal %{[>operation.new,>Rescue:10,>rescue_test.rb:22,<rescue_test.rb:23]} }
-  it { NestedInsanity.({}).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:true [true, true, true, true, true, true, nil, nil] >} }
-  it { NestedInsanity.({}, "raise-y" => true).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:false [true, true, nil, nil, nil, nil, true, true] >} }
-  it { NestedInsanity.({}, "raise-a" => true).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:false [true, true, true, true, nil, nil, nil, true] >} }
+  it { Trailblazer::Operation::Inspect.(NestedInsanity).must_match /\[>Rescue\(\d+\),>nested/ } # FIXME: better introspect tests for all id-generating macros.
+  it { NestedInsanity.().inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:true [true, true, true, true, true, true, nil, nil] >} }
+  it { NestedInsanity.( "raise-y" => true).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:false [true, true, nil, nil, nil, nil, true, true] >} }
+  it { NestedInsanity.( "raise-a" => true).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:false [true, true, true, true, nil, nil, nil, true] >} }
 
   #-
   # inheritance
   class UbernestedInsanity < NestedInsanity
   end
 
-  it { UbernestedInsanity.({}).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:true [true, true, true, true, true, true, nil, nil] >} }
-  it { UbernestedInsanity.({}, "raise-a" => true).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:false [true, true, true, true, nil, nil, nil, true] >} }
+  it { UbernestedInsanity.().inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:true [true, true, true, true, true, true, nil, nil] >} }
+  it { UbernestedInsanity.( "raise-a" => true).inspect("a", "y", "z", "b", "c", "e", "inner-err", "outer-err").must_equal %{<Result:false [true, true, true, true, nil, nil, nil, true] >} }
 end
 
 class RescueTest < Minitest::Spec
@@ -66,8 +66,8 @@ class RescueTest < Minitest::Spec
   end
   #:simple end
 
-  it { Create.( id: 1, title: "Prodigal Son" )["contract.default"].model.inspect.must_equal %{#<struct RescueTest::Song id=1, title="Prodigal Son">} }
-  it { Create.( id: nil ).inspect("model").must_equal %{<Result:false [nil] >} }
+  it { Create.( params: {id: 1, title: "Prodigal Son"} )["contract.default"].model.inspect.must_equal %{#<struct RescueTest::Song id=1, title="Prodigal Son">} }
+  it { Create.( params: {id: nil} ).inspect(:model).must_equal %{<Result:false [nil] >} }
 
   #-
   # Rescue ExceptionClass, handler: ->(*) { }
@@ -91,10 +91,10 @@ class RescueTest < Minitest::Spec
   end
   #:name end
 
-    it { Create.( id: 1, title: "Prodigal Son" )["contract.default"].model.inspect.must_equal %{#<struct RescueTest::Song id=1, title="Prodigal Son">} }
-    it { Create.( id: 1, title: "Prodigal Son" ).inspect("x").must_equal %{<Result:true [nil] >} }
-    it { Create.( id: nil ).inspect("model", "x").must_equal %{<Result:false [nil, RescueTest::RecordNotFound] >} }
-    it { assert_raises(RuntimeError) { Create.( id: "RuntimeError!" ) } }
+    it { Create.( params: {id: 1, title: "Prodigal Son"} )["contract.default"].model.inspect.must_equal %{#<struct RescueTest::Song id=1, title="Prodigal Son">} }
+    it { Create.( params: {id: 1, title: "Prodigal Son"} ).inspect("x").must_equal %{<Result:true [nil] >} }
+    it { Create.( params: {id: nil} ).inspect(:model, "x").must_equal %{<Result:false [nil, RescueTest::RecordNotFound] >} }
+    it { assert_raises(RuntimeError) { Create.( params: {id: "RuntimeError!"} ) } }
   end
 
 
@@ -120,7 +120,7 @@ class RescueTest < Minitest::Spec
     step Rescue( RecordNotFound, handler: :rollback! ) {
       step Wrap ->(*, &block) { Sequel.transaction do block.call end } {
         step Model( Song, :find )
-        step ->(options) { options["model"].lock! } # lock the model.
+        step ->(options, *) { options[:model].lock! } # lock the model.
         step Contract::Build( constant: MyContract )
         step Contract::Validate( )
         step Contract::Persist( method: :sync )
@@ -134,7 +134,7 @@ class RescueTest < Minitest::Spec
       #~ex end
     end
 
-    def error!(options)
+    def error!(options, *)
       #~ex
       options["err"] = true
       #~ex end
@@ -142,13 +142,13 @@ class RescueTest < Minitest::Spec
   end
   #:example end
 
-    it { Create.( id: 1, title: "Pie" ).inspect("model", "x", "err").must_equal %{<Result:true [#<struct RescueTest::Song id=1, title=\"Pie\">, nil, nil] >} }
+    it { Create.( params: {id: 1, title: "Pie"} ).inspect(:model, "x", "err").must_equal %{<Result:true [#<struct RescueTest::Song id=1, title=\"Pie\">, nil, nil] >} }
     # raise exceptions in Model:
-    it { Create.( id: nil ).inspect("model", "x").must_equal %{<Result:false [nil, RescueTest::RecordNotFound] >} }
-    it { assert_raises(RuntimeError) { Create.( id: "RuntimeError!" ) } }
+    it { Create.( params: {id: nil} ).inspect(:model, "x").must_equal %{<Result:false [nil, RescueTest::RecordNotFound] >} }
+    it { assert_raises(RuntimeError) { Create.( params: {id: "RuntimeError!"} ) } }
     it do
-      Create.( id: 1, title: "Pie" )
-      Sequel.result.first.must_equal Pipetree::Railway::Right
+      Create.( params: {id: 1, title: "Pie"} )
+      Sequel.result.first.must_be_kind_of Trailblazer::Operation::Railway::End::Success
     end
   end
 end

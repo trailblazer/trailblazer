@@ -24,10 +24,10 @@ class DocsFailFastOptionTest < Minitest::Spec
   end
   #:ffopt end
 
-  it { Update.(id: 1).inspect("result.model.song", "contract.default").must_equal %{<Result:false [\"Something went wrong with ID 1!\", nil] >} }
+  it { Update.(params: {id: 1}).inspect("result.model.song", "contract.default").must_equal %{<Result:false [\"Something went wrong with ID 1!\", nil] >} }
   it do
   #:ffopt-res
-    result = Update.(id: 1)
+    result = Update.(params: {id: 1})
     result["result.model.song"] #=> "Something went wrong with ID 1!"
   #:ffopt-res end
   end
@@ -50,11 +50,11 @@ class DocsFailFastOptionWithStepTest < Minitest::Spec
   end
   #:ffopt-step end
 
-  it { Update.({ id: nil }).inspect("model").must_equal %{<Result:false [nil] >} }
-  it { Update.({ id: 1 }).inspect("model").must_equal %{<Result:true [Object] >} }
+  it { Update.(params: { id: nil }).inspect(:model).must_equal %{<Result:false [nil] >} }
+  it { Update.(params: { id: 1 }).inspect(:model).must_equal %{<Result:true [Object] >} }
   it do
   #:ffopt-step-res
-    result = Update.({ id: nil })
+    result = Update.(params: { id: nil })
 
     result.failure? #=> true
     result["model"] #=> nil
@@ -85,10 +85,10 @@ class DocsPassFastWithStepOptionTest < Minitest::Spec
   end
   #:pfopt-step end
 
-  it { Update.(id: 1).inspect("result.model.song", "contract.default").must_equal %{<Result:false [\"Something went wrong with ID 1!\", nil] >} }
+  it { Update.(params: {id: 1}).inspect("result.model.song", "contract.default").must_equal %{<Result:false [\"Something went wrong with ID 1!\", nil] >} }
   it do
   #:pfopt-step-res
-    result = Update.(id: 1)
+    result = Update.(params: {id: 1})
     result["result.model.song"] #=> "Something went wrong with ID 1!"
   #:pfopt-step-res end
   end
@@ -101,7 +101,7 @@ class DocsFailFastMethodTest < Minitest::Spec
 
   #:ffmeth
   class Update < Trailblazer::Operation
-    step :filter_params!         # emits fail_fast!
+    step :filter_params!,         fast_track: true # emits fail_fast!
     step Model( Song, :find_by )
     failure :handle_fail!
 
@@ -118,10 +118,10 @@ class DocsFailFastMethodTest < Minitest::Spec
   end
   #:ffmeth end
 
-  it { Update.({}).inspect("result.params", "my.status").must_equal %{<Result:false [\"No ID in params!\", nil] >} }
+  it { Update.(params: {}).inspect("result.params", "my.status").must_equal %{<Result:false [\"No ID in params!\", nil] >} }
   it do
   #:ffmeth-res
-    result = Update.(id: 1)
+    result = Update.(params: {id: 1})
     result["result.params"] #=> "No ID in params!"
     result["my.status"]     #=> nil
   #:ffmeth-res end
@@ -139,7 +139,7 @@ class DocsPassFastMethodTest < Minitest::Spec
   #:pfmeth
   class Create < Trailblazer::Operation
     step Model( Song, :new )
-    step :empty_model!                           # emits pass_fast!
+    step :empty_model!,         fast_track: true  # emits pass_fast!
     step Contract::Build( constant: MyContract )
     # ..
 
@@ -151,12 +151,132 @@ class DocsPassFastMethodTest < Minitest::Spec
   end
   #:pfmeth end
 
-  it { Create.({ title: "Tyrant"}, "is_empty" => true).inspect("model").must_equal %{<Result:true [#<struct DocsPassFastMethodTest::Song id=nil, title=nil>] >} }
+  it { Create.(params: { title: "Tyrant"}, "is_empty" => true).inspect(:model).must_equal %{<Result:true [#<struct DocsPassFastMethodTest::Song id=nil, title=nil>] >} }
   it do
   #:pfmeth-res
-    result = Create.({}, "is_empty" => true)
+    result = Create.(params: {}, "is_empty" => true)
     result["model"] #=> #<Song id=nil, title=nil>
   #:pfmeth-res end
+  end
+end
+
+
+class FastTrackWithNestedTest < Minitest::Spec
+  module Lib; end
+  module Memo; end
+
+  #:ft-nested
+  class Lib::Authenticate < Trailblazer::Operation
+    step :verify_input, fail_fast: true
+    step :user_ok?
+    #~ign
+    def verify_input(options, w:true, **); options[:w] = true; w; end
+    def user_ok?(options, u:true, **);     options[:u] = true; u; end
+    #~ign end
+  end
+  #:ft-nested end
+
+  #:ft-create
+  class Memo::Create < Trailblazer::Operation
+    step :validate
+    step Nested( Lib::Authenticate ) # fail_fast goes to End.fail_fast
+    step :create_model
+    step :save
+    #~igncr
+    def validate(options, v:true, **);     options[:v] = true; v; end
+    def create_model(options, c:true, **); options[:c] = true; c; end
+    def save(options, s:true, **);         options[:s] = true; s; end
+    #~igncr end
+  end
+  #:ft-create end
+
+  it "everything goes :success ===> End.success" do
+    result = Memo::Create.()
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:true [true, true, true, true, true] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Success
+  end
+
+  it "validate => failure ===> End.failure" do
+    result = Memo::Create.(v: false)
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:false [true, nil, nil, nil, nil] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Failure
+  end
+
+  it "verify_input? => fail_fast ===> End.fail_fast" do
+    result = Memo::Create.(w: false)
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:false [true, true, nil, nil, nil] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::FailFast
+  end
+
+  it "user_ok? => fail ===> End.failure" do
+    result = Memo::Create.(u: false)
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:false [true, true, true, nil, nil] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Failure
+  end
+
+  it "create_model? => fail ===> End.failure" do
+    result = Memo::Create.(c: false)
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:false [true, true, true, true, nil] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Failure
+  end
+
+  module Rewire
+    module Memo; end
+
+    #:ft-rewire
+    class Memo::Create < Trailblazer::Operation
+      step :validate
+      step Nested( Lib::Authenticate ), Output(:fail_fast) => :failure
+      step :create_model
+      step :save
+      #~ignrw
+      def validate(options, v:true, **);     options[:v] = true; v; end
+      def create_model(options, c:true, **); options[:c] = true; c; end
+      def save(options, s:true, **);         options[:s] = true; s; end
+      #~ignrw end
+    end
+    #:ft-rewire end
+  end
+
+  it "everything goes :success ===> End.success" do
+    result = Rewire::Memo::Create.()
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:true [true, true, true, true, true] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Success
+  end
+
+  it "validate => failure ===> End.failure" do
+    result = Rewire::Memo::Create.(v: false)
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:false [true, nil, nil, nil, nil] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Failure
+  end
+
+  # this is the only test differing.
+  it "verify_input? => fail_fast ===> End.failure" do
+    result = Rewire::Memo::Create.(w: false)
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:false [true, true, nil, nil, nil] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Failure
+  end
+
+  it "user_ok? => fail ===> End.failure" do
+    result = Rewire::Memo::Create.(u: false)
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:false [true, true, true, nil, nil] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Failure
+  end
+
+  it "create_model? => fail ===> End.failure" do
+    result = Rewire::Memo::Create.(c: false)
+
+    result.inspect(:v,:w,:u,:c,:s).must_equal %{<Result:false [true, true, true, true, nil] >}
+    result.event.must_be_instance_of Trailblazer::Operation::Railway::End::Failure
   end
 end
 
