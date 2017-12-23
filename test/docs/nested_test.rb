@@ -171,11 +171,9 @@ end
 class NestedWithCallableTest < Minitest::Spec
   Song = Struct.new(:id, :title)
 
-  class Song
-    module Contract
-      class Create < Reform::Form
-        property :title
-      end
+  module Song::Contract
+    class Create < Reform::Form
+      property :title
     end
   end
 
@@ -229,8 +227,6 @@ class NestedWithCallableTest < Minitest::Spec
   #---
   #:callable-builder
   class MyBuilder
-    extend Uber::Callable
-
     def self.call(options, current_user:nil, **)
       current_user.admin? ? Create::Admin : Create::NeedsModeration
     end
@@ -246,6 +242,50 @@ class NestedWithCallableTest < Minitest::Spec
 
   it { Delete.(params: {}, current_user: anonymous).inspect("x").must_equal %{<Result:true [true] >} }
   it { Delete.(params: {}, current_user: admin)    .inspect("x").must_equal %{<Result:true [nil] >} }
+end
+
+class NestedWithCallableAndInputTest < Minitest::Spec
+  Memo = Struct.new(:title, :text, :created_by)
+
+  class Memo::Upsert < Trailblazer::Operation
+    step Nested( :operation_class, input: :input_for_create )
+
+    def operation_class( ctx, ** )
+      pp ctx
+      ctx[:id] ? Update : Create
+    end
+
+    # only let :title pass through.
+    def input_for_create( ctx )
+      { title: ctx[:title] }
+    end
+
+    class Create < Trailblazer::Operation
+      step :create_memo
+
+      def create_memo( ctx, ** )
+        ctx[:model] = Memo.new(ctx[:title], ctx[:text], :create)
+      end
+    end
+
+    class Update < Trailblazer::Operation
+      step :find_by_title
+
+      def find_by_title( ctx, ** )
+        ctx[:model] = Memo.new(ctx[:title], ctx[:text], :update)
+      end
+    end
+  end
+
+  it "runs Create without :id" do
+    Memo::Upsert.( title: "Yay!" ).inspect(:model).
+      must_equal %{<Result:true [#<struct NestedWithCallableAndInputTest::Memo title=\"Yay!\", text=nil, created_by=:create>] >}
+  end
+
+  it "runs Update without :id" do
+    Memo::Upsert.( id: 1, title: "Yay!" ).inspect(:model).
+      must_equal %{<Result:true [#<struct NestedWithCallableAndInputTest::Memo title=\"Yay!\", text=nil, created_by=:update>] >}
+  end
 end
 
 # builder: Nested + deviate to left if nil / skip_track if true

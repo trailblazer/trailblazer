@@ -3,7 +3,7 @@ module Trailblazer
   class Operation
     def self.Nested(callable, input:nil, output:nil, id: "Nested(#{callable})")
       task_wrap_wirings = []
-      task, operation = Nested.build(callable, input, output)
+      task, operation, is_dynamic = Nested.build(callable, input, output)
 
       # @needs operation#outputs
 
@@ -25,6 +25,14 @@ module Trailblazer
           task output_filter, id: ".output", before: "End.success", group: :end # DISCUSS: position
         end
       end
+
+      if is_dynamic # FIXME: prototyping
+        task_wrap_extensions += Activity::Magnetic::Builder::Path.plan do
+          task task.method(:compute_nested_activity), id: ".compute_nested_activity",  before: ".input"
+          task task.method(:call_nested_activity),    id: ".call_nested_activity",     replace: "task_wrap.call_task"
+        end
+      end
+
         # Default {Output} copies the mutable data from the nested activity into the original.
 
       { task: task, id: id, runner_options: { merge: task_wrap_extensions }, plus_poles: Activity::Magnetic::DSL::PlusPoles.from_outputs(operation.outputs) }
@@ -33,12 +41,12 @@ module Trailblazer
     # @private
     module Nested
       def self.build(nested_operation, input, output) # DISCUSS: use builders here?
-        return dynamic = Dynamic.new(nested_operation), dynamic unless nestable_object?(nested_operation)
+        return dynamic = Dynamic.new(nested_operation), dynamic, true unless nestable_object?(nested_operation)
 
         # The returned {Nested} instance is a valid circuit element and will be `call`ed in the circuit.
         # It simply returns the nested activity's `signal,options,flow_options` return set.
         # The actual wiring - where to go with that - is done by the step DSL.
-        return Trailblazer::Activity::Subprocess(nested_operation, call: :__call__), nested_operation
+        return Trailblazer::Activity::Subprocess(nested_operation, call: :__call__), nested_operation, false
       end
 
       def self.nestable_object?(object)
@@ -66,16 +74,32 @@ module Trailblazer
 
         attr_reader :outputs
 
-        def call( (options, flow_options), **circuit_options )
-          activity = @wrapped.(options, circuit_options) # evaluate the option to get the actual "object" to call.
+# evaluate the option to get the actual "object" to call.
+        # TaskWrap step.
+        def compute_nested_activity( (wrap_ctx, original_args), **circuit_options )
+          (ctx, _), original_circuit_options = original_args
 
-          signal, args = activity.__call__( [options, flow_options], **circuit_options )
+          wrap_ctx[:nested_activity] = @wrapped.( ctx, original_circuit_options ) # evaluate the option to get the actual "object" to call.
+
+          return Activity::Right, [ wrap_ctx, original_args ]
+        end
+
+        def call_nested_activity( (wrap_ctx, original_args), **circuit_options )
+          activity = wrap_ctx[:nested_activity]
+          activity = Trailblazer::Activity::Subprocess( activity, call: :__call__ )
+
+          # TODO: use Subprocess.
+          # signal, args = activity.__call__( [options, flow_options], **circuit_options )
+          signal, (wrap_context, wr_bla) = Activity::Wrap.call_task( [wrap_ctx.merge(task: activity), original_args], **circuit_options )
+
+          signal_ = wrap_context[:result_direction]
+          wrap_context[:result_direction] = signal_.kind_of?(Railway::End::Success) ? @outputs[:success].signal : @outputs[:failure].signal
 
           # Translate the genuine nested signal to the generic Dynamic end (success/failure, only).
           # Note that here we lose information about what specific event was emitted.
           [
-            signal.kind_of?(Railway::End::Success) ? @outputs[:success].signal : @outputs[:failure].signal,
-            args
+            signal,
+            [ wrap_context, wr_bla]
           ]
         end
       end
