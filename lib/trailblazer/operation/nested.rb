@@ -29,7 +29,7 @@ module Trailblazer
       if is_dynamic # FIXME: prototyping
         task_wrap_extensions += Activity::Magnetic::Builder::Path.plan do
           task task.method(:compute_nested_activity), id: ".compute_nested_activity",  before: ".input"
-          task task.method(:call_nested_activity),    id: ".call_nested_activity",     replace: "task_wrap.call_task"
+          task task.method(:compute_return_signal),   id: ".compute_return_signal",    after: "task_wrap.call_task"
         end
       end
 
@@ -79,27 +79,21 @@ module Trailblazer
         def compute_nested_activity( (wrap_ctx, original_args), **circuit_options )
           (ctx, _), original_circuit_options = original_args
 
-          wrap_ctx[:nested_activity] = @wrapped.( ctx, original_circuit_options ) # evaluate the option to get the actual "object" to call.
+          activity = @wrapped.( ctx, original_circuit_options ) # evaluate the option to get the actual "object" to call.
+          wrap_ctx[:task] = Trailblazer::Activity::Subprocess( activity, call: :__call__ )
 
           return Activity::Right, [ wrap_ctx, original_args ]
         end
 
-        def call_nested_activity( (wrap_ctx, original_args), **circuit_options )
-          activity = wrap_ctx[:nested_activity]
-          activity = Trailblazer::Activity::Subprocess( activity, call: :__call__ )
-
-          # TODO: use Subprocess.
-          # signal, args = activity.__call__( [options, flow_options], **circuit_options )
-          signal, (wrap_context, wr_bla) = Activity::Wrap.call_task( [wrap_ctx.merge(task: activity), original_args], **circuit_options )
-
-          signal_ = wrap_context[:result_direction]
-          wrap_context[:result_direction] = signal_.kind_of?(Railway::End::Success) ? @outputs[:success].signal : @outputs[:failure].signal
+        def compute_return_signal( (wrap_ctx, original_args), **circuit_options )
+          signal = wrap_ctx[:result_direction]
+          wrap_ctx[:result_direction] = signal.kind_of?(Railway::End::Success) ? @outputs[:success].signal : @outputs[:failure].signal
 
           # Translate the genuine nested signal to the generic Dynamic end (success/failure, only).
           # Note that here we lose information about what specific event was emitted.
           [
-            signal,
-            [ wrap_context, wr_bla]
+            Activity::Right,
+            [ wrap_ctx, original_args ]
           ]
         end
       end
