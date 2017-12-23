@@ -3,7 +3,7 @@ module Trailblazer
   class Operation
     def self.Nested(callable, input:nil, output:nil, id: "Nested(#{callable})")
       task_wrap_wirings = []
-      task, operation, is_dynamic = Nested.build(callable, input, output)
+      task, operation, is_dynamic = Nested.build(callable)
 
       # @needs operation#outputs
 
@@ -26,21 +26,19 @@ module Trailblazer
         end
       end
 
-      if is_dynamic # FIXME: prototyping
+      if is_dynamic
         task_wrap_extensions += Activity::Magnetic::Builder::Path.plan do
-          task task.method(:compute_nested_activity), id: ".compute_nested_activity",  before: ".input"
+          task task.method(:compute_nested_activity), id: ".compute_nested_activity",  after: "Start.default", group: :start
           task task.method(:compute_return_signal),   id: ".compute_return_signal",    after: "task_wrap.call_task"
         end
       end
-
-        # Default {Output} copies the mutable data from the nested activity into the original.
 
       { task: task, id: id, runner_options: { merge: task_wrap_extensions }, plus_poles: Activity::Magnetic::DSL::PlusPoles.from_outputs(operation.outputs) }
     end
 
     # @private
     module Nested
-      def self.build(nested_operation, input, output) # DISCUSS: use builders here?
+      def self.build(nested_operation) # DISCUSS: use builders here?
         return dynamic = Dynamic.new(nested_operation), dynamic, true unless nestable_object?(nested_operation)
 
         # The returned {Nested} instance is a valid circuit element and will be `call`ed in the circuit.
@@ -74,27 +72,26 @@ module Trailblazer
 
         attr_reader :outputs
 
-# evaluate the option to get the actual "object" to call.
         # TaskWrap step.
         def compute_nested_activity( (wrap_ctx, original_args), **circuit_options )
           (ctx, _), original_circuit_options = original_args
 
           activity = @wrapped.( ctx, original_circuit_options ) # evaluate the option to get the actual "object" to call.
+
+          # overwrite :task so task_wrap.call_task will call this activity. This is a trick so we don't have to repeat
+          # logic from #call_task here.
           wrap_ctx[:task] = Trailblazer::Activity::Subprocess( activity, call: :__call__ )
 
           return Activity::Right, [ wrap_ctx, original_args ]
         end
 
         def compute_return_signal( (wrap_ctx, original_args), **circuit_options )
-          signal = wrap_ctx[:result_direction]
-          wrap_ctx[:result_direction] = signal.kind_of?(Railway::End::Success) ? @outputs[:success].signal : @outputs[:failure].signal
-
           # Translate the genuine nested signal to the generic Dynamic end (success/failure, only).
           # Note that here we lose information about what specific event was emitted.
-          [
-            Activity::Right,
-            [ wrap_ctx, original_args ]
-          ]
+          wrap_ctx[:return_signal] = wrap_ctx[:return_signal].kind_of?(Railway::End::Success) ?
+            @outputs[:success].signal : @outputs[:failure].signal
+
+          return Activity::Right, [ wrap_ctx, original_args ]
         end
       end
     end
