@@ -1,3 +1,4 @@
+require "pp"
 require "trailblazer"
 require "minitest/autorun"
 
