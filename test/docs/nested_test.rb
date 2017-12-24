@@ -251,7 +251,6 @@ class NestedWithCallableAndInputTest < Minitest::Spec
     step Nested( :operation_class, input: :input_for_create )
 
     def operation_class( ctx, ** )
-      pp ctx
       ctx[:id] ? Update : Create
     end
 

@@ -2,28 +2,12 @@
 module Trailblazer
   class Operation
     def self.Nested(callable, input:nil, output:nil, id: "Nested(#{callable})")
-      task_wrap_wirings = []
+      task_wrap_extensions        = []
+
       task, operation, is_dynamic = Nested.build(callable)
 
-      # @needs operation#outputs
-
-      # TODO: move this to the generic step DSL
-      task_wrap_extensions = []
-
-      if input || output
-        default_input_filter  = ->(options, *) { ctx = options }
-        default_output_filter = ->(options, *) { options }
-
-        input  ||= default_input_filter
-        output ||= default_output_filter
-
-        input_filter  = Activity::Wrap::Input.new(input)
-        output_filter = Activity::Wrap::Output.new(output)
-
-        task_wrap_extensions = Activity::Magnetic::Builder::Path.plan do
-          task input_filter,  id: ".input",  before: "task_wrap.call_task"
-          task output_filter, id: ".output", before: "End.success", group: :end # DISCUSS: position
-        end
+      if input || output # TODO: move this to the generic step DSL
+        task_wrap_extensions = InputOutput.plan( input, output )
       end
 
       if is_dynamic
@@ -33,7 +17,12 @@ module Trailblazer
         end
       end
 
-      { task: task, id: id, runner_options: { merge: task_wrap_extensions }, plus_poles: Activity::Magnetic::DSL::PlusPoles.from_outputs(operation.outputs) }
+      {
+        task:           task,
+        id:             id,
+        runner_options: { merge: task_wrap_extensions },
+        plus_poles:     Activity::Magnetic::DSL::PlusPoles.from_outputs(operation.outputs) # @needs operation#outputs
+      }
     end
 
     # @private
@@ -62,9 +51,9 @@ module Trailblazer
       #
       # This is what {Nested} in 2.0 used to do, where the outcome could only be true/false (or success/failure).
       class Dynamic
-        def initialize(wrapped)
-          @wrapped = Trailblazer::Option::KW(wrapped)
-          @outputs = {
+        def initialize(nested_activity)
+          @nested_activity = Trailblazer::Option::KW(nested_activity)
+          @outputs         = {
             :success => Activity::Output( Railway::End::Success.new(:success), :success ),
             :failure => Activity::Output( Railway::End::Failure.new(:failure), :failure ),
           }
@@ -76,7 +65,7 @@ module Trailblazer
         def compute_nested_activity( (wrap_ctx, original_args), **circuit_options )
           (ctx, _), original_circuit_options = original_args
 
-          activity = @wrapped.( ctx, original_circuit_options ) # evaluate the option to get the actual "object" to call.
+          activity = @nested_activity.( ctx, original_circuit_options ) # evaluate the option to get the actual "object" to call.
 
           # overwrite :task so task_wrap.call_task will call this activity. This is a trick so we don't have to repeat
           # logic from #call_task here.
