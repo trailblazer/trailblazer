@@ -28,10 +28,10 @@ class Trailblazer::Operation
 
       def call( (options, flow_options), **circuit_options )
         block_calling_wrapped = -> {
-          args, circuit_options_with_wrap_static = Railway::TaskWrap.arguments_for_call( @operation, [options, flow_options], **circuit_options )
+          args, circuit_options = Railway::TaskWrap.arguments_for_call( @operation, [options, flow_options], **circuit_options )
 
           # TODO: this is not so nice, still working out how to separate all those bits and pieces.
-          @operation.instance_variable_get(:@process).( args, **circuit_options.merge(circuit_options_with_wrap_static) ) # FIXME: arguments_for_call don't return the full circuit_options, :exec_context gets lost.
+          @operation.instance_variable_get(:@process).( args, **circuit_options ) # FIXME:  :exec_context gets lost. ?????
         }
 
         # call the user's Wrap {} block in the operation.
