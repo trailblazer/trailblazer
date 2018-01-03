@@ -19,6 +19,7 @@ gem "trailblazer-operation", github: "trailblazer/trailblazer-operation"
 
 gem "minitest-line"
 
+gem "rubocop", require: false
 # gem "trailblazer-activity", path: "../trailblazer-circuit"
 gem "trailblazer-activity", github: "trailblazer/trailblazer-activity"
 
