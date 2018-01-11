@@ -4,14 +4,14 @@ class Trailblazer::Operation
 
     task = Railway::TaskBuilder.( Model.new )
 
-    runner_options = {
-      merge: Wrap::Inject::Defaults(
+    extension = Trailblazer::Activity::TaskWrap::Merge.new(
+      Wrap::Inject::Defaults(
         "model.class"  => model_class,
         "model.action" => action
       )
-    }
+    )
 
-    { task: task, id: "model.build", runner_options: runner_options }
+    { task: task, id: "model.build", extension: [extension] }
   end
 
   class Model

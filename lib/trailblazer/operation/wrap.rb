@@ -3,7 +3,7 @@ class Trailblazer::Operation
   # false is automatically connected to End.failure.
 
   def self.Wrap(user_wrap, id: "Wrap/#{rand(100)}", &block)
-    operation_class = Wrap.Operation(block)
+    operation_class = Wrap.create_operation(block)
     wrapped         = Wrap::Wrapped.new(operation_class, user_wrap)
 
     # connect `false` as an end event, when an exception stopped the wrap, for example.
@@ -13,7 +13,7 @@ class Trailblazer::Operation
   end
 
   module Wrap
-    def self.Operation(block)
+    def self.create_operation(block)
       Class.new( Nested.operation_class, &block ) # Usually resolves to Trailblazer::Operation.
     end
 
@@ -28,10 +28,9 @@ class Trailblazer::Operation
 
       def call( (options, flow_options), **circuit_options )
         block_calling_wrapped = -> {
-          args, circuit_options = Railway::TaskWrap.arguments_for_call( @operation, [options, flow_options], **circuit_options )
+          activity, _ = @operation.decompose
 
-          # TODO: this is not so nice, still working out how to separate all those bits and pieces.
-          @operation.instance_variable_get(:@process).( args, **circuit_options ) # FIXME:  :exec_context gets lost. ?????
+          activity.( [options, flow_options], **circuit_options )
         }
 
         # call the user's Wrap {} block in the operation.
