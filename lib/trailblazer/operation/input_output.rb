@@ -13,8 +13,8 @@ module Trailblazer
       input  ||= default_input_filter
       output ||= default_output_filter
 
-      input_filter  = Activity::Wrap::Input.new(input)
-      output_filter = Activity::Wrap::Output.new(output)
+      input_filter  = Activity::TaskWrap::Input.new(input)
+      output_filter = Activity::TaskWrap::Output.new(output)
 
       # taskWrap extensions
       Activity::Magnetic::Builder::Path.plan do
