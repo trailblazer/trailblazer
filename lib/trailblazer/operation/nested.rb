@@ -20,7 +20,7 @@ module Trailblazer
       {
         task:           task,
         id:             id,
-        runner_options: { merge: task_wrap_extensions },
+        extension:      [ Trailblazer::Activity::TaskWrap::Merge.new(task_wrap_extensions) ],
         plus_poles:     Activity::Magnetic::DSL::PlusPoles.from_outputs(operation.outputs) # @needs operation#outputs
       }
     end

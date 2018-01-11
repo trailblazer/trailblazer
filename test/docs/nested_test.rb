@@ -145,10 +145,10 @@ class NestedOutput < Minitest::Spec
 
   #:output
   class Update < Trailblazer::Operation
-    step Nested( Edit, output: ->(options, **) do
+    step Nested( Edit, output: ->( ctx, ** ) do
       {
-        "contract.my" => options["contract.default"],
-        model:           options[:model]
+        "contract.my" => ctx["contract.default"],
+        model:           ctx[:model]
       }
     end )
     step Contract::Validate( name: "my" )
