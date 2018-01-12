@@ -10,22 +10,15 @@ class Trailblazer::Operation
       extract  = Validate::Extract.new( key: key, params_path: params_path ).freeze
       validate = Validate.new( name: name, representer: representer, params_path: params_path ).freeze
 
-      # Return the Validate::Call task if the first step, the params extraction, is not desired.
-      if skip_extract || representer
-        return { task: Trailblazer::Activity::Task::Binary( validate ), id: "contract.#{name}.call" }
-      end
-
-
-      # TODO: USE OPERATION.ACTIVITY
       # Build a simple Railway {Activity} for the internal flow.
-      activity = Trailblazer::Activity::Railway.build do # FIXME: make Activity.build(builder: Railway) do end an <Activity>
-        include Trailblazer::Activity::TaskWrap
-        step Trailblazer::Activity::Task::Binary( extract ),  id: "#{params_path}_extract"
-        step Trailblazer::Activity::Task::Binary( validate ), id: "contract.#{name}.call"
+      activity = Class.new( Trailblazer::Operation ) do
+        step extract,  id: "#{params_path}_extract" unless skip_extract || representer
+        step validate, id: "contract.#{name}.call"
       end
+
+      activity, _ = activity.decompose
 
       # DISCUSS: use Nested here?
-      # Nested.operation_class.Nested( activity, id: "contract.#{name}.validate" )
       { task: activity, id: "contract.#{name}.validate", plus_poles: Trailblazer::Activity::Magnetic::DSL::PlusPoles.from_outputs(activity.outputs) }
     end
 
@@ -36,8 +29,8 @@ class Trailblazer::Operation
           @key, @params_path = key, params_path
         end
 
-        def call( (options, flow_options), **circuit_options )
-          options[@params_path] = @key ? options[:params][@key] : options[:params]
+        def call( ctx, params:, ** )
+          ctx[@params_path] = @key ? params[@key] : params
         end
       end
 
@@ -46,10 +39,10 @@ class Trailblazer::Operation
       end
 
       # Task: Validates contract `:name`.
-      def call( (options, flow_options), **circuit_options )
+      def call( ctx, ** )
         validate!(
-          options,
-          representer: options["representer.#{@name}.class"] ||= @representer, # FIXME: maybe @representer should use DI.
+          ctx,
+          representer: ctx["representer.#{@name}.class"] ||= @representer, # FIXME: maybe @representer should use DI.
           params_path: @params_path
         )
       end
