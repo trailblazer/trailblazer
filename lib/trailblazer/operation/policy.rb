@@ -32,13 +32,13 @@ class Trailblazer::Operation
 
       task = Eval.new( name: name, path: path )
 
-      runner_options = {
-        merge: Trailblazer::Operation::Wrap::Inject::Defaults(
+      extension = Trailblazer::Activity::TaskWrap::Merge.new(
+        Trailblazer::Operation::Wrap::Inject::Defaults(
           path => condition
         )
-      }
+      )
 
-      { task: task, id: path, runner_options: runner_options }
+      { task: task, id: path, extension: [extension] }
     end
   end
 end
