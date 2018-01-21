@@ -11,7 +11,7 @@ class Trailblazer::Operation
     def self.Build(name: "default", constant: nil, builder: nil)
       step = ->((options, flow_options), **circuit_options) { Build.(options, circuit_options, name: name, constant: constant, builder: builder) }
 
-      task = Trailblazer::Activity::Task::Binary( step )
+      task = Trailblazer::Activity::TaskBuilder::Binary.( step )
 
       { task: task, id: "contract.build" }
     end

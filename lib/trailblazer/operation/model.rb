@@ -2,7 +2,7 @@ class Trailblazer::Operation
   def self.Model(model_class, action=nil)
     # step = Pipetree::Step.new(step, "model.class" => model_class, "model.action" => action)
 
-    task = Railway::TaskBuilder.( Model.new )
+    task = Trailblazer::Activity::TaskBuilder::Binary.( Model.new )
 
     extension = Trailblazer::Activity::TaskWrap::Merge.new(
       Wrap::Inject::Defaults(

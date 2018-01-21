@@ -2,7 +2,9 @@
 module Trailblazer
   class Operation
     def self.Nested(callable, input:nil, output:nil, id: "Nested(#{callable})")
-      task_wrap_extensions        = []
+      task_wrap_extensions        = Module.new do
+        extend Activity[ Activity::Path::Plan ]
+      end
 
       task, operation, is_dynamic = Nested.build(callable)
 
@@ -11,10 +13,10 @@ module Trailblazer
       end
 
       if is_dynamic
-        task_wrap_extensions += Activity::Magnetic::Builder::Path.plan do
-          task task.method(:compute_nested_activity), id: ".compute_nested_activity",  after: "Start.default", group: :start
-          task task.method(:compute_return_signal),   id: ".compute_return_signal",    after: "task_wrap.call_task"
-        end
+        # task_wrap_extensions += Activity::Magnetic::Builder::Path.plan do
+          task_wrap_extensions.task task.method(:compute_nested_activity), id: ".compute_nested_activity",  after: "Start.default", group: :start
+          task_wrap_extensions.task task.method(:compute_return_signal),   id: ".compute_return_signal",    after: "task_wrap.call_task"
+        # end
       end
 
       {

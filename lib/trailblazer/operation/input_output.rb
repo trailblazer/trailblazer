@@ -17,7 +17,9 @@ module Trailblazer
       output_filter = Activity::TaskWrap::Output.new(output)
 
       # taskWrap extensions
-      Activity::Magnetic::Builder::Path.plan do
+      Module.new do
+        extend Activity[ Activity::Path::Plan ]
+
         task input_filter,  id: ".input",  before: "task_wrap.call_task"
         task output_filter, id: ".output", before: "End.success", group: :end # DISCUSS: position
       end
