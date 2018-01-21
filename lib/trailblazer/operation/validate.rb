@@ -14,6 +14,8 @@ module Trailblazer
         # Build a simple Railway {Activity} for the internal flow.
         activity = Module.new do
           extend Activity[ Activity::Railway ]
+          include Activity::TaskWrap
+
           step extract,  id: "#{params_path}_extract" unless skip_extract || representer
           step validate, id: "contract.#{name}.call"
         end
