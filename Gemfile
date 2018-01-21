@@ -14,15 +14,15 @@ gem "dry-auto_inject"
 gem "dry-matcher"
 gem "dry-validation"
 
-gem "trailblazer-operation", path: "../operation"
-# gem "trailblazer-operation", github: "trailblazer/trailblazer-operation"
+# gem "trailblazer-operation", path: "../operation"
+gem "trailblazer-operation", github: "trailblazer/trailblazer-operation"
 
 gem "minitest-line"
 
 gem "rubocop", require: false
 # gem "trailblazer-activity", path: "../trailblazer-circuit"
-# gem "trailblazer-activity", github: "trailblazer/trailblazer-activity"
-gem "trailblazer-activity", path: "../trailblazer-circuit"
+gem "trailblazer-activity", github: "trailblazer/trailblazer-activity"
+# gem "trailblazer-activity", path: "../trailblazer-circuit"
 # gem "trailblazer-activity", github: "trailblazer/trailblazer-activity"
 
 # gem "trailblazer-context", path: "../trailblazer-context"
