@@ -3,7 +3,7 @@ module Trailblazer
   class Operation
     def self.Nested(callable, input:nil, output:nil, id: "Nested(#{callable})")
       task_wrap_extensions        = Module.new do
-        extend Activity[ Activity::Path::Plan ]
+        extend Activity::Path::Plan()
       end
 
       task, operation, is_dynamic = Nested.build(callable)

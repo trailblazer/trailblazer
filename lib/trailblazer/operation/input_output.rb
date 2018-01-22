@@ -18,7 +18,7 @@ module Trailblazer
 
       # taskWrap extensions
       Module.new do
-        extend Activity[ Activity::Path::Plan ]
+        extend Activity::Path::Plan()
 
         task input_filter,  id: ".input",  before: "task_wrap.call_task"
         task output_filter, id: ".output", before: "End.success", group: :end # DISCUSS: position
