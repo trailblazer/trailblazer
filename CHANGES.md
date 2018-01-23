@@ -29,6 +29,10 @@ document Task API and define step API
 deprecate step->(options) ?
 injectable, per-operation step arguments strategy?
 
+# 2.1.0.beta2
+
+* Simplify `Nested` and several other internals by using the new `Activity` API.
+
 # 2.1.0.beta1
 
 * Add `deprecation/call` and `deprecation/context` that help with the new `call` API and symbols for `options` keys.
