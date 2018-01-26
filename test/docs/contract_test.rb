@@ -62,15 +62,15 @@ class DocsContractOverviewTest < Minitest::Spec
 
   it "shows 2-level tracing" do
     result = Create.trace( params: { length: "A" } )
-    result.wtf.gsub(/0x\w+/, "").must_equal %{|-- #<Trailblazer::Activity::Start:>
+    result.wtf.gsub(/0x\w+/, "").must_equal %{|-- #<Trailblazer::Activity::Start semantic=:default>
 |-- model.build
 |-- contract.build
 |-- contract.default.validate
-|   |-- #<Trailblazer::Activity::Start:>
+|   |-- #<Trailblazer::Activity::Start semantic=:default>
 |   |-- contract.default.params_extract
 |   |-- contract.default.call
-|   `-- #<Trailblazer::Activity::End:>
-`-- #<Trailblazer::Operation::Railway::End::Failure:>}
+|   `-- #<Trailblazer::Activity::End semantic=:failure>
+`-- #<Trailblazer::Operation::Railway::End::Failure semantic=:failure>}
   end
 end
 

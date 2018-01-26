@@ -38,10 +38,10 @@ class DocsTraceTest < Minitest::Spec
     # `-- End.success
     #:trace end
 
-    result.wtf.gsub(/0x\w+/, "").must_equal %{|-- #<Trailblazer::Activity::Start:>
+    result.wtf.gsub(/0x\w+/, "").must_equal %{|-- #<Trailblazer::Activity::Start semantic=:default>
 |-- model.build
 |-- contract.build
-`-- #<Trailblazer::Operation::Railway::End::Success:>}
+`-- #<Trailblazer::Operation::Railway::End::Success semantic=:success>}
   end
 
   it do
