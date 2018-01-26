@@ -28,7 +28,7 @@ class Trailblazer::Operation
 
       def call( (options, flow_options), **circuit_options )
         block_calling_wrapped = -> {
-          activity = @operation.decompose[:activity]
+          activity = @operation.to_h[:activity]
 
           activity.( [options, flow_options], **circuit_options )
         }
