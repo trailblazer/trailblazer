@@ -56,8 +56,8 @@ module Trailblazer
         def initialize(nested_activity)
           @nested_activity = Trailblazer::Option::KW(nested_activity)
           @outputs         = {
-            :success => Activity::Output( Railway::End::Success.new(:success), :success ),
-            :failure => Activity::Output( Railway::End::Failure.new(:failure), :failure ),
+            :success => Activity::Output( Railway::End::Success.new(semantic: :success), :success ),
+            :failure => Activity::Output( Railway::End::Failure.new(semantic: :failure), :failure ),
           }
         end
 
