@@ -1,87 +1,44 @@
-module Trailblazer
-  class NotAuthorizedError < RuntimeError
-  end
-
-  # Adds #evaluate_policy to #setup!, and ::policy.
-  module Operation::Policy
-    require "trailblazer/operation/policy/guard"
-
-    def self.included(includer)
-      includer.extend DSL
-    end
-
-    module DSL
-      def self.extended(extender)
-        extender.inheritable_attr :policy_config
-        extender.policy_config = Guard::Permission.new { true } # return true per default.
+class Trailblazer::Operation
+  module Policy
+    # Step: This generically `call`s a policy and then pushes its result to `options`.
+    # You can use any callable object as a policy with this step.
+    class Eval
+      def initialize(name:nil, path:nil)
+        @name = name
+        @path = path
       end
 
-      def policy(*args, &block)
-        self.policy_config = permission_class.new(*args, &block)
-      end
+      # incoming low-level {Task API}.
+      # outgoing Task::Binary API.
+      def call((options, flow_options), **circuit_options)
+        condition = options[ @path ] # this allows dependency injection.
+        result    = condition.( [options, flow_options], **circuit_options )
 
-      def permission_class
-        Permission
-      end
-    end
+        options["policy.#{@name}"]        = result["policy"] # assign the policy as a skill.
+        options["result.policy.#{@name}"] = result
 
-    attr_reader :policy
+        # flow control
+        signal = result.success? ? Trailblazer::Activity::Right : Trailblazer::Activity::Left # since we & this, it's only executed OnRight and the return boolean decides the direction, input is passed straight through.
 
-  private
-    module Setup
-      def setup!(params)
-        super
-        evaluate_policy(params)
-      end
-    end
-    include Setup
-
-
-    private
-    def evaluate_policy(params)
-      user = params[:current_user]
-
-      @policy = self.class.policy_config.(user, model, @policy) do |policy, action|
-        raise policy_exception(policy, action, model)
+        return signal, [ options, flow_options ]
       end
     end
 
-    def policy_exception(policy, action, model)
-      NotAuthorizedError.new(query: action, record: model, policy: policy)
-    end
+    # Adds the `yield` result to the pipe and treats it like a
+    # policy-compatible  object at runtime.
+    def self.step(condition, options, &block)
+      name = options[:name]
+      path = "policy.#{name}.eval"
 
-    # Encapsulate building the Policy object and calling the defined query action.
-    # This assumes the policy class is "pundit-style", as in Policy.new(user, model).edit?.
-    class Permission
-      def initialize(policy_class, action)
-        @policy_class, @action = policy_class, action
-      end
+      task = Eval.new( name: name, path: path )
 
-      # Without a block, return the policy object (which is usually a Pundit-style class).
-      # When block is passed evaluate the default rule and run block when false.
-      def call(user, model, external_policy=nil)
-        build_policy(user, model, external_policy).tap do |policy|
-          policy.send(@action) || yield(policy, @action) if block_given?
-        end
-      end
+      extension = Trailblazer::Activity::TaskWrap::Merge.new(
+        Trailblazer::Operation::Wrap::Inject::Defaults(
+          path => condition
+        )
+      )
 
-    private
-      def build_policy(user, model, policy)
-        policy or @policy_class.new(user, model)
-      end
-    end
-  end
-
-
-  module Operation::Deny
-    def self.included(includer)
-      includer.extend ClassMethods
-    end
-
-    module ClassMethods
-      def deny!
-        raise NotAuthorizedError
-      end
+      { task: task, id: path, extension: [extension] }
     end
   end
 end

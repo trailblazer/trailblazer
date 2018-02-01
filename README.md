@@ -1,15 +1,19 @@
 # Trailblazer
 
-_Trailblazer is a thin layer on top of Rails. It gently enforces encapsulation, an intuitive code structure and gives you an object-oriented architecture._
+_Trailblazer provides new high-level abstractions for Ruby frameworks. It gently enforces encapsulation, an intuitive code structure and gives you an object-oriented architecture._
 
-[![Gem Version](https://badge.fury.io/rb/trailblazer.svg)](http://badge.fury.io/rb/trailblazer)
 [![Gitter Chat](https://badges.gitter.im/trailblazer/chat.svg)](https://gitter.im/trailblazer/chat)
+[![TRB Newsletter](https://img.shields.io/badge/TRB-newsletter-lightgrey.svg)](http://trailblazer.to/newsletter/)
+[![Gem Version](https://badge.fury.io/rb/trailblazer.svg)](http://badge.fury.io/rb/trailblazer)
 
+**This document discusses Trailblazer 2.1.** An overview about the additions are [on our website](http://trailblazer.to/blog/2017-12-trailblazer-2-1-what-you-need-to-know.html).
+
+The [1.x documentation is here](http://trailblazer.to/gems/operation/1.1/).
 
 ## Trailblazer In A Nutshell
 
 1. All business logic is encapsulated in [operations](#operation) (service objects).
-  * An optional Reform [form](#validations) object in the operation deserializes and validates input. The form object can also be used for rendering.
+  * Optional [validation objects](#validation) (Reform and/or Dry-validation) in the operation deserialize and validate input. The form object can also be used for rendering.
   * An optional [policy](#policies) object blocks unauthorized users from running the operation.
   * Optional [callback](#callbacks) objects allow declaring post-processing logic.
 3. [Controllers](#controllers) instantly delegate to an operation. No business code in controllers, only HTTP-specific logic.
@@ -18,7 +22,7 @@ _Trailblazer is a thin layer on top of Rails. It gently enforces encapsulation, 
 
 Trailblazer is designed to handle different contexts like user roles by applying [inheritance](#inheritance) between and [composing](#composing) of operations, form objects, policies, representers and callbacks.
 
-Wanna see some code? Jump [right here](#controllers)!
+Want code? Jump [right here](#controllers)!
 
 ## Trailblazer Gem Ecosystem
 _**You are free to use any part of the system by itself, but Trailblazer really shines, when all parts work together.**_ 
@@ -51,26 +55,37 @@ Again, you can pick which layers you want. Trailblazer doesn't impose technical 
 
 Trailblazer is no "complex web of objects and indirection". It solves many problems that have been around for years with a cleanly layered architecture. Only use what you like. And that's the bottom line.
 
+## Concepts over Technology
 
-## A Concept-Driven OOP Framework
-
-Trailblazer offers you a new, more intuitive file layout in Rails apps where you structure files by *concepts*.
+Trailblazer offers you a new, more intuitive file layout in applications.
 
 ```
 app
 ├── concepts
 │   ├── comment
-│   │   ├── cell.rb
-│   │   ├── views
+│   │   ├── operation
+│   │   │   ├── create.rb
+│   │   │   ├── update.rb
+│   │   ├── contract
+│   │   │   ├── create.rb
+│   │   │   ├── update.rb
+│   │   ├── cell
+│   │   │   ├── show.rb
+│   │   │   ├── index.rb
+│   │   ├── view
 │   │   │   ├── show.haml
-│   │   │   ├── list.haml
-│   │   ├── assets
+│   │   │   ├── index.rb
 │   │   │   ├── comment.css.sass
-│   │   ├── operation.rb
-│   │   ├── twin.rb
 ```
 
-Files, classes and views that logically belong to one _concept_ are kept in one place. You are free to use additional namespaces within a concept. Trailblazer tries to keep it as simple as possible, though.
+Instead of grouping by technology, classes and views are structured by *concept*, and then by technology. A concept can relate to a model, or can be a completely abstract concern such as `invoicing`.
+
+Within a concept, you can have any level of nesting. For example, `invoicing/pdf/` could be one.
+
+The file structure is implemented by the [`trailblazer-loader` gem](https://github.com/trailblazer/trailblazer-loader).
+
+[Learn more.](http://trailblazer.to/gems/trailblazer/loader.html)
+
 
 ## Architecture
 
@@ -78,7 +93,7 @@ Trailblazer extends the conventional MVC stack in Rails. Keep in mind that addin
 
 The opposite is the case: Controller, view and model become lean endpoints for HTTP, rendering and persistence. Redundant code gets eliminated by putting very little application code into the right layer.
 
-![The Trailblazer stack.](https://raw.github.com/apotonick/trailblazer/master/doc/Trb-The-Stack.png)
+![The Trailblazer stack.](https://raw.github.com/apotonick/trailblazer/master/doc/operation-2017.png)
 
 ## Routing
 
@@ -99,6 +114,7 @@ class CommentsController < ApplicationController
   def create
     run Comment::Create # Comment::Create is an operation class.
   end
+end
 ```
 
 The `#run` method invokes the operation. It allows you to run a conditional block of logic if the operation was successful.
@@ -112,6 +128,7 @@ class CommentsController < ApplicationController
 
     render :new # invalid. re-render form.
   end
+end
 ```
 
 Again, the controller only dispatchs to the operation and handles successful/invalid processing on the HTTP level. For instance by redirecting, setting flash messages, or signing in a user.
@@ -122,42 +139,57 @@ Again, the controller only dispatchs to the operation and handles successful/inv
 
 Operations encapsulate business logic and are the heart of a Trailblazer architecture.
 
-Operations don't know about HTTP or the environment. You could use an operation in Rails, Lotus, or Roda, it wouldn't know. This makes them an ideal replacement for test factories.
+The bare bones operation without any Trailblazery is implemented in [the `trailblazer-operation` gem](https://github.com/trailblazer/trailblazer-operation) and can be used without our stack.
 
-An operation is not just a monolithic replacement for your business code. It's a simple orchestrator between the form object, models and your business code.
+Operations don't know about HTTP or the environment. You could use an operation in Rails, Hanami, or Roda, it wouldn't know.
+
+An operation is not just a monolithic replacement for your business code. It's a simple orchestrator between the form objects, models, your business code and all other layers needed to get the job done.
 
 ```ruby
 class Comment::Create < Trailblazer::Operation
-  def process(params)
+  step :process!
+
+  def process!(options)
     # do whatever you feel like.
   end
 end
 ```
 
-Operations only need to implement `#process` which receives the params from the caller.
+Operations only need to define and implement steps, like the `#process!` steps. Those steps receive the arguments from the caller.
+
+You cannot instantiate them per design. The only way to invoke them is `call`.
+
+```ruby
+Comment::Create.call(whatever: "goes", in: "here")
+# same as
+Comment::Create.(whatever: "goes", in: "here")
+```
+
+Their high degree of encapsulation makes them a [replacement for test factories](#test), too.
 
 [Learn more.](http://trailblazer.to/gems/operation)
 
-## Validations
+## Validation
 
 In Trailblazer, an operation (usually) has a form object which is simply a `Reform::Form` class. All the [API documented in Reform](https://github.com/apotonick/reform) can be applied and used.
+
+Validations can also be implemented in pure Dry-validation.
 
 The operation makes use of the form object using the `#validate` method.
 
 ```ruby
 class Comment::Create < Trailblazer::Operation
+  extend Contract::DSL
+
   contract do
     # this is a Reform::Form class!
     property :body, validates: {presence: true}
   end
 
-  def process(params)
-    @model = Comment.new
-
-    validate(params[:comment], @model) do |f|
-      f.save
-    end
-  end
+  step Model( Comment, :new )
+  step Contract::Build()
+  step Contract::Validate( key: :comment )
+  step Contract::Persist( )
 end
 ```
 
@@ -165,43 +197,7 @@ The contract (aka _form_) is defined in the `::contract` block. You can implemen
 
 In the `#process` method you can define your business logic.
 
-[Learn more.](http://trailblazer.to/gems/operation/api.html)
-
-## Callbacks
-
-Post-processing logic (also known as _callbacks_) is configured in operations.
-
-Callbacks can be defined in groups. They use the form object's state tracking to find out whether they should be run.
-
-```ruby
-class Comment::Create < Trailblazer::Operation
-  include Dispatch
-  callback(:after_save) do
-    on_change :markdownize_body! # this is only run when the form object has changed.
-  end
-```
-
-Callbacks are never triggered automatically, you have to invoke them! This is called _Imperative Callback_.
-
-```ruby
-class Comment::Create < Trailblazer::Operation
-  include Dispatch
-  def process(params)
-    validate(params) do
-      contract.save
-      dispatch!(:after_save) # run markdownize_body!, but only if form changed.
-    end
-  end
-
-  def markdownize_body!(comment)
-    comment.body = Markdownize.(comment.body)
-  end
-end
-```
-
-No magical triggering of unwanted logic anymore, but explicit invocations where you want it.
-
-[Learn more.](http://trailblazer.to/gems/operation/callback.html)
+[Learn more.](http://trailblazer.to/gems/operation/2.0/contract.html)
 
 ## Models
 
@@ -239,14 +235,14 @@ The rule is enabled via the `::policy` call.
 
 ```ruby
 class Comment::Create < Trailblazer::Operation
-  include Policy
-
-  policy Comment::Policy, :create?
+  step Policy( Comment::Policy, :create? )
+end
 ```
 
 The policy is evaluated in `#setup!`, raises an exception if `false` and suppresses running `#process`.
 
 [Learn more.](http://trailblazer.to/gems/operation/policy.html)
+
 
 ## Views
 
@@ -261,6 +257,7 @@ class CommentsController < ApplicationController
   def new
     form Comment::Create # will assign the form object to @form.
   end
+end
 ```
 
 Since Reform objects can be passed to form builders, you can use the operation to render and process the form!
@@ -285,11 +282,12 @@ class Comment::Create < Trailblazer::Operation
 
     link(:self) { comment_path(represented.id) }
   end
+end
 ```
 
 The operation can then parse incoming JSON documents in `validate` and render a document via `to_json`.
 
-[Learn more.](http://trailblazer.to/gems/operation/representer.html)
+[Learn more.](http://trailblazer.to/gems/operation/2.0/representer.html)
 
 ## Tests
 
@@ -300,6 +298,7 @@ Operations completely replace the need for leaky factories.
 ```ruby
 describe Comment::Update do
   let(:comment) { Comment::Create.(comment: {body: "[That](http://trailblazer.to)!"}) }
+end
 ```
 
 ## More
@@ -319,16 +318,8 @@ The obvious needs to be in your `Gemfile`.
 ```ruby
 gem "trailblazer"
 gem "trailblazer-rails" # if you are in rails.
-gem "cells"
+gem "trailblazer-cells"
 ```
 
 Cells is _not_ required per default! Add it if you use it, which is highly recommended.
-
-## The Book
-
-![](https://raw.githubusercontent.com/apotonick/trailblazer/master/doc/trb.jpg)
-
-Please buy it: [Trailblazer - A new architecture for Rails](https://leanpub.com/trailblazer).
-
-The [demo application](https://github.com/apotonick/gemgem-trbrb) implements what we discuss in the book.
 

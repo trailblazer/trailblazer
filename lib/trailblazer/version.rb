@@ -1,3 +1,3 @@
 module Trailblazer
-  VERSION = "1.0.4"
+  VERSION = "2.1.0.beta2"
 end

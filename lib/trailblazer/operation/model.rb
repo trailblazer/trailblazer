@@ -1,49 +1,64 @@
-require "trailblazer/operation/model/dsl"
+class Trailblazer::Operation
+  def self.Model(model_class, action=nil)
+    # step = Pipetree::Step.new(step, "model.class" => model_class, "model.action" => action)
 
-module Trailblazer
-  class Operation
-    # The Model module will automatically create/find models for the configured +action+.
-    # It adds a public  +Operation#model+ reader to access the model (after performing).
-    module Model
-      def self.included(base)
-        base.extend DSL
+    task = Trailblazer::Activity::TaskBuilder::Binary.( Model.new )
+
+    extension = Trailblazer::Activity::TaskWrap::Merge.new(
+      Wrap::Inject::Defaults(
+        "model.class"  => model_class,
+        "model.action" => action
+      )
+    )
+
+    { task: task, id: "model.build", extension: [extension] }
+  end
+
+  class Model
+    def call(options, params:,  **)
+      builder = Model::Builder.new
+
+      options[:model] = model = builder.(options, params)
+
+      options["result.model"] = result = Result.new(!model.nil?, {})
+
+      result.success?
+    end
+
+    class Builder
+      def call(options, params)
+        deprecate_update!(options)
+        action      = options["model.action"] || :new
+        model_class = options["model.class"]
+
+        action = :pass_through unless [:new, :find_by, :find].include?(action)
+
+        send("#{action}!", model_class, params, options["model.action"])
       end
 
-      # Methods to create the model according to class configuration and params.
-      module BuildModel
-        def model!(params)
-          instantiate_model(params)
-        end
-
-        def instantiate_model(params)
-          send("#{action_name}_model", params)
-        end
-
-        def create_model(params)
-          model_class.new
-        end
-
-        def update_model(params)
-          model_class.find(params[:id])
-        end
-
-        alias_method :find_model, :update_model
+      def new!(model_class, params, *)
+        model_class.new
       end
 
+      def find!(model_class, params, *)
+        model_class.find(params[:id])
+      end
 
-      # #validate no longer accepts a model since this module instantiates it for you.
-      def validate(params, model=self.model, *args)
-        super(params, model, *args)
+      # Doesn't throw an exception and will return false to divert to Left.
+      def find_by!(model_class, params, *)
+        model_class.find_by(id: params[:id])
+      end
+
+      # Call any method on the model class and pass :id.
+      def pass_through!(model_class, params, action)
+        model_class.send(action, params[:id])
       end
 
     private
-      include BuildModel
-
-      def model_class
-        self.class.model_class
-      end
-      def action_name
-        self.class.action_name
+      def deprecate_update!(options) # TODO: remove in 2.1.
+        return unless options["model.action"] == :update
+        options["model.action"] = :find
+        warn "[Trailblazer] Model( .., :update ) is deprecated, please use :find or :find_by."
       end
     end
   end

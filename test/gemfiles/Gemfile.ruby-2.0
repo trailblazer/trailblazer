@@ -1,0 +1,12 @@
+source 'https://rubygems.org'
+
+# Specify your gem's dependencies in trailblazer.gemspec
+gemspec path: "../../"
+
+gem "multi_json"
+gem "trailblazer-operation"
+gem "minitest-line"
+gem "benchmark-ips"
+gem "activesupport", "~> 4.2.0"
+gem "reform-rails"
+gem "dry-validation"
