@@ -20,10 +20,10 @@ module Trailblazer
       end
 
       {
-        task:           task,
-        id:             id,
-        extension:      [ Trailblazer::Activity::TaskWrap::Merge.new(task_wrap_extensions) ],
-        plus_poles:     Activity::Magnetic::DSL::PlusPoles.from_outputs(operation.outputs) # @needs operation#outputs
+        task:      task,
+        id:        id,
+        extension: [ Trailblazer::Activity::TaskWrap::Merge.new(task_wrap_extensions) ],
+        outputs:   operation.outputs
       }
     end
 

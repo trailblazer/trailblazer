@@ -22,7 +22,7 @@ module Trailblazer
         # activity, _ = activity.decompose
 
         # DISCUSS: use Nested here?
-        { task: activity, id: "contract.#{name}.validate", plus_poles: Activity::Magnetic::DSL::PlusPoles.from_outputs(activity.outputs) }
+        { task: activity, id: "contract.#{name}.validate", outputs: activity.outputs }
       end
 
       class Validate

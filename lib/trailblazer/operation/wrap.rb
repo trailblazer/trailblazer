@@ -8,7 +8,7 @@ class Trailblazer::Operation
 
     # connect `false` as an end event, when an exception stopped the wrap, for example.
 
-    { task: wrapped, id: id, plus_poles: Trailblazer::Activity::Magnetic::DSL::PlusPoles.from_outputs(operation_class.outputs) }
+    { task: wrapped, id: id, outputs: operation_class.outputs }
     # TODO: Nested could have a better API and do the "merge" for us!
   end
 
