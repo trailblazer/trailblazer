@@ -46,6 +46,8 @@ class Trailblazer::Operation
         # FIXME: we *might* return some "older version" of options here!
         if returned === false
           return @operation.outputs[:failure].signal, [options, flow_options]
+        elsif returned === true
+          return @operation.outputs[:success].signal, [options, flow_options]
         end
 
         returned # let's hope returned is one of activity's Ends.

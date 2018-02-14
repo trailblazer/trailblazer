@@ -5,6 +5,7 @@ _Trailblazer provides new high-level abstractions for Ruby frameworks. It gently
 [![Gitter Chat](https://badges.gitter.im/trailblazer/chat.svg)](https://gitter.im/trailblazer/chat)
 [![TRB Newsletter](https://img.shields.io/badge/TRB-newsletter-lightgrey.svg)](http://trailblazer.to/newsletter/)
 [![Gem Version](https://badge.fury.io/rb/trailblazer.svg)](http://badge.fury.io/rb/trailblazer)
+[![Open Source Helpers](https://www.codetriage.com/trailblazer/trailblazer/badges/users.svg)](https://www.codetriage.com/trailblazer/trailblazer)
 
 **This document discusses Trailblazer 2.1.** An overview about the additions are [on our website](http://trailblazer.to/blog/2017-12-trailblazer-2-1-what-you-need-to-know.html).
 

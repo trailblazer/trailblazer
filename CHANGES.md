@@ -7,6 +7,7 @@
 * Wrap
   dropped the `pipe` option. This is now `options, flow_options, *`
   `false` is now automatically connected to End.failure.
+* remove `Uber::Callable`.
 
 * `operation.new` step removed.
 * Undocumented step behavior removed. You can't write to `self` anymore.

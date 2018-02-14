@@ -31,3 +31,10 @@ end
 require "pp"
 
 Minitest::Spec::Operation = Trailblazer::Operation
+
+Memo = Struct.new(:id, :body) do
+  def self.find(id)
+    return new(id, "Yo!") if id
+    nil
+  end
+end

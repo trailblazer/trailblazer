@@ -1,6 +1,7 @@
 # per default, everything we pass into a circuit is immutable. it's the ops/act's job to allow writing (via a Context)
 module Trailblazer
   class Operation
+    # {Nested} macro.
     def self.Nested(callable, input:nil, output:nil, id: "Nested(#{callable})")
       task_wrap_extensions        = Module.new do
         extend Activity::Path::Plan()
@@ -35,7 +36,7 @@ module Trailblazer
         # The returned {Nested} instance is a valid circuit element and will be `call`ed in the circuit.
         # It simply returns the nested activity's `signal,options,flow_options` return set.
         # The actual wiring - where to go with that - is done by the step DSL.
-        return Trailblazer::Activity::Subprocess(nested_operation, call: :__call__), nested_operation, false
+        return Trailblazer::Operation::Callable(nested_operation, call: :__call__), nested_operation, false
       end
 
       def self.nestable_object?(object)
@@ -71,7 +72,7 @@ module Trailblazer
 
           # overwrite :task so task_wrap.call_task will call this activity. This is a trick so we don't have to repeat
           # logic from #call_task here.
-          wrap_ctx[:task] = Trailblazer::Activity::Subprocess( activity, call: :__call__ )
+          wrap_ctx[:task] = Trailblazer::Operation::Callable( activity, call: :__call__ )
 
           return Activity::Right, [ wrap_ctx, original_args ]
         end

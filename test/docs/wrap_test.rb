@@ -37,18 +37,21 @@ class WrapTest < Minitest::Spec
     end
   end
 
+# it allows returning legacy true/false
   class Create < Trailblazer::Operation
     class MyContract < Reform::Form
       property :title
     end
 
-    step Wrap ->(options, *, &block) {
+    step Wrap( ->(options, *, &block) {
       begin
         block.call
       rescue => exception
         options["result.model.find"] = "argh! because #{exception.class}"
-        false
-      end } {
+        return false
+      end
+      true
+      }) {
       step Model( Song, :find )
       step Contract::Build( constant: MyContract )
     }
@@ -63,7 +66,7 @@ class WrapTest < Minitest::Spec
   # Wrap return
   class WrapReturnTest < Minitest::Spec
     class Create < Trailblazer::Operation
-      step Wrap ->(options, *, &block) { options["yield?"] ? block.call : false } {
+      step Wrap( ->(options, *, &block) { options["yield?"] ? block.call : false }) {
         step ->(options, **) { options["x"] = true }
         success :noop!
         # ...
@@ -118,7 +121,7 @@ class WrapTest < Minitest::Spec
     end
 
     #~wrap-only end
-    step Wrap ->(*, &block) { Sequel.transaction do block.call end } {
+    step Wrap( ->(*, &block) { Sequel.transaction do block.call end } ) {
       step Model( Song, :new )
       #~wrap-only
       step Contract::Build( constant: MyContract )
@@ -200,7 +203,7 @@ class WrapTest < Minitest::Spec
   class WrapWithMethodTest < Minitest::Spec
     class Create < Trailblazer::Operation
       step Model( Song, :new )
-      step Wrap ->(options, *, &block) { block.call } {
+      step Wrap( ->(options, *, &block) { block.call } ) {
         step :check_model!
 
       }
