@@ -48,8 +48,10 @@ class WrapTest < Minitest::Spec
         block.call
       rescue => exception
         options["result.model.find"] = "argh! because #{exception.class}"
-        false
-      end }) {
+        return false
+      end
+      true
+      }) {
       step Model( Song, :find )
       step Contract::Build( constant: MyContract )
     }
