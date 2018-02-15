@@ -10,15 +10,22 @@ class DryAutoInjectTest < Minitest::Spec
 
   class Create < Trailblazer::Operation
     include AutoInject[:user_repository]
+
+    pass :use_it!
+
+    def use_it!(ctx, user_repository:, **)
+      ctx[:my_repo] = user_repository
+    end
   end
 
   it "auto-injects user_repository" do
-    res = Create.({})
+    res = Create.(params: {})
     res[:user_repository].must_equal Object
+    res[:my_repo].must_equal Object
   end
 
   it "allows dependency injection via ::call" do
-    Create.({}, user_repository: String)[:user_repository].must_equal String
+    Create.(params: {}, user_repository: String)[:user_repository].must_equal String
   end
 
   describe "inheritance" do
