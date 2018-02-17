@@ -29,12 +29,12 @@ class Trailblazer::Operation
 
       def define_call
         class_mod.class_exec(container, dependency_map) do |container, dependency_map|
-          define_method :call do |params={}, options={}, *dependencies|
-            options_with_deps = dependency_map.to_h.each_with_object({}) { |(name, identifier), obj|
-              obj[name] = options[name] || container[identifier]
-            }.merge(options)
+          define_method :call do |ctx={}, *dependencies|
+            ctx_with_deps = dependency_map.to_h.each_with_object({}) { |(name, identifier), obj|
+              obj[name] = ctx[name] || container[identifier]
+            }.merge(ctx)
 
-            super(params, options_with_deps, *dependencies)
+            super(ctx_with_deps, *dependencies)
           end
         end
       end
