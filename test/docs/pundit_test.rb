@@ -122,9 +122,9 @@ end
 #   end
 #   #:class-level end
 
-#   it { assert_nil Create.(); Create["result.policy"] }
+#   it { Create.(); Create["result.policy"].must_be_nil }
 #   it { Create.(params: {}, current_user: Module)["x"].must_equal true }
-#   it { assert_nil Create.(params: {}                          )["x"] }
+#   it { Create.(params: {}                          )["x"].must_be_nil }
 # end
 
 

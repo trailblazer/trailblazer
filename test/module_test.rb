@@ -86,7 +86,7 @@
 #     op["dispatched"].must_equal [:notify_me!]
 #     op["model"].name.must_equal "Feelings"
 #     op["model"].artist.id.must_equal 1
-#     assert_nil op["model"].artist.full_name  # property not declared.
+#     op["model"].artist.full_name.must_be_nil  # property not declared.
 #   end
 
 #   it do
