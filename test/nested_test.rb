@@ -165,18 +165,18 @@ class NestedTest < Minitest::Spec
     result["mutable.data.from.A"].must_equal "from A!"
 
     # AlmostB doesn't look for everything
-    result["can.B.see.current_user?"].must_be_nil
-    result["can.B.see.params?"].must_be_nil
+    assert_nil result["can.B.see.current_user?"]
+    assert_nil result["can.B.see.params?"]
     if is_successful
       result["can.B.see.A.mutable.data?"].must_equal "from A!"
-      result["can.B.see.A.class.data?"].must_equal nil # we don't look for it.
+      assert_nil  result["can.B.see.A.class.data?"] # we don't look for it.
       result["can.A.see.B.mutable.data?"].must_equal "from AlmostB!"
     else
-      result["can.B.see.A.mutable.data?"].must_be_nil
-      result["can.B.see.A.class.data?"].must_be_nil
-      result["can.A.see.B.mutable.data?"].must_be_nil
+      assert_nil result["can.B.see.A.mutable.data?"]
+      assert_nil result["can.B.see.A.class.data?"]
+      assert_nil result["can.A.see.B.mutable.data?"]
     end
-    result["can.B.see.container.data?"].must_be_nil
+    assert_nil result["can.B.see.container.data?"]
 
 
     # result[:is_successful].must_equal is_successful # FIXME: this is wrong!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! key is symbol
@@ -189,14 +189,14 @@ class NestedTest < Minitest::Spec
 
     # B can see everything
     result["can.B.see.A.mutable.data?"].must_equal "from A!"
-    result["can.B.see.current_user?"].must_be_nil
+    assert_nil  result["can.B.see.current_user?"]
     result["can.B.see.params?"].must_equal({})
     result["can.B.see.A.class.data?"].must_equal "yes"
-    result["can.B.see.container.data?"].must_be_nil
+    assert_nil result["can.B.see.container.data?"]
 
     result["can.A.see.B.mutable.data?"].must_equal "from B!"
 
-    result[:is_successful].must_be_nil
+    assert_nil result[:is_successful]
     result.success?.must_equal true # B was successful, so A is successful.
   end
 
