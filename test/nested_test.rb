@@ -169,7 +169,7 @@ class NestedTest < Minitest::Spec
     result["can.B.see.params?"].must_be_nil
     if is_successful
       result["can.B.see.A.mutable.data?"].must_equal "from A!"
-      result["can.B.see.A.class.data?"].must_equal nil # we don't look for it.
+       result["can.B.see.A.class.data?"].must_be_nil # we don't look for it.
       result["can.A.see.B.mutable.data?"].must_equal "from AlmostB!"
     else
       result["can.B.see.A.mutable.data?"].must_be_nil
