@@ -231,7 +231,7 @@ class FastTrackWithNestedTest < Minitest::Spec
     #:ft-rewire
     class Memo::Create < Trailblazer::Operation
       step :validate
-      step Nested( Lib::Authenticate ), Output(:fail_fast) => :failure
+      step Nested( Lib::Authenticate ), Output(:fail_fast) => Track(:failure)
       step :create_model
       step :save
       #~ignrw

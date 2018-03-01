@@ -267,7 +267,7 @@ class NestedWithFastTrackTest < Minitest::Spec
   #- Nested, :pass_fast => :failure
   it "attaches :pass_fast => :failure" do
     op = Class.new(Trailblazer::Operation) do
-      step Nested( Edit ), Output(:pass_fast) => :failure
+      step Nested( Edit ), Output(:pass_fast) => Track(:failure)
       step :b
       fail :f
 
