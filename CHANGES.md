@@ -30,6 +30,10 @@ document Task API and define step API
 deprecate step->(options) ?
 injectable, per-operation step arguments strategy?
 
+# 2.1.0.beta4
+
+* Simple maintenance release to establish `activity-0.5.0`.
+
 # 2.1.0.beta3
 
 * More simplifications because of `activity`.
