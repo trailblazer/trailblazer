@@ -19,18 +19,14 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "trailblazer-operation", ">= 0.2.3", "< 0.3.0"
   spec.add_dependency "trailblazer-activity",  ">= 0.4.3", "< 0.6.0"
-
-  spec.add_dependency "reform", ">= 2.2.0", "< 3.0.0"
+  spec.add_dependency "trailblazer-macro", ">= 2.1.0.beta4", "< 2.2.0"
   spec.add_dependency "declarative"
-
-  spec.add_development_dependency "activemodel" # for Reform::AM::V
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "minitest"
   spec.add_development_dependency "nokogiri"
-
   spec.add_development_dependency "roar"
-  # spec.required_ruby_version = '>= 1.9.3'
+
   spec.required_ruby_version = '>= 2.0.0'
 end

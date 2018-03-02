@@ -4,25 +4,17 @@ source 'https://rubygems.org'
 gemspec
 
 gem "reform-rails"
-gem "activesupport"#, "~> 4.2.0"
-
-# gem "reform", "~> 2.0.0"
-gem "reform"#, path: "../reform"
+gem "activesupport"
 gem "multi_json"
 
 gem "dry-auto_inject"
 gem "dry-matcher"
 gem "dry-validation"
 
-# gem "trailblazer-operation", path: "../operation"
 gem "trailblazer-operation", github: "trailblazer/trailblazer-operation"
+gem "trailblazer-activity", github: "trailblazer/trailblazer-activity"
+gem "trailblazer-macro", github: "trailblazer/trailblazer-macro"
+gem "trailblazer-macro-contract", github: "trailblazer/trailblazer-macro-contract"
 
 gem "minitest-line"
-
 gem "rubocop", require: false
-# gem "trailblazer-activity", path: "../trailblazer-circuit"
-gem "trailblazer-activity", github: "trailblazer/trailblazer-activity"
-# gem "trailblazer-activity", path: "../trailblazer-circuit"
-# gem "trailblazer-activity", github: "trailblazer/trailblazer-activity"
-
-# gem "trailblazer-context", path: "../trailblazer-context"
