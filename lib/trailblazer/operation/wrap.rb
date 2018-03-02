@@ -2,7 +2,7 @@ class Trailblazer::Operation
 
   # false is automatically connected to End.failure.
 
-  def self.Wrap(user_wrap, id: "Wrap/#{rand(100)}", &block)
+  def self.Wrap(user_wrap, id: "Wrap/#{user_wrap}", &block)
     operation_class = Wrap.create_operation(block)
     wrapped         = Wrap::Wrapped.new(operation_class, user_wrap)
 
