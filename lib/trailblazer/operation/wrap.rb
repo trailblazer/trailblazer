@@ -1,15 +1,9 @@
 class Trailblazer::Operation
-
-  # false is automatically connected to End.failure.
-
   def self.Wrap(user_wrap, id: "Wrap/#{rand(100)}", &block)
     operation_class = Wrap.create_operation(block)
     wrapped         = Wrap::Wrapped.new(operation_class, user_wrap)
 
-    # connect `false` as an end event, when an exception stopped the wrap, for example.
-
     { task: wrapped, id: id, outputs: operation_class.outputs }
-    # TODO: Nested could have a better API and do the "merge" for us!
   end
 
   module Wrap
@@ -70,6 +64,7 @@ class Trailblazer::Operation
         if returned.is_a?(Array) # 1. {circuit interface return}, new style.
           signal, (ctx, flow_options) = returned
         else                     # 2. {task interface return}, only a signal (or true/false)
+          # TODO: deprecate this?
           signal = returned
         end
 
@@ -81,11 +76,8 @@ class Trailblazer::Operation
       end
 
       def outputs
-        @operation.outputs # FIXME: we don't map false, yet
+        @operation.outputs
       end
     end
   end # Wrap
 end
-
-# (options, *) => (options, operation, bla)
-# (*, params:, **) => (options, operation, bla, options)
