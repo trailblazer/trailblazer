@@ -16,6 +16,8 @@ gem "dry-validation"
 
 # gem "trailblazer-operation", path: "../operation"
 gem "trailblazer-operation", github: "trailblazer/trailblazer-operation"
+gem "trailblazer-macro", github: "trailblazer/trailblazer-macro"
+gem "trailblazer-macro-contract", github: "trailblazer/trailblazer-macro-contract"
 
 gem "minitest-line"
 

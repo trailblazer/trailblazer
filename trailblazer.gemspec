@@ -18,8 +18,8 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "trailblazer-operation", ">= 0.2.4", "< 0.3.0"
+  spec.add_dependency "trailblazer-macro", ">= 2.1.0.beta4", "< 2.2.0"
 
-  spec.add_dependency "reform", ">= 2.2.0", "< 3.0.0"
   spec.add_dependency "declarative"
 
   spec.add_development_dependency "activemodel" # for Reform::AM::V
