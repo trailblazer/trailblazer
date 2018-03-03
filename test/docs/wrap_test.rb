@@ -28,9 +28,13 @@ class DocsWrapTest < Minitest::Spec
     end
   end
 
+=begin
+When success: return the block's returns
+When raise:   return {Railway.fail!}
+=end
   class Memo::Create < Trailblazer::Operation
     class HandleUnsafeProcess
-      def self.call(ctx, *, &block)
+      def self.call((ctx), *, &block)
         begin
           yield # calls the wrapped steps
         rescue
@@ -52,17 +56,19 @@ class DocsWrapTest < Minitest::Spec
     #~methods end
   end
 
-  describe "callable wrap" do
-    it { Memo::Create.( { seq: [] } ).inspect(:seq).must_equal %{<Result:true [[:find_model, :update, :rehash, :notify]] >} }
-    it { Memo::Create.( { seq: [], rehash_raise: true } ).inspect(:seq).must_equal %{<Result:false [[:find_model, :update, :rehash, :log_error]] >} }
-  end
+  it { Memo::Create.( { seq: [] } ).inspect(:seq).must_equal %{<Result:true [[:find_model, :update, :rehash, :notify]] >} }
+  it { Memo::Create.( { seq: [], rehash_raise: true } ).inspect(:seq).must_equal %{<Result:false [[:find_model, :update, :rehash, :log_error]] >} }
 
+=begin
+When success: return the block's returns
+When raise:   return {Railway.fail!}, but wire Wrap() to {fail_fast: true}
+=end
   class WrapGoesIntoFailFastTest < Minitest::Spec
     Memo = Module.new
 
     class Memo::Create < Trailblazer::Operation
       class HandleUnsafeProcess
-        def self.call(ctx, *, &block)
+        def self.call((ctx), *, &block)
           begin
             yield # calls the wrapped steps
           rescue
@@ -88,12 +94,16 @@ class DocsWrapTest < Minitest::Spec
     it { Memo::Create.( { seq: [], rehash_raise: true } ).inspect(:seq).must_equal %{<Result:false [[:find_model, :update, :rehash]] >} }
   end
 
+=begin
+When success: return the block's returns
+When raise:   return {Railway.fail_fast!} and configure Wrap() to {fast_track: true}
+=end
   class WrapGoesIntoFailFastViaFastTrackTest < Minitest::Spec
     Memo = Module.new
 
     class Memo::Create < Trailblazer::Operation
       class HandleUnsafeProcess
-        def self.call(ctx, *, &block)
+        def self.call((ctx), *, &block)
           begin
             yield # calls the wrapped steps
           rescue
@@ -119,12 +129,16 @@ class DocsWrapTest < Minitest::Spec
     it { Memo::Create.( { seq: [], rehash_raise: true } ).inspect(:seq).must_equal %{<Result:false [[:find_model, :update, :rehash]] >} }
   end
 
+=begin
+When success: return the block's returns
+When raise:   return {Railway.pass!} and go "successful"
+=end
   class WrapGoesIntoPassFromRescueTest < Minitest::Spec
     Memo = Module.new
 
     class Memo::Create < Trailblazer::Operation
       class HandleUnsafeProcess
-        def self.call(ctx, *, &block)
+        def self.call((ctx), *, &block)
           begin
             yield # calls the wrapped steps
           rescue
@@ -149,6 +163,10 @@ class DocsWrapTest < Minitest::Spec
     it { Memo::Create.( { seq: [] } ).inspect(:seq).must_equal %{<Result:true [[:find_model, :update, :rehash, :notify]] >} }
     it { Memo::Create.( { seq: [], rehash_raise: true } ).inspect(:seq).must_equal %{<Result:true [[:find_model, :update, :rehash, :notify]] >} }
   end
+
+
+
+
 
 
   Song = Struct.new(:id, :title) do
@@ -279,7 +297,7 @@ class DocsWrapTest < Minitest::Spec
 
   #:callable-t
   class MyTransaction
-    def self.call(options, *)
+    def self.call(ctx, *)
       Sequel.transaction { yield } # yield runs the nested pipe.
       # return value decides about left or right track!
     end

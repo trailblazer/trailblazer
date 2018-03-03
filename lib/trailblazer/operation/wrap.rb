@@ -21,7 +21,20 @@ class Trailblazer::Operation
     class Wrapped #< Trailblazer::Operation # FIXME: the inheritance is only to satisfy Nested( Wrapped.new )
       include Trailblazer::Activity::Interface
 
+      private def deprecate_positional_wrap_signature(user_wrap)
+        parameters = user_wrap.is_a?(Class) ? user_wrap.method(:call).parameters : user_wrap.parameters
+
+        return user_wrap if parameters[0] == [:req] # means ((ctx, flow_options), *, &block), "new style"
+
+        ->((ctx, flow_options), **circuit_options, &block) do
+          warn "[Trailblazer] Wrap handlers have a new signature: ((ctx), *, &block)"
+          user_wrap.(ctx, &block)
+        end
+      end
+
       def initialize(operation, user_wrap)
+        user_wrap = deprecate_positional_wrap_signature(user_wrap)
+
         @operation  = operation
         @user_wrap  = user_wrap
 
@@ -48,7 +61,7 @@ class Trailblazer::Operation
 
         # call the user's Wrap {} block in the operation.
         # This will invoke block_calling_wrapped above if the user block yields.
-        returned = @user_wrap.( ctx, flow_options, **circuit_options, &block_calling_wrapped )
+        returned = @user_wrap.( [ctx, flow_options], **circuit_options, &block_calling_wrapped )
 
         # {returned} can be
         #   1. {circuit interface return} from the begin block, because the wrapped OP passed
