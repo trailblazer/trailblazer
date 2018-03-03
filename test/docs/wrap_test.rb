@@ -1,52 +1,162 @@
 require "test_helper"
 
-# TODO: consume End signal from wrapped
+class DocsWrapTest < Minitest::Spec
+  module Memo
+  end
 
-class WrapTest < Minitest::Spec
+  module Methods
+    def find_model(ctx, seq:, **)
+      seq << :find_model
+    end
+
+    def update(ctx, seq:, **)
+      seq << :update
+    end
+
+    def notify(ctx, seq:, **)
+      seq << :notify
+    end
+
+    def rehash(ctx, seq:, rehash_raise:false, **)
+      seq << :rehash
+      raise if rehash_raise
+      true
+    end
+
+    def log_error(ctx, seq:, **)
+      seq << :log_error
+    end
+  end
+
+  class Memo::Create < Trailblazer::Operation
+    class HandleUnsafeProcess
+      def self.call(ctx, *, &block)
+        begin
+          yield # calls the wrapped steps
+        rescue
+          [ Trailblazer::Operation::Railway.fail!, [ctx, {}] ]
+        end
+      end
+    end
+
+    step :find_model
+    step Wrap( HandleUnsafeProcess ) {
+      step :update
+      step :rehash
+    }
+    step :notify
+    fail :log_error
+
+    #~methods
+    include Methods
+    #~methods end
+  end
+
+  describe "callable wrap" do
+    it { Memo::Create.( { seq: [] } ).inspect(:seq).must_equal %{<Result:true [[:find_model, :update, :rehash, :notify]] >} }
+    it { Memo::Create.( { seq: [], rehash_raise: true } ).inspect(:seq).must_equal %{<Result:false [[:find_model, :update, :rehash, :log_error]] >} }
+  end
+
+  class WrapGoesIntoFailFastTest < Minitest::Spec
+    Memo = Module.new
+
+    class Memo::Create < Trailblazer::Operation
+      class HandleUnsafeProcess
+        def self.call(ctx, *, &block)
+          begin
+            yield # calls the wrapped steps
+          rescue
+            [ Trailblazer::Operation::Railway.fail!, [ctx, {}] ]
+          end
+        end
+      end
+
+      step :find_model
+      step Wrap( HandleUnsafeProcess ) {
+        step :update
+        step :rehash
+      }, fail_fast: true
+      step :notify
+      fail :log_error
+
+      #~methods
+      include DocsWrapTest::Methods
+      #~methods end
+    end
+
+    it { Memo::Create.( { seq: [] } ).inspect(:seq).must_equal %{<Result:true [[:find_model, :update, :rehash, :notify]] >} }
+    it { Memo::Create.( { seq: [], rehash_raise: true } ).inspect(:seq).must_equal %{<Result:false [[:find_model, :update, :rehash]] >} }
+  end
+
+  class WrapGoesIntoFailFastViaFastTrackTest < Minitest::Spec
+    Memo = Module.new
+
+    class Memo::Create < Trailblazer::Operation
+      class HandleUnsafeProcess
+        def self.call(ctx, *, &block)
+          begin
+            yield # calls the wrapped steps
+          rescue
+            [ Trailblazer::Operation::Railway.fail_fast!, [ctx, {}] ]
+          end
+        end
+      end
+
+      step :find_model
+      step Wrap( HandleUnsafeProcess ) {
+        step :update
+        step :rehash
+      }, fast_track: true
+      step :notify
+      fail :log_error
+
+      #~methods
+      include DocsWrapTest::Methods
+      #~methods end
+    end
+
+    it { Memo::Create.( { seq: [] } ).inspect(:seq).must_equal %{<Result:true [[:find_model, :update, :rehash, :notify]] >} }
+    it { Memo::Create.( { seq: [], rehash_raise: true } ).inspect(:seq).must_equal %{<Result:false [[:find_model, :update, :rehash]] >} }
+  end
+
+  class WrapGoesIntoPassFromRescueTest < Minitest::Spec
+    Memo = Module.new
+
+    class Memo::Create < Trailblazer::Operation
+      class HandleUnsafeProcess
+        def self.call(ctx, *, &block)
+          begin
+            yield # calls the wrapped steps
+          rescue
+            [ Trailblazer::Operation::Railway.pass!, [ctx, {}] ]
+          end
+        end
+      end
+
+      step :find_model
+      step Wrap( HandleUnsafeProcess ) {
+        step :update
+        step :rehash
+      }
+      step :notify
+      fail :log_error
+
+      #~methods
+      include DocsWrapTest::Methods
+      #~methods end
+    end
+
+    it { Memo::Create.( { seq: [] } ).inspect(:seq).must_equal %{<Result:true [[:find_model, :update, :rehash, :notify]] >} }
+    it { Memo::Create.( { seq: [], rehash_raise: true } ).inspect(:seq).must_equal %{<Result:true [[:find_model, :update, :rehash, :notify]] >} }
+  end
+
+
   Song = Struct.new(:id, :title) do
     def self.find(id)
       id.nil? ? raise : new(id)
     end
   end
 
-  class DirectWiringTest < Minitest::Spec
-    class Create < Trailblazer::Operation
-      class MyContract < Reform::Form
-        property :title
-      end
-
-      # {yield} will return circuit interface
-      # user can also return {true|false}
-      # user can also return signal {Railway.fail_fast!} etc
-
-      step( Wrap( ->(options, *args, &block) {
-        begin
-
-          end_event, (ctx, flow_options) = block.call # run the wrapped operation.
-          puts "@@@@@ #{end_event.inspect}"
-
-          [end_event, [ctx, flow_options]]
-
-        rescue => exception
-          options["result.model.find"] = "argh! because #{exception.class}"
-          [ Railway.fail_fast!, options, *args ]
-        end }) {
-        step ->(options, **) { options["x"] = true }
-        step Model( Song, :find )
-        step Contract::Build( constant: MyContract )
-      }.merge(fast_track: true))
-      step Contract::Validate()
-      step Contract::Persist( method: :sync )
-    end
-
-    # pp Create.to_h[:circuit]
-
-    it { Create.( params: {id: 1, title: "Prodigal Son"} ).inspect("x", :model).must_equal %{<Result:true [true, #<struct WrapTest::Song id=1, title=\"Prodigal Son\">] >} }
-
-    it "goes directly from Wrap to End.fail_fast" do
-      Create.(params: {}).inspect("x", :model, "result.model.find").must_equal %{<Result:false [true, nil, "argh! because RuntimeError"] >}
-    end
-  end
 
 # it allows returning legacy true/false
   class Create < Trailblazer::Operation
@@ -70,7 +180,7 @@ class WrapTest < Minitest::Spec
     step Contract::Persist( method: :sync )
   end
 
-  it { Create.( params: {id: 1, title: "Prodigal Son"} )["contract.default"].model.inspect.must_equal %{#<struct WrapTest::Song id=1, title="Prodigal Son">} }
+  it { Create.( params: {id: 1, title: "Prodigal Son"} )["contract.default"].model.inspect.must_equal %{#<struct DocsWrapTest::Song id=1, title="Prodigal Son">} }
   it { Create.( params: {id: nil }).inspect("result.model.find").must_equal %{<Result:false [\"argh! because RuntimeError\"] >} }
 
   #-
@@ -94,8 +204,6 @@ class WrapTest < Minitest::Spec
 
   class WrapWithCallableTest < Minitest::Spec
     class MyWrapper
-      extend Uber::Callable
-
       def self.call(options, *, &block)
         options["yield?"] ? yield : false
       end
@@ -155,7 +263,7 @@ class WrapTest < Minitest::Spec
   end
   #:sequel-transaction end
 
-    it { Create.( params: {title: "Pie"} ).inspect(:model, "x", "err").must_equal %{<Result:true [#<struct WrapTest::Song id=nil, title=\"Pie\">, nil, nil] >} }
+    it { Create.( params: {title: "Pie"} ).inspect(:model, "x", "err").must_equal %{<Result:true [#<struct DocsWrapTest::Song id=nil, title=\"Pie\">, nil, nil] >} }
   end
 
   class WrapExampleCallableTest < Minitest::Spec
@@ -208,7 +316,7 @@ class WrapTest < Minitest::Spec
   end
   #:sequel-transaction-callable end
 
-    it { Create.( params: {title: "Pie"} ).inspect(:model, "x", "err").must_equal %{<Result:true [#<struct WrapTest::Song id=nil, title=\"Pie\">, nil, nil] >} }
+    it { Create.( params: {title: "Pie"} ).inspect(:model, "x", "err").must_equal %{<Result:true [#<struct DocsWrapTest::Song id=nil, title=\"Pie\">, nil, nil] >} }
   end
 
   class WrapWithMethodTest < Minitest::Spec
