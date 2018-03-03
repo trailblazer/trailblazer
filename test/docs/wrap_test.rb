@@ -15,9 +15,18 @@ class WrapTest < Minitest::Spec
         property :title
       end
 
+      # {yield} will return circuit interface
+      # user can also return {true|false}
+      # user can also return signal {Railway.fail_fast!} etc
+
       step( Wrap( ->(options, *args, &block) {
         begin
-          block.call
+
+          end_event, (ctx, flow_options) = block.call # run the wrapped operation.
+          puts "@@@@@ #{end_event.inspect}"
+
+          [end_event, [ctx, flow_options]]
+
         rescue => exception
           options["result.model.find"] = "argh! because #{exception.class}"
           [ Railway.fail_fast!, options, *args ]
@@ -29,6 +38,8 @@ class WrapTest < Minitest::Spec
       step Contract::Validate()
       step Contract::Persist( method: :sync )
     end
+
+    # pp Create.to_h[:circuit]
 
     it { Create.( params: {id: 1, title: "Prodigal Son"} ).inspect("x", :model).must_equal %{<Result:true [true, #<struct WrapTest::Song id=1, title=\"Prodigal Son\">] >} }
 
