@@ -26,6 +26,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake"
   spec.add_development_dependency "minitest"
   spec.add_development_dependency "nokogiri"
+  spec.add_development_dependency "reform-rails"
+
+  spec.add_development_dependency "multi_json"
   spec.add_development_dependency "roar"
 
   spec.required_ruby_version = '>= 2.0.0'
