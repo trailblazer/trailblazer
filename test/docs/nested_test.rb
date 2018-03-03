@@ -296,5 +296,5 @@ class NestedNameTest < Minitest::Spec
     # ...
   end
 
-  it { Operation::Inspect.(Create).must_equal %{[>>Nested(NestedNameTest::Create::Present)]} }
+  it { Operation::Inspect.(Create).must_equal %{[>Nested(NestedNameTest::Create::Present)]} }
 end
