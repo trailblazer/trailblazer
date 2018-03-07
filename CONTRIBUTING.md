@@ -125,6 +125,13 @@ git push origin my-feature-branch -f
 #### Check on Your Pull Request
 Go back to your pull request after a few minutes and see whether it passed muster with Travis-CI. Everything should look green, otherwise fix issues and amend your commit as described above.
 
+## Releasing
+
+When you have release rights, please follow these rules.
+
+* When tagging a commit for a release, use the format `vX.X.X` for the tag, e.g. `git tag v2.1.0`.
+* The tagged commit **must contain the line** "Releasing vX.X.X" so it can be quickly spotted later in the commit list.
+
 #### What now?
 At this point you're waiting on us. Expect a conversation regarding your pull request; Questions, clarifications, and so on.
 
