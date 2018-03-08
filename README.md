@@ -321,7 +321,7 @@ result["result.contract.default"].errors          #=> Errors object
 result["result.contract.default"].errors.messages #=> {:length=>["is not a number"]}
 ```
 
-Each result object responds to success?, failure?, and errors, which is an Errors object. TODO: design/document Errors. WE ARE CURRENTLY WORKING ON A UNIFIED API FOR ERRORS (FOR DRY AND REFORM).
+Each result object responds to success?, failure?, and errors, which is an Errors object.
 
 ## Models
 
