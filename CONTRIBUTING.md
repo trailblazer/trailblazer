@@ -131,7 +131,7 @@ Commiting to OSS projects is always difficult, because all maintainers will adhe
 
 * Good design matters: sometimes a feature could be added with a simple `if <my new case>` to an existing block of code. Usually, an `if` implies that the original design didn't plan on handling multiple cases, or in other words, **a refactoring of the code structure might be necessary**. If you're unsure: [Talk to us!](https://gitter.im/trailblazer/chat)
 * Make smaller pull requests. It is so much easier to discuss something graspable and not a "37 files changed" PR.
-* Never ever use `if respond_to?` to add a feature. This is a pattern as seen a lot in Rails core that causes incredibly hard to solve bugs. In Trailblazer, we use "Tell, don't ask!", which means, never try to find out the type of an object via `respond_to?`. If you really have to introspect the type, use `is_a?`. Treat it as a duck, ducks don't speak.
+* **Never ever use `if respond_to?`** to add a feature. This is a pattern as seen a lot in Rails core that causes incredibly hard to find ~bugs~ behavior. In Trailblazer, we use "Tell, don't ask!", which means, never try to find out the type of an object via `respond_to?`. If you really have to introspect the type, use `is_a?`. Treat it as a duck, ducks don't speak.
 
 
 ## Releasing
