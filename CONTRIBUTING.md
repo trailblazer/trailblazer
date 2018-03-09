@@ -130,7 +130,7 @@ Go back to your pull request after a few minutes and see whether it passed muste
 Commiting to OSS projects is always difficult, because all maintainers will adhere to their own quality standards that you don't know. Every projects wants "good code design", and so do we, so here are a few things that you should follow when contributing.
 
 * Good design matters: sometimes a feature could be added with a simple `if <my new case>` to an existing block of code. Usually, an `if` implies that the original design didn't plan on handling multiple cases, or in other words, **a refactoring of the code structure might be necessary**. If you're unsure: [Talk to us!](https://gitter.im/trailblazer/chat)
-* Make smaller pull requests. It is so much easier to discuss something graspable and not a "37 files changed" PR.
+* Make smaller pull requests. It is so much easier to discuss something graspable and not a "37 files changed" PR. The sooner we see your code, the earlier we can decide about which way to go. It is incredibly appreciated, though, to send us a link to a branch of yours where we can see the desired changes in total. We can then help splitting those into smaller steps.
 * **Never ever use `if respond_to?`** to add a feature. This is a pattern as seen a lot in Rails core that causes incredibly hard to find ~bugs~ behavior. In Trailblazer, we use "Tell, don't ask!", which means, never try to find out the type of an object via `respond_to?`. If you really have to introspect the type, use `is_a?`. Treat it as a duck, ducks don't speak.
 
 
