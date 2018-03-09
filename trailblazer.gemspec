@@ -18,8 +18,8 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "trailblazer-operation", ">= 0.2.4", "< 0.3.0"
-  spec.add_dependency "trailblazer-macro", ">= 2.1.0.beta1", "< 2.2.0"
-  spec.add_dependency "trailblazer-macro-contract", ">= 2.1.0.beta1", "< 2.2.0"
+  spec.add_dependency "trailblazer-macro", ">= 2.1.0.beta2", "< 2.2.0"
+  spec.add_dependency "trailblazer-macro-contract", ">= 2.1.0.beta2", "< 2.2.0"
 
   spec.add_dependency "declarative"
 
