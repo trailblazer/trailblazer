@@ -3,13 +3,6 @@ require "delegate"
 require "trailblazer"
 require "minitest/autorun"
 
-# TODO: convert tests to non-rails.
-require "reform"
-require "reform/form/active_model/validations"
-Reform::Form.class_eval do
-  include Reform::Form::ActiveModel::Validations
-end
-
 # require "trailblazer/deprecation/context.rb"
 
 module Mock
@@ -28,8 +21,6 @@ module Test
   end
   ReturnResult = ->(last, input, options) { input }
 end
-
-require "pp"
 
 Minitest::Spec::Operation = Trailblazer::Operation
 
