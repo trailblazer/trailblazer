@@ -1,4 +1,5 @@
 require "pp"
+require "delegate"
 require "trailblazer"
 require "minitest/autorun"
 
