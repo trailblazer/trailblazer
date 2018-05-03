@@ -15,15 +15,15 @@ gem "dry-matcher"
 gem "dry-validation"
 
 # gem "trailblazer-operation", path: "../operation"
-gem "trailblazer-operation", github: "trailblazer/trailblazer-operation"
-gem "trailblazer-macro", github: "trailblazer/trailblazer-macro"
-gem "trailblazer-macro-contract", github: "trailblazer/trailblazer-macro-contract"
+# gem "trailblazer-operation", github: "trailblazer/trailblazer-operation"
+# gem "trailblazer-macro", github: "trailblazer/trailblazer-macro"
+# gem "trailblazer-macro-contract", github: "trailblazer/trailblazer-macro-contract"
 
 gem "minitest-line"
 
 gem "rubocop", require: false
 # gem "trailblazer-activity", path: "../trailblazer-circuit"
-gem "trailblazer-activity", github: "trailblazer/trailblazer-activity"
+# gem "trailblazer-activity", github: "trailblazer/trailblazer-activity"
 # gem "trailblazer-activity", path: "../trailblazer-circuit"
 # gem "trailblazer-activity", github: "trailblazer/trailblazer-activity"
 

@@ -30,6 +30,10 @@ document Task API and define step API
 deprecate step->(options) ?
 injectable, per-operation step arguments strategy?
 
+# 2.1.0.beta6
+
+* Use new `activity-0.3.0`.
+
 # 2.1.0.beta5
 
 * All macros are now cleanly extracted to `trailblazer-macro` and `trailblazer-macro-contract`.
