@@ -23,14 +23,11 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "declarative"
 
-  spec.add_development_dependency "activemodel" # for Reform::AM::V
-
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "minitest"
   spec.add_development_dependency "nokogiri"
 
   spec.add_development_dependency "roar"
-  # spec.required_ruby_version = '>= 1.9.3'
   spec.required_ruby_version = '>= 2.0.0'
 end
