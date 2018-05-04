@@ -12,9 +12,10 @@ Gem::Specification.new do |spec|
   spec.homepage      = "http://trailblazer.to"
   spec.license       = "LGPL-3.0"
 
-  spec.files         = `git ls-files`.split($/)
-  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
+  spec.files         = `git ls-files -z`.split("\x0").reject do |f|
+    f.match(%r{^(test|doc)/})
+  end
+  spec.test_files    = `git ls-files -z test`.split("\x0")
   spec.require_paths = ["lib"]
 
   spec.add_dependency "trailblazer-operation", ">= 0.3.0", "< 0.4.0"
