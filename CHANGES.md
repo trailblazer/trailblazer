@@ -32,7 +32,7 @@ injectable, per-operation step arguments strategy?
 
 # 2.1.0.beta7
 
-* Use new `activity-0.3.1` where `VariableMapping` is included now.
+* Use new `activity-0.3.2` where `VariableMapping` is included now.
 
 # 2.1.0.beta6
 
