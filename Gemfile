@@ -23,13 +23,8 @@ if ENV['USE_LOCAL_GEMS']
   gem "trailblazer-activity", path: "../trailblazer-activity"
   gem "trailblazer-context", path: "../trailblazer-context"
 else
-  gem "reform", github: "trailblazer/reform"
-  gem "reform-rails", github: "trailblazer/reform-rails"
-  gem "trailblazer-operation", github: "trailblazer/trailblazer-operation"
-  gem "trailblazer-macro", github: "trailblazer/trailblazer-macro"
-  gem "trailblazer-macro-contract", github: "trailblazer/trailblazer-macro-contract"
-  gem "trailblazer-activity", github: "trailblazer/trailblazer-activity"
-  gem "trailblazer-context", github: "trailblazer/trailblazer-context"
+  gem "reform"
+  gem "reform-rails"
 end
 
 
