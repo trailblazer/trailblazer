@@ -30,6 +30,10 @@ document Task API and define step API
 deprecate step->(options) ?
 injectable, per-operation step arguments strategy?
 
+# 2.1.0.beta7
+
+* Use new `activity-0.3.1` where `VariableMapping` is included now.
+
 # 2.1.0.beta6
 
 * Use new `activity-0.3.0`.

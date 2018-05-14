@@ -135,7 +135,7 @@ the scoping.
     result = DiscreetOrganization.("public_opinion" => "Freedom!", "public_knowledge" => true)
 
     result.inspect("public_opinion", "rumours", "secret", "edward.public_opinion", "edward.secret", "edward.rumours", "out.keys", "out.rumours", "out.secret", "org.rumours", "org.secret", "public_knowledge", "edward.public_knowledge").
-      must_equal %{<Result:false [\"Freedom!\", \"Bla\", \"Psst!\", nil, nil, nil, [\"edward.public_opinion\", \"edward.secret\", \"edward.rumours\", \"edward.public_knowledge\"], \"Bla\", \"!tssP\", nil, nil, true, nil] >}
+      must_equal %{<Result:false [\"Freedom!\", \"Bla\", \"Psst!\", nil, nil, nil, [\"edward.public_opinion\", \"edward.secret\", \"edward.rumours\", \"edward.public_knowledge\", \"rumours\", \"secret\", \"public_opinion\", \"public_knowledge\"], \"Bla\", \"!tssP\", nil, nil, true, nil] >}
   end
 
   it "with tracing" do

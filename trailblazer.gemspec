@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = `git ls-files -z test`.split("\x0")
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "trailblazer-operation", ">= 0.3.0", "< 0.4.0"
+  spec.add_dependency "trailblazer-operation", ">= 0.3.1", "< 0.4.0"
   spec.add_dependency "trailblazer-macro", ">= 2.1.0.beta6", "< 2.2.0"
   spec.add_dependency "trailblazer-macro-contract", ">= 2.1.0.beta4", "< 2.2.0"
 
