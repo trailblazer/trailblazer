@@ -1,4 +1,4 @@
-Copyright (c) Nick Sutterer
+Copyright (c) 2018 Trailblazer GmbH
 
 Trailblazer is an Open Source project licensed under the terms of
 the LGPLv3 license.  Please see <http://www.gnu.org/licenses/lgpl-3.0.html>
