@@ -1,4 +1,6 @@
-inherit_from: .rubocop_todo.yml
+inherit_from:
+    - https://raw.githubusercontent.com/trailblazer/meta/master/rubocop.yml
+    - .rubocop_todo.yml
 
 # Trailblazer uses constant named methods for macros.
 # Ignore the false positives in these files.
