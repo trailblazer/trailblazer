@@ -7,10 +7,10 @@ Gem::Specification.new do |spec|
   spec.version       = Trailblazer::VERSION
   spec.authors       = ["Nick Sutterer"]
   spec.email         = ["apotonick@gmail.com"]
-  spec.description   = %q{A high-level architecture introducing new abstractions such as control flow, operations, form objects or policies.}
+  spec.description   = %q{A high-level architecture introducing new abstractions such as operations and control flow, form objects and policies.}
   spec.summary       = %q{A high-level architecture for Ruby and Rails.}
   spec.homepage      = "http://trailblazer.to"
-  spec.license       = "LGPL-3.0"
+  spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
     f.match(%r{^(test|doc)/})
@@ -18,9 +18,9 @@ Gem::Specification.new do |spec|
   spec.test_files    = `git ls-files -z test`.split("\x0")
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "trailblazer-operation", ">= 0.3.1", "< 0.4.0"
-  spec.add_dependency "trailblazer-macro", ">= 2.1.0.beta7", "< 2.2.0"
-  spec.add_dependency "trailblazer-macro-contract", ">= 2.1.0.beta4", "< 2.2.0"
+  spec.add_dependency "trailblazer-macro", ">= 2.1.0.rc1", "< 2.2.0"
+  spec.add_dependency "trailblazer-macro-contract", "2.1.0.rc1"#, "< 2.2.0"
+  spec.add_dependency "trailblazer-operation" # TODO: why do we need this here?
 
   spec.add_dependency "declarative"
 
