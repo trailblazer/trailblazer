@@ -30,6 +30,10 @@ document Task API and define step API
 deprecate step->(options) ?
 injectable, per-operation step arguments strategy?
 
+# 2.1.0
+
+* Remove `declarative` dependency.
+
 # 2.1.0.rc1
 
 * Remove `task` and `input_output`, those are implemented in `activity`.

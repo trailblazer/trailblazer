@@ -22,8 +22,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "trailblazer-macro-contract", "2.1.0.rc1"#, "< 2.2.0"
   spec.add_dependency "trailblazer-operation" # TODO: why do we need this here?
 
-  spec.add_dependency "declarative"
-
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "minitest"
