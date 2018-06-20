@@ -71,3 +71,31 @@ Style/StringMethods:
   Enabled: true
 Style/SymbolArray:
   Enabled: true
+# this allows in rspec to have expect { } with multiple lines
+Style/BlockDelimiters:
+  EnforcedStyle: braces_for_chaining
+Layout/EndOfLine:
+  Enabled: false
+# don't need these checks in test folders
+Metrics/ModuleLength:
+  Exclude:
+    - "spec/**/*"
+    - "test/**/*"
+Metrics/BlockLength:
+  Exclude:
+    - "spec/**/*"
+    - "test/**/*"
+    - "*.gemspec" # definitely not in the gemspec
+Metrics/MethodLength:
+  Max: 20
+Lint/UnreachableCode:
+  Description: 'Unreachable code.'
+  Enabled: false
+Lint/Void:
+  Enabled: false
+Layout/AlignHash:
+  EnforcedLastArgumentHashStyle: ignore_implicit
+Metrics/AbcSize:
+  Max: 25
+Style/LambdaCall:
+  Enabled: false
