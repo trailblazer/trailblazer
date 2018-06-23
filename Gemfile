@@ -23,6 +23,7 @@ case ENV['GEMS_SOURCE']
     gem "trailblazer-macro-contract", path: "../trailblazer-macro-contract"
     gem "trailblazer-activity", path: "../trailblazer-activity"
     gem "trailblazer-context", path: "../trailblazer-context"
+    gem "representable", path: "../representable"
   when 'github'
     gem "reform", github: "trailblazer/reform"
     gem "reform-rails", github: "trailblazer/reform-rails"
@@ -31,6 +32,7 @@ case ENV['GEMS_SOURCE']
     gem "trailblazer-macro-contract", github: "trailblazer/trailblazer-macro-contract"
     gem "trailblazer-activity", github: "trailblazer/trailblazer-activity"
     gem "trailblazer-context", github: "trailblazer/trailblazer-context"
+    gem "representable", github: "trailblazer/representable"
   when 'custom'
     eval_gemfile('GemfileCustom')
   else # use rubygems releases

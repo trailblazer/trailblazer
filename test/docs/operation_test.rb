@@ -354,8 +354,8 @@ class DocsOperationStepOptionsTest < Minitest::Spec
   class ManualNameTest < Minitest::Spec
     #:name-manu
     class New < Trailblazer::Operation
-      step(Model( Song, :new ), {name: "build.song.model"})
-      step :validate_params!,   name: "my.params.validate"
+      step(Model( Song, :new ), {id: "build.song.model"})
+      step :validate_params!,   id: "my.params.validate"
       # ..
     end
     #:name-manu end

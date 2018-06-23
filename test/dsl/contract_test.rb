@@ -38,7 +38,7 @@ class DslContractTest < MiniTest::Spec
   end
 
   # no inheritance with setter.
-  it { CreateOrFind["contract.default.class"].must_equal nil }
+  it { assert_nil CreateOrFind["contract.default.class"] }
 
   # ---
   # Op::contract Constant
@@ -197,7 +197,7 @@ class DslContractTest < MiniTest::Spec
       form.sync
 
       song.genre.must_equal "Punkrock"
-      song.band.must_equal nil
+      assert_nil song.band
     end
   end
 
