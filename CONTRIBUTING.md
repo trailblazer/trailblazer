@@ -127,7 +127,7 @@ Go back to your pull request after a few minutes and see whether it passed muste
 
 ## Quality
 
-Commiting to OSS projects is always difficult, because all maintainers will adhere to their own quality standards that you don't know. Every projects wants "good code design", and so do we, so here are a few things that you should follow when contributing.
+Committing to OSS projects is always difficult, because all maintainers will adhere to their own quality standards that you don't know. Every projects wants "good code design", and so do we, so here are a few things that you should follow when contributing.
 
 * Good design matters: sometimes a feature could be added with a simple `if <my new case>` to an existing block of code. Usually, an `if` implies that the original design didn't plan on handling multiple cases, or in other words, **a refactoring of the code structure might be necessary**. If you're unsure: [Talk to us!](https://gitter.im/trailblazer/chat)
 * Make smaller pull requests. It is so much easier to discuss something graspable and not a "37 files changed" PR. The sooner we see your code, the earlier we can decide about which way to go. It is incredibly appreciated, though, to send us a link to a branch of yours where we can see the desired changes in total. We can then help splitting those into smaller steps.
@@ -145,7 +145,7 @@ When you have release rights, please follow these rules.
 At this point you're waiting on us. Expect a conversation regarding your pull request; Questions, clarifications, and so on.
 
 Some things that will increase the chance that your pull request is accepted:
-* Use Trailblazer idioms and follow the Trailblazer idealogy
+* Use Trailblazer idioms and follow the Trailblazer ideology
 * Include tests that fail without your code, and pass with it
 * Update the documentation, guides, etc.
 
