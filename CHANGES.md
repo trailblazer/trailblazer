@@ -29,6 +29,11 @@ document Task API and define step API
 deprecate step->(options) ?
 injectable, per-operation step arguments strategy?
 
+# 2.1.0.rc11
+
+* Remove all macros. They're not located in `trailblazer-macro` and `trailblazer-macro-contract`.
+* Remove DSL code: `contract do .. end` etc needs to be moved to a new gem if we want to keep it alive.
+
 # 2.0.6
 
 * Fix what we broke in 2.0.5, where `Wrap` would always use the current operation subclass and not the empty `Trailblazer::Operation`. Thanks to @mensfeld.
