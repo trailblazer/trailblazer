@@ -4,7 +4,7 @@ require 'trailblazer/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "trailblazer"
-  spec.version       = Trailblazer::VERSION
+  spec.version       = Trailblazer::Version::VERSION
   spec.authors       = ["Nick Sutterer"]
   spec.email         = ["apotonick@gmail.com"]
   spec.description   = %q{A high-level architecture introducing new abstractions such as operations and control flow, form objects and policies.}
@@ -18,15 +18,24 @@ Gem::Specification.new do |spec|
   spec.test_files    = `git ls-files -z test`.split("\x0")
   spec.require_paths = ["lib"]
 
+<<<<<<< HEAD
   spec.add_dependency "trailblazer-macro", ">= 2.1.0.rc1", "< 2.2.0"
   spec.add_dependency "trailblazer-macro-contract", "2.1.0.rc1"#, "< 2.2.0"
   spec.add_dependency "trailblazer-operation" # TODO: why do we need this here?
+=======
+  spec.add_dependency "trailblazer-operation", ">= 0.5.0", "< 0.6.0"
+  spec.add_dependency "trailblazer-macro-contract"
+  spec.add_dependency "reform", ">= 2.2.0", "< 3.0.0"
+>>>>>>> 2-1
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "minitest"
-  spec.add_development_dependency "nokogiri"
 
+<<<<<<< HEAD
   spec.add_development_dependency "roar"
   spec.required_ruby_version = '>= 2.0.0'
+=======
+  spec.required_ruby_version = '>= 2.1.0'
+>>>>>>> 2-1
 end

@@ -7,6 +7,7 @@ source 'https://rubygems.org'
 
 # Specify your gem's dependencies in trailblazer.gemspec
 gemspec
+<<<<<<< HEAD
 
 gem "multi_json"
 
@@ -41,3 +42,5 @@ end
 gem "minitest-line"
 
 gem "rubocop", require: false
+=======
+>>>>>>> 2-1
