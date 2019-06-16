@@ -18,24 +18,13 @@ Gem::Specification.new do |spec|
   spec.test_files    = `git ls-files -z test`.split("\x0")
   spec.require_paths = ["lib"]
 
-<<<<<<< HEAD
-  spec.add_dependency "trailblazer-macro", ">= 2.1.0.rc1", "< 2.2.0"
-  spec.add_dependency "trailblazer-macro-contract", "2.1.0.rc1"#, "< 2.2.0"
+  spec.add_dependency "trailblazer-macro", ">= 2.1.0.rc11", "< 2.2.0"
+  spec.add_dependency "trailblazer-macro-contract", "2.1.0.rc11"#, "< 2.2.0"
   spec.add_dependency "trailblazer-operation" # TODO: why do we need this here?
-=======
-  spec.add_dependency "trailblazer-operation", ">= 0.5.0", "< 0.6.0"
-  spec.add_dependency "trailblazer-macro-contract"
-  spec.add_dependency "reform", ">= 2.2.0", "< 3.0.0"
->>>>>>> 2-1
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "minitest"
 
-<<<<<<< HEAD
-  spec.add_development_dependency "roar"
-  spec.required_ruby_version = '>= 2.0.0'
-=======
   spec.required_ruby_version = '>= 2.1.0'
->>>>>>> 2-1
 end
