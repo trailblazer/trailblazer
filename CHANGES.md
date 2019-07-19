@@ -35,6 +35,10 @@ injectable, per-operation step arguments strategy?
 
 * Remove `declarative` dependency.
 
+# 2.1.0.2c12
+
+* Update dependencies.
+
 # 2.1.0.rc11
 
 * Remove all macros. They're not located in `trailblazer-macro` and `trailblazer-macro-contract`.
