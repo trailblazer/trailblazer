@@ -35,7 +35,11 @@ injectable, per-operation step arguments strategy?
 
 * Remove `declarative` dependency.
 
-# 2.1.0.2c12
+# 2.1.0.rc13
+
+* Use newest `macro` and `macro-context`.  They use symbols keys now everywhere.
+
+# 2.1.0.rc12
 
 * Update dependencies.
 
