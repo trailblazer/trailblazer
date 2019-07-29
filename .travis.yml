@@ -1,4 +1,3 @@
-sudo: false
 language: ruby
 cache: bundler
 before_install:
