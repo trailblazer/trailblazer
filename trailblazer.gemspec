@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.description   = %q{A high-level architecture introducing new abstractions such as operations and control flow, form objects and policies.}
   spec.summary       = %q{A high-level architecture for Ruby and Rails.}
   spec.homepage      = "http://trailblazer.to"
-  spec.license       = "MIT"
+  spec.license       = "LGPL-3.0"
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
     f.match(%r{^(test|doc)/})
