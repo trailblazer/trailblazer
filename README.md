@@ -1,25 +1,30 @@
 # Trailblazer
 
-_Trailblazer provides new high-level abstractions for Ruby frameworks. It gently enforces encapsulation, an intuitive code structure and gives you an object-oriented architecture._
+_Trailblazer provides new high-level abstractions for Ruby frameworks. It gently enforces encapsulation, an intuitive code structure and approaches the modeling of complex business workflows with a functional mind-set._
 
 [![Gitter Chat](https://badges.gitter.im/trailblazer/chat.svg)](https://gitter.im/trailblazer/chat)
 [![TRB Newsletter](https://img.shields.io/badge/TRB-newsletter-lightgrey.svg)](http://trailblazer.to/newsletter/)
 [![Gem Version](https://badge.fury.io/rb/trailblazer.svg)](http://badge.fury.io/rb/trailblazer)
 [![Open Source Helpers](https://www.codetriage.com/trailblazer/trailblazer/badges/users.svg)](https://www.codetriage.com/trailblazer/trailblazer)
 
-**This document discusses Trailblazer 2.1.** An overview about the additions are [on our website](http://trailblazer.to/blog/2017-12-trailblazer-2-1-what-you-need-to-know.html).
+## Documentation
+
+**This document discusses Trailblazer 2.1.** An overview about the additions are [on our website](http://2019.trailblazer.to/2.1/docs/trailblazer.html#trailblazer-2-1-migration).
+
+We're working on several new example applications!
+
+* *Refactoring to Trailblazer* discusses how the cfp-app is converted into a TRB app.
+* *BPMN and workflows* shows in-detail how the new 2.1 features in Trailblazer are used.
 
 The [1.x documentation is here](http://trailblazer.to/gems/operation/1.1/).
 
 ## Trailblazer In A Nutshell
 
 1. All business logic is encapsulated in [operations](#operation) (service objects).
-  * Optional [validation objects](#validation) (Reform and/or Dry-validation) in the operation deserialize and validate input. The form object can also be used for rendering.
-  * An optional [policy](#policies) object blocks unauthorized users from running the operation.
-  * Optional [callback](#callbacks) objects allow declaring post-processing logic.
 3. [Controllers](#controllers) instantly delegate to an operation. No business code in controllers, only HTTP-specific logic.
 4. [Models](#models) are persistence-only and solely define associations and scopes. No business code is to be found here. No validations, no callbacks.
 5. The presentation layer offers optional [view models](#views) (Cells) and [representers](#representers) for document APIs.
+6. More complex business flows and life-cycles are modeled using workflows.
 
 Trailblazer is designed to handle different contexts like user roles by applying [inheritance](#inheritance) between and [composing](#composing) of operations, form objects, policies, representers and callbacks.
 
@@ -61,10 +66,6 @@ app
 Instead of grouping by technology, classes and views are structured by *concept*, and then by technology. A concept can relate to a model, or can be a completely abstract concern such as `invoicing`.
 
 Within a concept, you can have any level of nesting. For example, `invoicing/pdf/` could be one.
-
-The file structure is implemented by the [`trailblazer-loader` gem](https://github.com/trailblazer/trailblazer-loader).
-
-[Learn more.](http://trailblazer.to/gems/trailblazer/loader.html)
 
 
 ## Architecture
@@ -127,201 +128,31 @@ An operation is not just a monolithic replacement for your business code. It's a
 
 ```ruby
 class Song::Create < Trailblazer::Operation
-  step :process!
+  step :model
+  step :validate
 
-  def process!(options)
+  def model(ctx, **)
     # do whatever you feel like.
+    ctx[:model] = Song.new
+  end
+
+  def validate(ctx, params:, **)
+    # ..
   end
 end
 ```
 
-Operations only need to define and implement steps, like the `#process!` steps. Those steps receive the arguments from the caller.
+Operations define the flow of their logic using the DSL and implement the particular steps with pure Ruby.
 
 You cannot instantiate them per design. The only way to invoke them is `call`.
 
 ```ruby
-Song::Create.call(whatever: "goes", in: "here")
-# same as
-Song::Create.(whatever: "goes", in: "here")
+Song::Create.(params: {whatever: "goes", in: "here"})
 ```
 
 Their high degree of encapsulation makes them a [replacement for test factories](#test), too.
 
 [Learn more.](http://trailblazer.to/gems/operation)
-
-### Contract
-The Contract Macro, covers the contracts for Trailblazer, they are basically Reform objects that you can define and validate inside an operation. Reform is a fantastic tool for deserializing and validating deeply nested hashes, and then, when valid, writing those to the database using your persistence layer such as ActiveRecord.
-
-```ruby
-# app/concepts/song/contract/create.rb
-module Song::Contract
-  class Create < Reform::Form
-    property :title
-    property :length
-
-    validates :title,  length: 2..33
-    validates :length, numericality: true
-  end
-end
-```
-
-The Contract then gets hooked into the operation. using this Macro.
-```ruby
-# app/concepts/song/operation/create.rb
-class Song::Create < Trailblazer::Operation
-  step Model( Song, :new )
-  step Contract::Build( constant: Song::Contract::Create )
-  step Contract::Validate()
-  step Contract::Persist()
-end
-```
-As you can see, using contracts consists of five steps.
-
-Define the contract class (or multiple of them) for the operation.
-Plug the contract creation into the operation’s pipe using Contract::Build.
-Run the contract’s validation for the params using Contract::Validate.
-If successful, write the sane data to the model(s). This will usually happen in the Contract::Persist macro.
-After the operation has been run, interpret the result. For instance, a controller calling an operation will render a erroring form for invalid input.
-
-Here’s what the result would look like after running the Create operation with invalid data.
-```ruby
-result = Song::Create.( title: "A" )
-result.success? #=> false
-result["contract.default"].errors.messages
-  #=> {:title=>["is too short (minimum is 2 characters)"], :length=>["is not a number"]}
-```
-
-#### Build
-The Contract::Build macro helps you to instantiate the contract. It is both helpful for a complete workflow, or to create the contract, only, without validating it, e.g. when presenting the form.
-```ruby
-class Song::New < Trailblazer::Operation
-  step Model( Song, :new )
-  step Contract::Build( constant: Song::Contract::Create )
-end
-```
-
-This macro will grab the model from options["model"] and pass it into the contract’s constructor. The contract is then saved in options["contract.default"].
-```ruby
-result = Song::New.()
-result["model"] #=> #<struct Song title=nil, length=nil>
-result["contract.default"]
-  #=> #<Song::Contract::Create model=#<struct Song title=nil, length=nil>>
-```
-The Build macro accepts the :name option to change the name from default.
-
-#### Validation
-The Contract::Validate macro is responsible for validating the incoming params against its contract. That means you have to use Contract::Build beforehand, or create the contract yourself. The macro will then grab the params and throw then into the contract’s validate (or call) method.
-
-```ruby
-class Song::ValidateOnly < Trailblazer::Operation
-  step Model( Song, :new )
-  step Contract::Build( constant: Song::Contract::Create )
-  step Contract::Validate()
-end
-```
-Depending on the outcome of the validation, it either stays on the right track, or deviates to left, skipping the remaining steps.
-```ruby
-result = Song::ValidateOnly.({}) # empty params
-result.success? #=> false
-```
-
-Note that Validate really only validates the contract, nothing is written to the model, yet. You need to push data to the model manually, e.g. with Contract::Persist.
-```ruby
-result = Song::ValidateOnly.({ title: "Rising Force", length: 13 })
-
-result.success? #=> true
-result["model"] #=> #<struct Song title=nil, length=nil>
-result["contract.default"].title #=> "Rising Force"
-```
-
-Validate will use options["params"] as the input. You can change the nesting with the :key option.
-
-Internally, this macro will simply call Form#validate on the Reform object.
-
-Note: Reform comes with sophisticated deserialization semantics for nested forms, it might be worth reading a bit about Reform to fully understand what you can do in the Validate step.
-
-##### Key
-Per default, Contract::Validate will use options["params"] as the data to be validated. Use the key: option if you want to validate a nested hash from the original params structure.
-```ruby
-class Song::Create < Trailblazer::Operation
-  step Model( Song, :new )
-  step Contract::Build( constant: Song::Contract::Create )
-  step Contract::Validate( key: "song" )
-  step Contract::Persist( )
-end
-```
-
-This automatically extracts the nested "song" hash.
-```ruby
-result = Song::Create.({ "song" => { title: "Rising Force", length: 13 } })
-result.success? #=> true
-```
-
-If that key isn’t present in the params hash, the operation fails before the actual validation.
-```ruby
-result = Song::Create.({ title: "Rising Force", length: 13 })
-result.success? #=> false
-```
-
-Note: String vs. symbol do matter here since the operation will simply do a hash lookup using the key you provided.
-
-#### Persist
-To push validated data from the contract to the model(s), use Persist. Like Validate, this requires a contract to be set up beforehand.
-```ruby
-class Song::Create < Trailblazer::Operation
-  step Model( Song, :new )
-  step Contract::Build( constant: Song::Contract::Create )
-  step Contract::Validate()
-  step Contract::Persist()
-end
-```
-
-After the step, the contract’s attribute values are written to the model, and the contract will call save on the model.
-```ruby
-result = Song::Create.( title: "Rising Force", length: 13 )
-result.success? #=> true
-result["model"] #=> #<Song title="Rising Force", length=13>
-```
-
-You can also configure the Persist step to call sync instead of Reform’s save.
-```ruby
-step Persist( method: :sync )
-```
-This will only write the contract’s data to the model without calling save on it.
-
-##### Name
-Explicit naming for the contract is possible, too.
-```ruby
-
-class Song::Create < Trailblazer::Operation
-  step Model( Song, :new )
-  step Contract::Build(    name: "form", constant: Song::Contract::Create )
-  step Contract::Validate( name: "form" )
-  step Contract::Persist(  name: "form" )
-end
-```
-
-You have to use the name: option to tell each step what contract to use. The contract and its result will now use your name instead of default.
-```ruby
-result = Song::Create.({ title: "A" })
-result["contract.form"].errors.messages #=> {:title=>["is too short (minimum is 2 ch...
-```
-
-Use this if your operation has multiple contracts.
-
-#### Result Object
-The operation will store the validation result for every contract in its own result object.
-
-The path is result.contract.#{name}.
-```ruby
-result = Create.({ length: "A" })
-
-result["result.contract.default"].success?        #=> false
-result["result.contract.default"].errors          #=> Errors object
-result["result.contract.default"].errors.messages #=> {:length=>["is not a number"]}
-```
-
-Each result object responds to success?, failure?, and errors, which is an Errors object.
 
 ## Models
 
@@ -339,80 +170,6 @@ end
 
 Only operations and views/cells can access models directly.
 
-## Policies
-
-You can abort running an operation using a policy. "[Pundit](https://github.com/elabs/pundit)-style" policy classes define the rules.
-
-```ruby
-class Song::Policy
-  def initialize(user, song)
-    @user, @song = user, song
-  end
-
-  def create?
-    @user.admin?
-  end
-end
-```
-
-The rule is enabled via the `::policy` call.
-
-```ruby
-class Song::Create < Trailblazer::Operation
-  step Policy( Song::Policy, :create? )
-end
-```
-
-The policy is evaluated in `#setup!`, raises an exception if `false` and suppresses running `#process`.
-
-[Learn more.](http://trailblazer.to/gems/operation/policy.html)
-
-
-## Views
-
-View rendering can happen using the controller as known from Rails. This is absolutely fine for simple views.
-
-More complex UI logic happens in _View Models_ as found in [Cells](https://github.com/apotonick/cells). View models also replace helpers.
-
-The operation's form object can be rendered in views, too.
-
-```ruby
-class SongsController < ApplicationController
-  def new
-    form Song::Create # will assign the form object to @form.
-  end
-end
-```
-
-Since Reform objects can be passed to form builders, you can use the operation to render and process the form!
-
-```haml
-= simple_form_for @form do |f|
-  = f.input :body
-```
-
-
-## Representers
-
-Operations can use representers from [Roar](https://github.com/apotonick/roar) to serialize and parse JSON and XML documents for APIs.
-
-Representers can be inferred automatically from your contract, then may be refined, e.g. with hypermedia or a format like `JSON-API`.
-
-```ruby
-class Song::Create < Trailblazer::Operation
-  representer do
-    # inherited :body
-    include Roar::JSON::HAL
-
-    link(:self) { song_path(represented.id) }
-  end
-end
-```
-
-The operation can then parse incoming JSON documents in `validate` and render a document via `to_json`.
-
-[Learn more.](http://trailblazer.to/gems/operation/2.0/representer.html)
-
 ## Tests
 
 In Trailblazer, you only have operation unit tests and integration smoke tests to test the operation/controller wiring.
@@ -425,15 +182,13 @@ describe Song::Update do
 end
 ```
 
-## More
+## Workflows
 
-Trailblazer has many more architectural features such as
+Operations are a great way to clean up controllers and models. However, Trailblazer goes further and provides an approach to model entire life-cycles of business objects, such as "a song" or "the root user".
 
-* Polymorphic builders and operations
-* Inheritance and composition support
-* Polymorphic views
+Those workflows dramatically reduce the usage of control flow logic in your code and allow for visually designing and discussing flows.
 
-Check the project website and the book.
+Learn more about BPMN and workflows [on our website](https://2019.trailblazer.to/docs/workflow).
 
 ## Installation
 
