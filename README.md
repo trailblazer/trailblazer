@@ -26,8 +26,6 @@ The [1.x documentation is here](http://trailblazer.to/gems/operation/1.1/).
 5. The presentation layer offers optional [view models](#views) (Cells) and [representers](#representers) for document APIs.
 6. More complex business flows and life-cycles are modeled using workflows.
 
-Trailblazer is designed to handle different contexts like user roles by applying [inheritance](#inheritance) between and [composing](#composing) of operations, form objects, policies, representers and callbacks.
-
 Want code? Jump [right here](#controllers)!
 
 ## Mission
@@ -150,9 +148,9 @@ You cannot instantiate them per design. The only way to invoke them is `call`.
 Song::Create.(params: {whatever: "goes", in: "here"})
 ```
 
-Their high degree of encapsulation makes them a [replacement for test factories](#test), too.
+Their high degree of encapsulation makes them a [replacement for test factories](#tests), too.
 
-[Learn more.](http://trailblazer.to/gems/operation)
+[Learn more.](https://2019.trailblazer.to/2.1/docs/operation.html#operation-overview)
 
 ## Models
 
@@ -182,13 +180,10 @@ describe Song::Update do
 end
 ```
 
-## Workflows
+## Workflow
+Operations are a great way to clean up controllers and models. However, Trailblazer goes further and provides an approach to model entire life-cycles of business objects, such as "a song" or "the root user" using workflow ([`pro feature`](https://2019.trailblazer.to/2.1/docs/pro.html#pro-1)). Also, you don't have to use the DSL but can use the [`editor`](https://2019.trailblazer.to/2.1/docs/pro.html#pro-editor) instead (cool for more complex, long-running flows). Here comes a sample screenshot.
 
-Operations are a great way to clean up controllers and models. However, Trailblazer goes further and provides an approach to model entire life-cycles of business objects, such as "a song" or "the root user".
-
-Those workflows dramatically reduce the usage of control flow logic in your code and allow for visually designing and discussing flows.
-
-Learn more about BPMN and workflows [on our website](https://2019.trailblazer.to/docs/workflow).
+<img src="http://2019.trailblazer.to/2.1/dist/img/flow.png">
 
 ## Installation
 
