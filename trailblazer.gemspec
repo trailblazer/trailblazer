@@ -11,7 +11,16 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{A high-level architecture for Ruby and Rails.}
   spec.homepage      = "http://trailblazer.to"
   spec.license       = "LGPL-3.0"
-
+  spec.metadata      = {
+    "bug_tracker_uri"   => "https://github.com/trailblazer/trailblazer/issues",
+    "changelog_uri"     => "https://github.com/trailblazer/trailblazer/blob/master/CHANGES.md",
+    "documentation_uri" => "https://trailblazer.to/2.1/docs/trailblazer.html",
+    "homepage_uri"      => "https://trailblazer.to/",
+    "mailing_list_uri"  => "https://trailblazer.zulipchat.com/",
+    "source_code_uri"   => "https://github.com/trailblazer/trailblazer",
+    "wiki_uri"          => "https://github.com/trailblazer/trailblazer/wiki"
+  }
+  
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
     f.match(%r{^(test|doc)/})
   end
