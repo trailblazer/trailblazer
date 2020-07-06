@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.metadata      = {
     "bug_tracker_uri"   => "https://github.com/trailblazer/trailblazer/issues",
     "changelog_uri"     => "https://github.com/trailblazer/trailblazer/blob/master/CHANGES.md",
-    "documentation_uri" => "https://trailblazer.to/2.1/docs/trailblazer.html",
+    "documentation_uri" => "https://trailblazer.to/docs",
     "homepage_uri"      => "https://trailblazer.to/",
     "mailing_list_uri"  => "https://trailblazer.zulipchat.com/",
     "source_code_uri"   => "https://github.com/trailblazer/trailblazer",
