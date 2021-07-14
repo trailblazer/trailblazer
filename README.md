@@ -9,7 +9,7 @@ _Trailblazer provides new high-level abstractions for Ruby frameworks. It gently
 
 ## Documentation
 
-* **The current version is Trailblazer 2.1.** We have [comprehensive API documenation](https://trailblazer.to/2.1/docs) ready for you. If you're new to TRB start with our [LEARN page](https://trailblazer.to/2.1/learn).
+* **The current version is Trailblazer 2.1.** We have [comprehensive API documenation](https://trailblazer.to/2.1/docs/trailblazer.html) ready for you. If you're new to TRB start with our [LEARN page](https://trailblazer.to/2.1/learn.html).
 * A migration guide from 2.0 can be found [on our website](https://trailblazer.to/2.1/docs/trailblazer.html#trailblazer-2-1-migration).
 * The [1.x documentation is here](http://trailblazer.to/gems/operation/1.1/).
 
