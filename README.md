@@ -9,14 +9,13 @@ _Trailblazer provides new high-level abstractions for Ruby frameworks. It gently
 
 ## Documentation
 
-**This document discusses Trailblazer 2.1.** An overview about the additions are [on our website](http://2019.trailblazer.to/2.1/docs/trailblazer.html#trailblazer-2-1-migration).
+* **The current version is Trailblazer 2.1.** We have [comprehensive API documenation](https://trailblazer.to/2.1/docs) ready for you. If you're new to TRB start with our [LEARN page](https://trailblazer.to/2.1/learn).
+* A migration guide from 2.0 can be found [on our website](https://trailblazer.to/2.1/docs/trailblazer.html#trailblazer-2-1-migration).
+* The [1.x documentation is here](http://trailblazer.to/gems/operation/1.1/).
 
-We're working on several new example applications!
+Make sure to check out the new beginner's guide to learning Trailblazer. The brand-new book discusses all aspects in a step-wise approach you need to understand Trailblazer's mechanics and design ideas.
 
-* *Refactoring to Trailblazer* discusses how the cfp-app is converted into a TRB app.
-* *BPMN and workflows* shows in-detail how the new 2.1 features in Trailblazer are used.
-
-The [1.x documentation is here](http://trailblazer.to/gems/operation/1.1/).
+<a href="https://leanpub.com/buildalib"><img src="https://trailblazer.to/images/2.1/buildalib-cover.png"></a>
 
 ## Trailblazer In A Nutshell
 
