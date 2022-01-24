@@ -19,7 +19,7 @@ Make sure to check out the new beginner's guide to learning Trailblazer. The [br
 
 ## Screencasts
 
-Watch our series of screencasts [**TRAILBLAZER TALES**]() if you prefer learning from videos!
+Watch our series of screencasts [**TRAILBLAZER TALES**](https://www.youtube.com/channel/UCi2P0tFMtjMUsWLYAD1Ezsw) if you prefer learning from videos!
 
 <a href="https://www.youtube.com/embed/9elpobV4HSw"><img src="https://trailblazer.to/images/2.1/01-operation-basics.png"></a>
 
