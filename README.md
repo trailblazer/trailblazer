@@ -17,6 +17,12 @@ Make sure to check out the new beginner's guide to learning Trailblazer. The [br
 
 <a href="https://leanpub.com/buildalib"><img src="https://trailblazer.to/images/2.1/buildalib-cover.png"></a>
 
+## Screencasts
+
+Watch our series of screencasts **TRAILBLAZER TALES** if you prefer learning from videos!
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/9elpobV4HSw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 ## Trailblazer In A Nutshell
 
 1. All business logic is encapsulated in [operations](#operation) (service objects).
