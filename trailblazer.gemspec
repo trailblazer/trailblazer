@@ -27,9 +27,9 @@ Gem::Specification.new do |spec|
   spec.test_files    = `git ls-files -z test`.split("\x0")
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "trailblazer-macro", ">= 2.1.10.beta1", "< 2.2.0"
+  spec.add_dependency "trailblazer-macro",          ">= 2.1.10.beta1", "< 2.2.0"
   spec.add_dependency "trailblazer-macro-contract", ">= 2.1.3.beta1", "< 2.2.0"
-  spec.add_dependency "trailblazer-operation", ">= 0.8.0.beta1", "< 1.0.0" # TODO: why do we need this here?
+  spec.add_dependency "trailblazer-operation",      ">= 0.8.0.beta1", "< 1.0.0"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
