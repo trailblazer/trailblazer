@@ -1,3 +1,6 @@
+## This file is managed by Terraform.
+## Do not modify this file directly, as it may be overwritten.
+## Please open an issue instead.
 name: CI
 on: [push, pull_request]
 jobs:
@@ -5,13 +8,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Due to https://github.com/actions/runner/issues/849, we have to use quotes for '3.0'
-        ruby: [2.5, 2.6, 2.7, '3.0', 3.1, head, jruby, jruby-head]
+        ruby: [2.7, '3.0', '3.1']
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
-        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+        bundler-cache: true
     - run: bundle exec rake
