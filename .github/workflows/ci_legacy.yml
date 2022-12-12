@@ -1,0 +1,19 @@
+## This file is managed by Terraform.
+## Do not modify this file directly, as it may be overwritten.
+## Please open an issue instead.
+name: CI with EOL ruby versions
+on: [push, pull_request]
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: [2.5, 2.6]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+        bundler-cache: true
+    - run: bundle exec rake
