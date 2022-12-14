@@ -1,4 +1,5 @@
 
+
 # 2.1
 
 * Macros now always have to provide an `:id`. This was a bit fuzzy in 2.0.
@@ -30,6 +31,10 @@ TODO:
 document Task API and define step API
 deprecate step->(options) ?
 injectable, per-operation step arguments strategy?
+
+# 2.1.2
+
+* Use `trailblazer-activity-dsl-linear` >= 1.1.0.
 
 # 2.1.1
 
