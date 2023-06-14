@@ -7,9 +7,8 @@ Gem::Specification.new do |spec|
   spec.version       = Trailblazer::Version::VERSION
   spec.authors       = ["Nick Sutterer"]
   spec.email         = ["apotonick@gmail.com"]
-  spec.description   = %q{A high-level architecture introducing new abstractions such as operations and control flow, form objects and policies.}
-  spec.summary       = %q{A high-level architecture for Ruby and Rails.}
-  spec.homepage      = "http://trailblazer.to"
+  spec.description   = %q{Ruby framework for structuring your business logic.}
+  spec.homepage      = "https://trailblazer.to"
   spec.license       = "LGPL-3.0"
   spec.metadata      = {
     "bug_tracker_uri"   => "https://github.com/trailblazer/trailblazer/issues",
@@ -27,7 +26,8 @@ Gem::Specification.new do |spec|
   spec.test_files    = `git ls-files -z test`.split("\x0")
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "trailblazer-macro",          ">= 2.1.12", "< 2.2.0"
+  spec.add_dependency "trailblazer-macro",          ">= 2.1.15", "< 2.2.0"
+  spec.add_dependency "trailblazer-developer",      ">= 0.1.0", "< 0.2.0"
   spec.add_dependency "trailblazer-macro-contract", ">= 2.1.4", "< 2.2.0"
   spec.add_dependency "trailblazer-operation",      ">= 0.9.0", "< 1.0.0"
 
@@ -36,5 +36,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest"
   spec.add_development_dependency "minitest-line"
 
-  spec.required_ruby_version = '>= 2.1.0'
+  spec.required_ruby_version = '>= 2.5.0'
 end
