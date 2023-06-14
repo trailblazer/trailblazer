@@ -59,7 +59,7 @@ The operation takes care of the flow control. Internally, this works as depicted
 The best part: the only way to invoke this operation is `Operation.call`. The single entry-point saves programmers from shenanigans with instances and has proven to be an almost bullet-proof concept in the past 10 years.
 
 ```ruby
-result = Song::Operation::Create.(params: {title: nil, band: "Rancid"})
+result = Song::Operation::Create.(params: {title: "Hear Us Out", band: "Rancid"})
 
 result.success? #=> true
 result[:model]  #=> #<Song title="Hear Us Out" ...>
@@ -72,7 +72,7 @@ Operations encourage a high degree of encapsulation while giving you all the con
 In the past years, we learnt from some old mistakes and improved developer experience. As a starter, check out our built-in tracing!
 
 ```ruby
-result = Song::Operation::Create.wtf?(params: {title: "Hear Us Out", band: "Rancid"})
+result = Song::Operation::Create.wtf?(params: {title: "", band: "Rancid"})
 ```
 
 ![Tracing the internal flow of an operation.](https://github.com/trailblazer/trailblazer/blob/readme/doc/song_operation_create_trace.png?raw=true)
