@@ -1,6 +1,6 @@
 # Trailblazer
 
-_Ruby framework to help structuring your business logic._
+_Battle-tested Ruby framework to help structuring your business logic._
 
 [![Gem Version](https://badge.fury.io/rb/trailblazer.svg)](http://badge.fury.io/rb/trailblazer)
 
@@ -17,10 +17,11 @@ If you've ever asked yourself one of the following questions, you might be inter
 * Is it a good idea to make my team document their efforts of implementing our own "service object" or is there something maintained in the wild?
 * Are we with unhappy with our own file structure, because every developer names things differently?
 * What's a better way to handle validations and forms in general?
+* Is there life in outer space?
 
 ## Operation
 
-Operations encapsulate business logic and are the heart of the Trailblazer architecture.
+The operation encapsulates business logic and is the heart of the Trailblazer architecture.
 
 An operation is not just a monolithic replacement for your business code. It's a simple orchestrator between the form objects, models, your business code and all other layers needed to get the job done.
 
@@ -48,7 +49,7 @@ end
 
 The `step` DSL takes away the pain of flow control and error handling. You focus on what happens: creating models, validating data, sending out notifications. The operation takes care of the flow control.
 
-![alt text](https://github.com/trailblazer/trailblazer/blob/readme/doc/song_operation_create.png?raw=true
+![alt text](https://github.com/trailblazer/trailblazer/blob/readme/doc/song_operation_create.png?raw=true)
 
 The only way to invoke them is `Operation.call`. The single entry-point saves programmers from shenanigans with instances and has proven to be an almost bullet-proof concept in the past 10 years.
 
