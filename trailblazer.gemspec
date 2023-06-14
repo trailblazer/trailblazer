@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.version       = Trailblazer::Version::VERSION
   spec.authors       = ["Nick Sutterer"]
   spec.email         = ["apotonick@gmail.com"]
-  spec.description   = %q{Ruby framework for structuring your business logic.}
+  spec.summary       = %q{Ruby framework for structuring your business logic.}
   spec.homepage      = "https://trailblazer.to"
   spec.license       = "LGPL-3.0"
   spec.metadata      = {
