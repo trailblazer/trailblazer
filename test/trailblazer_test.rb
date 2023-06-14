@@ -6,6 +6,7 @@ require "trailblazer/macro/contract"
 class TrailblazerTest < Minitest::Spec
   Song = Struct.new(:title)
 
+
   class Create < Trailblazer::Operation
     class Form < Reform::Form
       include Reform::Form::Dry
@@ -47,6 +48,7 @@ class TrailblazerTest < Minitest::Spec
     assert_equal result[:model].to_h, {:title=>"Dead and Gone"}
 
   # invalid!
+      result = Create.wtf?(params: {})
     output, _ = capture_io do
       result = Create.wtf?(params: {})
     end
@@ -67,3 +69,31 @@ class TrailblazerTest < Minitest::Spec
     assert_equal result[:mode].to_h, {}
   end
 end
+
+# Song = Struct.new(:title)
+# class Song
+#   module Operation
+#     class Create < Trailblazer::Operation
+#       step :create_model
+#       step :validate
+#       fail :handle_errors
+#       step :notify
+
+#       def create_model(ctx, **)
+#         # do whatever you feel like.
+#         ctx[:model] = Song.new
+#       end
+
+#       def validate(ctx, params:, **)
+#         # ..
+#       end
+
+#       def handle_errors(ctx, **)
+#         true
+#       end
+#     end
+
+#   end
+# end
+
+# Song::Operation::Create.wtf?(params: {})
