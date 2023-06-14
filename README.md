@@ -10,14 +10,13 @@ Trailblazer introduces new abstraction layers into Ruby applications to help you
 
 ## Should I use Trailblazer?
 
-If you've ever asked yourself one of the following questions, you might be interested in TRB!
+Give us a chance if you say "yes" to this!
 
-* Should this messy controller action be extracted to some separate layer? The model? Or a "service object"? And where do I put the file?
-* How would I design my own "service object"? What interfaces does it need? And is there a way to get rid of all those `if`s and `else`s?
-* Is it a good idea to make my team document their efforts of implementing our own "service object" or is there something maintained in the wild?
-* Are we with unhappy with our own file structure, because every developer names things differently?
-* What's a better way to handle validations and forms in general?
-* Is there life in outer space?
+* You hate messy controller code but don't know where to put it?
+* Moving business code into the model gives you nightmares?
+* "Service objects" are great?
+* You're tired of 12 different "service object" implementations throughout your app?
+* Additional abstractions such as form objects or policies are missing in big frameworks?
 
 ## Operation
 
@@ -53,7 +52,7 @@ The `step` DSL takes away the pain of flow control and error handling. You focus
 
 The operation takes care of the flow control. Internally, this works as depicted in this beautiful diagram.
 
-![alt text](https://github.com/trailblazer/trailblazer/blob/readme/doc/song_operation_create.png?raw=true)
+![Flow diagram of a typical operation.](https://github.com/trailblazer/trailblazer/blob/readme/doc/song_operation_create.png?raw=true)
 
 The best part: the only way to invoke this operation is `Operation.call`. The single entry-point saves programmers from shenanigans with instances and has proven to be an almost bullet-proof concept in the past 10 years.
 
@@ -68,7 +67,13 @@ Operations encourage a high degree of encapsulation while giving you all the con
 
 ### Tracing
 
-In the past years, we learnt from some old mistakes and improved developer experience. Check out our built-in tracing!
+In the past years, we learnt from some old mistakes and improved developer experience. As a starter, check out our built-in tracing!
+
+```ruby
+result = Song::Operation::Create.wtf?(params: {title: "Hear Us Out", band: "Rancid"})
+```
+
+![Tracing the internal flow of an operation.](https://github.com/trailblazer/trailblazer/blob/readme/doc/song_operation_create_trace.png?raw=true)
 
 ## Documentation
 
