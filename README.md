@@ -1,11 +1,64 @@
 # Trailblazer
 
-_Trailblazer provides new high-level abstractions for Ruby frameworks. It gently enforces encapsulation, an intuitive code structure and approaches the modeling of complex business workflows with a functional mind-set._
+_Ruby framework to help structuring your business logic._
 
-[![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://trailblazer.zulipchat.com)
-[![TRB Newsletter](https://img.shields.io/badge/TRB-newsletter-lightgrey.svg)](http://trailblazer.to/newsletter/)
 [![Gem Version](https://badge.fury.io/rb/trailblazer.svg)](http://badge.fury.io/rb/trailblazer)
-[![Open Source Helpers](https://www.codetriage.com/trailblazer/trailblazer/badges/users.svg)](https://www.codetriage.com/trailblazer/trailblazer)
+
+## What's Trailblazer?
+
+Trailblazer introduces new abstraction layers into Ruby applications to help you structure your business logic. It ships with our canonical "service object" implementation called "operation", testing gems, Rails support, optional form objects and much more.
+
+## Should I use Trailblazer?
+
+If you've ever asked yourself one of the following questions, you might be interested in TRB!
+
+* Should this messy controller action be extracted to some separate layer? The model? Or a "service object"? And where do I put the file?
+* How would I design my own "service object"? What interfaces does it need? And is there a way to get rid of all those `if`s and `else`s?
+* Is it a good idea to make my team document their efforts of implementing our own "service object" or is there something maintained in the wild?
+* Are we with unhappy with our own file structure, because every developer names things differently?
+* What's a better way to handle validations and forms in general?
+
+## Operation
+
+Operations encapsulate business logic and are the heart of the Trailblazer architecture.
+
+An operation is not just a monolithic replacement for your business code. It's a simple orchestrator between the form objects, models, your business code and all other layers needed to get the job done.
+
+```ruby
+# app/concepts/song/operation/create.rb
+module Song::Operation
+  class Create < Trailblazer::Operation
+    step :create_model
+    step :validate
+    left :handle_error
+    step :notify
+
+    def create_model(ctx, **)
+      # do whatever you feel like.
+      ctx[:model] = Song.new
+    end
+
+    def validate(ctx, params:, **)
+      # ..
+    end
+    # ...
+  end
+end
+```
+
+The `step` DSL takes away the pain of flow control and error handling. You focus on what happens: creating models, validating data, sending out notifications. The operation takes care of the flow control.
+
+![alt text](https://github.com/trailblazer/trailblazer/blob/readme/doc/song_operation_create.png?raw=true
+
+The only way to invoke them is `Operation.call`. The single entry-point saves programmers from shenanigans with instances and has proven to be an almost bullet-proof concept in the past 10 years.
+
+```ruby
+Song::Operation::Create.(params: {title: "Hear Us Out", band: "Rancid"})
+```
+
+Their high degree of encapsulation makes them a [replacement for test factories](#tests), too.
+
+[Learn more.](https://2019.trailblazer.to/2.1/docs/operation.html#operation-overview)
 
 ## Documentation
 
@@ -23,7 +76,12 @@ Watch our series of screencasts [**TRAILBLAZER TALES**](https://www.youtube.com/
 
 <a href="https://www.youtube.com/embed/9elpobV4HSw"><img src="https://trailblazer.to/images/2.1/01-operation-basics.png"></a>
 
-## Trailblazer In A Nutshell
+
+service object
+if/else, callbacks
+big teams, conventions, developer exp
+Ruby 2.5, not because we're old-school, but to help upgrading applications stuck in the 90s.
+
 
 1. All business logic is encapsulated in [operations](#operation) (service objects).
 3. [Controllers](#controllers) instantly delegate to an operation. No business code in controllers, only HTTP-specific logic.
@@ -119,43 +177,7 @@ Again, the controller only dispatchs to the operation and handles successful/inv
 
 [Learn more.](http://trailblazer.to/gems/operation/controller.html)
 
-## Operation
 
-Operations encapsulate business logic and are the heart of a Trailblazer architecture.
-
-The bare bones operation without any Trailblazery is implemented in [the `trailblazer-operation` gem](https://github.com/trailblazer/trailblazer-operation) and can be used without our stack.
-
-Operations don't know about HTTP or the environment. You could use an operation in Rails, Hanami, or Roda, it wouldn't know.
-
-An operation is not just a monolithic replacement for your business code. It's a simple orchestrator between the form objects, models, your business code and all other layers needed to get the job done.
-
-```ruby
-class Song::Create < Trailblazer::Operation
-  step :model
-  step :validate
-
-  def model(ctx, **)
-    # do whatever you feel like.
-    ctx[:model] = Song.new
-  end
-
-  def validate(ctx, params:, **)
-    # ..
-  end
-end
-```
-
-Operations define the flow of their logic using the DSL and implement the particular steps with pure Ruby.
-
-You cannot instantiate them per design. The only way to invoke them is `call`.
-
-```ruby
-Song::Create.(params: {whatever: "goes", in: "here"})
-```
-
-Their high degree of encapsulation makes them a [replacement for test factories](#tests), too.
-
-[Learn more.](https://2019.trailblazer.to/2.1/docs/operation.html#operation-overview)
 
 ## Models
 
