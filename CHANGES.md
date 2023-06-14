@@ -1,7 +1,16 @@
+# 2.1.3
 
+# 2.1.2
 
-# 2.1
+* Use `trailblazer-activity-dsl-linear` >= 1.1.0.
 
+# 2.1.1
+
+* Use `trailblazer-activity-dsl-linear` >= 1.0.0.
+
+# 2.1.0
+
+* Remove `declarative` dependency.
 * Macros now always have to provide an `:id`. This was a bit fuzzy in 2.0.
 
 * Nested
@@ -23,26 +32,8 @@
 
     Always write to `options`.
 
-* self[] removed
 * Fixed `Guard` where procs could receive one argument, only. Guards follow the step interface: `Policy::Guard( ->(options, **) { .. } )
 * Removed `Operation::Callback` which was a poor idea and luckily no one was using it.
-
-TODO:
-document Task API and define step API
-deprecate step->(options) ?
-injectable, per-operation step arguments strategy?
-
-# 2.1.2
-
-* Use `trailblazer-activity-dsl-linear` >= 1.1.0.
-
-# 2.1.1
-
-* Use `trailblazer-activity-dsl-linear` >= 1.0.0.
-
-# 2.1.0
-
-* Remove `declarative` dependency.
 
 # 2.1.0.rc13
 
