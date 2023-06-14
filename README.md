@@ -31,7 +31,7 @@ module Song::Operation
   class Create < Trailblazer::Operation
     step :create_model
     step :validate
-    left :handle_error
+    left :handle_errors
     step :notify
 
     def create_model(ctx, **)
@@ -47,19 +47,28 @@ module Song::Operation
 end
 ```
 
-The `step` DSL takes away the pain of flow control and error handling. You focus on what happens: creating models, validating data, sending out notifications. The operation takes care of the flow control.
+The `step` DSL takes away the pain of flow control and error handling. You focus on what happens: creating models, validating data, sending out notifications.
+
+### Control flow
+
+The operation takes care of the flow control. Internally, this works as depicted in this beautiful diagram.
 
 ![alt text](https://github.com/trailblazer/trailblazer/blob/readme/doc/song_operation_create.png?raw=true)
 
-The only way to invoke them is `Operation.call`. The single entry-point saves programmers from shenanigans with instances and has proven to be an almost bullet-proof concept in the past 10 years.
+The best part: the only way to invoke this operation is `Operation.call`. The single entry-point saves programmers from shenanigans with instances and has proven to be an almost bullet-proof concept in the past 10 years.
 
 ```ruby
-Song::Operation::Create.(params: {title: "Hear Us Out", band: "Rancid"})
+result = Song::Operation::Create.(params: {title: "Hear Us Out", band: "Rancid"})
+
+result.success? #=> true
+result[:model]  #=> #<Song title="Hear Us Out" ...>
 ```
 
-Their high degree of encapsulation makes them a [replacement for test factories](#tests), too.
+Operations encourage a high degree of encapsulation while giving you all the conventions and tools for free except for a bit of a learning curve.
 
-[Learn more.](https://2019.trailblazer.to/2.1/docs/operation.html#operation-overview)
+### Tracing
+
+In the past years, we learnt from some old mistakes and improved developer experience. Check out our built-in tracing!
 
 ## Documentation
 
