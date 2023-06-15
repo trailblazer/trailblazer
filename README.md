@@ -15,10 +15,14 @@ It ships with our canonical "service object" implementation called *operation*, 
 Give us a chance if you say "yes" to this!
 
 * You hate messy controller code but don't know where to put it?
-* Moving business code into the model gives you nightmares?
+* Moving business code into the "fat model" gives you nightmares?
 * "Service objects" are great?
 * Anyhow, you're tired of 12 different "service object" implementations throughout your app?
-* Additional abstractions such as form objects or policies would be nice to have in big frameworks?
+* You keep asking for additional layers such as forms, policies, decorators?
+
+Yes? Then we got a well-seasoned framework for you: [Trailblazer](https://trailblazer.to/2.1).
+
+Here are the main concepts.
 
 ## Operation
 
@@ -48,15 +52,15 @@ module Song::Operation
 end
 ```
 
-The `step` DSL takes away the pain of flow control and error handling. You focus on what happens: creating models, validating data, sending out notifications.
+The `step` DSL takes away the pain of flow control and error handling. You focus on _what_ happens: creating models, validating data, sending out notifications.
 
 ### Control flow
 
-The operation takes care of the flow control. Internally, this works as depicted in this beautiful diagram.
+The operation takes care _when_ things happen: the flow control. Internally, this works as depicted in this beautiful diagram.
 
 ![Flow diagram of a typical operation.](https://github.com/trailblazer/trailblazer/blob/readme/doc/song_operation_create.png?raw=true)
 
-The best part: the only way to invoke this operation is `Operation.call`. The single entry-point saves programmers from shenanigans with instances and has proven to be an almost bullet-proof concept in the past 10 years.
+The best part: the only way to invoke this operation is `Operation.call`. The single entry-point saves programmers from shenanigans with instances and internal state - it's proven to be an almost bullet-proof concept in the past 10 years.
 
 ```ruby
 result = Song::Operation::Create.(params: {title: "Hear Us Out", band: "Rancid"})
@@ -65,7 +69,9 @@ result.success? #=> true
 result[:model]  #=> #<Song title="Hear Us Out" ...>
 ```
 
-Operations encourage a high degree of encapsulation while giving you all the conventions and tools for free except for a bit of a learning curve.
+Data, computed values, statuses or models from within the operation run are exposed through the `result` object.
+
+Leveraging those functional mechanics, operations encourage a high degree of encapsulation while giving you all the conventions and tools for free (except for a bit of a learning curve).
 
 ### Tracing
 
@@ -81,7 +87,9 @@ result = Song::Operation::Create.wtf?(params: {title: "", band: "Rancid"})
 
 All our abstraction layers such as operations, form objects, view components, test gems and much more are used in [hundreds of OSS projects](https://github.com/trailblazer/trailblazer/network/dependents) and commercial applications in the Ruby world.
 
-We provide a visual debugger, a BPMN editor for long-running business processes, comprehensive documentation and a growing list of onboarding videos.
+We provide a visual debugger, a BPMN editor for long-running business processes, comprehensive documentation and a growing list of onboarding videos ([**TRAILBLAZER TALES**](https://www.youtube.com/channel/UCi2P0tFMtjMUsWLYAD1Ezsw)).
+
+Trailblazer is both used for refactoring legacy apps (we support Ruby 2.5+) and helping big teams organizing, structuring and debugging modern, growing (Rails) applications.
 
 ## Documentation
 
@@ -91,10 +99,5 @@ We provide a visual debugger, a BPMN editor for long-running business processes,
 
 Make sure to check out the new beginner's guide to learning Trailblazer. The [brand-new book](https://leanpub.com/buildalib) discusses all aspects in a step-wise approach you need to understand Trailblazer's mechanics and design ideas.
 
-<a href="https://leanpub.com/buildalib"><img src="https://trailblazer.to/images/2.1/buildalib-cover.png"></a>
+![The new begginer's guide.](https://github.com/trailblazer/trailblazer/blob/readme/doc/s_hero.png?raw=true)
 
-## Screencasts
-
-Watch our series of screencasts [**TRAILBLAZER TALES**](https://www.youtube.com/channel/UCi2P0tFMtjMUsWLYAD1Ezsw) if you prefer learning from videos!
-
-<a href="https://www.youtube.com/embed/9elpobV4HSw"><img src="https://trailblazer.to/images/2.1/01-operation-basics.png"></a>
