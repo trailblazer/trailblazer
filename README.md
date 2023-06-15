@@ -85,6 +85,10 @@ result = Song::Operation::Create.wtf?(params: {title: "", band: "Rancid"})
 
 ![Tracing the internal flow of an operation.](https://github.com/trailblazer/trailblazer/blob/readme/doc/song_operation_create_trace.png?raw=true)
 
+Within a second you know which step failed - a thing that might seem trivial, but when things grow and a deeply nested step in an iteration fails, you will start loving `#wtf?`! It has saved us days of debugging.
+
+We even provide a [visual debugger](https://trailblazer.to/2.1/pro) to inspect traces on the webs.
+
 ## There's a lot more
 
 All our abstraction layers such as [operations](https://trailblazer.to/2.1/docs/operation), [form objects](https://trailblazer.to/2.1/docs/reform.html), [view components](https://trailblazer.to/2.1/docs/cells.html), [test gems](https://trailblazer.to/2.1/docs/test) and much more are used in [hundreds of OSS projects](https://github.com/trailblazer/trailblazer/network/dependents) and commercial applications in the Ruby world.
