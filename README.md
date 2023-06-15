@@ -95,7 +95,7 @@ All our abstraction layers such as [operations](https://trailblazer.to/2.1/docs/
 
 We provide a [visual debugger](https://pro.trailblazer.to), a [BPMN editor](https://trailblazer.to/2.1/docs/workflow) for long-running business processes, [thorough documentation](https://trailblazer.to/2.1/docs/trailblazer.html) and a growing list of onboarding videos ([**TRAILBLAZER TALES**](https://www.youtube.com/channel/UCi2P0tFMtjMUsWLYAD1Ezsw)).
 
-Trailblazer is both used for refactoring legacy apps (we support Ruby 2.5+) and helping big teams organizing, structuring and debugging modern, growing (Rails) applications.
+Trailblazer is both used for refactoring legacy apps (we support Ruby 2.5+) and helps big teams organizing, structuring and debugging modern, growing (Rails) applications.
 
 ## Documentation
 
