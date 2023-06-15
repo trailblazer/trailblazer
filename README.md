@@ -58,7 +58,7 @@ The `step` DSL takes away the pain of flow control and error handling. You focus
 
 The operation takes care _when_ things happen: the flow control. Internally, this works as depicted in this beautiful diagram.
 
-![Flow diagram of a typical operation.](https://github.com/trailblazer/trailblazer/blob/readme/doc/song_operation_create.png?raw=true)
+![Flow diagram of a typical operation.](https://github.com/trailblazer/trailblazer/blob/master/doc/song_operation_create.png?raw=true)
 
 The best part: the only way to invoke this operation is `Operation.call`. The single entry-point saves programmers from shenanigans with instances and internal state - it's proven to be an almost bullet-proof concept in the past 10 years.
 
@@ -83,7 +83,7 @@ In the past years, we learnt from some old mistakes and improved developer exper
 result = Song::Operation::Create.wtf?(params: {title: "", band: "Rancid"})
 ```
 
-![Tracing the internal flow of an operation.](https://github.com/trailblazer/trailblazer/blob/readme/doc/song_operation_create_trace.png?raw=true)
+![Tracing the internal flow of an operation.](https://github.com/trailblazer/trailblazer/blob/master/doc/song_operation_create_trace.png?raw=true)
 
 Within a second you know which step failed - a thing that might seem trivial, but when things grow and a deeply nested step in an iteration fails, you will start loving `#wtf?`! It has saved us days of debugging.
 
@@ -105,5 +105,5 @@ Trailblazer is both used for refactoring legacy apps (we support Ruby 2.5+) and 
 
 Make sure to check out the new beginner's guide to learning Trailblazer. The [new book](https://leanpub.com/buildalib) discusses all aspects in a step-wise approach you need to understand Trailblazer's mechanics and design ideas.
 
-![The new begginer's guide.](https://github.com/trailblazer/trailblazer/blob/readme/doc/s_hero.png?raw=true)
+![The new begginer's guide.](https://github.com/trailblazer/trailblazer/blob/master/doc/s_hero.png?raw=true)
 
