@@ -1,5 +1,10 @@
 # 2.1.3
 
+* Require `trailblazer-developer` 0.1 line which brings tracing performance increase by
+  factor 4-10.
+* Introduce `Operation.left` as an alias for `#fail`.
+* Better debugging API for the upcoming web debugger.
+
 # 2.1.2
 
 * Use `trailblazer-activity-dsl-linear` >= 1.1.0.
