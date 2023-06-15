@@ -71,6 +71,8 @@ result[:model]  #=> #<Song title="Hear Us Out" ...>
 
 Data, computed values, statuses or models from within the operation run are exposed through the `result` object.
 
+Operations can be nested, use composition and inheritance patterns, provide [variable mapping](https://trailblazer.to/2.1/docs/activity#activity-variable-mapping) around each step, support dependency injection, and save you from reinventing the wheel - over and over, again.
+
 Leveraging those functional mechanics, operations encourage a high degree of encapsulation while giving you all the conventions and tools for free (except for a bit of a learning curve).
 
 ### Tracing
@@ -85,19 +87,19 @@ result = Song::Operation::Create.wtf?(params: {title: "", band: "Rancid"})
 
 ## There's a lot more
 
-All our abstraction layers such as operations, form objects, view components, test gems and much more are used in [hundreds of OSS projects](https://github.com/trailblazer/trailblazer/network/dependents) and commercial applications in the Ruby world.
+All our abstraction layers such as [operations](https://trailblazer.to/2.1/docs/operation), [form objects](https://trailblazer.to/2.1/docs/reform.html), [view components](https://trailblazer.to/2.1/docs/cells.html), [test gems](https://trailblazer.to/2.1/docs/test) and much more are used in [hundreds of OSS projects](https://github.com/trailblazer/trailblazer/network/dependents) and commercial applications in the Ruby world.
 
-We provide a visual debugger, a BPMN editor for long-running business processes, comprehensive documentation and a growing list of onboarding videos ([**TRAILBLAZER TALES**](https://www.youtube.com/channel/UCi2P0tFMtjMUsWLYAD1Ezsw)).
+We provide a [visual debugger](https://pro.trailblazer.to), a [BPMN editor](https://trailblazer.to/2.1/docs/workflow) for long-running business processes, [thorough documentation](https://trailblazer.to/2.1/docs/trailblazer.html) and a growing list of onboarding videos ([**TRAILBLAZER TALES**](https://www.youtube.com/channel/UCi2P0tFMtjMUsWLYAD1Ezsw)).
 
 Trailblazer is both used for refactoring legacy apps (we support Ruby 2.5+) and helping big teams organizing, structuring and debugging modern, growing (Rails) applications.
 
 ## Documentation
 
-* **The current version is Trailblazer 2.1.** We do have [comprehensive API documenation](https://trailblazer.to/2.1/docs/trailblazer.html) ready for you. If you're new to TRB start with our [LEARN page](https://trailblazer.to/2.1/learn.html).
+* **The current version is Trailblazer 2.1.** We do have comprehensive [API documenation](https://trailblazer.to/2.1/docs/trailblazer.html) ready for you. If you're new to TRB start with our [LEARN page](https://trailblazer.to/2.1/learn.html).
 * A migration guide from 2.0 can be found [on our website](https://trailblazer.to/2.1/docs/trailblazer.html#trailblazer-2-1-migration).
 * The [1.x documentation is here](http://trailblazer.to/2.0/gems/operation/1.1/index.html).
 
-Make sure to check out the new beginner's guide to learning Trailblazer. The [brand-new book](https://leanpub.com/buildalib) discusses all aspects in a step-wise approach you need to understand Trailblazer's mechanics and design ideas.
+Make sure to check out the new beginner's guide to learning Trailblazer. The [new book](https://leanpub.com/buildalib) discusses all aspects in a step-wise approach you need to understand Trailblazer's mechanics and design ideas.
 
 ![The new begginer's guide.](https://github.com/trailblazer/trailblazer/blob/readme/doc/s_hero.png?raw=true)
 
