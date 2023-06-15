@@ -1,203 +1,109 @@
 # Trailblazer
 
-_Trailblazer provides new high-level abstractions for Ruby frameworks. It gently enforces encapsulation, an intuitive code structure and approaches the modeling of complex business workflows with a functional mind-set._
+_Battle-tested Ruby framework to help structuring your business logic._
 
-[![Zulip chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://trailblazer.zulipchat.com)
-[![TRB Newsletter](https://img.shields.io/badge/TRB-newsletter-lightgrey.svg)](http://trailblazer.to/newsletter/)
 [![Gem Version](https://badge.fury.io/rb/trailblazer.svg)](http://badge.fury.io/rb/trailblazer)
-[![Open Source Helpers](https://www.codetriage.com/trailblazer/trailblazer/badges/users.svg)](https://www.codetriage.com/trailblazer/trailblazer)
 
-## Documentation
+## What's Trailblazer?
 
-* **The current version is Trailblazer 2.1.** We do have [comprehensive API documenation](https://trailblazer.to/2.1/docs/trailblazer.html) ready for you. If you're new to TRB start with our [LEARN page](https://trailblazer.to/2.1/learn.html).
-* A migration guide from 2.0 can be found [on our website](https://trailblazer.to/2.1/docs/trailblazer.html#trailblazer-2-1-migration).
-* The [1.x documentation is here](http://trailblazer.to/2.0/gems/operation/1.1/index.html).
+Trailblazer introduces new abstraction layers into Ruby applications to help you structure your business logic.
 
-Make sure to check out the new beginner's guide to learning Trailblazer. The [brand-new book](https://leanpub.com/buildalib) discusses all aspects in a step-wise approach you need to understand Trailblazer's mechanics and design ideas.
+It ships with our canonical "service object" implementation called *operation*, many conventions, gems for testing, Rails support, optional form objects and much more.
 
-<a href="https://leanpub.com/buildalib"><img src="https://trailblazer.to/images/2.1/buildalib-cover.png"></a>
+## Should I use Trailblazer?
 
-## Screencasts
+Give us a chance if you say "yes" to this!
 
-Watch our series of screencasts [**TRAILBLAZER TALES**](https://www.youtube.com/channel/UCi2P0tFMtjMUsWLYAD1Ezsw) if you prefer learning from videos!
+* You hate messy controller code but don't know where to put it?
+* Moving business code into the "fat model" gives you nightmares?
+* "Service objects" are great?
+* Anyhow, you're tired of 12 different "service object" implementations throughout your app?
+* You keep asking for additional layers such as forms, policies, decorators?
 
-<a href="https://www.youtube.com/embed/9elpobV4HSw"><img src="https://trailblazer.to/images/2.1/01-operation-basics.png"></a>
+Yes? Then we got a well-seasoned framework for you: [Trailblazer](https://trailblazer.to/2.1).
 
-## Trailblazer In A Nutshell
-
-1. All business logic is encapsulated in [operations](#operation) (service objects).
-3. [Controllers](#controllers) instantly delegate to an operation. No business code in controllers, only HTTP-specific logic.
-4. [Models](#models) are persistence-only and solely define associations and scopes. No business code is to be found here. No validations, no callbacks.
-5. The presentation layer offers optional [view models](#views) (Cells) and [representers](#representers) for document APIs.
-6. More complex business flows and life-cycles are modeled using workflows.
-
-Want code? Jump [right here](#controllers)!
-
-## Mission
-
-While _Trailblazer_ offers you abstraction layers for all aspects of Ruby On Rails, it does _not_ missionize you. Wherever you want, you may fall back to the "Rails Way" with fat models, monolithic controllers, global helpers, etc. This is not a bad thing, but allows you to step-wise introduce Trailblazer's encapsulation in your app without having to rewrite it.
-
-Trailblazer is all about structure. It helps re-organize existing code into smaller components where different concerns are handled in separated classes.
-
-Again, you can pick which layers you want. Trailblazer doesn't impose technical implementations, it offers mature solutions for recurring problems in all types of Rails applications.
-
-Trailblazer is no "complex web of objects and indirection". It solves many problems that have been around for years with a cleanly layered architecture. Only use what you like. And that's the bottom line.
-
-## Concepts over Technology
-
-Trailblazer offers you a new, more intuitive file layout in applications.
-
-```
-app
-├── concepts
-│   ├── song
-│   │   ├── operation
-│   │   │   ├── create.rb
-│   │   │   ├── update.rb
-│   │   ├── contract
-│   │   │   ├── create.rb
-│   │   │   ├── update.rb
-│   │   ├── cell
-│   │   │   ├── show.rb
-│   │   │   ├── index.rb
-│   │   ├── view
-│   │   │   ├── show.haml
-│   │   │   ├── index.rb
-│   │   │   ├── song.css.sass
-```
-
-Instead of grouping by technology, classes and views are structured by *concept*, and then by technology. A concept can relate to a model, or can be a completely abstract concern such as `invoicing`.
-
-Within a concept, you can have any level of nesting. For example, `invoicing/pdf/` could be one.
-
-
-## Architecture
-
-Trailblazer extends the conventional MVC stack in Rails. Keep in mind that adding layers doesn't necessarily mean adding more code and complexity.
-
-The opposite is the case: Controller, view and model become lean endpoints for HTTP, rendering and persistence. Redundant code gets eliminated by putting very little application code into the right layer.
-
-![The Trailblazer stack.](https://raw.github.com/apotonick/trailblazer/master/doc/operation-2017.png)
-
-## Routing
-
-Trailblazer uses Rails routing to map URLs to controllers, because it works.
-
-```ruby
-Rails.application.routes.draw do
-  resources :songs
-end
-```
-
-## Controllers
-
-Controllers are lean endpoints for HTTP. They do not contain any business logic. Actions immediately dispatch to an operation.
-
-```ruby
-class SongsController < ApplicationController
-  def create
-    run Song::Create # Song::Create is an operation class.
-  end
-end
-```
-
-The `#run` method invokes the operation. It allows you to run a conditional block of logic if the operation was successful.
-
-```ruby
-class SongsController < ApplicationController
-  def create
-    run Song::Create do |op|
-      return redirect_to(song_path op.model) # success!
-    end
-
-    render :new # invalid. re-render form.
-  end
-end
-```
-
-Again, the controller only dispatchs to the operation and handles successful/invalid processing on the HTTP level. For instance by redirecting, setting flash messages, or signing in a user.
-
-[Learn more.](http://trailblazer.to/gems/operation/controller.html)
+Here are the main concepts.
 
 ## Operation
 
-Operations encapsulate business logic and are the heart of a Trailblazer architecture.
-
-The bare bones operation without any Trailblazery is implemented in [the `trailblazer-operation` gem](https://github.com/trailblazer/trailblazer-operation) and can be used without our stack.
-
-Operations don't know about HTTP or the environment. You could use an operation in Rails, Hanami, or Roda, it wouldn't know.
+The operation encapsulates business logic and is the heart of the Trailblazer architecture.
 
 An operation is not just a monolithic replacement for your business code. It's a simple orchestrator between the form objects, models, your business code and all other layers needed to get the job done.
 
 ```ruby
-class Song::Create < Trailblazer::Operation
-  step :model
-  step :validate
+# app/concepts/song/operation/create.rb
+module Song::Operation
+  class Create < Trailblazer::Operation
+    step :create_model
+    step :validate
+    left :handle_errors
+    step :notify
 
-  def model(ctx, **)
-    # do whatever you feel like.
-    ctx[:model] = Song.new
+    def create_model(ctx, **)
+      # do whatever you feel like.
+      ctx[:model] = Song.new
+    end
+
+    def validate(ctx, params:, **)
+      # ..
+    end
+    # ...
   end
-
-  def validate(ctx, params:, **)
-    # ..
-  end
 end
 ```
 
-Operations define the flow of their logic using the DSL and implement the particular steps with pure Ruby.
+The `step` DSL takes away the pain of flow control and error handling. You focus on _what_ happens: creating models, validating data, sending out notifications.
 
-You cannot instantiate them per design. The only way to invoke them is `call`.
+### Control flow
 
-```ruby
-Song::Create.(params: {whatever: "goes", in: "here"})
-```
+The operation takes care _when_ things happen: the flow control. Internally, this works as depicted in this beautiful diagram.
 
-Their high degree of encapsulation makes them a [replacement for test factories](#tests), too.
+![Flow diagram of a typical operation.](https://github.com/trailblazer/trailblazer/blob/master/doc/song_operation_create.png?raw=true)
 
-[Learn more.](https://2019.trailblazer.to/2.1/docs/operation.html#operation-overview)
-
-## Models
-
-Models for persistence can be implemented using any ORM you fancy, for instance [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord#active-record--object-relational-mapping-in-rails) or [Datamapper](http://datamapper.org/).
-
-In Trailblazer, models are completely empty. They solely contain associations and finders. No business logic is allowed in models.
+The best part: the only way to invoke this operation is `Operation.call`. The single entry-point saves programmers from shenanigans with instances and internal state - it's proven to be an almost bullet-proof concept in the past 10 years.
 
 ```ruby
-class Song < ActiveRecord::Base
-  belongs_to :thing
+result = Song::Operation::Create.(params: {title: "Hear Us Out", band: "Rancid"})
 
-  scope :latest, lambda { all.limit(9).order("id DESC") }
-end
+result.success? #=> true
+result[:model]  #=> #<Song title="Hear Us Out" ...>
 ```
 
-Only operations and views/cells can access models directly.
+Data, computed values, statuses or models from within the operation run are exposed through the `result` object.
 
-## Tests
+Operations can be nested, use composition and inheritance patterns, provide [variable mapping](https://trailblazer.to/2.1/docs/activity#activity-variable-mapping) around each step, support dependency injection, and save you from reinventing the wheel - over and over, again.
 
-In Trailblazer, you only have operation unit tests and integration smoke tests to test the operation/controller wiring.
+Leveraging those functional mechanics, operations encourage a high degree of encapsulation while giving you all the conventions and tools for free (except for a bit of a learning curve).
 
-Operations completely replace the need for leaky factories.
+### Tracing
+
+In the past years, we learnt from some old mistakes and improved developer experience. As a starter, check out our built-in tracing!
 
 ```ruby
-describe Song::Update do
-  let(:song) { Song::Create.(song: {body: "[That](http://trailblazer.to)!"}) }
-end
+result = Song::Operation::Create.wtf?(params: {title: "", band: "Rancid"})
 ```
 
-## Workflow
-Operations are a great way to clean up controllers and models. However, Trailblazer goes further and provides an approach to model entire life-cycles of business objects, such as "a song" or "the root user" using workflow ([`pro feature`](https://2019.trailblazer.to/2.1/docs/pro.html#pro-1)). Also, you don't have to use the DSL but can use the [`editor`](https://2019.trailblazer.to/2.1/docs/pro.html#pro-editor) instead (cool for more complex, long-running flows). Here comes a sample screenshot.
+![Tracing the internal flow of an operation.](https://github.com/trailblazer/trailblazer/blob/master/doc/song_operation_create_trace.png?raw=true)
 
-<img src="http://2019.trailblazer.to/2.1/dist/img/flow.png">
+Within a second you know which step failed - a thing that might seem trivial, but when things grow and a deeply nested step in an iteration fails, you will start loving `#wtf?`! It has saved us days of debugging.
 
-## Installation
+We even provide a [visual debugger](https://trailblazer.to/2.1/pro) to inspect traces on the webs.
 
-The obvious needs to be in your `Gemfile`.
+## There's a lot more
 
-```ruby
-gem "trailblazer"
-gem "trailblazer-rails" # if you are in rails.
-gem "trailblazer-cells"
-```
+All our abstraction layers such as [operations](https://trailblazer.to/2.1/docs/operation), [form objects](https://trailblazer.to/2.1/docs/reform.html), [view components](https://trailblazer.to/2.1/docs/cells.html), [test gems](https://trailblazer.to/2.1/docs/test) and much more are used in [hundreds of OSS projects](https://github.com/trailblazer/trailblazer/network/dependents) and commercial applications in the Ruby world.
 
-Cells is _not_ required per default! Add it if you use it, which is highly recommended.
+We provide a [visual debugger](https://pro.trailblazer.to), a [BPMN editor](https://trailblazer.to/2.1/docs/workflow) for long-running business processes, [thorough documentation](https://trailblazer.to/2.1/docs/trailblazer.html) and a growing list of onboarding videos ([**TRAILBLAZER TALES**](https://www.youtube.com/channel/UCi2P0tFMtjMUsWLYAD1Ezsw)).
+
+Trailblazer is both used for refactoring legacy apps (we support Ruby 2.5+) and helps big teams organizing, structuring and debugging modern, growing (Rails) applications.
+
+## Documentation
+
+* **The current version is Trailblazer 2.1.** We do have comprehensive [API documenation](https://trailblazer.to/2.1/docs/trailblazer.html) ready for you. If you're new to TRB start with our [LEARN page](https://trailblazer.to/2.1/learn.html).
+* A migration guide from 2.0 can be found [on our website](https://trailblazer.to/2.1/docs/trailblazer.html#trailblazer-2-1-migration).
+* The [1.x documentation is here](http://trailblazer.to/2.0/gems/operation/1.1/index.html).
+
+Make sure to check out the new beginner's guide to learning Trailblazer. The [new book](https://leanpub.com/buildalib) discusses all aspects in a step-wise approach you need to understand Trailblazer's mechanics and design ideas.
+
+![The new begginer's guide.](https://github.com/trailblazer/trailblazer/blob/master/doc/s_hero.png?raw=true)
+
