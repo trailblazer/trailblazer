@@ -91,7 +91,17 @@ We even provide a [visual debugger](https://trailblazer.to/2.1/pro) to inspect t
 
 ## There's a lot more
 
-All our abstraction layers such as [operations](https://trailblazer.to/2.1/docs/operation), [form objects](https://trailblazer.to/2.1/docs/reform.html), [view components](https://trailblazer.to/2.1/docs/cells.html), [test gems](https://trailblazer.to/2.1/docs/test) and much more are used in [hundreds of OSS projects](https://github.com/trailblazer/trailblazer/network/dependents) and commercial applications in the Ruby world.
+All our abstraction layers such as [operations](https://trailblazer.to/2.1/docs/operation), [form objects](https://trailblazer.to/2.1/docs/reform.html), [view components](https://trailblazer.to/2.1/docs/cells.html) and much more are used in [hundreds of OSS projects](https://github.com/trailblazer/trailblazer/network/dependents) and commercial applications in the Ruby world.
+
+Recently, we [released](https://dev.to/trailblazer/unit-tests-in-trailblazer-less-code-more-coverage-4oig) the [trailblazer-test](https://trailblazer.to/2.1/docs/test/) gem along with support for RSpec to easily write operation unit tests.
+
+```ruby
+it "passes with valid input" do
+  assert_pass Song::Operation::Create, valid_input,
+    title: "Hear us out",
+    persisted?: true
+end
+```
 
 We provide a [visual debugger](https://pro.trailblazer.to), a [BPMN editor](https://trailblazer.to/2.1/docs/workflow) for long-running business processes, [thorough documentation](https://trailblazer.to/2.1/docs/trailblazer.html) and a growing list of onboarding videos ([**TRAILBLAZER TALES**](https://www.youtube.com/channel/UCi2P0tFMtjMUsWLYAD1Ezsw)).
 
