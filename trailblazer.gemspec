@@ -17,7 +17,6 @@ Gem::Specification.new do |spec|
     "homepage_uri"      => "https://trailblazer.to/",
     "mailing_list_uri"  => "https://trailblazer.zulipchat.com/",
     "source_code_uri"   => "https://github.com/trailblazer/trailblazer",
-    "wiki_uri"          => "https://github.com/trailblazer/trailblazer/wiki"
   }
   
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
@@ -26,10 +25,10 @@ Gem::Specification.new do |spec|
   spec.test_files    = `git ls-files -z test`.split("\x0")
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "trailblazer-macro",          ">= 2.2.0", "< 2.3.0"
-  spec.add_dependency "trailblazer-developer",      ">= 0.2.0", "< 0.3.0"
-  spec.add_dependency "trailblazer-macro-contract", ">= 2.2.0", "< 2.3.0"
-  spec.add_dependency "trailblazer-operation",      ">= 0.12.0", "< 1.0.0"
+  spec.add_dependency "trailblazer-macro"#,          ">= 2.2.0", "< 2.3.0"
+  spec.add_dependency "trailblazer-developer"#,      ">= 0.2.0", "< 0.3.0"
+  spec.add_dependency "trailblazer-macro-contract"#, ">= 2.2.0", "< 2.3.0"
+  spec.add_dependency "trailblazer-operation"#,      ">= 0.12.0", "< 1.0.0"
   # spec.add_dependency "trailblazer-activity-dsl-linear", ">= 1.2.3", "< 1.3.0" # this can be removed at some point.
 
   spec.add_development_dependency "bundler"
