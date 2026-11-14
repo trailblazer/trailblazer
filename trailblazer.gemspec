@@ -36,5 +36,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest-line"
   spec.add_development_dependency "dry-validation"
 
-  spec.required_ruby_version = '>= 2.5.0'
+  spec.required_ruby_version = ">= 3.3.0"
 end
